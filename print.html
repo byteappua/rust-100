@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-0d721ba8.js";
+            window.path_to_searchindex_js = "searchindex-0b6c097e.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-18f6c445.js"></script>
+        <script src="toc-417062df.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -756,6 +756,134 @@ assert_eq!(slice, &amp;[2, 3]);
 
     &amp;s[..]
 }
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-07-结构体-structs"><a class="header" href="#day-07-结构体-structs">Day 07: 结构体 (Structs)</a></h1>
+<p>结构体（Struct）让你能够将多个相关的值组合成一个有意义的命名组合。</p>
+<h2 id="1-定义与实例化结构体"><a class="header" href="#1-定义与实例化结构体">1. 定义与实例化结构体</a></h2>
+<h3 id="定义结构体"><a class="header" href="#定义结构体">定义结构体</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+<span class="boring">}</span></code></pre>
+<h3 id="实例化结构体"><a class="header" href="#实例化结构体">实例化结构体</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let user1 = User {
+    email: String::from("someone@example.com"),
+    username: String::from("someusername123"),
+    active: true,
+    sign_in_count: 1,
+};
+<span class="boring">}</span></code></pre>
+<h2 id="2-元组结构体-tuple-structs"><a class="header" href="#2-元组结构体-tuple-structs">2. 元组结构体 (Tuple Structs)</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+<span class="boring">}</span></code></pre>
+<h2 id="3-类单元结构体-unit-like-structs"><a class="header" href="#3-类单元结构体-unit-like-structs">3. 类单元结构体 (Unit-Like Structs)</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct AlwaysEqual;
+<span class="boring">}</span></code></pre>
+<h2 id="4-方法语法"><a class="header" href="#4-方法语法">4. 方法语法</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-08-枚举-enums-与模式匹配"><a class="header" href="#day-08-枚举-enums-与模式匹配">Day 08: 枚举 (Enums) 与模式匹配</a></h1>
+<p>枚举（Enumerations），通常称为 Enums，允许你通过列举可能的成员（Variants）来定义一个类型。</p>
+<h2 id="1-定义枚举"><a class="header" href="#1-定义枚举">1. 定义枚举</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum IpAddrKind {
+    V4,
+    V6,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-option-枚举"><a class="header" href="#2-option-枚举">2. Option 枚举</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-match-控制流运算符"><a class="header" href="#3-match-控制流运算符">3. match 控制流运算符</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>match coin {
+    Coin::Penny =&gt; 1,
+    Coin::Nickel =&gt; 5,
+    Coin::Dime =&gt; 10,
+    Coin::Quarter =&gt; 25,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-if-let"><a class="header" href="#4-if-let">4. if let</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if let Some(3) = some_u8_value {
+    println!("three");
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-09-模块系统-modules"><a class="header" href="#day-09-模块系统-modules">Day 09: 模块系统 (Modules)</a></h1>
+<p>Rust 的模块系统包括：</p>
+<ul>
+<li><strong>包 (Packages)</strong></li>
+<li><strong>Crates</strong></li>
+<li><strong>模块 (Modules)</strong></li>
+<li><strong>路径 (Paths)</strong></li>
+</ul>
+<h2 id="1-模块定义"><a class="header" href="#1-模块定义">1. 模块定义</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod front_of_house {
+    mod hosting {
+        fn add_to_waitlist() {}
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-使用-use"><a class="header" href="#2-使用-use">2. 使用 use</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use crate::front_of_house::hosting;
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-10-常用集合"><a class="header" href="#day-10-常用集合">Day 10: 常用集合</a></h1>
+<h2 id="1-vector-vec"><a class="header" href="#1-vector-vec">1. Vector (Vec<t>)</t></a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let v = vec![1, 2, 3];
+<span class="boring">}</span></code></pre>
+<h2 id="2-string"><a class="header" href="#2-string">2. String</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello");
+<span class="boring">}</span></code></pre>
+<h2 id="3-hashmap"><a class="header" href="#3-hashmap">3. HashMap</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::collections::HashMap;
+let mut map = HashMap::new();
+map.insert("key", "value");
 <span class="boring">}</span></code></pre>
 
                     </main>
