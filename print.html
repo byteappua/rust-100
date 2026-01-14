@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-e9de763a.js";
+            window.path_to_searchindex_js = "searchindex-24867e00.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-f5fcecb3.js"></script>
+        <script src="toc-e373f3ae.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1272,6 +1272,316 @@ mod tests {
 fn it_adds_two() {
     assert_eq!(4, testing_demo::add_two(2));
 }
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-16-闭包-closures"><a class="header" href="#day-16-闭包-closures">Day 16: 闭包 (Closures)</a></h1>
+<p>闭包（Closures），也叫做匿名函数，是可以保存进变量或作为参数传递给其他函数的函数。与函数不同的是，闭包可以捕获调用者作用域中的值。</p>
+<h2 id="1-定义闭包"><a class="header" href="#1-定义闭包">1. 定义闭包</a></h2>
+<p>闭包的定义语法：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let add_one = |x| x + 1;
+let add_one_v2 = |x: i32| -&gt; i32 { x + 1 };
+<span class="boring">}</span></code></pre>
+<ul>
+<li><code>||</code> 包含参数。</li>
+<li>可选的 <code>{}</code> 包含函数体（如果只有一行表达式可省略）。</li>
+</ul>
+<h2 id="2-闭包类型推断"><a class="header" href="#2-闭包类型推断">2. 闭包类型推断</a></h2>
+<p>编译器通常可以推断参数和返回值的类型。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let example_closure = |x| x;
+let s = example_closure(String::from("hello"));
+// let n = example_closure(5); // 错误：类型已被锁定为 String
+<span class="boring">}</span></code></pre>
+<h2 id="3-捕获环境"><a class="header" href="#3-捕获环境">3. 捕获环境</a></h2>
+<p>闭包可以捕获其环境中的变量。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = 4;
+let equal_to_x = |z| z == x;
+let y = 4;
+assert!(equal_to_x(y));
+<span class="boring">}</span></code></pre>
+<h3 id="捕获方式-fn-traits"><a class="header" href="#捕获方式-fn-traits">捕获方式 (Fn Traits)</a></h3>
+<p>闭包可以通过三种方式捕获环境，这对应于三个 Trait：</p>
+<ol>
+<li><strong>FnOnce</strong> 消费从周围作用域捕获的变量（获取所有权）。闭包不能多次调用。</li>
+<li><strong>FnMut</strong> 获取可变借用值。</li>
+<li><strong>Fn</strong> 获取不可变借用值。</li>
+</ol>
+<h3 id="move-关键字"><a class="header" href="#move-关键字"><code>move</code> 关键字</a></h3>
+<p>强制闭包获取其使用环境值的所有权。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = vec![1, 2, 3];
+let equal_to_x = move |z| z == x;
+// println!("can't use x here: {:?}", x); // 错误：x 已移动
+<span class="boring">}</span></code></pre>
+<h2 id="4-练习带有缓存的-cacher"><a class="header" href="#4-练习带有缓存的-cacher">4. 练习：带有缓存的 Cacher</a></h2>
+<p>创建一个结构体，持有闭包和计算结果的缓存。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Cacher&lt;T&gt;
+where
+    T: Fn(u32) -&gt; u32,
+{
+    calculation: T,
+    value: Option&lt;u32&gt;,
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-17-迭代器-iterators"><a class="header" href="#day-17-迭代器-iterators">Day 17: 迭代器 (Iterators)</a></h1>
+<p>迭代器模式允许你对一个项的序列进行某些处理。迭代器负责遍历序列中的每一项和决定序列何时结束的逻辑。</p>
+<h2 id="1-iterator-trait"><a class="header" href="#1-iterator-trait">1. Iterator Trait</a></h2>
+<p>在 Rust 中，迭代器都实现了 <code>Iterator</code> trait。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Iterator {
+    type Item;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
+    // 此处省略了其它有默认实现的方法
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-使用迭代器"><a class="header" href="#2-使用迭代器">2. 使用迭代器</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let v1 = vec![1, 2, 3];
+let v1_iter = v1.iter();
+
+for val in v1_iter {
+    println!("Got: {}", val);
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-消费适配器-consuming-adaptors"><a class="header" href="#3-消费适配器-consuming-adaptors">3. 消费适配器 (Consuming Adaptors)</a></h2>
+<p>调用 <code>next</code> 方法的方法被称为消费适配器，因为它们会消耗迭代器。</p>
+<ul>
+<li><code>sum()</code>: 获取所有权并反复调用 <code>next</code> 遍历迭代器，将结果求和。</li>
+<li><code>collect()</code>: 将迭代器转换成一个集合。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let v1 = vec![1, 2, 3];
+let v1_iter = v1.iter();
+let total: i32 = v1_iter.sum();
+<span class="boring">}</span></code></pre>
+<h2 id="4-迭代器适配器-iterator-adaptors"><a class="header" href="#4-迭代器适配器-iterator-adaptors">4. 迭代器适配器 (Iterator Adaptors)</a></h2>
+<p>允许我们将当前迭代器转换成不同类型的迭代器。</p>
+<ul>
+<li><code>map()</code>: 对每个元素调用闭包。</li>
+<li><code>filter()</code>: 过滤元素。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let v1: Vec&lt;i32&gt; = vec![1, 2, 3];
+let v2: Vec&lt;_&gt; = v1.iter().map(|x| x + 1).collect();
+<span class="boring">}</span></code></pre>
+<h2 id="5-自定义迭代器"><a class="header" href="#5-自定义迭代器">5. 自定义迭代器</a></h2>
+<p>我们可以为自己的类型实现 <code>Iterator</code> trait。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Counter {
+    count: u32,
+}
+
+impl Counter {
+    fn new() -&gt; Counter {
+        Counter { count: 0 }
+    }
+}
+
+impl Iterator for Counter {
+    type Item = u32;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        if self.count &lt; 5 {
+            self.count += 1;
+            Some(self.count)
+        } else {
+            None
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-18-cargo-进阶与-cratesio"><a class="header" href="#day-18-cargo-进阶与-cratesio">Day 18: Cargo 进阶与 Crates.io</a></h1>
+<p>Cargo 不仅是构建工具，也是依赖管理和包管理器。</p>
+<h2 id="1-发布配置-release-profiles"><a class="header" href="#1-发布配置-release-profiles">1. 发布配置 (Release Profiles)</a></h2>
+<p>Cargo 有两个主要的配置：</p>
+<ul>
+<li><code>dev</code> profile: <code>cargo build</code> 使用。默认优化程度低，包含 debug 信息。</li>
+<li><code>release</code> profile: <code>cargo build --release</code> 使用。默认优化程度高。</li>
+</ul>
+<p>可以在 <code>Cargo.toml</code> 中自定义：</p>
+<pre><code class="language-toml">[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+</code></pre>
+<h2 id="2-文档注释"><a class="header" href="#2-文档注释">2. 文档注释</a></h2>
+<p>使用 <code>///</code> 编写文档注释，支持 Markdown。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// Adds one to the number given.
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = my_crate::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+pub fn add_one(x: i32) -&gt; i32 {
+    x + 1
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li>运行 <code>cargo doc --open</code> 生成并查看文档。</li>
+<li>文档注释中的代码块会被 <code>cargo test</code> 作为测试运行（文档测试）。</li>
+</ul>
+<h2 id="3-发布到-cratesio"><a class="header" href="#3-发布到-cratesio">3. 发布到 Crates.io</a></h2>
+<ol>
+<li>注册账号并获取 API token。</li>
+<li><code>cargo login &lt;token&gt;</code>。</li>
+<li>在 <code>Cargo.toml</code> 中添加元数据（license, description, etc.）。</li>
+<li><code>cargo publish</code>。</li>
+</ol>
+<p>注意：一旦发布，版本永久存在。可以使用 <code>cargo yank</code> 撤回（标记为不可用，但已存在的依赖不受影响）。</p>
+<h2 id="4-cargo-工作空间-workspaces"><a class="header" href="#4-cargo-工作空间-workspaces">4. Cargo 工作空间 (Workspaces)</a></h2>
+<p>工作空间是一组共享同一个 <code>Cargo.lock</code> 和输出目录的包。</p>
+<h3 id="目录结构"><a class="header" href="#目录结构">目录结构</a></h3>
+<pre><code>workspace_demo/
+├── Cargo.toml
+├── add_one/
+│   ├── Cargo.toml
+│   └── src/main.rs
+└── adder/
+    ├── Cargo.toml
+    └── src/main.rs
+</code></pre>
+<h3 id="根-cargotoml"><a class="header" href="#根-cargotoml">根 Cargo.toml</a></h3>
+<pre><code class="language-toml">[workspace]
+
+members = [
+    "adder",
+    "add_one",
+]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-19-智能指针---box"><a class="header" href="#day-19-智能指针---box">Day 19: 智能指针 - Box<t></t></a></h1>
+<p>智能指针（Smart Pointers）是行为类似于指针的数据结构，但它们通常拥有元数据和附加功能。最显著的区别是智能指针通常<strong>拥有</strong>它们指向的数据。</p>
+<p>常见的智能指针：</p>
+<ul>
+<li><code>Box&lt;T&gt;</code>: 用于在堆上分配值。</li>
+<li><code>Rc&lt;T&gt;</code>: 引用计数，允许多重所有权。</li>
+<li><code>Ref&lt;T&gt;</code> 和 <code>RefMut&lt;T&gt;</code>: 通过 <code>RefCell&lt;T&gt;</code> 访问，在运行时强制借用规则。</li>
+</ul>
+<h2 id="1-box"><a class="header" href="#1-box">1. Box<t></t></a></h2>
+<p><code>Box&lt;T&gt;</code> 是最简单的智能指针。它允许你将数据存储在堆上而不是栈上。栈上只保留指向堆数据的指针。</p>
+<h3 id="使用场景"><a class="header" href="#使用场景">使用场景</a></h3>
+<ol>
+<li>当类型的大小在编译时无法确定，但代码上下文需要确切大小时（例如递归类型）。</li>
+<li>当有大量数据，希望在转移所有权时不进行数据拷贝时。</li>
+<li>当希望拥有一个值并只关心它是否实现了特定 trait 而不是具体类型时（trait 对象）。</li>
+</ol>
+<h3 id="递归类型"><a class="header" href="#递归类型">递归类型</a></h3>
+<p>Rust 需要在编译时知道类型占用多少空间。递归类型（如链表）理论上可以无限大。</p>
+<pre class="playground"><code class="language-rust">enum List {
+    Cons(i32, Box&lt;List&gt;),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}</code></pre>
+<h2 id="2-解引用-trait-deref-trait"><a class="header" href="#2-解引用-trait-deref-trait">2. 解引用 Trait (Deref Trait)</a></h2>
+<p>实现 <code>Deref</code> trait 允许我们自定义解引用运算符 <code>*</code> 的行为。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::ops::Deref;
+
+struct MyBox&lt;T&gt;(T);
+
+impl&lt;T&gt; MyBox&lt;T&gt; {
+    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+        MyBox(x)
+    }
+}
+
+impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+    type Target = T;
+
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.0
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-drop-trait"><a class="header" href="#3-drop-trait">3. Drop Trait</a></h2>
+<p><code>Drop</code> trait 允许我们在值离开作用域时执行代码（析构函数）。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&amp;mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-20-智能指针---rc-与-refcell"><a class="header" href="#day-20-智能指针---rc-与-refcell">Day 20: 智能指针 - Rc<t> 与 RefCell<t></t></t></a></h1>
+<h2 id="1-rc-引用计数"><a class="header" href="#1-rc-引用计数">1. Rc<t> (引用计数)</t></a></h2>
+<p><code>Rc&lt;T&gt;</code> (Reference Counting) 允许一个值有多个所有者。当所有者数量为 0 时，值才会被清理。</p>
+<ul>
+<li><strong>特点</strong>：只能用于单线程场景。</li>
+<li><strong>用途</strong>：用于图结构等多个部分读取同一数据的情况。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::rc::Rc;
+
+let a = Rc::new(5);
+let b = Rc::clone(&amp;a); // 增加引用计数，不会深拷贝
+println!("count = {}", Rc::strong_count(&amp;a));
+<span class="boring">}</span></code></pre>
+<h2 id="2-refcell-内部可变性"><a class="header" href="#2-refcell-内部可变性">2. RefCell<t> (内部可变性)</t></a></h2>
+<p><code>RefCell&lt;T&gt;</code> 代表其数据的单一所有权。它与 <code>Box&lt;T&gt;</code> 的区别在于：</p>
+<ul>
+<li><code>Box&lt;T&gt;</code>: 编译时执行借用规则检查。</li>
+<li><code>RefCell&lt;T&gt;</code>: <strong>运行时</strong>执行借用规则检查。如果违反规则（如同时存在两个可变借用），程序会 panic。</li>
+</ul>
+<h3 id="内部可变性模式"><a class="header" href="#内部可变性模式">内部可变性模式</a></h3>
+<p>允许你修改一个不可变引用背后的数据。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::cell::RefCell;
+
+let x = RefCell::new(5);
+*x.borrow_mut() += 1;
+assert_eq!(*x.borrow(), 6);
+<span class="boring">}</span></code></pre>
+<h2 id="3-结合-rc-和-refcell"><a class="header" href="#3-结合-rc-和-refcell">3. 结合 Rc<t> 和 RefCell<t></t></t></a></h2>
+<p>这是 Rust 中常见的模式：拥有多个所有者，且每个所有者都能修改数据。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug)]
+enum List {
+    Cons(Rc&lt;RefCell&lt;i32&gt;&gt;, Rc&lt;List&gt;),
+    Nil,
+}
+
+use std::rc::Rc;
+use std::cell::RefCell;
+
+let value = Rc::new(RefCell::new(5));
+// ...
 <span class="boring">}</span></code></pre>
 
                     </main>

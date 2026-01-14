@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Day 02: 变量与数据类型 - Rust - 100天从新手到大师</title>
+        <title>Day 20: 智能指针 Rc 与 RefCell - Rust - 100天从新手到大师</title>
 
 
         <!-- Custom HTML head -->
@@ -177,119 +177,62 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-02-变量与数据类型"><a class="header" href="#day-02-变量与数据类型">Day 02: 变量与数据类型</a></h1>
-<h2 id="1-变量与可变性"><a class="header" href="#1-变量与可变性">1. 变量与可变性</a></h2>
-<p>在 Rust 中，变量默认是<strong>不可变</strong>（Immutable）的。这是 Rust 推动编写安全且易于并发代码的重要方式之一。</p>
-<h3 id="声明变量"><a class="header" href="#声明变量">声明变量</a></h3>
-<p>使用 <code>let</code> 关键字声明变量：</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let x = 5;
-println!("The value of x is: {}", x);
-// x = 6; // 这行代码会报错，因为 x 是不可变的
-<span class="boring">}</span></code></pre>
-<h3 id="可变变量"><a class="header" href="#可变变量">可变变量</a></h3>
-<p>如果你想让变量可变，需要在 <code>let</code> 后加上 <code>mut</code> 关键字：</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let mut x = 5;
-println!("The value of x is: {}", x);
-x = 6;
-println!("The value of x is: {}", x);
-<span class="boring">}</span></code></pre>
-<h3 id="常量"><a class="header" href="#常量">常量</a></h3>
-<p>常量使用 <code>const</code> 关键字声明，必须注明类型，且只能被设置为常量表达式，不能是函数调用的结果。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>const MAX_POINTS: u32 = 100_000;
-<span class="boring">}</span></code></pre>
-<h3 id="隐藏-shadowing"><a class="header" href="#隐藏-shadowing">隐藏 (Shadowing)</a></h3>
-<p>你可以声明和前面变量同名的新变量，这被称为“隐藏”。通常用于类型转换。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let x = 5;
-let x = x + 1; // 新的 x 隐藏了旧的 x
-let x = "spaces"; // 甚至可以改变类型
-<span class="boring">}</span></code></pre>
-<h2 id="2-数据类型"><a class="header" href="#2-数据类型">2. 数据类型</a></h2>
-<p>Rust 是静态类型语言。如果不明确，编译器通常可以推断出类型。</p>
-<h3 id="标量类型-scalar-types"><a class="header" href="#标量类型-scalar-types">标量类型 (Scalar Types)</a></h3>
-<p>标量类型代表一个单独的值。</p>
-<ol>
-<li>
-<p><strong>整型 (Integer)</strong>:</p>
+                        <h1 id="day-20-智能指针---rc-与-refcell"><a class="header" href="#day-20-智能指针---rc-与-refcell">Day 20: 智能指针 - Rc<t> 与 RefCell<t></t></t></a></h1>
+<h2 id="1-rc-引用计数"><a class="header" href="#1-rc-引用计数">1. Rc<t> (引用计数)</t></a></h2>
+<p><code>Rc&lt;T&gt;</code> (Reference Counting) 允许一个值有多个所有者。当所有者数量为 0 时，值才会被清理。</p>
 <ul>
-<li>有符号: <code>i8</code>, <code>i16</code>, <code>i32</code> (默认), <code>i64</code>, <code>i128</code>, <code>isize</code></li>
-<li>无符号: <code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
-</ul>
-</li>
-<li>
-<p><strong>浮点型 (Floating-Point)</strong>:</p>
-<ul>
-<li><code>f32</code></li>
-<li><code>f64</code> (默认)</li>
-</ul>
-</li>
-<li>
-<p><strong>布尔型 (Boolean)</strong>:</p>
-<ul>
-<li><code>bool</code> (值为 <code>true</code> 或 <code>false</code>)</li>
-</ul>
-</li>
-<li>
-<p><strong>字符类型 (Character)</strong>:</p>
-<ul>
-<li><code>char</code> (4字节，代表 Unicode 标量值)</li>
-</ul>
-</li>
-</ol>
-<h3 id="复合类型-compound-types"><a class="header" href="#复合类型-compound-types">复合类型 (Compound Types)</a></h3>
-<ol>
-<li>
-<p><strong>元组 (Tuple)</strong>:</p>
-<ul>
-<li>可以将多个不同类型的值组合在一起。</li>
-<li>长度固定。</li>
+<li><strong>特点</strong>：只能用于单线程场景。</li>
+<li><strong>用途</strong>：用于图结构等多个部分读取同一数据的情况。</li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let tup: (i32, f64, u8) = (500, 6.4, 1);
-let (x, y, z) = tup; // 解构
-let five_hundred = tup.0; // 索引访问
+</span>use std::rc::Rc;
+
+let a = Rc::new(5);
+let b = Rc::clone(&amp;a); // 增加引用计数，不会深拷贝
+println!("count = {}", Rc::strong_count(&amp;a));
 <span class="boring">}</span></code></pre>
-</li>
-<li>
-<p><strong>数组 (Array)</strong>:</p>
+<h2 id="2-refcell-内部可变性"><a class="header" href="#2-refcell-内部可变性">2. RefCell<t> (内部可变性)</t></a></h2>
+<p><code>RefCell&lt;T&gt;</code> 代表其数据的单一所有权。它与 <code>Box&lt;T&gt;</code> 的区别在于：</p>
 <ul>
-<li>包含多个相同类型的值。</li>
-<li>长度固定。</li>
+<li><code>Box&lt;T&gt;</code>: 编译时执行借用规则检查。</li>
+<li><code>RefCell&lt;T&gt;</code>: <strong>运行时</strong>执行借用规则检查。如果违反规则（如同时存在两个可变借用），程序会 panic。</li>
 </ul>
+<h3 id="内部可变性模式"><a class="header" href="#内部可变性模式">内部可变性模式</a></h3>
+<p>允许你修改一个不可变引用背后的数据。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let a = [1, 2, 3, 4, 5];
-let first = a[0];
+</span>use std::cell::RefCell;
+
+let x = RefCell::new(5);
+*x.borrow_mut() += 1;
+assert_eq!(*x.borrow(), 6);
 <span class="boring">}</span></code></pre>
-</li>
-</ol>
-<h2 id="3-练习"><a class="header" href="#3-练习">3. 练习</a></h2>
-<p>创建一个名为 <code>variables</code> 的项目，尝试以下操作：</p>
-<ol>
-<li>定义一个不可变变量，尝试修改它，观察编译器错误。</li>
-<li>定义一个可变变量，修改它的值。</li>
-<li>定义一个元组，包含你的年龄（整数）和身高（浮点数），并打印出来。</li>
-</ol>
+<h2 id="3-结合-rc-和-refcell"><a class="header" href="#3-结合-rc-和-refcell">3. 结合 Rc<t> 和 RefCell<t></t></t></a></h2>
+<p>这是 Rust 中常见的模式：拥有多个所有者，且每个所有者都能修改数据。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug)]
+enum List {
+    Cons(Rc&lt;RefCell&lt;i32&gt;&gt;, Rc&lt;List&gt;),
+    Nil,
+}
+
+use std::rc::Rc;
+use std::cell::RefCell;
+
+let value = Rc::new(RefCell::new(5));
+// ...
+<span class="boring">}</span></code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Day01-15/01.Introduction/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Day16-30/19.SmartPointers_Box/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Day01-15/03.FunctionsAndControlFlow/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -297,13 +240,10 @@ let first = a[0];
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Day01-15/01.Introduction/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Day16-30/19.SmartPointers_Box/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Day01-15/03.FunctionsAndControlFlow/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                    </a>
             </nav>
 
         </div>
