@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Day 10: 常用集合 - Rust - 100天从新手到大师</title>
+        <title>Day 15: 自动化测试 - Rust - 100天从新手到大师</title>
 
 
         <!-- Custom HTML head -->
@@ -177,36 +177,94 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-10-常用集合"><a class="header" href="#day-10-常用集合">Day 10: 常用集合</a></h1>
-<h2 id="1-vector-vec"><a class="header" href="#1-vector-vec">1. Vector (Vec<t>)</t></a></h2>
+                        <h1 id="day-15-自动化测试-automated-testing"><a class="header" href="#day-15-自动化测试-automated-testing">Day 15: 自动化测试 (Automated Testing)</a></h1>
+<p>Rust 的测试功能由 <code>test</code> 属性、<code>cargo test</code> 命令和 <code>should_panic</code> 属性等组成。</p>
+<h2 id="1-编写测试"><a class="header" href="#1-编写测试">1. 编写测试</a></h2>
+<p>测试通常放在 <code>src</code> 目录下的源文件中，或者放在 <code>tests</code> 目录下的集成测试文件中。</p>
+<h3 id="单元测试"><a class="header" href="#单元测试">单元测试</a></h3>
+<p>在模块内定义测试，使用 <code>#[cfg(test)]</code> 标注模块，使用 <code>#[test]</code> 标注测试函数。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let v = vec![1, 2, 3];
+</span>pub fn add(left: usize, right: usize) -&gt; usize {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
 <span class="boring">}</span></code></pre>
-<h2 id="2-string"><a class="header" href="#2-string">2. String</a></h2>
+<h3 id="常用宏"><a class="header" href="#常用宏">常用宏</a></h3>
+<ul>
+<li><code>assert!(expression)</code>: 断言表达式为 true。</li>
+<li><code>assert_eq!(left, right)</code>: 断言两个值相等。</li>
+<li><code>assert_ne!(left, right)</code>: 断言两个值不相等。</li>
+<li><code>panic!("message")</code>: 导致测试失败。</li>
+</ul>
+<h2 id="2-测试-panic"><a class="header" href="#2-测试-panic">2. 测试 Panic</a></h2>
+<p>使用 <code>#[should_panic]</code> 属性检查代码是否按预期 panic。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let s = String::from("hello");
+</span>pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -&gt; Guess {
+        if value &lt; 1 || value &gt; 100 {
+            panic!("Guess value must be between 1 and 100, got {}.", value);
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
 <span class="boring">}</span></code></pre>
-<h2 id="3-hashmap"><a class="header" href="#3-hashmap">3. HashMap</a></h2>
+<h2 id="3-运行测试"><a class="header" href="#3-运行测试">3. 运行测试</a></h2>
+<pre><code class="language-bash">cargo test
+</code></pre>
+<ul>
+<li><code>cargo test --help</code>: 查看帮助。</li>
+<li><code>cargo test -- --test-threads=1</code>: 单线程运行（避免并行干扰）。</li>
+<li><code>cargo test -- --show-output</code>: 显示成功测试的输出。</li>
+</ul>
+<h2 id="4-集成测试"><a class="header" href="#4-集成测试">4. 集成测试</a></h2>
+<p>集成测试完全位于你的库之外。它们与其他外部代码一样使用你的库。创建 <code>tests</code> 目录。</p>
+<p><strong>tests/integration_test.rs</strong>:</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use std::collections::HashMap;
-let mut map = HashMap::new();
-map.insert("key", "value");
+</span>use testing_demo;
+
+#[test]
+fn it_adds_two() {
+    assert_eq!(4, testing_demo::add_two(2));
+}
 <span class="boring">}</span></code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Day01-15/09.Modules/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Day01-15/14.Lifetimes/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Day01-15/11.ErrorHandling/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -214,13 +272,10 @@ map.insert("key", "value");
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Day01-15/09.Modules/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Day01-15/14.Lifetimes/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Day01-15/11.ErrorHandling/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                    </a>
             </nav>
 
         </div>

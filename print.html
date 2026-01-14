@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-0b6c097e.js";
+            window.path_to_searchindex_js = "searchindex-e9de763a.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-417062df.js"></script>
+        <script src="toc-f5fcecb3.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -884,6 +884,394 @@ impl Rectangle {
 </span>use std::collections::HashMap;
 let mut map = HashMap::new();
 map.insert("key", "value");
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-11-错误处理-error-handling"><a class="header" href="#day-11-错误处理-error-handling">Day 11: 错误处理 (Error Handling)</a></h1>
+<p>Rust 将错误组合成两个主要类别：</p>
+<ol>
+<li><strong>可恢复错误 (Recoverable errors)</strong>：通常代表向用户报告错误并重试的操作。例如：未找到文件。使用 <code>Result&lt;T, E&gt;</code>。</li>
+<li><strong>不可恢复错误 (Unrecoverable errors)</strong>：是 bug 的症状。例如：尝试访问超过数组结尾的索引。使用 <code>panic!</code>。</li>
+</ol>
+<h2 id="1-panic-与不可恢复错误"><a class="header" href="#1-panic-与不可恢复错误">1. panic! 与不可恢复错误</a></h2>
+<p>当 <code>panic!</code> 宏执行时，程序会打印一个错误信息，展开并清理栈数据，然后退出。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    panic!("crash and burn");
+}</code></pre>
+<p>使用 <code>RUST_BACKTRACE=1</code> 环境变量运行程序可以获取回溯信息。</p>
+<h2 id="2-result-与可恢复错误"><a class="header" href="#2-result-与可恢复错误">2. Result 与可恢复错误</a></h2>
+<p><code>Result</code> 枚举定义如下：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+<span class="boring">}</span></code></pre>
+<h3 id="处理-result"><a class="header" href="#处理-result">处理 Result</a></h3>
+<pre class="playground"><code class="language-rust">use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let f = File::open("hello.txt");
+
+    let f = match f {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; match error.kind() {
+            ErrorKind::NotFound =&gt; match File::create("hello.txt") {
+                Ok(fc) =&gt; fc,
+                Err(e) =&gt; panic!("Problem creating the file: {:?}", e),
+            },
+            other_error =&gt; {
+                panic!("Problem opening the file: {:?}", other_error)
+            }
+        },
+    };
+}</code></pre>
+<h3 id="unwrap-和-expect"><a class="header" href="#unwrap-和-expect">unwrap 和 expect</a></h3>
+<p>帮助方法，如果 <code>Result</code> 是 <code>Err</code>，则调用 <code>panic!</code>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let f = File::open("hello.txt").unwrap();
+let f = File::open("hello.txt").expect("Failed to open hello.txt");
+<span class="boring">}</span></code></pre>
+<h2 id="3-传播错误"><a class="header" href="#3-传播错误">3. 传播错误</a></h2>
+<p>将错误返回给调用者。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
+    let f = File::open("hello.txt");
+
+    let mut f = match f {
+        Ok(file) =&gt; file,
+        Err(e) =&gt; return Err(e),
+    };
+
+    let mut s = String::new();
+
+    match f.read_to_string(&amp;mut s) {
+        Ok(_) =&gt; Ok(s),
+        Err(e) =&gt; Err(e),
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="传播错误的简写-运算符"><a class="header" href="#传播错误的简写-运算符">传播错误的简写：<code>?</code> 运算符</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io;
+use std::io::Read;
+
+fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
+    let mut s = String::new();
+    File::open("hello.txt")?.read_to_string(&amp;mut s)?;
+    Ok(s)
+}
+<span class="boring">}</span></code></pre>
+<p>注意：<code>?</code> 运算符只能用于返回 <code>Result</code>、<code>Option</code> 或实现了 <code>FromResidual</code> 的类型的函数中。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-12-泛型-generics"><a class="header" href="#day-12-泛型-generics">Day 12: 泛型 (Generics)</a></h1>
+<p>泛型是具体类型或其他属性的抽象替代。在编译时，Rust 会将泛型代码“单态化”（Monomorphization），这意味着泛型不会带来运行时的性能损耗。</p>
+<h2 id="1-函数定义中的泛型"><a class="header" href="#1-函数定义中的泛型">1. 函数定义中的泛型</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn largest&lt;T: PartialOrd&gt;(list: &amp;[T]) -&gt; &amp;T {
+    let mut largest = &amp;list[0];
+
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+
+    largest
+}
+<span class="boring">}</span></code></pre>
+<p>这里 <code>T</code> 是类型参数的名称。<code>PartialOrd</code> 是一个 trait bound（特征约束），表示 <code>T</code> 必须是可以比较大小的类型。</p>
+<h2 id="2-结构体定义中的泛型"><a class="header" href="#2-结构体定义中的泛型">2. 结构体定义中的泛型</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+let integer = Point { x: 5, y: 10 };
+let float = Point { x: 1.0, y: 4.0 };
+<span class="boring">}</span></code></pre>
+<p>如果要支持不同类型：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Point&lt;T, U&gt; {
+    x: T,
+    y: U,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-枚举定义中的泛型"><a class="header" href="#3-枚举定义中的泛型">3. 枚举定义中的泛型</a></h2>
+<p>我们之前见过的 <code>Option</code> 和 <code>Result</code> 就是泛型枚举。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-方法定义中的泛型"><a class="header" href="#4-方法定义中的泛型">4. 方法定义中的泛型</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+impl&lt;T&gt; Point&lt;T&gt; {
+    fn x(&amp;self) -&gt; &amp;T {
+        &amp;self.x
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>可以为特定类型实现方法：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Point&lt;f32&gt; {
+    fn distance_from_origin(&amp;self) -&gt; f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-13-trait-特征"><a class="header" href="#day-13-trait-特征">Day 13: Trait (特征)</a></h1>
+<p>Trait 告诉 Rust 编译器某个特定类型拥有可能与其他类型共享的功能。Trait 类似于其他语言中的接口（Interfaces），但有一些区别。</p>
+<h2 id="1-定义-trait"><a class="header" href="#1-定义-trait">1. 定义 Trait</a></h2>
+<p>使用 <code>trait</code> 关键字定义。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Summary {
+    fn summarize(&amp;self) -&gt; String;
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-为类型实现-trait"><a class="header" href="#2-为类型实现-trait">2. 为类型实现 Trait</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub retweet: bool,
+}
+
+impl Summary for Tweet {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-默认实现"><a class="header" href="#3-默认实现">3. 默认实现</a></h2>
+<p>可以在 Trait 定义中提供默认行为。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Summary {
+    fn summarize(&amp;self) -&gt; String {
+        String::from("(Read more...)")
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-trait-作为参数-trait-bounds"><a class="header" href="#4-trait-作为参数-trait-bounds">4. Trait 作为参数 (Trait Bounds)</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn notify(item: &amp;impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+<span class="boring">}</span></code></pre>
+<p>这实际上是 Trait Bound 语法的语法糖：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn notify&lt;T: Summary&gt;(item: &amp;T) {
+    println!("Breaking news! {}", item.summarize());
+}
+<span class="boring">}</span></code></pre>
+<h3 id="指定多个-trait-bound"><a class="header" href="#指定多个-trait-bound">指定多个 Trait Bound</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn notify(item: &amp;(impl Summary + Display)) {
+<span class="boring">}</span></code></pre>
+<h3 id="where-子句"><a class="header" href="#where-子句">where 子句</a></h3>
+<p>当 Trait Bound 太多时，使用 <code>where</code> 从句可以使代码更清晰。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn some_function&lt;T, U&gt;(t: &amp;T, u: &amp;U) -&gt; i32
+    where T: Display + Clone,
+          U: Clone + Debug
+{
+<span class="boring">}</span></code></pre>
+<h2 id="5-返回实现了-trait-的类型"><a class="header" href="#5-返回实现了-trait-的类型">5. 返回实现了 Trait 的类型</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn returns_summarizable() -&gt; impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from("of course, as you probably already know, people"),
+        reply: false,
+        retweet: false,
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>注意：这种方式只适用于返回单一类型的情况。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-14-生命周期-lifetimes"><a class="header" href="#day-14-生命周期-lifetimes">Day 14: 生命周期 (Lifetimes)</a></h1>
+<p>生命周期是 Rust 中最独特的概念之一。它是引用有效的作用域。</p>
+<h2 id="1-悬垂引用-dangling-references"><a class="header" href="#1-悬垂引用-dangling-references">1. 悬垂引用 (Dangling References)</a></h2>
+<p>Rust 的借用检查器（Borrow Checker）确保所有引用都是有效的。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{
+    let r;
+    {
+        let x = 5;
+        r = &amp;x;
+    } // x 离开作用域被丢弃
+    println!("r: {}", r); // 错误：r 引用了无效的内存
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-泛型生命周期"><a class="header" href="#2-泛型生命周期">2. 泛型生命周期</a></h2>
+<p>当函数返回一个引用时，Rust 需要知道这个引用的生命周期与参数的生命周期有什么关系。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() {
+        x
+    } else {
+        y
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>这里的 <code>'a</code> 是生命周期注解。它告诉 Rust：</p>
+<ul>
+<li>两个参数 <code>x</code> 和 <code>y</code> 存活的时间至少和 <code>'a</code> 一样长。</li>
+<li>返回值的存活时间也至少和 <code>'a</code> 一样长。</li>
+<li>实际上，返回值的生命周期是 <code>x</code> 和 <code>y</code> 中较短的那个。</li>
+</ul>
+<h2 id="3-结构体定义中的生命周期"><a class="header" href="#3-结构体定义中的生命周期">3. 结构体定义中的生命周期</a></h2>
+<p>如果结构体持有引用，它必须拥有生命周期注解。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct ImportantExcerpt&lt;'a&gt; {
+    part: &amp;'a str,
+}
+<span class="boring">}</span></code></pre>
+<p>这意味着 <code>ImportantExcerpt</code> 的实例不能比其 <code>part</code> 字段引用的字符串存活得更久。</p>
+<h2 id="4-生命周期省略规则-lifetime-elision-rules"><a class="header" href="#4-生命周期省略规则-lifetime-elision-rules">4. 生命周期省略规则 (Lifetime Elision Rules)</a></h2>
+<p>在某些常见情况下，编译器可以推断出生命周期，无需显式标注。</p>
+<ol>
+<li>每个是引用的参数都有其自己的生命周期参数。</li>
+<li>如果只有一个输入生命周期参数，那么它被赋予所有输出生命周期参数。</li>
+<li>如果有多个输入生命周期参数，但其中一个是 <code>&amp;self</code> 或 <code>&amp;mut self</code>，那么 <code>self</code> 的生命周期被赋予所有输出生命周期参数。</li>
+</ol>
+<h2 id="5-静态生命周期-static"><a class="header" href="#5-静态生命周期-static">5. 静态生命周期 (’static)</a></h2>
+<p><code>'static</code> 生命周期存活于整个程序期间。所有的字符串字面值都拥有 <code>'static</code> 生命周期。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s: &amp;'static str = "I have a static lifetime.";
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-15-自动化测试-automated-testing"><a class="header" href="#day-15-自动化测试-automated-testing">Day 15: 自动化测试 (Automated Testing)</a></h1>
+<p>Rust 的测试功能由 <code>test</code> 属性、<code>cargo test</code> 命令和 <code>should_panic</code> 属性等组成。</p>
+<h2 id="1-编写测试"><a class="header" href="#1-编写测试">1. 编写测试</a></h2>
+<p>测试通常放在 <code>src</code> 目录下的源文件中，或者放在 <code>tests</code> 目录下的集成测试文件中。</p>
+<h3 id="单元测试"><a class="header" href="#单元测试">单元测试</a></h3>
+<p>在模块内定义测试，使用 <code>#[cfg(test)]</code> 标注模块，使用 <code>#[test]</code> 标注测试函数。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn add(left: usize, right: usize) -&gt; usize {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="常用宏"><a class="header" href="#常用宏">常用宏</a></h3>
+<ul>
+<li><code>assert!(expression)</code>: 断言表达式为 true。</li>
+<li><code>assert_eq!(left, right)</code>: 断言两个值相等。</li>
+<li><code>assert_ne!(left, right)</code>: 断言两个值不相等。</li>
+<li><code>panic!("message")</code>: 导致测试失败。</li>
+</ul>
+<h2 id="2-测试-panic"><a class="header" href="#2-测试-panic">2. 测试 Panic</a></h2>
+<p>使用 <code>#[should_panic]</code> 属性检查代码是否按预期 panic。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -&gt; Guess {
+        if value &lt; 1 || value &gt; 100 {
+            panic!("Guess value must be between 1 and 100, got {}.", value);
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-运行测试"><a class="header" href="#3-运行测试">3. 运行测试</a></h2>
+<pre><code class="language-bash">cargo test
+</code></pre>
+<ul>
+<li><code>cargo test --help</code>: 查看帮助。</li>
+<li><code>cargo test -- --test-threads=1</code>: 单线程运行（避免并行干扰）。</li>
+<li><code>cargo test -- --show-output</code>: 显示成功测试的输出。</li>
+</ul>
+<h2 id="4-集成测试"><a class="header" href="#4-集成测试">4. 集成测试</a></h2>
+<p>集成测试完全位于你的库之外。它们与其他外部代码一样使用你的库。创建 <code>tests</code> 目录。</p>
+<p><strong>tests/integration_test.rs</strong>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use testing_demo;
+
+#[test]
+fn it_adds_two() {
+    assert_eq!(4, testing_demo::add_two(2));
+}
 <span class="boring">}</span></code></pre>
 
                     </main>
