@@ -1,0 +1,7 @@
+[book]
+title = "Rust - 100 Days from Beginner to Master"
+authors = ["Rust-100-Days"]
+description = "Rust 100天从新手到大师"
+language = "zh-CN"
+multilingual = false
+src = "."
