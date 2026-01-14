@@ -27,3 +27,8 @@
 - [Day 18: Cargo 进阶](Day16-30/18.CargoAndCrates/README.md)
 - [Day 19: 智能指针 Box](Day16-30/19.SmartPointers_Box/README.md)
 - [Day 20: 智能指针 Rc 与 RefCell](Day16-30/20.SmartPointers_RcRefCell/README.md)
+- [Day 21: 引用循环与内存泄漏](Day16-30/21.ReferenceCycles/README.md)
+- [Day 22: 并发 - 线程](Day16-30/22.Threads/README.md)
+- [Day 23: 并发 - 消息传递](Day16-30/23.MessagePassing/README.md)
+- [Day 24: 并发 - 共享状态](Day16-30/24.SharedState/README.md)
+- [Day 25: 并发 - Send 与 Sync](Day16-30/25.SendSync/README.md)
