@@ -1,0 +1,810 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust - 100天从新手到大师</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-0d721ba8.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-18f6c445.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust - 100天从新手到大师</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Start-Rust/100-days-of-rust" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="rust---100天从新手到大师"><a class="header" href="#rust---100天从新手到大师">Rust - 100天从新手到大师</a></h1>
+<blockquote>
+<p>这是一个受 <a href="https://github.com/jackfrued/Python-100-Days">Python - 100天从新手到大师</a> 启发的 Rust 语言学习计划。</p>
+</blockquote>
+<p>Rust 是一门赋予每个人构建可靠且高效软件能力的系统编程语言。它注重内存安全、线程安全和高性能。本项目的目标是通过100天的学习，帮助新手掌握 Rust 语言，并能够使用 Rust 进行实际的项目开发。</p>
+<h2 id="目录"><a class="header" href="#目录">目录</a></h2>
+<h3 id="第一阶段rust-语言基础-day-01---15"><a class="header" href="#第一阶段rust-语言基础-day-01---15">第一阶段：Rust 语言基础 (Day 01 - 15)</a></h3>
+<ul>
+<li><strong>Day 01</strong>: 初识 Rust - 环境搭建、Cargo 使用、Hello World</li>
+<li><strong>Day 02</strong>: 变量与数据类型 - 变量绑定、可变性、基本类型</li>
+<li><strong>Day 03</strong>: 函数与控制流 - 函数定义、if/else、循环</li>
+<li><strong>Day 04</strong>: 所有权 (Ownership) - Rust 的核心概念</li>
+<li><strong>Day 05</strong>: 引用与借用 (References &amp; Borrowing)</li>
+<li><strong>Day 06</strong>: 切片 (Slices) 类型</li>
+<li><strong>Day 07</strong>: 结构体 (Structs) - 定义与实例化</li>
+<li><strong>Day 08</strong>: 枚举 (Enums) 与模式匹配 (Match)</li>
+<li><strong>Day 09</strong>: 模块系统 (Modules) - 包、Crate、模块</li>
+<li><strong>Day 10</strong>: 常用集合 - Vector, String, HashMap</li>
+<li><strong>Day 11</strong>: 错误处理 - Result 与 Panic</li>
+<li><strong>Day 12</strong>: 泛型 (Generics)</li>
+<li><strong>Day 13</strong>: Trait - 定义共享行为</li>
+<li><strong>Day 14</strong>: 生命周期 (Lifetimes) 基础</li>
+<li><strong>Day 15</strong>: 自动化测试</li>
+</ul>
+<h3 id="第二阶段进阶概念-day-16---30"><a class="header" href="#第二阶段进阶概念-day-16---30">第二阶段：进阶概念 (Day 16 - 30)</a></h3>
+<ul>
+<li><strong>Day 16</strong>: 闭包 (Closures)</li>
+<li><strong>Day 17</strong>: 迭代器 (Iterators)</li>
+<li><strong>Day 18</strong>: Cargo 进阶与 Crates.io</li>
+<li><strong>Day 19</strong>: 智能指针 (Smart Pointers) - Box</li>
+<li><strong>Day 20</strong>: 智能指针 - Rc 与 RefCell</li>
+<li><strong>Day 21</strong>: 内部可变性模式</li>
+<li><strong>Day 22</strong>: 引用循环与内存泄漏</li>
+<li><strong>Day 23</strong>: 并发编程 - 线程</li>
+<li><strong>Day 24</strong>: 消息传递 (Channels)</li>
+<li><strong>Day 25</strong>: 共享状态并发 (Mutex, Arc)</li>
+<li><strong>Day 26</strong>: Sync 与 Send Trait</li>
+<li><strong>Day 27</strong>: 面向对象编程特性</li>
+<li><strong>Day 28</strong>: 模式匹配进阶</li>
+<li><strong>Day 29</strong>: 高级 Trait</li>
+<li><strong>Day 30</strong>: 高级类型</li>
+</ul>
+<h3 id="第三阶段宏与不安全代码-day-31---40"><a class="header" href="#第三阶段宏与不安全代码-day-31---40">第三阶段：宏与不安全代码 (Day 31 - 40)</a></h3>
+<ul>
+<li><strong>Day 31</strong>: Unsafe Rust 介绍</li>
+<li><strong>Day 32</strong>: 高级函数与闭包</li>
+<li><strong>Day 33</strong>: 宏 (Macros) - 声明宏</li>
+<li><strong>Day 34</strong>: 过程宏 (Procedural Macros)</li>
+<li><strong>Day 35</strong>: FFI - 与 C 语言交互</li>
+<li><strong>Day 36-40</strong>: 阶段性项目练习 (构建一个简单的 CLI 工具)</li>
+</ul>
+<h3 id="第四阶段生态系统与异步编程-day-41---60"><a class="header" href="#第四阶段生态系统与异步编程-day-41---60">第四阶段：生态系统与异步编程 (Day 41 - 60)</a></h3>
+<ul>
+<li><strong>Day 41</strong>: 异步编程基础 (Async/Await)</li>
+<li><strong>Day 42</strong>: Tokio 运行时介绍</li>
+<li><strong>Day 43</strong>: 构建异步 Web 服务器 (Hyper/Axum)</li>
+<li><strong>Day 44</strong>: 序列化与反序列化 (Serde)</li>
+<li><strong>Day 45</strong>: 数据库交互 (SQLx / Diesel)</li>
+<li><strong>Day 46</strong>: 日志与监控 (Tracing)</li>
+<li><strong>Day 47</strong>: 错误处理最佳实践 (Anyhow / Thiserror)</li>
+<li><strong>Day 48</strong>: 配置管理</li>
+<li><strong>Day 49</strong>: 命令行参数解析 (Clap)</li>
+<li><strong>Day 50</strong>: HTTP 客户端 (Reqwest)</li>
+<li><strong>Day 51-60</strong>: 异步网络项目实战 (如：简易 Redis 克隆)</li>
+</ul>
+<h3 id="第五阶段web-开发实战-day-61---80"><a class="header" href="#第五阶段web-开发实战-day-61---80">第五阶段：Web 开发实战 (Day 61 - 80)</a></h3>
+<ul>
+<li><strong>Day 61</strong>: Web 开发概览</li>
+<li><strong>Day 62-65</strong>: 使用 Actix-web 或 Axum 构建 RESTful API</li>
+<li><strong>Day 66-68</strong>: 数据库集成与迁移</li>
+<li><strong>Day 69-70</strong>: 身份认证与授权 (JWT)</li>
+<li><strong>Day 71-72</strong>: 状态管理</li>
+<li><strong>Day 73-75</strong>: 前端交互 (Templates / WASM 简介)</li>
+<li><strong>Day 76-80</strong>: 完整 Web 项目实战 (如：博客系统)</li>
+</ul>
+<h3 id="第六阶段系统编程与拓展-day-81---90"><a class="header" href="#第六阶段系统编程与拓展-day-81---90">第六阶段：系统编程与拓展 (Day 81 - 90)</a></h3>
+<ul>
+<li><strong>Day 81</strong>: 操作系统概念回顾</li>
+<li><strong>Day 82</strong>: 文件系统操作</li>
+<li><strong>Day 83</strong>: 进程与信号处理</li>
+<li><strong>Day 84</strong>: 网络编程 (TCP/UDP)</li>
+<li><strong>Day 85</strong>: WebAssembly (WASM) 深入</li>
+<li><strong>Day 86</strong>: 嵌入式 Rust 简介</li>
+<li><strong>Day 87</strong>: 性能分析与优化</li>
+<li><strong>Day 88</strong>: CI/CD 持续集成</li>
+<li><strong>Day 89</strong>: 发布与部署</li>
+<li><strong>Day 90</strong>: Rust 未来展望</li>
+</ul>
+<h3 id="第七阶段毕业设计-day-91---100"><a class="header" href="#第七阶段毕业设计-day-91---100">第七阶段：毕业设计 (Day 91 - 100)</a></h3>
+<ul>
+<li><strong>Day 91-100</strong>: 综合项目开发 (自选题目，如：分布式系统、高性能服务器、游戏引擎组件等)</li>
+</ul>
+<h2 id="如何使用"><a class="header" href="#如何使用">如何使用</a></h2>
+<p>建议按照天数顺序学习。每一天的文件夹中包含了当天的学习笔记、代码示例和练习题。</p>
+<h2 id="资源链接"><a class="header" href="#资源链接">资源链接</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language (Rust Book)</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
+<li><a href="https://doc.rust-lang.org/std/">Rust Standard Library Documentation</a></li>
+<li><a href="https://crates.io/">Crates.io</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-01-初识-rust"><a class="header" href="#day-01-初识-rust">Day 01: 初识 Rust</a></h1>
+<h2 id="1-rust-简介"><a class="header" href="#1-rust-简介">1. Rust 简介</a></h2>
+<p>Rust 是一门系统编程语言，专注于安全，尤其是并发安全。它支持函数式和命令式以及泛型等编程范式的多范式语言。Rust 在语法上和 C++ 类似，但是设计者通过<strong>所有权</strong>系统保证了内存安全，在编译期就能消除各种内存错误。</p>
+<h3 id="为什么选择-rust"><a class="header" href="#为什么选择-rust">为什么选择 Rust?</a></h3>
+<ul>
+<li><strong>高性能</strong>：Rust 速度惊人且内存利用率极高。由于没有运行时和垃圾回收，它能够胜任对性能要求特别高的服务。</li>
+<li><strong>可靠性</strong>：Rust 丰富的类型系统和所有权模型保证了内存安全和线程安全，让您在编译期就消除各种错误。</li>
+<li><strong>生产力</strong>：Rust 拥有出色的文档、友好的编译器和顶级的工具链（包管理器 Cargo）。</li>
+</ul>
+<h2 id="2-环境搭建"><a class="header" href="#2-环境搭建">2. 环境搭建</a></h2>
+<h3 id="安装-rust"><a class="header" href="#安装-rust">安装 Rust</a></h3>
+<p>推荐使用 <code>rustup</code> 工具链管理器来安装 Rust。</p>
+<p><strong>Linux / macOS:</strong></p>
+<p>打开终端并运行：</p>
+<pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+</code></pre>
+<p><strong>Windows:</strong></p>
+<p>访问 <a href="https://rustup.rs/">https://rustup.rs/</a> 下载 <code>rustup-init.exe</code> 并运行。</p>
+<h3 id="验证安装"><a class="header" href="#验证安装">验证安装</a></h3>
+<p>安装完成后，关闭并重新打开终端，输入：</p>
+<pre><code class="language-bash">rustc --version
+cargo --version
+</code></pre>
+<p>如果看到版本号，说明安装成功。</p>
+<h2 id="3-hello-world"><a class="header" href="#3-hello-world">3. Hello World</a></h2>
+<p>按照编程传统，我们从 Hello World 开始。</p>
+<h3 id="使用-rustc-直接编译"><a class="header" href="#使用-rustc-直接编译">使用 rustc 直接编译</a></h3>
+<p>创建一个名为 <code>main.rs</code> 的文件，输入以下代码：</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    println!("Hello, world!");
+}</code></pre>
+<p>在终端编译并运行：</p>
+<pre><code class="language-bash">rustc main.rs
+./main  # Windows 上是 .\main.exe
+</code></pre>
+<h3 id="使用-cargo-推荐"><a class="header" href="#使用-cargo-推荐">使用 Cargo (推荐)</a></h3>
+<p>Cargo 是 Rust 的构建系统和包管理器。</p>
+<ol>
+<li><strong>创建新项目</strong>：</li>
+</ol>
+<pre><code class="language-bash">cargo new hello_world
+cd hello_world
+</code></pre>
+<ol start="2">
+<li><strong>项目结构</strong>：</li>
+</ol>
+<pre><code class="language-text">hello_world
+├── Cargo.toml
+└── src
+    └── main.rs
+</code></pre>
+<ol start="3">
+<li><strong>运行项目</strong>：</li>
+</ol>
+<pre><code class="language-bash">cargo run
+</code></pre>
+<p>你应当能看到输出 <code>Hello, world!</code>。</p>
+<h2 id="4-练习"><a class="header" href="#4-练习">4. 练习</a></h2>
+<ol>
+<li>成功安装 Rust 环境。</li>
+<li>使用 Cargo 创建一个新项目，输出 “Hello Rust!”。</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-02-变量与数据类型"><a class="header" href="#day-02-变量与数据类型">Day 02: 变量与数据类型</a></h1>
+<h2 id="1-变量与可变性"><a class="header" href="#1-变量与可变性">1. 变量与可变性</a></h2>
+<p>在 Rust 中，变量默认是<strong>不可变</strong>（Immutable）的。这是 Rust 推动编写安全且易于并发代码的重要方式之一。</p>
+<h3 id="声明变量"><a class="header" href="#声明变量">声明变量</a></h3>
+<p>使用 <code>let</code> 关键字声明变量：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = 5;
+println!("The value of x is: {}", x);
+// x = 6; // 这行代码会报错，因为 x 是不可变的
+<span class="boring">}</span></code></pre>
+<h3 id="可变变量"><a class="header" href="#可变变量">可变变量</a></h3>
+<p>如果你想让变量可变，需要在 <code>let</code> 后加上 <code>mut</code> 关键字：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut x = 5;
+println!("The value of x is: {}", x);
+x = 6;
+println!("The value of x is: {}", x);
+<span class="boring">}</span></code></pre>
+<h3 id="常量"><a class="header" href="#常量">常量</a></h3>
+<p>常量使用 <code>const</code> 关键字声明，必须注明类型，且只能被设置为常量表达式，不能是函数调用的结果。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>const MAX_POINTS: u32 = 100_000;
+<span class="boring">}</span></code></pre>
+<h3 id="隐藏-shadowing"><a class="header" href="#隐藏-shadowing">隐藏 (Shadowing)</a></h3>
+<p>你可以声明和前面变量同名的新变量，这被称为“隐藏”。通常用于类型转换。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = 5;
+let x = x + 1; // 新的 x 隐藏了旧的 x
+let x = "spaces"; // 甚至可以改变类型
+<span class="boring">}</span></code></pre>
+<h2 id="2-数据类型"><a class="header" href="#2-数据类型">2. 数据类型</a></h2>
+<p>Rust 是静态类型语言。如果不明确，编译器通常可以推断出类型。</p>
+<h3 id="标量类型-scalar-types"><a class="header" href="#标量类型-scalar-types">标量类型 (Scalar Types)</a></h3>
+<p>标量类型代表一个单独的值。</p>
+<ol>
+<li>
+<p><strong>整型 (Integer)</strong>:</p>
+<ul>
+<li>有符号: <code>i8</code>, <code>i16</code>, <code>i32</code> (默认), <code>i64</code>, <code>i128</code>, <code>isize</code></li>
+<li>无符号: <code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
+</ul>
+</li>
+<li>
+<p><strong>浮点型 (Floating-Point)</strong>:</p>
+<ul>
+<li><code>f32</code></li>
+<li><code>f64</code> (默认)</li>
+</ul>
+</li>
+<li>
+<p><strong>布尔型 (Boolean)</strong>:</p>
+<ul>
+<li><code>bool</code> (值为 <code>true</code> 或 <code>false</code>)</li>
+</ul>
+</li>
+<li>
+<p><strong>字符类型 (Character)</strong>:</p>
+<ul>
+<li><code>char</code> (4字节，代表 Unicode 标量值)</li>
+</ul>
+</li>
+</ol>
+<h3 id="复合类型-compound-types"><a class="header" href="#复合类型-compound-types">复合类型 (Compound Types)</a></h3>
+<ol>
+<li>
+<p><strong>元组 (Tuple)</strong>:</p>
+<ul>
+<li>可以将多个不同类型的值组合在一起。</li>
+<li>长度固定。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let tup: (i32, f64, u8) = (500, 6.4, 1);
+let (x, y, z) = tup; // 解构
+let five_hundred = tup.0; // 索引访问
+<span class="boring">}</span></code></pre>
+</li>
+<li>
+<p><strong>数组 (Array)</strong>:</p>
+<ul>
+<li>包含多个相同类型的值。</li>
+<li>长度固定。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let a = [1, 2, 3, 4, 5];
+let first = a[0];
+<span class="boring">}</span></code></pre>
+</li>
+</ol>
+<h2 id="3-练习"><a class="header" href="#3-练习">3. 练习</a></h2>
+<p>创建一个名为 <code>variables</code> 的项目，尝试以下操作：</p>
+<ol>
+<li>定义一个不可变变量，尝试修改它，观察编译器错误。</li>
+<li>定义一个可变变量，修改它的值。</li>
+<li>定义一个元组，包含你的年龄（整数）和身高（浮点数），并打印出来。</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-03-函数与控制流"><a class="header" href="#day-03-函数与控制流">Day 03: 函数与控制流</a></h1>
+<h2 id="1-函数-functions"><a class="header" href="#1-函数-functions">1. 函数 (Functions)</a></h2>
+<p>函数在 Rust 代码中非常普遍。你已经见过语言中最重要的函数之一：<code>main</code> 函数，它是许多程序的入口点。</p>
+<h3 id="定义函数"><a class="header" href="#定义函数">定义函数</a></h3>
+<p>使用 <code>fn</code> 关键字定义函数。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    println!("Hello, world!");
+    another_function();
+}
+
+fn another_function() {
+    println!("Another function.");
+}</code></pre>
+<h3 id="参数-parameters"><a class="header" href="#参数-parameters">参数 (Parameters)</a></h3>
+<p>Rust 是强类型语言，定义函数时必须指定参数的类型。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn print_labeled_measurement(value: i32, unit_label: char) {
+    println!("The measurement is: {}{}", value, unit_label);
+}
+<span class="boring">}</span></code></pre>
+<h3 id="语句与表达式-statements-and-expressions"><a class="header" href="#语句与表达式-statements-and-expressions">语句与表达式 (Statements and Expressions)</a></h3>
+<ul>
+<li><strong>语句</strong>：执行操作但不返回值的指令。</li>
+<li><strong>表达式</strong>：计算并产生一个值。</li>
+</ul>
+<p>Rust 是基于表达式的语言。注意表达式末尾没有分号。如果加了分号，它就变成了语句，不再返回值。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let y = {
+    let x = 3;
+    x + 1 // 这是一个表达式，返回 4
+};
+<span class="boring">}</span></code></pre>
+<h3 id="具有返回值的函数"><a class="header" href="#具有返回值的函数">具有返回值的函数</a></h3>
+<p>函数可以向调用它的代码返回值。不需要命名返回值，但必须声明它们的类型。使用 <code>-&gt;</code> 箭头。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn five() -&gt; i32 {
+    5 // 隐式返回
+}
+
+fn plus_one(x: i32) -&gt; i32 {
+    x + 1
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-控制流-control-flow"><a class="header" href="#2-控制流-control-flow">2. 控制流 (Control Flow)</a></h2>
+<h3 id="if-表达式"><a class="header" href="#if-表达式">if 表达式</a></h3>
+<p><code>if</code> 表达式允许根据条件执行不同的代码分支。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let number = 3;
+
+if number &lt; 5 {
+    println!("condition was true");
+} else {
+    println!("condition was false");
+}
+<span class="boring">}</span></code></pre>
+<p>因为 <code>if</code> 是一个表达式，我们可以要在 <code>let</code> 语句的右侧使用它：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let condition = true;
+let number = if condition { 5 } else { 6 };
+<span class="boring">}</span></code></pre>
+<h3 id="循环-loops"><a class="header" href="#循环-loops">循环 (Loops)</a></h3>
+<p>Rust 有三种循环：<code>loop</code>、<code>while</code> 和 <code>for</code>。</p>
+<ol>
+<li>
+<p><strong>loop</strong>: 无限循环，直到显式停止 (<code>break</code>)。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut counter = 0;
+let result = loop {
+    counter += 1;
+    if counter == 10 {
+        break counter * 2; // 可以返回值
+    }
+};
+<span class="boring">}</span></code></pre>
+</li>
+<li>
+<p><strong>while</strong>: 条件循环。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut number = 3;
+while number != 0 {
+    println!("{}!", number);
+    number -= 1;
+}
+<span class="boring">}</span></code></pre>
+</li>
+<li>
+<p><strong>for</strong>: 遍历集合。这是最常用的循环方式，因为安全且简洁。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let a = [10, 20, 30, 40, 50];
+for element in a {
+    println!("the value is: {}", element);
+}
+
+// Range
+for number in (1..4).rev() {
+    println!("{}!", number);
+}
+<span class="boring">}</span></code></pre>
+</li>
+</ol>
+<h2 id="3-练习-1"><a class="header" href="#3-练习-1">3. 练习</a></h2>
+<ol>
+<li>编写一个函数，将摄氏温度转换为华氏温度。</li>
+<li>生成第 n 个斐波那契数。</li>
+<li>打印圣诞颂歌 “The Twelve Days of Christmas” 的歌词，利用循环重复的部分。</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-04-所有权-ownership"><a class="header" href="#day-04-所有权-ownership">Day 04: 所有权 (Ownership)</a></h1>
+<p>所有权是 Rust 最独特的特性，也是它在没有垃圾回收 (GC) 的情况下保证内存安全的关键所在。</p>
+<h2 id="1-什么是所有权"><a class="header" href="#1-什么是所有权">1. 什么是所有权？</a></h2>
+<p>Rust 的核心特性就是所有权。所有程序都必须管理其运行时使用计算机内存的方式。</p>
+<ul>
+<li>有些语言有垃圾回收机制（如 Java, Python）。</li>
+<li>有些语言需要程序员显式分配和释放内存（如 C, C++）。</li>
+<li>Rust 采用了第三种方式：内存通过一个所有权系统来管理，其中包含一组在编译时检查的规则。</li>
+</ul>
+<h3 id="所有权规则"><a class="header" href="#所有权规则">所有权规则</a></h3>
+<ol>
+<li>Rust 中的每一个值都有一个被称为其 <strong>所有者 (Owner)</strong> 的变量。</li>
+<li>值在任一时刻有且只有一个所有者。</li>
+<li>当所有者（变量）离开作用域，这个值将被丢弃。</li>
+</ol>
+<h2 id="2-变量作用域"><a class="header" href="#2-变量作用域">2. 变量作用域</a></h2>
+<p>作用域是一个项（item）在程序中有效的范围。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{                      // s 在这里无效，它尚未声明
+    let s = "hello";   // 从这里开始，s 是有效的
+    // 使用 s
+}                      // 此作用域结束，s 不再有效
+<span class="boring">}</span></code></pre>
+<h2 id="3-string-类型"><a class="header" href="#3-string-类型">3. String 类型</a></h2>
+<p>为了演示所有权，我们需要一个比基本标量类型更复杂的数据类型。<code>String</code> 是存储在堆上的，所以我们需要考虑内存的分配和释放。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello");
+<span class="boring">}</span></code></pre>
+<h2 id="4-内存与分配"><a class="header" href="#4-内存与分配">4. 内存与分配</a></h2>
+<ul>
+<li><strong>栈 (Stack)</strong>: 存储编译时大小已知的数据（如 i32, bool）。访问速度快。</li>
+<li><strong>堆 (Heap)</strong>: 存储编译时大小未知或可能变化的数据（如 String）。访问速度慢，需要分配器寻找空间。</li>
+</ul>
+<p>当变量离开作用域时，Rust 会自动调用一个特殊的函数 <code>drop</code>，释放内存。</p>
+<h3 id="变量与数据交互的方式移动-move"><a class="header" href="#变量与数据交互的方式移动-move">变量与数据交互的方式：移动 (Move)</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = 5;
+let y = x; // 复制 x 的值给 y，因为 i32 实现了 Copy trait
+<span class="boring">}</span></code></pre>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s1 = String::from("hello");
+let s2 = s1;
+// println!("{}, world!", s1); // 错误！s1 已经失效
+<span class="boring">}</span></code></pre>
+<p>为了保证内存安全（避免二次释放），Rust 认为 <code>s1</code> 不再有效。这个操作被称为 <strong>移动 (Move)</strong>。</p>
+<h3 id="变量与数据交互的方式克隆-clone"><a class="header" href="#变量与数据交互的方式克隆-clone">变量与数据交互的方式：克隆 (Clone)</a></h3>
+<p>如果我们确实需要深度复制堆上的数据，可以使用 <code>clone</code> 方法。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s1 = String::from("hello");
+let s2 = s1.clone();
+println!("s1 = {}, s2 = {}", s1, s2);
+<span class="boring">}</span></code></pre>
+<h3 id="只在栈上的数据拷贝-copy"><a class="header" href="#只在栈上的数据拷贝-copy">只在栈上的数据：拷贝 (Copy)</a></h3>
+<p>如果一个类型拥有 <code>Copy</code> trait，一个变量赋值给另一个变量后，原来的变量仍然有效。
+比如所有整数类型、布尔类型、浮点数类型、字符类型、包含 Copy 类型的元组。</p>
+<h2 id="5-所有权与函数"><a class="header" href="#5-所有权与函数">5. 所有权与函数</a></h2>
+<p>将值传递给函数与给变量赋值的语义类似。向函数传递值可能会移动或者复制，就像赋值语句一样。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let s = String::from("hello");
+    takes_ownership(s);
+    // s 在这里不再有效
+
+    let x = 5;
+    makes_copy(x);
+    // x 在这里仍然有效
+}</code></pre>
+<h2 id="6-返回值与作用域"><a class="header" href="#6-返回值与作用域">6. 返回值与作用域</a></h2>
+<p>返回值也可以转移所有权。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let s1 = gives_ownership();
+    let s2 = String::from("hello");
+    let s3 = takes_and_gives_back(s2);
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-05-引用与借用-references-and-borrowing"><a class="header" href="#day-05-引用与借用-references-and-borrowing">Day 05: 引用与借用 (References and Borrowing)</a></h1>
+<p>如果我们想使用变量的值但不获取其所有权，可以使用 <strong>引用 (Reference)</strong>。获取引用作为函数参数称为 <strong>借用 (Borrowing)</strong>。</p>
+<h2 id="1-引用-reference"><a class="header" href="#1-引用-reference">1. 引用 (Reference)</a></h2>
+<p>像 <code>&amp;String</code> 这样的类型就是引用。它们允许你使用值但不获取所有权。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("hello");
+    let len = calculate_length(&amp;s1); // 传递引用
+    println!("The length of '{}' is {}.", s1, len); // s1 仍然有效
+}
+
+fn calculate_length(s: &amp;String) -&gt; usize { // s 是对 String 的引用
+    s.len()
+} // s 离开作用域，因为它不拥有所有权，所以什么也不会发生</code></pre>
+<h2 id="2-可变引用-mutable-references"><a class="header" href="#2-可变引用-mutable-references">2. 可变引用 (Mutable References)</a></h2>
+<p>默认情况下，引用是不可变的。如果我们想修改借用的值，需要使用 <strong>可变引用</strong>。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::from("hello");
+    change(&amp;mut s);
+}
+
+fn change(some_string: &amp;mut String) {
+    some_string.push_str(", world");
+}</code></pre>
+<h3 id="限制"><a class="header" href="#限制">限制</a></h3>
+<ol>
+<li><strong>特定作用域内，对特定数据只能有一个可变引用</strong>。这个限制允许 Rust 在编译时就避免数据竞争 (Data Races)。</li>
+<li><strong>不能同时拥有可变引用和不可变引用</strong>。</li>
+</ol>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut s = String::from("hello");
+
+let r1 = &amp;s; // 没问题
+let r2 = &amp;s; // 没问题
+let r3 = &amp;mut s; // 大问题！
+// println!("{}, {}, and {}", r1, r2, r3);
+<span class="boring">}</span></code></pre>
+<p>注意：引用的作用域从声明开始，一直持续到最后一次使用为止。</p>
+<h2 id="3-悬垂引用-dangling-references"><a class="header" href="#3-悬垂引用-dangling-references">3. 悬垂引用 (Dangling References)</a></h2>
+<p>在具有指针的语言中，很容易产生悬垂指针（指向已被释放内存的指针）。Rust 编译器保证引用永远不会是悬垂引用：如果拥有某个数据的引用，编译器确保数据在引用结束前不会失效。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    // let reference_to_nothing = dangle();
+}
+
+// fn dangle() -&gt; &amp;String {
+//     let s = String::from("hello");
+//     &amp;s // 返回字符串 s 的引用
+// } // s 离开作用域并被丢弃。错误！</code></pre>
+<p>解决方法是直接返回 String。</p>
+<h2 id="4-规则总结"><a class="header" href="#4-规则总结">4. 规则总结</a></h2>
+<ol>
+<li>在任意给定时间，<strong>要么</strong> 只能有一个可变引用，<strong>要么</strong> 只能有多个不可变引用。</li>
+<li>引用必须总是有效的。</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-06-切片-slices"><a class="header" href="#day-06-切片-slices">Day 06: 切片 (Slices)</a></h1>
+<p>切片 (Slice) 允许你引用集合中一段连续的元素序列，而不需要引用整个集合。切片是一种引用，所以它没有所有权。</p>
+<h2 id="1-字符串切片-string-slices"><a class="header" href="#1-字符串切片-string-slices">1. 字符串切片 (String Slices)</a></h2>
+<p>字符串切片是指向 <code>String</code> 中一部分内容的引用。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello world");
+
+let hello = &amp;s[0..5];
+let world = &amp;s[6..11];
+<span class="boring">}</span></code></pre>
+<p><code>[starting_index..ending_index]</code> 语法：</p>
+<ul>
+<li>从 <code>starting_index</code> 开始（包含）。</li>
+<li>到 <code>ending_index</code> 结束（不包含）。</li>
+</ul>
+<h3 id="简写"><a class="header" href="#简写">简写</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = String::from("hello");
+
+let len = s.len();
+
+let slice = &amp;s[0..2];
+let slice = &amp;s[..2]; // 等价
+
+let slice = &amp;s[3..len];
+let slice = &amp;s[3..]; // 等价
+
+let slice = &amp;s[0..len];
+let slice = &amp;s[..]; // 等价
+<span class="boring">}</span></code></pre>
+<h2 id="2-字符串字面值就是切片"><a class="header" href="#2-字符串字面值就是切片">2. 字符串字面值就是切片</a></h2>
+<p>我们之前见过的：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = "Hello, world!";
+<span class="boring">}</span></code></pre>
+<p>这里的 <code>s</code> 的类型是 <code>&amp;str</code>：它是一个指向二进制程序特定位置的切片。这也是为什么字符串字面值是不可变的。</p>
+<h2 id="3-其他类型的切片"><a class="header" href="#3-其他类型的切片">3. 其他类型的切片</a></h2>
+<p>数组也可以有切片。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let a = [1, 2, 3, 4, 5];
+let slice = &amp;a[1..3];
+assert_eq!(slice, &amp;[2, 3]);
+<span class="boring">}</span></code></pre>
+<h2 id="4-练习-1"><a class="header" href="#4-练习-1">4. 练习</a></h2>
+<p>编写一个函数，接收一个字符串，返回它的第一个单词。如果字符串中没有空格，返回整个字符串。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn first_word(s: &amp;str) -&gt; &amp;str {
+    let bytes = s.as_bytes();
+
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+
+    &amp;s[..]
+}
+<span class="boring">}</span></code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+
+    </div>
+    </body>
+</html>

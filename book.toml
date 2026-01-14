@@ -1,0 +1,8 @@
+[book]
+authors = ["Rust 100 Days"]
+language = "zh-CN"
+src = "."
+title = "Rust - 100天从新手到大师"
+
+[output.html]
+git-repository-url = "https://github.com/Start-Rust/100-days-of-rust"
