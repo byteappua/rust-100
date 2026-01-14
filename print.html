@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-24867e00.js";
+            window.path_to_searchindex_js = "searchindex-86ab097e.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-e373f3ae.js"></script>
+        <script src="toc-0674edff.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1582,6 +1582,275 @@ use std::cell::RefCell;
 
 let value = Rc::new(RefCell::new(5));
 // ...
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-21-引用循环与内存泄漏"><a class="header" href="#day-21-引用循环与内存泄漏">Day 21: 引用循环与内存泄漏</a></h1>
+<p>Rust 的内存安全性保证使其很难发生内存泄漏，但不是不可能。如果使用 <code>Rc&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 创建了引用循环，items 的引用计数永远不会降为 0，内存也就永远不会被释放。</p>
+<h2 id="1-制造引用循环"><a class="header" href="#1-制造引用循环">1. 制造引用循环</a></h2>
+<p>如果两个 <code>Rc</code> 指针相互引用，就会形成循环。</p>
+<pre class="playground"><code class="language-rust">use std::rc::Rc;
+use std::cell::RefCell;
+use crate::List::{Cons, Nil};
+
+#[derive(Debug)]
+enum List {
+    Cons(i32, RefCell&lt;Rc&lt;List&gt;&gt;),
+    Nil,
+}
+
+impl List {
+    fn tail(&amp;self) -&gt; Option&lt;&amp;RefCell&lt;Rc&lt;List&gt;&gt;&gt; {
+        match self {
+            Cons(_, item) =&gt; Some(item),
+            Nil =&gt; None,
+        }
+    }
+}
+
+fn main() {
+    let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil))));
+
+    println!("a initial rc count = {}", Rc::strong_count(&amp;a));
+    println!("a next item = {:?}", a.tail());
+
+    let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&amp;a))));
+
+    println!("a rc count after b creation = {}", Rc::strong_count(&amp;a));
+    println!("b initial rc count = {}", Rc::strong_count(&amp;b));
+    println!("b next item = {:?}", b.tail());
+
+    if let Some(link) = a.tail() {
+        *link.borrow_mut() = Rc::clone(&amp;b);
+    }
+
+    println!("b rc count after changing a = {}", Rc::strong_count(&amp;b));
+    println!("a rc count after changing a = {}", Rc::strong_count(&amp;a));
+
+    // 取消下面的注释会造成栈溢出，因为 debug 打印会尝试递归打印循环引用
+    // println!("a next item = {:?}", a.tail());
+}</code></pre>
+<h2 id="2-使用-weak-避免引用循环"><a class="header" href="#2-使用-weak-避免引用循环">2. 使用 Weak<t> 避免引用循环</t></a></h2>
+<p><code>Weak&lt;T&gt;</code> 是弱引用，不增加 <code>strong_count</code>，而是增加 <code>weak_count</code>。当 <code>strong_count</code> 为 0 时，即使 <code>weak_count</code> 不为 0，对象也会被清理。</p>
+<p>你需要使用 <code>upgrade</code> 方法将 <code>Weak&lt;T&gt;</code> 升级为 <code>Option&lt;Rc&lt;T&gt;&gt;</code> 才能访问数据，这确保了数据存在。</p>
+<h3 id="示例树形结构父节点指针"><a class="header" href="#示例树形结构父节点指针">示例：树形结构（父节点指针）</a></h3>
+<p>子节点拥有父节点的引用，如果用 <code>Rc</code> 就会造成循环。应该使用 <code>Weak</code>。</p>
+<pre class="playground"><code class="language-rust">use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    parent: RefCell&lt;Weak&lt;Node&gt;&gt;,
+    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+}
+
+fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 5,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
+    });
+
+    *leaf.parent.borrow_mut() = Rc::downgrade(&amp;branch);
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+}</code></pre>
+<h2 id="3-strong-vs-weak"><a class="header" href="#3-strong-vs-weak">3. Strong vs Weak</a></h2>
+<ul>
+<li><code>Rc::clone</code> 增加 <code>strong_count</code>。<code>Rc&lt;T&gt;</code> 实例在 <code>strong_count</code> 为 0 时被清理。</li>
+<li><code>Rc::downgrade</code> 增加 <code>weak_count</code>。<code>Weak&lt;T&gt;</code> 不影响清理时间。</li>
+<li><code>Weak&lt;T&gt;</code> 用于打破循环引用，防止内存泄漏。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-22-并发编程---线程-threads"><a class="header" href="#day-22-并发编程---线程-threads">Day 22: 并发编程 - 线程 (Threads)</a></h1>
+<p>Rust 中的并发编程非常安全，因为 Rust 的所有权和类型系统会在编译时捕获许多并发错误（如数据竞争）。</p>
+<h2 id="1-创建线程"><a class="header" href="#1-创建线程">1. 创建线程</a></h2>
+<p>使用 <code>std::thread::spawn</code> 创建新线程。</p>
+<pre class="playground"><code class="language-rust">use std::thread;
+use std::time::Duration;
+
+fn main() {
+    thread::spawn(|| {
+        for i in 1..10 {
+            println!("hi number {} from the spawned thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    for i in 1..5 {
+        println!("hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
+    }
+}</code></pre>
+<p>注意：当主线程结束时，所有派生线程也会立即停止，不管它们是否执行完毕。</p>
+<h2 id="2-等待线程结束-join"><a class="header" href="#2-等待线程结束-join">2. 等待线程结束 (join)</a></h2>
+<p>为了确保派生线程执行完毕，我们可以保存 <code>spawn</code> 返回的 <code>JoinHandle</code>，并调用 <code>.join()</code>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let handle = thread::spawn(|| {
+    // ...
+});
+
+handle.join().unwrap(); // 阻塞主线程直到 handle 代表的线程结束
+<span class="boring">}</span></code></pre>
+<h2 id="3-线程与-move-闭包"><a class="header" href="#3-线程与-move-闭包">3. 线程与 move 闭包</a></h2>
+<p>如果要在线程中使用主线程的数据，通常需要将数据的所有权<strong>移动 (move)</strong> 到线程中。</p>
+<pre class="playground"><code class="language-rust">use std::thread;
+
+fn main() {
+    let v = vec![1, 2, 3];
+
+    // 强行将 v 的所有权移入闭包
+    let handle = thread::spawn(move || {
+        println!("Here's a vector: {:?}", v);
+    });
+
+    handle.join().unwrap();
+    // println!("{:?}", v); // 错误！v 已经被移动了
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-23-并发编程---消息传递-message-passing"><a class="header" href="#day-23-并发编程---消息传递-message-passing">Day 23: 并发编程 - 消息传递 (Message Passing)</a></h1>
+<p>Go 语言有一句名言：“不要通过共享内存来通信，而要通过通信来共享内存。” Rust 也支持这种方式，主要通过 <strong>Channel (通道)</strong> 来实现。</p>
+<h2 id="1-mpsc-通道"><a class="header" href="#1-mpsc-通道">1. mpsc 通道</a></h2>
+<p>Rust 标准库提供了 <code>mpsc</code> (Multiple Producer, Single Consumer)，即<strong>多生产者，单消费者</strong>通道。</p>
+<pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    // tx: 发送端 (transmitter)
+    // rx: 接收端 (receiver)
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+        // send 会转移所有权，val 在这里之后不能再被使用
+    });
+
+    // recv() 会阻塞直到收到一个值
+    // try_recv() 不会阻塞
+    let received = rx.recv().unwrap();
+    println!("Got: {}", received);
+}</code></pre>
+<h2 id="2-发送多个值与遍历接收"><a class="header" href="#2-发送多个值与遍历接收">2. 发送多个值与遍历接收</a></h2>
+<p>接收端 <code>rx</code> 可以被当作迭代器使用。当通道关闭且没有剩余值时，迭代结束。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>thread::spawn(move || {
+    let vals = vec![
+        String::from("hi"),
+        String::from("from"),
+        String::from("thread"),
+    ];
+
+    for val in vals {
+        tx.send(val).unwrap();
+        thread::sleep(Duration::from_secs(1));
+    }
+}); // 闭包结束，tx 离开作用域，通道被关闭
+
+for received in rx {
+    println!("Got: {}", received);
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-多生产者"><a class="header" href="#3-多生产者">3. 多生产者</a></h2>
+<p>可以通过 <code>tx.clone()</code> 创建多个发送端，它们都发送到同一个接收端。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let (tx, rx) = mpsc::channel();
+let tx1 = tx.clone();
+thread::spawn(move || { tx1.send(...).unwrap(); });
+thread::spawn(move || { tx.send(...).unwrap(); });
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-24-并发编程---共享状态-shared-state"><a class="header" href="#day-24-并发编程---共享状态-shared-state">Day 24: 并发编程 - 共享状态 (Shared State)</a></h1>
+<p>另一种并发模型是共享内存。在 Rust 中，这通常意味着多线程同时访问和修改同一块数据。</p>
+<h2 id="1-mutex-互斥器"><a class="header" href="#1-mutex-互斥器">1. Mutex<t> (互斥器)</t></a></h2>
+<p><code>Mutex</code> (Mutual Exclusion) 允许一次只允许一个线程访问数据。要访问数据，线程必须先获取锁 (<code>lock</code>)。</p>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> 提供<strong>内部可变性</strong>（类似于 <code>RefCell&lt;T&gt;</code>）。</li>
+<li><code>lock()</code> 返回一个 <code>MutexGuard</code> 智能指针，当它离开作用域时，锁会自动释放。</li>
+</ul>
+<pre class="playground"><code class="language-rust">use std::sync::Mutex;
+
+fn main() {
+    let m = Mutex::new(5);
+
+    {
+        let mut num = m.lock().unwrap();
+        *num = 6;
+    } // 锁在这里自动释放
+
+    println!("m = {:?}", m);
+}</code></pre>
+<h2 id="2-arc-原子引用计数"><a class="header" href="#2-arc-原子引用计数">2. Arc<t> (原子引用计数)</t></a></h2>
+<p>要在多个线程间共享 <code>Mutex&lt;T&gt;</code> 的所有权，我们需要类似 <code>Rc&lt;T&gt;</code> 的东西。但是 <code>Rc&lt;T&gt;</code> 并不是线程安全的。</p>
+<p>Rust 提供了 <code>Arc&lt;T&gt;</code> (Atomic Reference Counting)，它是线程安全的引用计数智能指针。</p>
+<pre class="playground"><code class="language-rust">use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let counter = Arc::clone(&amp;counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1;
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Result: {}", *counter.lock().unwrap());
+}</code></pre>
+<p>注意：<code>Arc</code> 会带来一些性能损耗，所以如果不需要多线程共享，优先使用 <code>Rc</code>。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-25-并发编程---send-与-sync-trait"><a class="header" href="#day-25-并发编程---send-与-sync-trait">Day 25: 并发编程 - Send 与 Sync Trait</a></h1>
+<p><code>Send</code> 和 <code>Sync</code> 是 Rust 并发安全的基石。它们是 <strong>Marker Traits</strong>（标记 Trait），没有任何方法，只是用来标记类型具有某些并发属性。</p>
+<h2 id="1-send-trait"><a class="header" href="#1-send-trait">1. Send Trait</a></h2>
+<p><code>Send</code> 标记表明类型的所有权可以在线程间转移。</p>
+<ul>
+<li>几乎所有的 Rust 类型都是 <code>Send</code> 的。</li>
+<li>主要例外：<code>Rc&lt;T&gt;</code>。因为 <code>Rc</code> 的引用计数不是原子的，在多线程间转移会导致计数错误。</li>
+<li><code>Raw Pointers</code> (裸指针) 也不是 <code>Send</code> 的。</li>
+</ul>
+<p>如果一个类型完全由 <code>Send</code> 的类型组成，那么它自动就是 <code>Send</code> 的。</p>
+<h2 id="2-sync-trait"><a class="header" href="#2-sync-trait">2. Sync Trait</a></h2>
+<p><code>Sync</code> 标记表明类型可以被多个线程安全地共享引用（即 <code>&amp;T</code> 是 <code>Send</code> 的）。</p>
+<ul>
+<li>基本类型是 <code>Sync</code> 的。</li>
+<li><code>Mutex&lt;T&gt;</code> 是 <code>Sync</code> 的。</li>
+<li><code>RefCell&lt;T&gt;</code> 不是 <code>Sync</code> 的，因为它的运行时借用检查不是线程安全的。</li>
+<li><code>Rc&lt;T&gt;</code> 不是 <code>Sync</code> 的。</li>
+</ul>
+<h2 id="3-手动实现"><a class="header" href="#3-手动实现">3. 手动实现</a></h2>
+<p>通常不需要手动实现 <code>Send</code> 和 <code>Sync</code>，编译器会自动推导。手动实现是不安全的（<code>unsafe</code>），通常只在编写底层并发原语时需要。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 仅作演示，通常由编译器自动推导
+unsafe impl Send for MyType {}
+unsafe impl Sync for MyType {}
+<span class="boring">}</span></code></pre>
+<h2 id="4-编译器检查"><a class="header" href="#4-编译器检查">4. 编译器检查</a></h2>
+<p>Rust 编译器会利用这些 Trait 来检查并发代码的安全性。例如 <code>thread::spawn</code> 的签名要求闭包捕获的变量必须是 <code>Send</code> 的。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn spawn&lt;F, T&gt;(f: F) -&gt; JoinHandle&lt;T&gt;
+where
+    F: FnOnce() -&gt; T,
+    F: Send + 'static,
+    T: Send + 'static,
 <span class="boring">}</span></code></pre>
 
                     </main>
