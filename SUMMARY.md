@@ -32,3 +32,8 @@
 - [Day 23: 并发 - 消息传递](Day16-30/23.MessagePassing/README.md)
 - [Day 24: 并发 - 共享状态](Day16-30/24.SharedState/README.md)
 - [Day 25: 并发 - Send 与 Sync](Day16-30/25.SendSync/README.md)
+- [Day 26: OOP 特性 - Trait 对象](Day16-30/26.OOP_TraitObjects/README.md)
+- [Day 27: 模式与匹配](Day16-30/27.Patterns/README.md)
+- [Day 28: 高级 Trait](Day16-30/28.AdvancedTraits/README.md)
+- [Day 29: 高级类型](Day16-30/29.AdvancedTypes/README.md)
+- [Day 30: 高级函数与宏](Day16-30/30.AdvancedFnAndMacros/README.md)
