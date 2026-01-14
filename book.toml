@@ -1,7 +1,6 @@
 [book]
 authors = ["Rust 100 Days"]
 language = "zh-CN"
-multilingual = false
 src = "."
 title = "Rust - 100天从新手到大师"
 
