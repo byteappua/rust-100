@@ -41,6 +41,12 @@
     - [Day 23: 并发 - 消息传递](Day16-30/23.MessagePassing/README.md)
     - [Day 24: 并发 - 共享状态](Day16-30/24.SharedState/README.md)
     - [Day 25: 并发 - Send 与 Sync](Day16-30/25.SendSync/README.md)
+- [高级特性]()
+    - [Day 26: 面向对象编程特性]()
+    - [Day 27: 模式匹配进阶]()
+    - [Day 28: 高级 Trait]()
+    - [Day 29: 高级类型]()
+    - [Day 30: 阶段性复习]()
 
 # 第三阶段：宏与不安全代码 (Day 31 - 40)
 
