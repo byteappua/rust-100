@@ -59,7 +59,7 @@
     - [Day 34: 网络编程基础 (TCP)](Day31-45/34.Network_TCP/README.md)
     - [Day 35: 异步编程入门 (Async/Await)](Day31-45/35.AsyncAwait/README.md)
 - [底层与高级特性]()
-    - [Day 36: Unsafe Rust 介绍]()
+    - [Day 36: Unsafe Rust 介绍](Day31-45/36.UnsafeRust/README.md)
     - [Day 37: 过程宏 (Procedural Macros)]()
     - [Day 38: FFI - 与 C 语言交互]()
 - [Web 开发生态]()
