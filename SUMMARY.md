@@ -66,7 +66,7 @@
     - [Day 39: Tokio 运行时深入](Day31-45/39.TokioDeepDive/README.md)
     - [Day 40: 构建异步 Web 服务器](Day31-45/40.AsyncWebServer/README.md)
     - [Day 41: 数据库交互 (SQLx/Diesel)](Day31-45/41.Database_SQLx/README.md)
-    - [Day 42: 日志与监控 (Tracing)]()
+    - [Day 42: 日志与监控 (Tracing)](Day31-45/42.Tracing/README.md)
     - [Day 43: 错误处理最佳实践]()
     - [Day 44: 命令行参数解析 (Clap)]()
     - [Day 45: HTTP 客户端 (Reqwest)]()
