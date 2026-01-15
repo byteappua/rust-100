@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Day 11: 错误处理 - Rust - 100天从新手到大师</title>
+        <title>Day 32: 序列化与反序列化 (Serde) - Rust - 100天从新手到大师</title>
 
 
         <!-- Custom HTML head -->
@@ -177,101 +177,62 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-11-错误处理-error-handling"><a class="header" href="#day-11-错误处理-error-handling">Day 11: 错误处理 (Error Handling)</a></h1>
-<p>Rust 将错误组合成两个主要类别：</p>
-<ol>
-<li><strong>可恢复错误 (Recoverable errors)</strong>：通常代表向用户报告错误并重试的操作。例如：未找到文件。使用 <code>Result&lt;T, E&gt;</code>。</li>
-<li><strong>不可恢复错误 (Unrecoverable errors)</strong>：是 bug 的症状。例如：尝试访问超过数组结尾的索引。使用 <code>panic!</code>。</li>
-</ol>
-<h2 id="1-panic-与不可恢复错误"><a class="header" href="#1-panic-与不可恢复错误">1. panic! 与不可恢复错误</a></h2>
-<p>当 <code>panic!</code> 宏执行时，程序会打印一个错误信息，展开并清理栈数据，然后退出。</p>
-<pre class="playground"><code class="language-rust">fn main() {
-    panic!("crash and burn");
-}</code></pre>
-<p>使用 <code>RUST_BACKTRACE=1</code> 环境变量运行程序可以获取回溯信息。</p>
-<h2 id="2-result-与可恢复错误"><a class="header" href="#2-result-与可恢复错误">2. Result 与可恢复错误</a></h2>
-<p><code>Result</code> 枚举定义如下：</p>
+                        <h1 id="day-32-序列化与反序列化-serialization-with-serde"><a class="header" href="#day-32-序列化与反序列化-serialization-with-serde">Day 32: 序列化与反序列化 (Serialization with Serde)</a></h1>
+<p>在 Rust 中，处理序列化（将数据转换为可存储/传输的格式）和反序列化（将格式化数据转换回 Rust 对象）的事实标准是 <code>serde</code> 框架。</p>
+<h2 id="1-serde-概览"><a class="header" href="#1-serde-概览">1. Serde 概览</a></h2>
+<p>Serde 是 <strong>Ser</strong>ialization 和 <strong>De</strong>serialization 的缩写。它是一个高效的通用序列化框架，不依赖于运行时反射，而是使用 Rust 的 Trait 系统和编译时宏派生。</p>
+<h2 id="2-设置-cargotoml"><a class="header" href="#2-设置-cargotoml">2. 设置 Cargo.toml</a></h2>
+<p>你需要添加 <code>serde</code> 以及你想要支持的数据格式库（如 <code>serde_json</code>）。</p>
+<pre><code class="language-toml">[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+</code></pre>
+<ul>
+<li><code>features = ["derive"]</code>: 允许我们使用 <code>#[derive(Serialize, Deserialize)]</code> 宏。</li>
+</ul>
+<h2 id="3-基本用法"><a class="header" href="#3-基本用法">3. 基本用法</a></h2>
+<h3 id="定义结构体"><a class="header" href="#定义结构体">定义结构体</a></h3>
+<p>使用 <code>derive</code> 宏自动实现序列化 Trait。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>enum Result&lt;T, E&gt; {
-    Ok(T),
-    Err(E),
+</span>use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Person {
+    name: String,
+    age: u8,
 }
 <span class="boring">}</span></code></pre>
-<h3 id="处理-result"><a class="header" href="#处理-result">处理 Result</a></h3>
-<pre class="playground"><code class="language-rust">use std::fs::File;
-use std::io::ErrorKind;
-
-fn main() {
-    let f = File::open("hello.txt");
-
-    let f = match f {
-        Ok(file) =&gt; file,
-        Err(error) =&gt; match error.kind() {
-            ErrorKind::NotFound =&gt; match File::create("hello.txt") {
-                Ok(fc) =&gt; fc,
-                Err(e) =&gt; panic!("Problem creating the file: {:?}", e),
-            },
-            other_error =&gt; {
-                panic!("Problem opening the file: {:?}", other_error)
-            }
-        },
-    };
-}</code></pre>
-<h3 id="unwrap-和-expect"><a class="header" href="#unwrap-和-expect">unwrap 和 expect</a></h3>
-<p>帮助方法，如果 <code>Result</code> 是 <code>Err</code>，则调用 <code>panic!</code>。</p>
+<h3 id="序列化-to-json"><a class="header" href="#序列化-to-json">序列化 (To JSON)</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let f = File::open("hello.txt").unwrap();
-let f = File::open("hello.txt").expect("Failed to open hello.txt");
+</span>let p = Person { name: "Alice".into(), age: 30 };
+let json = serde_json::to_string(&amp;p)?;
 <span class="boring">}</span></code></pre>
-<h2 id="3-传播错误"><a class="header" href="#3-传播错误">3. 传播错误</a></h2>
-<p>将错误返回给调用者。</p>
+<h3 id="反序列化-from-json"><a class="header" href="#反序列化-from-json">反序列化 (From JSON)</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use std::fs::File;
-use std::io::{self, Read};
-
-fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
-    let f = File::open("hello.txt");
-
-    let mut f = match f {
-        Ok(file) =&gt; file,
-        Err(e) =&gt; return Err(e),
-    };
-
-    let mut s = String::new();
-
-    match f.read_to_string(&amp;mut s) {
-        Ok(_) =&gt; Ok(s),
-        Err(e) =&gt; Err(e),
-    }
-}
+</span>let data = r#"{"name": "Bob", "age": 25}"#;
+let p: Person = serde_json::from_str(data)?;
 <span class="boring">}</span></code></pre>
-<h3 id="传播错误的简写-运算符"><a class="header" href="#传播错误的简写-运算符">传播错误的简写：<code>?</code> 运算符</a></h3>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>use std::fs::File;
-use std::io;
-use std::io::Read;
-
-fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
-    let mut s = String::new();
-    File::open("hello.txt")?.read_to_string(&amp;mut s)?;
-    Ok(s)
-}
-<span class="boring">}</span></code></pre>
-<p>注意：<code>?</code> 运算符只能用于返回 <code>Result</code>、<code>Option</code> 或实现了 <code>FromResidual</code> 的类型的函数中。</p>
+<h2 id="4-常见数据格式"><a class="header" href="#4-常见数据格式">4. 常见数据格式</a></h2>
+<p>Serde 支持多种格式，不仅仅是 JSON：</p>
+<ul>
+<li><code>serde_json</code>: JSON</li>
+<li><code>serde_yaml</code>: YAML</li>
+<li><code>toml</code>: TOML (Cargo 使用的格式)</li>
+<li><code>bincode</code>: 二进制格式 (高效)</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Day01-15/10.CommonCollections/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Day31-45/31.FileIO/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Day01-15/12.Generics/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../Day31-45/33.Minigrep/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -281,11 +242,11 @@ fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Day01-15/10.CommonCollections/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Day31-45/31.FileIO/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Day01-15/12.Generics/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../Day31-45/33.Minigrep/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

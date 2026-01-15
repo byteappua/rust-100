@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Day 11: 错误处理 - Rust - 100天从新手到大师</title>
+        <title>Day 27: 模式与匹配 - Rust - 100天从新手到大师</title>
 
 
         <!-- Custom HTML head -->
@@ -177,101 +177,85 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-11-错误处理-error-handling"><a class="header" href="#day-11-错误处理-error-handling">Day 11: 错误处理 (Error Handling)</a></h1>
-<p>Rust 将错误组合成两个主要类别：</p>
-<ol>
-<li><strong>可恢复错误 (Recoverable errors)</strong>：通常代表向用户报告错误并重试的操作。例如：未找到文件。使用 <code>Result&lt;T, E&gt;</code>。</li>
-<li><strong>不可恢复错误 (Unrecoverable errors)</strong>：是 bug 的症状。例如：尝试访问超过数组结尾的索引。使用 <code>panic!</code>。</li>
-</ol>
-<h2 id="1-panic-与不可恢复错误"><a class="header" href="#1-panic-与不可恢复错误">1. panic! 与不可恢复错误</a></h2>
-<p>当 <code>panic!</code> 宏执行时，程序会打印一个错误信息，展开并清理栈数据，然后退出。</p>
-<pre class="playground"><code class="language-rust">fn main() {
-    panic!("crash and burn");
-}</code></pre>
-<p>使用 <code>RUST_BACKTRACE=1</code> 环境变量运行程序可以获取回溯信息。</p>
-<h2 id="2-result-与可恢复错误"><a class="header" href="#2-result-与可恢复错误">2. Result 与可恢复错误</a></h2>
-<p><code>Result</code> 枚举定义如下：</p>
+                        <h1 id="day-27-模式与匹配-patterns-and-matching"><a class="header" href="#day-27-模式与匹配-patterns-and-matching">Day 27: 模式与匹配 (Patterns and Matching)</a></h1>
+<p>Rust 的模式匹配功能非常强大，不仅限于 <code>match</code> 表达式。</p>
+<h2 id="1-模式的使用场景"><a class="header" href="#1-模式的使用场景">1. 模式的使用场景</a></h2>
+<ul>
+<li><strong>match 分支</strong>: 每个分支都是一个模式。</li>
+<li><strong>if let</strong>: 只处理一种匹配情况。</li>
+<li><strong>while let</strong>: 只要模式匹配就一直循环。</li>
+<li><strong>for 循环</strong>: <code>for (index, value) in v.iter().enumerate()</code> 中的 <code>(index, value)</code> 也是模式。</li>
+<li><strong>let 语句</strong>: <code>let (x, y) = (1, 2);</code> 也是解构模式。</li>
+<li><strong>函数参数</strong>: <code>fn print_coordinates(&amp;(x, y): &amp;(i32, i32))</code>。</li>
+</ul>
+<h2 id="2-refutability-可反驳性"><a class="header" href="#2-refutability-可反驳性">2. Refutability (可反驳性)</a></h2>
+<ul>
+<li><strong>Irrefutable (不可反驳)</strong>: 任何可能的值都能匹配。例如 <code>let x = 5;</code> 中的 <code>x</code>。</li>
+<li><strong>Refutable (可反驳)</strong>: 某些值可能不匹配。例如 <code>if let Some(x) = a_value</code> 中的 <code>Some(x)</code>（如果值是 <code>None</code> 就不匹配）。</li>
+</ul>
+<p><code>let</code> 语句、函数参数、<code>for</code> 循环必须接受不可反驳的模式。</p>
+<h2 id="3-模式语法"><a class="header" href="#3-模式语法">3. 模式语法</a></h2>
+<h3 id="解构"><a class="header" href="#解构">解构</a></h3>
+<p>可以解构结构体、枚举、元组。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>enum Result&lt;T, E&gt; {
-    Ok(T),
-    Err(E),
+</span>struct Point { x: i32, y: i32 }
+let p = Point { x: 0, y: 7 };
+
+match p {
+    Point { x, y: 0 } =&gt; println!("On the x axis at {}", x),
+    Point { x: 0, y } =&gt; println!("On the y axis at {}", y),
+    Point { x, y } =&gt; println!("On neither axis: ({}, {})", x, y),
 }
 <span class="boring">}</span></code></pre>
-<h3 id="处理-result"><a class="header" href="#处理-result">处理 Result</a></h3>
-<pre class="playground"><code class="language-rust">use std::fs::File;
-use std::io::ErrorKind;
-
-fn main() {
-    let f = File::open("hello.txt");
-
-    let f = match f {
-        Ok(file) =&gt; file,
-        Err(error) =&gt; match error.kind() {
-            ErrorKind::NotFound =&gt; match File::create("hello.txt") {
-                Ok(fc) =&gt; fc,
-                Err(e) =&gt; panic!("Problem creating the file: {:?}", e),
-            },
-            other_error =&gt; {
-                panic!("Problem opening the file: {:?}", other_error)
-            }
-        },
-    };
-}</code></pre>
-<h3 id="unwrap-和-expect"><a class="header" href="#unwrap-和-expect">unwrap 和 expect</a></h3>
-<p>帮助方法，如果 <code>Result</code> 是 <code>Err</code>，则调用 <code>panic!</code>。</p>
+<h3 id="忽略值"><a class="header" href="#忽略值">忽略值</a></h3>
+<ul>
+<li><code>_</code>: 忽略单个值。</li>
+<li><code>..</code>: 忽略剩余值。</li>
+</ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let f = File::open("hello.txt").unwrap();
-let f = File::open("hello.txt").expect("Failed to open hello.txt");
-<span class="boring">}</span></code></pre>
-<h2 id="3-传播错误"><a class="header" href="#3-传播错误">3. 传播错误</a></h2>
-<p>将错误返回给调用者。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>use std::fs::File;
-use std::io::{self, Read};
+</span>let numbers = (2, 4, 8, 16, 32);
 
-fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
-    let f = File::open("hello.txt");
-
-    let mut f = match f {
-        Ok(file) =&gt; file,
-        Err(e) =&gt; return Err(e),
-    };
-
-    let mut s = String::new();
-
-    match f.read_to_string(&amp;mut s) {
-        Ok(_) =&gt; Ok(s),
-        Err(e) =&gt; Err(e),
+match numbers {
+    (first, .., last) =&gt; {
+        println!("Some numbers: {}, {}", first, last);
     }
 }
 <span class="boring">}</span></code></pre>
-<h3 id="传播错误的简写-运算符"><a class="header" href="#传播错误的简写-运算符">传播错误的简写：<code>?</code> 运算符</a></h3>
+<h3 id="匹配守卫-match-guards"><a class="header" href="#匹配守卫-match-guards">匹配守卫 (Match Guards)</a></h3>
+<p><code>match</code> 分支模式后可以跟一个 <code>if</code> 条件。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use std::fs::File;
-use std::io;
-use std::io::Read;
+</span>let num = Some(4);
 
-fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
-    let mut s = String::new();
-    File::open("hello.txt")?.read_to_string(&amp;mut s)?;
-    Ok(s)
+match num {
+    Some(x) if x &lt; 5 =&gt; println!("less than five: {}", x),
+    Some(x) =&gt; println!("{}", x),
+    None =&gt; (),
 }
 <span class="boring">}</span></code></pre>
-<p>注意：<code>?</code> 运算符只能用于返回 <code>Result</code>、<code>Option</code> 或实现了 <code>FromResidual</code> 的类型的函数中。</p>
+<h3 id="-绑定"><a class="header" href="#-绑定">@ 绑定</a></h3>
+<p>允许我们在创建一个存放值的变量的同时测试其值是否匹配模式。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>match msg {
+    Message::Hello { id: id_variable @ 3..=7 } =&gt; {
+        println!("Found an id in range: {}", id_variable)
+    },
+    // ...
+}
+<span class="boring">}</span></code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Day01-15/10.CommonCollections/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Day16-30/26.OOP_TraitObjects/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Day01-15/12.Generics/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../Day16-30/28.AdvancedTraits/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -281,11 +265,11 @@ fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Day01-15/10.CommonCollections/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Day16-30/26.OOP_TraitObjects/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Day01-15/12.Generics/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../Day16-30/28.AdvancedTraits/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

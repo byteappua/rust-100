@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-17c1766b.js";
+            window.path_to_searchindex_js = "searchindex-eb0ad07d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-229fc29a.js"></script>
+        <script src="toc-87d7fd95.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1851,6 +1851,472 @@ where
     F: FnOnce() -&gt; T,
     F: Send + 'static,
     T: Send + 'static,
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-26-面向对象特性---trait-对象"><a class="header" href="#day-26-面向对象特性---trait-对象">Day 26: 面向对象特性 - Trait 对象</a></h1>
+<p>Rust 不是传统的面向对象语言（没有继承），但可以使用 <strong>Trait 对象</strong> 来实现多态性。</p>
+<h2 id="1-trait-对象-trait-objects"><a class="header" href="#1-trait-对象-trait-objects">1. Trait 对象 (Trait Objects)</a></h2>
+<p>如果我们需要一个集合，其中包含不同类型但都实现了某个 Trait 的对象，我们可以使用 Trait 对象。</p>
+<p>语法：<code>Box&lt;dyn Trait&gt;</code> 或 <code>&amp;dyn Trait</code>。</p>
+<p><code>dyn</code> 关键字强调这是一个动态调度的类型。</p>
+<h2 id="2-动态调度-dynamic-dispatch"><a class="header" href="#2-动态调度-dynamic-dispatch">2. 动态调度 (Dynamic Dispatch)</a></h2>
+<p>当我们在泛型中使用 Trait Bound 时（如 <code>fn foo&lt;T: Trait&gt;(t: T)</code>），编译器会进行<strong>单态化 (Monomorphization)</strong>，也就是<strong>静态调度</strong>。编译器为每个具体类型生成代码，性能好，但灵活性受限（集合中只能是一种类型）。</p>
+<p>使用 Trait 对象时，Rust 在运行时查找 Trait 方法的实现（通过 vtable），这就是<strong>动态调度</strong>。这会带来微小的运行时开销，但允许更大的灵活性。</p>
+<h2 id="3-对象安全-object-safety"><a class="header" href="#3-对象安全-object-safety">3. 对象安全 (Object Safety)</a></h2>
+<p>只有<strong>对象安全</strong>的 Trait 才能组成 Trait 对象。如果一个 Trait 的所有方法都满足以下条件，则它是对象安全的：</p>
+<ol>
+<li>返回值类型不是 <code>Self</code>。</li>
+<li>方法没有任何泛型类型参数。</li>
+</ol>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait Draw {
+    fn draw(&amp;self);
+}
+
+struct Screen {
+    // 这里可以存放任何实现了 Draw 的类型
+    components: Vec&lt;Box&lt;dyn Draw&gt;&gt;,
+}
+
+impl Screen {
+    fn run(&amp;self) {
+        for component in self.components.iter() {
+            component.draw();
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-27-模式与匹配-patterns-and-matching"><a class="header" href="#day-27-模式与匹配-patterns-and-matching">Day 27: 模式与匹配 (Patterns and Matching)</a></h1>
+<p>Rust 的模式匹配功能非常强大，不仅限于 <code>match</code> 表达式。</p>
+<h2 id="1-模式的使用场景"><a class="header" href="#1-模式的使用场景">1. 模式的使用场景</a></h2>
+<ul>
+<li><strong>match 分支</strong>: 每个分支都是一个模式。</li>
+<li><strong>if let</strong>: 只处理一种匹配情况。</li>
+<li><strong>while let</strong>: 只要模式匹配就一直循环。</li>
+<li><strong>for 循环</strong>: <code>for (index, value) in v.iter().enumerate()</code> 中的 <code>(index, value)</code> 也是模式。</li>
+<li><strong>let 语句</strong>: <code>let (x, y) = (1, 2);</code> 也是解构模式。</li>
+<li><strong>函数参数</strong>: <code>fn print_coordinates(&amp;(x, y): &amp;(i32, i32))</code>。</li>
+</ul>
+<h2 id="2-refutability-可反驳性"><a class="header" href="#2-refutability-可反驳性">2. Refutability (可反驳性)</a></h2>
+<ul>
+<li><strong>Irrefutable (不可反驳)</strong>: 任何可能的值都能匹配。例如 <code>let x = 5;</code> 中的 <code>x</code>。</li>
+<li><strong>Refutable (可反驳)</strong>: 某些值可能不匹配。例如 <code>if let Some(x) = a_value</code> 中的 <code>Some(x)</code>（如果值是 <code>None</code> 就不匹配）。</li>
+</ul>
+<p><code>let</code> 语句、函数参数、<code>for</code> 循环必须接受不可反驳的模式。</p>
+<h2 id="3-模式语法"><a class="header" href="#3-模式语法">3. 模式语法</a></h2>
+<h3 id="解构"><a class="header" href="#解构">解构</a></h3>
+<p>可以解构结构体、枚举、元组。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Point { x: i32, y: i32 }
+let p = Point { x: 0, y: 7 };
+
+match p {
+    Point { x, y: 0 } =&gt; println!("On the x axis at {}", x),
+    Point { x: 0, y } =&gt; println!("On the y axis at {}", y),
+    Point { x, y } =&gt; println!("On neither axis: ({}, {})", x, y),
+}
+<span class="boring">}</span></code></pre>
+<h3 id="忽略值"><a class="header" href="#忽略值">忽略值</a></h3>
+<ul>
+<li><code>_</code>: 忽略单个值。</li>
+<li><code>..</code>: 忽略剩余值。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let numbers = (2, 4, 8, 16, 32);
+
+match numbers {
+    (first, .., last) =&gt; {
+        println!("Some numbers: {}, {}", first, last);
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="匹配守卫-match-guards"><a class="header" href="#匹配守卫-match-guards">匹配守卫 (Match Guards)</a></h3>
+<p><code>match</code> 分支模式后可以跟一个 <code>if</code> 条件。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let num = Some(4);
+
+match num {
+    Some(x) if x &lt; 5 =&gt; println!("less than five: {}", x),
+    Some(x) =&gt; println!("{}", x),
+    None =&gt; (),
+}
+<span class="boring">}</span></code></pre>
+<h3 id="-绑定"><a class="header" href="#-绑定">@ 绑定</a></h3>
+<p>允许我们在创建一个存放值的变量的同时测试其值是否匹配模式。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>match msg {
+    Message::Hello { id: id_variable @ 3..=7 } =&gt; {
+        println!("Found an id in range: {}", id_variable)
+    },
+    // ...
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-28-高级-trait-advanced-traits"><a class="header" href="#day-28-高级-trait-advanced-traits">Day 28: 高级 Trait (Advanced Traits)</a></h1>
+<h2 id="1-关联类型-associated-types"><a class="header" href="#1-关联类型-associated-types">1. 关联类型 (Associated Types)</a></h2>
+<p>关联类型是 Trait 中的类型占位符。实现 Trait 时需要指定具体的类型。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait Iterator {
+    type Item;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
+}
+<span class="boring">}</span></code></pre>
+<p>与泛型 <code>trait Iterator&lt;T&gt;</code> 的区别在于：对于一个具体的类型，只能有一个关联类型的实现。而泛型可以对同一类型实现多次（针对不同的 T）。</p>
+<h2 id="2-默认泛型类型参数与运算符重载"><a class="header" href="#2-默认泛型类型参数与运算符重载">2. 默认泛型类型参数与运算符重载</a></h2>
+<p>Rust 允许运算符重载，这是通过实现 <code>std::ops</code> 下的 Trait 来完成的。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::ops::Add;
+
+struct Point { x: i32, y: i32 }
+
+impl Add for Point {
+    type Output = Point;
+    fn add(self, other: Point) -&gt; Point {
+        Point { x: self.x + other.x, y: self.y + other.y }
+    }
+}
+<span class="boring">}</span></code></pre>
+<p><code>Add</code> Trait 的定义使用了默认泛型参数：<code>trait Add&lt;Rhs=Self&gt; { ... }</code>。如果不指定 <code>Rhs</code>，默认就是 <code>Self</code>。</p>
+<h2 id="3-完全限定语法-fully-qualified-syntax"><a class="header" href="#3-完全限定语法-fully-qualified-syntax">3. 完全限定语法 (Fully Qualified Syntax)</a></h2>
+<p>当同一类型实现了两个具有相同方法名的 Trait 时，需要消除歧义。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait Pilot { fn fly(&amp;self); }
+trait Wizard { fn fly(&amp;self); }
+
+struct Human;
+impl Pilot for Human { ... }
+impl Wizard for Human { ... }
+
+let person = Human;
+Pilot::fly(&amp;person);
+Wizard::fly(&amp;person);
+<span class="boring">}</span></code></pre>
+<p>如果是关联函数（没有 <code>self</code>）：<code>&lt;Type as Trait&gt;::function(args)</code>。</p>
+<h2 id="4-supertraits-父-trait"><a class="header" href="#4-supertraits-父-trait">4. Supertraits (父 Trait)</a></h2>
+<p>有时一个 Trait 依赖于另一个 Trait。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait OutlinePrint: fmt::Display { ... }
+<span class="boring">}</span></code></pre>
+<p>实现 <code>OutlinePrint</code> 的类型必须也实现 <code>Display</code>。</p>
+<h2 id="5-newtype-模式"><a class="header" href="#5-newtype-模式">5. Newtype 模式</a></h2>
+<p>孤儿规则（Orphan Rule）：只有当 Trait 或类型定义在本地 crate 时，才能为类型实现 Trait。
+绕过方法：使用 <strong>Newtype 模式</strong>（元组结构体包装）。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Wrapper(Vec&lt;String&gt;);
+
+impl fmt::Display for Wrapper { ... }
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-29-高级类型-advanced-types"><a class="header" href="#day-29-高级类型-advanced-types">Day 29: 高级类型 (Advanced Types)</a></h1>
+<h2 id="1-newtype-模式"><a class="header" href="#1-newtype-模式">1. Newtype 模式</a></h2>
+<p>使用元组结构体创建一个新类型。即使内部类型一样，新类型也被视为完全不同的类型。这提供了静态类型检查的安全性。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Millimeters(u32);
+struct Meters(u32);
+<span class="boring">}</span></code></pre>
+<h2 id="2-类型别名-type-aliases"><a class="header" href="#2-类型别名-type-aliases">2. 类型别名 (Type Aliases)</a></h2>
+<p>使用 <code>type</code> 关键字给现有类型起别名。别名<strong>不是</strong>新类型，它只是原类型的另一个名字。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>type Kilometers = i32;
+
+let x: i32 = 5;
+let y: Kilometers = 5;
+
+println!("x + y = {}", x + y); // 合法，因为 Kilometers 就是 i32
+<span class="boring">}</span></code></pre>
+<p>主要用途是减少长类型名的重复：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>type Thunk = Box&lt;dyn Fn() + Send + 'static&gt;;
+<span class="boring">}</span></code></pre>
+<h2 id="3-never-type-"><a class="header" href="#3-never-type-">3. Never Type (!)</a></h2>
+<p>Rust 有一个特殊的类型 <code>!</code>，称为 <strong>Never Type</strong>，表示永远不会有值返回。</p>
+<ul>
+<li><code>panic!</code> 返回 <code>!</code>。</li>
+<li><code>continue</code> 和 <code>break</code> 表达式的值是 <code>!</code>。</li>
+<li><code>loop</code> 如果没有 break，也返回 <code>!</code>。</li>
+</ul>
+<p><code>!</code> 可以被强制转换为任何类型，这使得它在 <code>match</code> 分支中非常有用。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let num: u32 = match guess.parse() {
+    Ok(num) =&gt; num,
+    Err(_) =&gt; continue, // continue 返回 !，可以匹配 u32
+};
+<span class="boring">}</span></code></pre>
+<h2 id="4-动态大小类型-dsts-与-sized-trait"><a class="header" href="#4-动态大小类型-dsts-与-sized-trait">4. 动态大小类型 (DSTs) 与 Sized Trait</a></h2>
+<p>Rust 中大多数类型都是 <strong>Sized</strong>（编译时已知大小）。但也存在 <strong>DSTs</strong> (Dynamically Sized Types)，如 <code>str</code> 和 <code>[T]</code>。</p>
+<p>我们不能直接使用 DST，只能通过引用或指针使用它们（<code>&amp;str</code>, <code>Box&lt;str&gt;</code>）。引用本身是有固定大小的（指针+长度）。</p>
+<h3 id="sized-trait"><a class="header" href="#sized-trait">Sized Trait</a></h3>
+<p>只有已知大小的类型才实现了 <code>Sized</code> Trait。
+泛型函数默认有一个隐式的限定 <code>T: Sized</code>。</p>
+<p>如果要接受 DST，需要使用特殊语法 <code>T: ?Sized</code>（可能是 Sized，也可能不是）。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn generic&lt;T: ?Sized&gt;(t: &amp;T) { ... }
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-30-高级函数与宏-advanced-functions--macros"><a class="header" href="#day-30-高级函数与宏-advanced-functions--macros">Day 30: 高级函数与宏 (Advanced Functions &amp; Macros)</a></h1>
+<h2 id="1-函数指针"><a class="header" href="#1-函数指针">1. 函数指针</a></h2>
+<p>普通函数可以直接传递给期望函数参数的代码。类型是 <code>fn</code>（小写），这被称为<strong>函数指针</strong>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn add_one(x: i32) -&gt; i32 { x + 1 }
+
+fn do_twice(f: fn(i32) -&gt; i32, arg: i32) -&gt; i32 {
+    f(arg) + f(arg)
+}
+<span class="boring">}</span></code></pre>
+<p>区别：</p>
+<ul>
+<li><code>Fn</code>, <code>FnMut</code>, <code>FnOnce</code>: 是 Trait，闭包实现了这些 Trait。</li>
+<li><code>fn</code>: 是具体类型，没有运行时环境（不能捕获环境），只能指向代码。</li>
+<li><code>fn</code> 类型实现了 <code>Fn</code>, <code>FnMut</code>, <code>FnOnce</code>，所以可以在需要闭包的地方传函数指针。</li>
+</ul>
+<h2 id="2-返回闭包"><a class="header" href="#2-返回闭包">2. 返回闭包</a></h2>
+<p>闭包是用 Trait 表示的，大小不确定，所以不能直接作为返回值返回 <code>dyn Fn</code>。必须放在指针后面，通常是 <code>Box</code>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn returns_closure() -&gt; Box&lt;dyn Fn(i32) -&gt; i32&gt; {
+    Box::new(|x| x + 1)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-宏-macros"><a class="header" href="#3-宏-macros">3. 宏 (Macros)</a></h2>
+<p>Rust 的宏非常强大，属于<strong>元编程</strong>。</p>
+<h3 id="声明宏-declarative-macros-macro_rules"><a class="header" href="#声明宏-declarative-macros-macro_rules">声明宏 (Declarative Macros) <code>macro_rules!</code></a></h3>
+<p>类似于 <code>match</code> 表达式。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[macro_export]
+macro_rules! my_vec {
+    ( $( $x:expr ),* ) =&gt; {
+        {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push($x);
+            )*
+            temp_vec
+        }
+    };
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li><code>$x:expr</code>: 匹配任何表达式并绑定到 <code>$x</code>。</li>
+<li><code>$(...),*</code>: 匹配括号内的模式零次或多次，使用 <code>,</code> 分隔。</li>
+</ul>
+<h3 id="过程宏-procedural-macros"><a class="header" href="#过程宏-procedural-macros">过程宏 (Procedural Macros)</a></h3>
+<p>更像函数，接受代码作为输入，生成新代码作为输出。</p>
+<ul>
+<li>派生宏 (<code>#[derive]</code>)</li>
+<li>属性宏</li>
+<li>函数宏</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-31-文件输入与输出-file-io"><a class="header" href="#day-31-文件输入与输出-file-io">Day 31: 文件输入与输出 (File I/O)</a></h1>
+<p>Rust 的标准库 <code>std::fs</code> 和 <code>std::io</code> 提供了处理文件系统的功能。</p>
+<h2 id="1-打开与创建文件"><a class="header" href="#1-打开与创建文件">1. 打开与创建文件</a></h2>
+<ul>
+<li><code>File::open(path)</code>: 以只读模式打开文件。</li>
+<li><code>File::create(path)</code>: 创建文件（如果存在则截断/覆盖）。</li>
+<li><code>OpenOptions</code>: 提供更多控制（如追加模式）。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::fs::OpenOptions;
+
+let f = File::open("hello.txt")?;
+let f = File::create("hello.txt")?;
+let f = OpenOptions::new().append(true).open("hello.txt")?;
+<span class="boring">}</span></code></pre>
+<h2 id="2-读取文件"><a class="header" href="#2-读取文件">2. 读取文件</a></h2>
+<ul>
+<li><code>fs::read_to_string(path)</code>: 一次性读取整个文件为字符串。</li>
+<li><code>fs::read(path)</code>: 一次性读取整个文件为字节向量 <code>Vec&lt;u8&gt;</code>。</li>
+<li><code>BufReader</code>: 缓冲读取，适合按行读取。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::io::{BufRead, BufReader};
+
+let f = File::open("hello.txt")?;
+let reader = BufReader::new(f);
+
+for line in reader.lines() {
+    println!("{}", line?);
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-写入文件"><a class="header" href="#3-写入文件">3. 写入文件</a></h2>
+<ul>
+<li><code>write_all</code>: 写入字节切片。</li>
+<li><code>writeln!</code>: 宏，方便写入字符串并换行。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::io::Write;
+
+let mut f = File::create("output.txt")?;
+f.write_all(b"Hello")?;
+writeln!(f, "World")?;
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-32-序列化与反序列化-serialization-with-serde"><a class="header" href="#day-32-序列化与反序列化-serialization-with-serde">Day 32: 序列化与反序列化 (Serialization with Serde)</a></h1>
+<p>在 Rust 中，处理序列化（将数据转换为可存储/传输的格式）和反序列化（将格式化数据转换回 Rust 对象）的事实标准是 <code>serde</code> 框架。</p>
+<h2 id="1-serde-概览"><a class="header" href="#1-serde-概览">1. Serde 概览</a></h2>
+<p>Serde 是 <strong>Ser</strong>ialization 和 <strong>De</strong>serialization 的缩写。它是一个高效的通用序列化框架，不依赖于运行时反射，而是使用 Rust 的 Trait 系统和编译时宏派生。</p>
+<h2 id="2-设置-cargotoml"><a class="header" href="#2-设置-cargotoml">2. 设置 Cargo.toml</a></h2>
+<p>你需要添加 <code>serde</code> 以及你想要支持的数据格式库（如 <code>serde_json</code>）。</p>
+<pre><code class="language-toml">[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+</code></pre>
+<ul>
+<li><code>features = ["derive"]</code>: 允许我们使用 <code>#[derive(Serialize, Deserialize)]</code> 宏。</li>
+</ul>
+<h2 id="3-基本用法"><a class="header" href="#3-基本用法">3. 基本用法</a></h2>
+<h3 id="定义结构体-1"><a class="header" href="#定义结构体-1">定义结构体</a></h3>
+<p>使用 <code>derive</code> 宏自动实现序列化 Trait。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Person {
+    name: String,
+    age: u8,
+}
+<span class="boring">}</span></code></pre>
+<h3 id="序列化-to-json"><a class="header" href="#序列化-to-json">序列化 (To JSON)</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let p = Person { name: "Alice".into(), age: 30 };
+let json = serde_json::to_string(&amp;p)?;
+<span class="boring">}</span></code></pre>
+<h3 id="反序列化-from-json"><a class="header" href="#反序列化-from-json">反序列化 (From JSON)</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let data = r#"{"name": "Bob", "age": 25}"#;
+let p: Person = serde_json::from_str(data)?;
+<span class="boring">}</span></code></pre>
+<h2 id="4-常见数据格式"><a class="header" href="#4-常见数据格式">4. 常见数据格式</a></h2>
+<p>Serde 支持多种格式，不仅仅是 JSON：</p>
+<ul>
+<li><code>serde_json</code>: JSON</li>
+<li><code>serde_yaml</code>: YAML</li>
+<li><code>toml</code>: TOML (Cargo 使用的格式)</li>
+<li><code>bincode</code>: 二进制格式 (高效)</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-33-构建命令行工具-building-a-cli-tool"><a class="header" href="#day-33-构建命令行工具-building-a-cli-tool">Day 33: 构建命令行工具 (Building a CLI Tool)</a></h1>
+<p>这是一个经典的 Rust 入门项目：实现 <code>grep</code> 命令的简化版 <code>minigrep</code>。</p>
+<h2 id="涉及的概念"><a class="header" href="#涉及的概念">涉及的概念</a></h2>
+<ol>
+<li><strong>接收命令行参数</strong>: <code>std::env::args()</code>。</li>
+<li><strong>文件读取</strong>: <code>std::fs::read_to_string()</code>。</li>
+<li><strong>错误处理</strong>: 返回 <code>Result</code> 并使用 <code>Box&lt;dyn Error&gt;</code> 处理多种错误类型。</li>
+<li><strong>模块化</strong>: 将逻辑拆分到 <code>lib.rs</code>，<code>main.rs</code> 只负责参数解析和错误退出。</li>
+<li><strong>环境变量</strong>: 使用 <code>std::env::var()</code> 读取环境变量。</li>
+<li><strong>测试驱动开发 (TDD)</strong>: 先写测试，再写实现。</li>
+</ol>
+<h2 id="如何运行"><a class="header" href="#如何运行">如何运行</a></h2>
+<p>标准运行（区分大小写）：</p>
+<pre><code class="language-bash">cargo run -- query filename.txt
+</code></pre>
+<p>忽略大小写（设置环境变量）：</p>
+<pre><code class="language-bash">IGNORE_CASE=1 cargo run -- query filename.txt
+</code></pre>
+<h2 id="代码结构"><a class="header" href="#代码结构">代码结构</a></h2>
+<ul>
+<li><code>src/main.rs</code>: 二进制入口，处理参数收集和错误报告。</li>
+<li><code>src/lib.rs</code>: 包含配置结构体、业务逻辑 (<code>run</code> 函数) 和搜索算法。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-34-网络编程-network-programming---tcp"><a class="header" href="#day-34-网络编程-network-programming---tcp">Day 34: 网络编程 (Network Programming - TCP)</a></h1>
+<p>Rust 标准库 <code>std::net</code> 提供了 TCP 网络编程的基础。</p>
+<h2 id="1-tcp-server-服务端"><a class="header" href="#1-tcp-server-服务端">1. TCP Server (服务端)</a></h2>
+<ul>
+<li><code>TcpListener::bind(addr)</code>: 绑定端口。</li>
+<li><code>listener.incoming()</code>: 迭代接收连接 (<code>TcpStream</code>)。</li>
+<li>通常为每个连接创建一个新线程来处理。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::net::TcpListener;
+use std::thread;
+
+let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+for stream in listener.incoming() {
+    let stream = stream.unwrap();
+    thread::spawn(|| {
+        handle_connection(stream);
+    });
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-tcp-client-客户端"><a class="header" href="#2-tcp-client-客户端">2. TCP Client (客户端)</a></h2>
+<ul>
+<li><code>TcpStream::connect(addr)</code>: 连接到服务器。</li>
+<li><code>stream.write_all()</code>: 发送数据。</li>
+<li><code>stream.read()</code>: 接收数据。</li>
+</ul>
+<p><code>TcpStream</code> 实现了 <code>Read</code> 和 <code>Write</code> Trait。</p>
+<h2 id="3-注意事项"><a class="header" href="#3-注意事项">3. 注意事项</a></h2>
+<ul>
+<li>网络操作可能会阻塞，可以使用非阻塞模式或异步 I/O (如 Tokio) 来处理高并发。</li>
+<li>处理 <code>read</code> 返回 <code>0</code> 的情况，这通常表示连接被对方关闭。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-35-异步编程入门-asyncawait"><a class="header" href="#day-35-异步编程入门-asyncawait">Day 35: 异步编程入门 (Async/Await)</a></h1>
+<p>Rust 的异步编程允许你在单个线程上并发运行多个任务，非常适合 I/O 密集型操作（如网络服务）。</p>
+<h2 id="1-async-与-await"><a class="header" href="#1-async-与-await">1. async 与 .await</a></h2>
+<ul>
+<li><code>async fn</code>: 标记一个函数为异步函数。它不直接返回结果，而是返回一个 <code>Future</code>。</li>
+<li><code>.await</code>: 挂起当前任务，直到 <code>Future</code> 完成。这不会阻塞线程，而是允许执行其他任务。</li>
+</ul>
+<pre class="playground"><code class="language-rust">async fn do_something() {
+    // ...
+}
+
+async fn main_func() {
+    do_something().await;
+}</code></pre>
+<h2 id="2-运行时-runtime"><a class="header" href="#2-运行时-runtime">2. 运行时 (Runtime)</a></h2>
+<p>Rust 标准库没有内置异步运行时。你需要选择一个社区库，<strong>Tokio</strong> 是最流行的选择。</p>
+<p>在 <code>Cargo.toml</code> 中添加：</p>
+<pre><code class="language-toml">[dependencies]
+tokio = { version = "1", features = ["full"] }
+</code></pre>
+<p>使用 <code>#[tokio::main]</code> 宏将 <code>main</code> 函数变为异步入口。</p>
+<h2 id="3-future-trait"><a class="header" href="#3-future-trait">3. Future Trait</a></h2>
+<p><code>Future</code> 是异步编程的核心抽象。它表示一个未来某个时刻会产生值的对象。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Future {
+    type Output;
+    fn poll(self: Pin&lt;&amp;mut Self&gt;, cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Self::Output&gt;;
+}
+<span class="boring">}</span></code></pre>
+<p>通常我们不需要手动实现 <code>Future</code>，<code>async/await</code> 语法会自动为我们将代码块转换为状态机并实现 <code>Future</code>。</p>
+<h2 id="4-并发执行"><a class="header" href="#4-并发执行">4. 并发执行</a></h2>
+<p>使用 <code>tokio::join!</code> 等宏可以同时等待多个 <code>Future</code> 完成。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let f1 = task_one();
+let f2 = task_two();
+tokio::join!(f1, f2);
 <span class="boring">}</span></code></pre>
 
                     </main>
