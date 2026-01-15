@@ -1,6 +1,6 @@
 # Summary
 
-[前言](README.md)
+[Introduction](README.md)
 
 # 第一阶段：基础知识 (Days 1-15)
 
