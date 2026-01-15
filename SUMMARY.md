@@ -63,7 +63,7 @@
     - [Day 37: 过程宏 (Procedural Macros)](Day31-45/37.ProceduralMacros/README.md)
     - [Day 38: FFI - 与 C 语言交互](Day31-45/38.FFI/README.md)
 - [Web 开发生态]()
-    - [Day 39: Tokio 运行时深入]()
+    - [Day 39: Tokio 运行时深入](Day31-45/39.TokioDeepDive/README.md)
     - [Day 40: 构建异步 Web 服务器]()
     - [Day 41: 数据库交互 (SQLx/Diesel)]()
     - [Day 42: 日志与监控 (Tracing)]()
