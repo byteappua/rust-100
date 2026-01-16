@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-99a2c815.js";
+            window.path_to_searchindex_js = "searchindex-eedc7498.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-13fa5e57.js"></script>
@@ -11135,32 +11135,153 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <p>Day 74 将学习 API 文档生成 (OpenAPI)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-74-api-文档生成-openapi-1"><a class="header" href="#day-74-api-文档生成-openapi-1">Day 74: API 文档生成 (OpenAPI)</a></h1>
-<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的 API 文档生成部分。</p>
-<h2 id="核心内容-1"><a class="header" href="#核心内容-1">核心内容</a></h2>
+<h2 id="学习目标-12"><a class="header" href="#学习目标-12">学习目标</a></h2>
 <ul>
-<li>utoipa 库使用</li>
-<li>Swagger UI 集成</li>
-<li>API 文档自动生成</li>
-<li>文档测试</li>
+<li>理解 OpenAPI (Swagger) 规范的重要性</li>
+<li>掌握 <code>utoipa</code> crate 的使用方法</li>
+<li>学习如何自动生成 Rust Web API 文档</li>
+<li>集成 Swagger UI 到 Axum 项目中</li>
 </ul>
+<h2 id="核心概念-4"><a class="header" href="#核心概念-4">核心概念</a></h2>
+<h3 id="1-openapi-规范"><a class="header" href="#1-openapi-规范">1. OpenAPI 规范</a></h3>
+<p>OpenAPI Specification (OAS) 是一种用于 RESTful API 的标准描述格式。它允许人类和计算机在不访问源代码、文档或通过网络流量检查的情况下发现和理解服务的功能。</p>
+<h3 id="2-utoipa"><a class="header" href="#2-utoipa">2. Utoipa</a></h3>
+<p><code>utoipa</code> 是 Rust 生态中一个流行的库，用于从代码中自动生成 OpenAPI 文档。它通过派生宏（Derive Macros）和属性宏（Attribute Macros）来减少样板代码。</p>
+<ul>
+<li><code>#[derive(ToSchema)]</code>: 为结构体生成 JSON Schema。</li>
+<li><code>#[utoipa::path(...)]</code>: 为处理函数定义 API 路径、参数和响应。</li>
+<li><code>#[derive(OpenApi)]</code>: 聚合所有路径和组件，生成最终的文档。</li>
+</ul>
+<h3 id="3-swagger-ui"><a class="header" href="#3-swagger-ui">3. Swagger UI</a></h3>
+<p>Swagger UI 是一个基于 HTML/JS 的工具，它可以将 OpenAPI 规范可视化，并提供一个交互式的界面来测试 API。</p>
+<h2 id="代码示例"><a class="header" href="#代码示例">代码示例</a></h2>
+<p>本节代码演示了如何使用 <code>utoipa</code> 和 <code>utoipa-swagger-ui</code> 与 <code>axum</code> 集成。</p>
+<h3 id="定义数据模型"><a class="header" href="#定义数据模型">定义数据模型</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use utoipa::ToSchema;
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize, ToSchema)]
+struct User {
+    id: i32,
+    username: String,
+}
+<span class="boring">}</span></code></pre>
+<h3 id="定义-api-路径"><a class="header" href="#定义-api-路径">定义 API 路径</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::Json;
+use utoipa::OpenApi;
+
+#[utoipa::path(
+    get,
+    path = "/users",
+    responses(
+        (status = 200, description = "List all users", body = [User])
+    )
+)]
+async fn list_users() -&gt; Json&lt;Vec&lt;User&gt;&gt; {
+    // ...
+}
+<span class="boring">}</span></code></pre>
+<h3 id="集成-swagger-ui"><a class="header" href="#集成-swagger-ui">集成 Swagger UI</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use utoipa_swagger_ui::SwaggerUi;
+use axum::Router;
+
+// 定义 OpenAPI 结构
+#[derive(OpenApi)]
+#[openapi(paths(list_users), components(schemas(User)))]
+struct ApiDoc;
+
+// 在 Router 中挂载
+let app = Router::new()
+    .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()));
+<span class="boring">}</span></code></pre>
+<h2 id="运行示例"><a class="header" href="#运行示例">运行示例</a></h2>
+<p>进入 <code>openapi-demo</code> 目录并运行：</p>
+<pre><code class="language-bash">cd openapi-demo
+cargo run
+</code></pre>
+<p>启动后，访问浏览器：</p>
+<ul>
+<li><strong>Swagger UI</strong>: <a href="http://localhost:3000/swagger-ui">http://localhost:3000/swagger-ui</a></li>
+<li><strong>JSON Spec</strong>: <a href="http://localhost:3000/api-docs/openapi.json">http://localhost:3000/api-docs/openapi.json</a></li>
+</ul>
+<p>你可以在 Swagger UI 页面中直接测试 API，例如尝试 <code>POST /users</code> 创建用户，然后 <code>GET /users</code> 查看列表。</p>
+<h2 id="练习-11"><a class="header" href="#练习-11">练习</a></h2>
+<ol>
+<li>为 <code>User</code> 结构体添加更多字段（如 <code>age</code>, <code>role</code>），并更新文档。</li>
+<li>添加一个 <code>DELETE /users/{id}</code> 接口，并为其编写文档，注意处理 404 响应。</li>
+<li>尝试使用 <code>SecurityScheme</code> 为 API 添加 JWT 认证描述。</li>
+</ol>
 <h2 id="下一步-14"><a class="header" href="#下一步-14">下一步</a></h2>
 <p>Day 75 将学习容器化部署 (Docker)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-75-容器化部署-docker-1"><a class="header" href="#day-75-容器化部署-docker-1">Day 75: 容器化部署 (Docker)</a></h1>
-<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的容器化部署部分。</p>
-<h2 id="核心内容-2"><a class="header" href="#核心内容-2">核心内容</a></h2>
+<h2 id="学习目标-13"><a class="header" href="#学习目标-13">学习目标</a></h2>
 <ul>
-<li>Dockerfile 编写</li>
-<li>多阶段构建</li>
-<li>Docker Compose</li>
-<li>生产环境配置</li>
+<li>理解容器化技术及其在 Rust 项目中的应用</li>
+<li>掌握编写高效 Rust Dockerfile 的技巧（多阶段构建）</li>
+<li>学习使用 Docker Compose 编排服务</li>
+<li>了解如何在生产环境中部署 Rust 应用</li>
 </ul>
+<h2 id="核心概念-5"><a class="header" href="#核心概念-5">核心概念</a></h2>
+<h3 id="1-dockerfile-与多阶段构建"><a class="header" href="#1-dockerfile-与多阶段构建">1. Dockerfile 与多阶段构建</a></h3>
+<p>Rust 编译产物是二进制文件，不需要运行时环境（如 Node.js 或 Python 解释器）。
+<strong>多阶段构建 (Multi-stage builds)</strong> 是 Rust 容器化的最佳实践：</p>
+<ol>
+<li><strong>Builder Stage</strong>: 使用包含 Rust 编译器 (<code>rust:slim</code>) 的大镜像进行编译。</li>
+<li><strong>Runtime Stage</strong>: 将编译好的二进制文件复制到轻量级镜像 (<code>debian:slim</code> 或 <code>alpine</code>) 中运行。</li>
+</ol>
+<p>这样可以显著减小最终镜像的体积（从 &gt;1GB 减小到 &lt;100MB）。</p>
+<h3 id="2-依赖缓存"><a class="header" href="#2-依赖缓存">2. 依赖缓存</a></h3>
+<p>为了加快构建速度，通常先拷贝 <code>Cargo.toml</code> 和 <code>Cargo.lock</code> 并编译依赖，然后再拷贝源码编译应用。利用 Docker 的层缓存机制，当源码改变但依赖未变时，可以跳过依赖编译步骤。</p>
+<h3 id="3-docker-compose"><a class="header" href="#3-docker-compose">3. Docker Compose</a></h3>
+<p>用于定义和运行多容器 Docker 应用程序。通过 <code>docker-compose.yml</code> 文件配置应用服务。</p>
+<h2 id="代码示例-1"><a class="header" href="#代码示例-1">代码示例</a></h2>
+<p>本节包含一个简单的 Axum Web 服务及其 Dockerfile。</p>
+<h3 id="dockerfile-关键部分"><a class="header" href="#dockerfile-关键部分">Dockerfile 关键部分</a></h3>
+<pre><code class="language-dockerfile"># Builder
+FROM rust:1.80-slim-bookworm as builder
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+# Runtime
+FROM debian:bookworm-slim
+COPY --from=builder /app/target/release/docker-demo /usr/local/bin/app
+CMD ["app"]
+</code></pre>
+<h2 id="运行示例-1"><a class="header" href="#运行示例-1">运行示例</a></h2>
+<p>进入 <code>docker-demo</code> 目录：</p>
+<h3 id="1-本地运行-cargo"><a class="header" href="#1-本地运行-cargo">1. 本地运行 (Cargo)</a></h3>
+<pre><code class="language-bash">cd docker-demo
+cargo run
+# 访问 http://localhost:3000
+</code></pre>
+<h3 id="2-构建-docker-镜像"><a class="header" href="#2-构建-docker-镜像">2. 构建 Docker 镜像</a></h3>
+<pre><code class="language-bash">docker build -t rust-docker-demo .
+</code></pre>
+<h3 id="3-运行容器"><a class="header" href="#3-运行容器">3. 运行容器</a></h3>
+<pre><code class="language-bash">docker run -p 3000:3000 rust-docker-demo
+# 访问 http://localhost:3000
+</code></pre>
+<p>你应当看到返回的 JSON 中包含主机名，在容器中运行时这通常是容器 ID。</p>
+<h2 id="练习-12"><a class="header" href="#练习-12">练习</a></h2>
+<ol>
+<li>为该项目添加 <code>docker-compose.yml</code>，并集成一个 Redis 服务。</li>
+<li>尝试使用 <code>distroless</code> 镜像作为基础镜像 (<code>gcr.io/distroless/cc-debian12</code>) 以进一步减小体积并提高安全性。</li>
+<li>编写 GitHub Actions 脚本，自动构建并推送镜像到 Docker Hub 或 GHCR。</li>
+</ol>
 <h2 id="下一步-15"><a class="header" href="#下一步-15">下一步</a></h2>
-<p>Day 76-80 将完成完整的博客系统项目。</p>
+<p>Day 76-80 将开始完整的博客系统项目实战。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-76-博客系统---需求分析与设计"><a class="header" href="#day-76-博客系统---需求分析与设计">Day 76: 博客系统 - 需求分析与设计</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的博客系统设计部分。</p>
-<h2 id="核心内容-3"><a class="header" href="#核心内容-3">核心内容</a></h2>
+<h2 id="核心内容-1"><a class="header" href="#核心内容-1">核心内容</a></h2>
 <ul>
 <li>功能需求分析</li>
 <li>数据库设计</li>
@@ -11172,7 +11293,7 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-77-博客系统---核心业务实现"><a class="header" href="#day-77-博客系统---核心业务实现">Day 77: 博客系统 - 核心业务实现</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的核心业务实现部分。</p>
-<h2 id="核心内容-4"><a class="header" href="#核心内容-4">核心内容</a></h2>
+<h2 id="核心内容-2"><a class="header" href="#核心内容-2">核心内容</a></h2>
 <ul>
 <li>用户服务实现</li>
 <li>文章服务实现</li>
@@ -11184,7 +11305,7 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-78-博客系统---api-接口开发"><a class="header" href="#day-78-博客系统---api-接口开发">Day 78: 博客系统 - API 接口开发</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的 API 接口开发部分。</p>
-<h2 id="核心内容-5"><a class="header" href="#核心内容-5">核心内容</a></h2>
+<h2 id="核心内容-3"><a class="header" href="#核心内容-3">核心内容</a></h2>
 <ul>
 <li>RESTful API 设计</li>
 <li>路由配置</li>
@@ -11196,7 +11317,7 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-79-博客系统---测试与优化"><a class="header" href="#day-79-博客系统---测试与优化">Day 79: 博客系统 - 测试与优化</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的测试与优化部分。</p>
-<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
+<h2 id="核心内容-4"><a class="header" href="#核心内容-4">核心内容</a></h2>
 <ul>
 <li>单元测试</li>
 <li>集成测试</li>
@@ -11208,7 +11329,7 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-80-博客系统---项目总结与展示"><a class="header" href="#day-80-博客系统---项目总结与展示">Day 80: 博客系统 - 项目总结与展示</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的项目总结部分。</p>
-<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
+<h2 id="核心内容-5"><a class="header" href="#核心内容-5">核心内容</a></h2>
 <ul>
 <li>架构回顾</li>
 <li>技术栈总结</li>
@@ -11865,7 +11986,7 @@ cargo bench
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-81-操作系统概念回顾-1"><a class="header" href="#day-81-操作系统概念回顾-1">Day 81: 操作系统概念回顾</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
+<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
 <ul>
 <li>进程与线程</li>
 <li>内存管理</li>
@@ -11877,14 +11998,14 @@ cargo bench
 <p>Day 82 将深入学习文件系统操作。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-82-文件系统操作深入-1"><a class="header" href="#day-82-文件系统操作深入-1">Day 82: 文件系统操作深入</a></h1>
-<h2 id="学习目标-12"><a class="header" href="#学习目标-12">学习目标</a></h2>
+<h2 id="学习目标-14"><a class="header" href="#学习目标-14">学习目标</a></h2>
 <ul>
 <li>掌握 Rust 中的目录遍历技术</li>
 <li>理解并实现内存映射文件 (Memory Mapped Files)</li>
 <li>学习文件锁机制以处理并发访问</li>
 <li>熟悉文件元数据和权限操作</li>
 </ul>
-<h2 id="核心概念-4"><a class="header" href="#核心概念-4">核心概念</a></h2>
+<h2 id="核心概念-6"><a class="header" href="#核心概念-6">核心概念</a></h2>
 <h3 id="1-目录遍历"><a class="header" href="#1-目录遍历">1. 目录遍历</a></h3>
 <p>标准库 <code>std::fs</code> 提供了基本的目录操作。递归遍历通常需要手动实现，或者使用 <code>walkdir</code> 等第三方库。本示例展示了如何使用标准库实现简单的递归遍历。</p>
 <h3 id="2-内存映射文件-mmap"><a class="header" href="#2-内存映射文件-mmap">2. 内存映射文件 (mmap)</a></h3>
@@ -11900,7 +12021,7 @@ cargo bench
 <li><strong>共享锁 (Shared Lock)</strong>：通常用于读操作，多个进程可以同时持有。
 Rust 中可以使用 <code>fs2</code> crate 来进行跨平台的文件锁定。</li>
 </ul>
-<h2 id="代码示例"><a class="header" href="#代码示例">代码示例</a></h2>
+<h2 id="代码示例-2"><a class="header" href="#代码示例-2">代码示例</a></h2>
 <p>本节代码演示了上述三个核心概念的用法。</p>
 <h3 id="递归遍历目录"><a class="header" href="#递归遍历目录">递归遍历目录</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -11968,13 +12089,13 @@ fn file_lock_example(path: &amp;str) -&gt; io::Result&lt;()&gt; {
     Ok(())
 }
 <span class="boring">}</span></code></pre>
-<h2 id="运行示例"><a class="header" href="#运行示例">运行示例</a></h2>
+<h2 id="运行示例-2"><a class="header" href="#运行示例-2">运行示例</a></h2>
 <p>进入 <code>fs-demo</code> 目录并运行：</p>
 <pre><code class="language-bash">cd fs-demo
 cargo run
 </code></pre>
 <p>你将看到程序遍历源代码目录，创建测试文件进行内存映射读取，并演示文件锁的获取与释放。</p>
-<h2 id="练习-11"><a class="header" href="#练习-11">练习</a></h2>
+<h2 id="练习-13"><a class="header" href="#练习-13">练习</a></h2>
 <ol>
 <li>修改 <code>walk_dir</code> 函数，计算目录中所有文件的总大小。</li>
 <li>尝试使用 <code>notify</code> crate 监听文件系统的变化（如文件创建、修改）。</li>
@@ -11984,20 +12105,113 @@ cargo run
 <p>Day 83 将深入讲解进程管理与信号处理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-83-进程管理与信号处理-1"><a class="header" href="#day-83-进程管理与信号处理-1">Day 83: 进程管理与信号处理</a></h1>
-<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
+<h2 id="学习目标-15"><a class="header" href="#学习目标-15">学习目标</a></h2>
 <ul>
-<li>进程创建和管理</li>
-<li>进程间通信（IPC）</li>
-<li>信号处理</li>
-<li>守护进程</li>
+<li>掌握 Rust 中创建和管理子进程的方法</li>
+<li>理解进程间通信 (IPC) 的基本方式（管道）</li>
+<li>学习如何捕获和处理 Unix 信号 (Signals)</li>
+<li>了解守护进程 (Daemon) 的概念与实现</li>
 </ul>
+<h2 id="核心概念-7"><a class="header" href="#核心概念-7">核心概念</a></h2>
+<h3 id="1-进程创建与管道通信"><a class="header" href="#1-进程创建与管道通信">1. 进程创建与管道通信</a></h3>
+<p>Rust 标准库 <code>std::process::Command</code> 提供了强大的进程创建功能。通过配置 <code>Stdio</code>，我们可以重定向子进程的输入输出流，从而实现父子进程间的通信。</p>
+<ul>
+<li><strong>Spawn</strong>: 异步启动进程。</li>
+<li><strong>Output</strong>: 启动进程并等待其完成，收集输出。</li>
+<li><strong>Stdio::piped()</strong>: 创建管道，允许父进程读写子进程的标准输入/输出。</li>
+</ul>
+<h3 id="2-信号处理-signal-handling"><a class="header" href="#2-信号处理-signal-handling">2. 信号处理 (Signal Handling)</a></h3>
+<p>Unix 信号是操作系统向进程发送的异步通知（如 SIGINT, SIGTERM）。Rust 标准库对信号的支持较为基础，通常推荐使用 <code>signal-hook</code> crate 来处理 POSIX 信号。</p>
+<ul>
+<li><strong>SIGINT</strong>: 中断信号 (Ctrl+C)。</li>
+<li><strong>SIGTERM</strong>: 终止信号。</li>
+<li><strong>处理方式</strong>: 通常在一个独立的线程中阻塞等待信号，或者注册回调。</li>
+</ul>
+<h3 id="3-守护进程-daemon"><a class="header" href="#3-守护进程-daemon">3. 守护进程 (Daemon)</a></h3>
+<p>守护进程是在后台运行的长期服务进程，不与任何控制终端关联。创建守护进程通常涉及以下步骤：</p>
+<ol>
+<li><code>fork</code> 并退出父进程。</li>
+<li>调用 <code>setsid</code> 创建新会话。</li>
+<li>更改工作目录。</li>
+<li>重设文件权限掩码 (umask)。</li>
+<li>重定向标准 IO 流。</li>
+</ol>
+<p>Rust 生态中 <code>daemonize</code> crate 封装了这些复杂操作。</p>
+<h2 id="代码示例-3"><a class="header" href="#代码示例-3">代码示例</a></h2>
+<p>本节代码演示了上述三个核心概念的用法。</p>
+<h3 id="启动子进程并使用管道"><a class="header" href="#启动子进程并使用管道">启动子进程并使用管道</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::process::{Command, Stdio};
+use std::io::{Write, Read};
+
+fn run_pipe() -&gt; std::io::Result&lt;()&gt; {
+    // 启动 'tr' 命令，将小写转换为大写
+    let mut child = Command::new("tr")
+        .arg("a-z")
+        .arg("A-Z")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+
+    // 写入数据到子进程 stdin
+    if let Some(mut stdin) = child.stdin.take() {
+        stdin.write_all(b"hello rust world")?;
+    }
+
+    // 读取子进程 stdout
+    let output = child.wait_with_output()?;
+    println!("Output: {}", String::from_utf8_lossy(&amp;output.stdout));
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h3 id="捕获-sigint-信号"><a class="header" href="#捕获-sigint-信号">捕获 SIGINT 信号</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use signal_hook::{consts::SIGINT, iterator::Signals};
+use std::thread;
+
+fn handle_signals() -&gt; std::io::Result&lt;()&gt; {
+    let mut signals = Signals::new(&amp;[SIGINT])?;
+
+    thread::spawn(move || {
+        for sig in signals.forever() {
+            println!("Received signal {:?}", sig);
+            // 执行清理操作...
+            break;
+        }
+    });
+
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="运行示例-3"><a class="header" href="#运行示例-3">运行示例</a></h2>
+<p>进入 <code>process-demo</code> 目录并运行：</p>
+<pre><code class="language-bash">cd process-demo
+# 运行 IPC 和信号处理演示
+cargo run
+
+# 运行守护进程模式
+cargo run -- daemon
+</code></pre>
+<h3 id="预期输出"><a class="header" href="#预期输出">预期输出</a></h3>
+<ol>
+<li><strong>IPC 示例</strong>: 程序会调用 <code>tr</code> 命令，将 “hello process world” 转换为大写并输出。</li>
+<li><strong>信号示例</strong>: 程序会等待 5 秒。在此期间如果你按下 <code>Ctrl+C</code>，程序会捕获该信号并打印提示信息，而不是直接强行终止。</li>
+<li><strong>守护进程</strong>: 如果运行 <code>daemon</code> 模式，程序将转入后台运行。你可以查看 <code>/tmp/daemon.out</code> 确认其状态。</li>
+</ol>
+<h2 id="练习-14"><a class="header" href="#练习-14">练习</a></h2>
+<ol>
+<li>修改 IPC 示例，让父进程连续发送多行数据，子进程实时处理并返回。</li>
+<li>实现一个能够优雅关闭（Graceful Shutdown）的 Web 服务器原型，接收 SIGTERM 信号后停止接受新连接并等待现有请求完成。</li>
+<li>尝试使用 Unix Domain Socket (<code>std::os::unix::net::UnixStream</code>) 进行更高效的本地进程间通信。</li>
+</ol>
 <h2 id="下一步-22"><a class="header" href="#下一步-22">下一步</a></h2>
-<p>Day 84 将学习原始套接字编程。</p>
+<p>Day 84 将深入讲解原始套接字 (Raw Sockets) 与网络协议实现。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-84-原始套接字-raw-sockets-1"><a class="header" href="#day-84-原始套接字-raw-sockets-1">Day 84: 原始套接字 (Raw Sockets)</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
+<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
 <ul>
 <li>TCP/UDP 底层操作</li>
 <li>原始套接字编程</li>
@@ -12009,7 +12223,7 @@ cargo run
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-85-嵌入式-rust-简介-1"><a class="header" href="#day-85-嵌入式-rust-简介-1">Day 85: 嵌入式 Rust 简介</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
+<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
 <ul>
 <li>no_std 环境</li>
 <li>嵌入式 HAL</li>
@@ -12020,7 +12234,7 @@ cargo run
 <p>Day 86 将学习性能分析工具 (Flamegraph)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-86-性能分析工具-flamegraph-1"><a class="header" href="#day-86-性能分析工具-flamegraph-1">Day 86: 性能分析工具 (Flamegraph)</a></h1>
-<h2 id="学习目标-13"><a class="header" href="#学习目标-13">学习目标</a></h2>
+<h2 id="学习目标-16"><a class="header" href="#学习目标-16">学习目标</a></h2>
 <ul>
 <li>掌握性能分析工具</li>
 <li>学习火焰图分析</li>
@@ -12447,7 +12661,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <li><input disabled="" type="checkbox"> 使用迭代器而非循环</li>
 <li><input disabled="" type="checkbox"> 预分配容量</li>
 </ul>
-<h2 id="练习-12"><a class="header" href="#练习-12">练习</a></h2>
+<h2 id="练习-15"><a class="header" href="#练习-15">练习</a></h2>
 <ol>
 <li>分析一个实际项目的性能瓶颈</li>
 <li>优化字符串处理函数</li>
@@ -12460,7 +12674,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-87-内存优化技巧-1"><a class="header" href="#day-87-内存优化技巧-1">Day 87: 内存优化技巧</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
+<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
 <ul>
 <li>内存布局优化</li>
 <li>零拷贝技术</li>
@@ -12472,7 +12686,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-88-simd-与底层优化-1"><a class="header" href="#day-88-simd-与底层优化-1">Day 88: SIMD 与底层优化</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
+<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
 <ul>
 <li>SIMD 指令集</li>
 <li>向量化计算</li>
@@ -12484,7 +12698,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-89-持续集成流水线-1"><a class="header" href="#day-89-持续集成流水线-1">Day 89: 持续集成流水线</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
+<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
 <ul>
 <li>GitHub Actions 配置</li>
 <li>自动化测试</li>
@@ -12496,7 +12710,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-90-rust-编译优化与配置-1"><a class="header" href="#day-90-rust-编译优化与配置-1">Day 90: Rust 编译优化与配置</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
+<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
 <ul>
 <li>Cargo.toml 优化配置</li>
 <li>编译时间优化</li>
@@ -13316,7 +13530,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-91-选题与架构设计-1"><a class="header" href="#day-91-选题与架构设计-1">Day 91: 选题与架构设计</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
+<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
 <ul>
 <li>需求分析</li>
 <li>架构设计</li>
@@ -13327,7 +13541,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-92-原型验证-poc-1"><a class="header" href="#day-92-原型验证-poc-1">Day 92: 原型验证 (PoC)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
+<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
 <ul>
 <li>核心功能验证</li>
 <li>性能基准测试</li>
@@ -13338,7 +13552,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-93-核心模块开发-一"><a class="header" href="#day-93-核心模块开发-一">Day 93: 核心模块开发 (一)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-18"><a class="header" href="#核心内容-18">核心内容</a></h2>
+<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
 <ul>
 <li>项目结构搭建</li>
 <li>数据模型定义</li>
@@ -13349,7 +13563,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-19"><a class="header" href="#核心内容-19">核心内容</a></h2>
+<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
 <ul>
 <li>继续核心功能开发</li>
 <li>模块间集成</li>
@@ -13360,7 +13574,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-20"><a class="header" href="#核心内容-20">核心内容</a></h2>
+<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
 <ul>
 <li>认证中间件</li>
 <li>日志系统</li>
@@ -13372,7 +13586,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-21"><a class="header" href="#核心内容-21">核心内容</a></h2>
+<h2 id="核心内容-18"><a class="header" href="#核心内容-18">核心内容</a></h2>
 <ul>
 <li>负载测试</li>
 <li>性能分析</li>
@@ -13384,7 +13598,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-97-文档编写与代码清理-1"><a class="header" href="#day-97-文档编写与代码清理-1">Day 97: 文档编写与代码清理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-22"><a class="header" href="#核心内容-22">核心内容</a></h2>
+<h2 id="核心内容-19"><a class="header" href="#核心内容-19">核心内容</a></h2>
 <ul>
 <li>API 文档生成</li>
 <li>README 编写</li>
@@ -13396,7 +13610,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-23"><a class="header" href="#核心内容-23">核心内容</a></h2>
+<h2 id="核心内容-20"><a class="header" href="#核心内容-20">核心内容</a></h2>
 <ul>
 <li>版本发布流程</li>
 <li>CI/CD 配置</li>
@@ -13408,7 +13622,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-24"><a class="header" href="#核心内容-24">核心内容</a></h2>
+<h2 id="核心内容-21"><a class="header" href="#核心内容-21">核心内容</a></h2>
 <ul>
 <li>项目展示文档</li>
 <li>技术复盘</li>
