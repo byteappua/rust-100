@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-c7f88b6d.js";
+            window.path_to_searchindex_js = "../../searchindex-241d8fdc.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -178,14 +178,26 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-84-原始套接字-raw-sockets"><a class="header" href="#day-84-原始套接字-raw-sockets">Day 84: 原始套接字 (Raw Sockets)</a></h1>
-<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<p>详细内容请参考 <a href="../STAGE6_OVERVIEW.html">Stage 6 Overview</a>。</p>
 <h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
 <ul>
 <li>TCP/UDP 底层操作</li>
-<li>原始套接字编程</li>
+<li><code>socket2</code> crate 的使用</li>
+<li>原始套接字编程基础</li>
 <li>网络协议实现</li>
-<li>数据包捕获</li>
 </ul>
+<h2 id="示例项目-raw-sockets"><a class="header" href="#示例项目-raw-sockets">示例项目 <code>raw-sockets</code></a></h2>
+<p>本项目演示了如何使用 <code>socket2</code> 进行更底层的套接字配置，以及标准的 <code>std::net</code> TCP 编程。</p>
+<h3 id="功能演示"><a class="header" href="#功能演示">功能演示</a></h3>
+<ol>
+<li><strong>Socket2 Creation</strong>: 演示使用 <code>socket2</code> crate 创建并配置（非阻塞、地址复用）一个 TCP 套接字。</li>
+<li><strong>TCP Echo Server</strong>: 一个运行在后台线程的简单 TCP 服务器。</li>
+<li><strong>TCP Client</strong>: 一个连接到服务器并发送/接收数据的客户端。</li>
+</ol>
+<h3 id="运行代码"><a class="header" href="#运行代码">运行代码</a></h3>
+<pre><code class="language-bash">cd Day81-90/84.RawSockets
+cargo run
+</code></pre>
 <h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
 <p>Day 85 将学习嵌入式 Rust 简介。</p>
 
