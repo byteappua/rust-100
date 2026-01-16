@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-4c4eb806.js";
+            window.path_to_searchindex_js = "searchindex-71fa3fe4.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-ad554735.js"></script>
+        <script src="toc-ce481b3e.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -2786,6 +2786,569 @@ fn main() -&gt; Result&lt;()&gt; {
 Caused by:
     No such file or directory (os error 2)
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-44-命令行参数解析-clap"><a class="header" href="#day-44-命令行参数解析-clap">Day 44: 命令行参数解析 (Clap)</a></h1>
+<p>在 Rust 中，编写命令行工具 (CLI) 是一件非常愉快的事情，而 <strong><code>clap</code></strong> (Command Line Argument Parser) 是这个领域绝对的事实标准。它功能强大、性能优异，并且能自动生成帮助信息。</p>
+<h2 id="1-clap-的两种风格"><a class="header" href="#1-clap-的两种风格">1. <code>clap</code> 的两种风格</a></h2>
+<p><code>clap</code> 提供了两种主要的使用方式：</p>
+<ol>
+<li><strong>Builder API</strong>: 通过函数链式调用构建参数解析器。灵活性高，编译速度稍快，但代码较冗长。</li>
+<li><strong>Derive API</strong>: 使用 Rust 的宏 (<code>derive</code>) 直接在结构体上定义参数。代码简洁直观，类型安全，是目前推荐的方式。</li>
+</ol>
+<p>我们今天主要介绍 <strong>Derive API</strong>。</p>
+<h2 id="2-核心概念-1"><a class="header" href="#2-核心概念-1">2. 核心概念</a></h2>
+<p>在使用 Derive API 时，主要会用到三个 trait：</p>
+<ul>
+<li><code>Parser</code>: 顶级结构体，代表整个命令行程序。</li>
+<li><code>Subcommand</code>: 用于定义子命令（如 <code>git commit</code>, <code>git push</code>）。通常是一个枚举。</li>
+<li><code>Args</code>: 用于定义一组参数。可以被嵌入到 <code>Parser</code> 或 <code>Subcommand</code> 中。</li>
+</ul>
+<h2 id="3-基本用法-1"><a class="header" href="#3-基本用法-1">3. 基本用法</a></h2>
+<p>首先需要在 <code>Cargo.toml</code> 中添加依赖，并开启 <code>derive</code> 特性：</p>
+<pre><code class="language-toml">[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+</code></pre>
+<h3 id="示例代码"><a class="header" href="#示例代码">示例代码</a></h3>
+<pre class="playground"><code class="language-rust">use clap::{Parser, Subcommand};
+
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    /// 可选的名字
+    #[arg(short, long)]
+    name: Option&lt;String&gt;,
+
+    /// 计数次数 (默认 1)
+    #[arg(short, long, default_value_t = 1)]
+    count: u8,
+
+    #[command(subcommand)]
+    command: Option&lt;Commands&gt;,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// 执行测试
+    Test {
+        /// 是否列出详情
+        #[arg(short, long)]
+        list: bool,
+    },
+}
+
+fn main() {
+    let cli = Cli::parse();
+
+    if let Some(name) = cli.name.as_deref() {
+        println!("Value for name: {}", name);
+    }
+
+    // ...
+}</code></pre>
+<h2 id="4-运行效果"><a class="header" href="#4-运行效果">4. 运行效果</a></h2>
+<p><code>clap</code> 会自动生成 <code>--help</code> 信息：</p>
+<pre><code class="language-bash">$ cargo run -- --help
+Usage: demo [OPTIONS] [COMMAND]
+
+Commands:
+  test  执行测试
+  help  Print this message or the help of the given subcommand(s)
+
+Options:
+  -n, --name &lt;NAME&gt;    可选的名字
+  -c, --count &lt;COUNT&gt;  计数次数 (默认 1) [default: 1]
+  -h, --help           Print help
+  -V, --version        Print version
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-45-http-客户端-reqwest"><a class="header" href="#day-45-http-客户端-reqwest">Day 45: HTTP 客户端 (Reqwest)</a></h1>
+<p><strong><code>reqwest</code></strong> 是 Rust 生态中最流行的 HTTP 客户端库。它建立在 <code>hyper</code> 之上，提供了更高级、更易用的 API。</p>
+<h2 id="1-特性"><a class="header" href="#1-特性">1. 特性</a></h2>
+<ul>
+<li><strong>异步与同步</strong>: 默认提供异步 (Async) API，也通过 <code>blocking</code> 特性提供同步 API。</li>
+<li><strong>JSON 支持</strong>: 集成 <code>serde</code>，方便地处理 JSON 数据。</li>
+<li><strong>功能丰富</strong>: 支持 HTTPS, Proxy, Cookies, Connection Pooling 等。</li>
+</ul>
+<h2 id="2-依赖配置"><a class="header" href="#2-依赖配置">2. 依赖配置</a></h2>
+<p>在 <code>Cargo.toml</code> 中添加依赖：</p>
+<pre><code class="language-toml">[dependencies]
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["full"] } # 异步运行时
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+</code></pre>
+<h2 id="3-基本用法-2"><a class="header" href="#3-基本用法-2">3. 基本用法</a></h2>
+<h3 id="发送-get-请求"><a class="header" href="#发送-get-请求">发送 GET 请求</a></h3>
+<pre class="playground"><code class="language-rust">use std::collections::HashMap;
+
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let resp = reqwest::get("https://httpbin.org/ip")
+        .await?
+        .json::&lt;HashMap&lt;String, String&gt;&gt;()
+        .await?;
+
+    println!("{:#?}", resp);
+    Ok(())
+}</code></pre>
+<h3 id="发送-post-请求"><a class="header" href="#发送-post-请求">发送 POST 请求</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = reqwest::Client::new();
+let res = client.post("https://httpbin.org/post")
+    .body("the exact body that is sent")
+    .send()
+    .await?;
+<span class="boring">}</span></code></pre>
+<h3 id="处理-json-响应"><a class="header" href="#处理-json-响应">处理 JSON 响应</a></h3>
+<p>我们可以定义结构体来自动反序列化响应数据：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct IpResponse {
+    origin: String,
+}
+
+// ...
+let ip: IpResponse = reqwest::get("https://httpbin.org/ip").await?.json().await?;
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-46-项目初始化与配置"><a class="header" href="#day-46-项目初始化与配置">Day 46: 项目初始化与配置</a></h1>
+<p>从今天开始，我们将进入为期 15 天的 <strong>异步网络项目实战</strong> 阶段。我们将从零开始实现一个兼容 Redis 协议的轻量级 KV 存储服务器 —— <strong>Mini-Redis</strong>。</p>
+<p>这个项目将串联我们之前学到的众多知识点：</p>
+<ul>
+<li><strong>异步编程</strong>: 使用 Tokio 运行时。</li>
+<li><strong>网络编程</strong>: TCP Listener 与 Stream 处理。</li>
+<li><strong>数据结构</strong>: HashMap 存储数据。</li>
+<li><strong>并发控制</strong>: Mutex/RwLock 保护共享状态。</li>
+<li><strong>协议解析</strong>: 字节流操作。</li>
+<li><strong>错误处理与日志</strong>: anyhow, thiserror, tracing。</li>
+</ul>
+<h2 id="1-项目目标"><a class="header" href="#1-项目目标">1. 项目目标</a></h2>
+<p>实现一个支持 RESP (Redis Serialization Protocol) 的服务器，支持以下命令：</p>
+<ul>
+<li><code>GET key</code></li>
+<li><code>SET key value</code></li>
+<li><code>PUBLISH channel message</code></li>
+<li><code>SUBSCRIBE channel</code></li>
+</ul>
+<h2 id="2-初始化项目"><a class="header" href="#2-初始化项目">2. 初始化项目</a></h2>
+<p>我们创建一个新的二进制项目：</p>
+<pre><code class="language-bash">cargo init --bin mini-redis
+</code></pre>
+<h2 id="3-依赖配置"><a class="header" href="#3-依赖配置">3. 依赖配置</a></h2>
+<p>编辑 <code>Cargo.toml</code>，添加必要的依赖：</p>
+<pre><code class="language-toml">[dependencies]
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+anyhow = "1.0"
+bytes = "1.5"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+</code></pre>
+<ul>
+<li><code>tokio</code>: 异步运行时核心。</li>
+<li><code>tracing</code>: 结构化日志。</li>
+<li><code>bytes</code>: 高效处理网络字节流。</li>
+<li><code>anyhow</code>: 灵活的错误处理。</li>
+</ul>
+<h2 id="4-基础骨架"><a class="header" href="#4-基础骨架">4. 基础骨架</a></h2>
+<p>在 <code>src/main.rs</code> 中初始化日志和 Tokio 运行时：</p>
+<pre class="playground"><code class="language-rust">use tracing::info;
+
+#[tokio::main]
+async fn main() -&gt; anyhow::Result&lt;()&gt; {
+    // 初始化日志
+    tracing_subscriber::fmt::init();
+
+    info!("Mini-Redis server is starting...");
+
+    // TODO: 监听端口、处理连接
+
+    Ok(())
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-47-协议解析-resp"><a class="header" href="#day-47-协议解析-resp">Day 47: 协议解析 (Resp)</a></h1>
+<p>Redis 使用 RESP (Redis Serialization Protocol) 协议进行客户端与服务器之间的通信。它的设计目标是：</p>
+<ol>
+<li>易于实现。</li>
+<li>解析速度快。</li>
+<li>人类可读。</li>
+</ol>
+<h2 id="1-resp-数据类型"><a class="header" href="#1-resp-数据类型">1. RESP 数据类型</a></h2>
+<p>RESP 是一个基于文本的协议（除了 Bulk Strings 中包含的二进制数据），通过第一个字节来区分数据类型：</p>
+<ul>
+<li><code>+</code>: 简单字符串 (Simple Strings)
+<ul>
+<li>例如: <code>+OK\r\n</code></li>
+</ul>
+</li>
+<li><code>-</code>: 错误 (Errors)
+<ul>
+<li>例如: <code>-Error message\r\n</code></li>
+</ul>
+</li>
+<li><code>:</code>: 整数 (Integers)
+<ul>
+<li>例如: <code>:1000\r\n</code></li>
+</ul>
+</li>
+<li><code>$</code>: 批量字符串 (Bulk Strings)
+<ul>
+<li>例如: <code>$6\r\nfoobar\r\n</code></li>
+</ul>
+</li>
+<li><code>*</code>: 数组 (Arrays)
+<ul>
+<li>例如: <code>*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="2-定义-frame-枚举"><a class="header" href="#2-定义-frame-枚举">2. 定义 Frame 枚举</a></h2>
+<p>我们使用枚举 <code>Frame</code> 来表示解析后的数据帧：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bytes::Bytes;
+
+#[derive(Clone, Debug)]
+pub enum Frame {
+    Simple(String),
+    Error(String),
+    Integer(i64),
+    Bulk(Bytes),
+    Null, // 特殊的 Bulk String ($-1\r\n)
+    Array(Vec&lt;Frame&gt;),
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-实现解析逻辑"><a class="header" href="#3-实现解析逻辑">3. 实现解析逻辑</a></h2>
+<p>我们将实现一个简单的解析器，能够将字节流解析为 <code>Frame</code>。由于这里只做演示，我们重点实现 <code>Frame</code> 结构的定义和基本的解析单元测试。</p>
+<p>在实际的网络编程中，我们通常需要处理“半包”和“粘包”问题，这需要配合 <code>tokio_util::codec</code> 模块中的 <code>Decoder</code> trait 来完成。但在今天，我们先手动实现一个简单的解析函数来理解原理。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bytes::Bytes;
+use std::io::Cursor;
+
+// 模拟解析一个字符串
+pub fn parse_frame(src: &amp;mut Cursor&lt;&amp;[u8]&gt;) -&gt; Result&lt;Frame, String&gt; {
+    // ... 实现解析逻辑
+    Err("Not implemented".to_string())
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-48-命令处理架构"><a class="header" href="#day-48-命令处理架构">Day 48: 命令处理架构</a></h1>
+<p>将底层的 <code>Frame</code> 解析出来后，我们需要将其转换为具体的<strong>业务命令</strong>。这是一种典型的<strong>命令模式 (Command Pattern)</strong>。</p>
+<h2 id="1-为什么需要这一层"><a class="header" href="#1-为什么需要这一层">1. 为什么需要这一层？</a></h2>
+<p><code>Frame</code> 只是协议层面的数据表示（数组、字符串、整数）。业务逻辑不应该直接操作 <code>Frame</code>，而应该操作语义明确的 <code>Command</code>。</p>
+<p>例如，<code>SET key value</code> 命令在 RESP 中是一个由 3 个 Bulk Strings 组成的 Array。
+我们需要验证：</p>
+<ol>
+<li>确实是 Array 类型。</li>
+<li>第一个元素是 “SET”。</li>
+<li>总共有 3 个元素。</li>
+<li>提取出 <code>key</code> 和 <code>value</code>。</li>
+</ol>
+<h2 id="2-定义-command-枚举"><a class="header" href="#2-定义-command-枚举">2. 定义 Command 枚举</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum Command {
+    Get(Get),
+    Set(Set),
+    Publish(Publish),
+    Subscribe(Subscribe),
+    Unsubscribe(Unsubscribe),
+    Unknown(Unknown),
+}
+<span class="boring">}</span></code></pre>
+<p>每个具体的命令都是一个独立的结构体，例如 <code>Set</code>：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Set {
+    pub key: String,
+    pub value: Bytes,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-实现-from_frame"><a class="header" href="#3-实现-from_frame">3. 实现 from_frame</a></h2>
+<p>我们为 <code>Command</code> 实现一个方法，将 <code>Frame</code> 转换为 <code>Command</code>：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Command {
+    pub fn from_frame(frame: Frame) -&gt; crate::Result&lt;Command&gt; {
+        // ...
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>这样，我们的主流程就变成了：
+<code>Bytes -&gt; Frame -&gt; Command -&gt; Execute -&gt; Frame -&gt; Bytes</code></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-49-存储引擎实现"><a class="header" href="#day-49-存储引擎实现">Day 49: 存储引擎实现</a></h1>
+<p>今天我们将实现 Mini-Redis 的核心：存储数据的部分。</p>
+<h2 id="1-并发与共享状态"><a class="header" href="#1-并发与共享状态">1. 并发与共享状态</a></h2>
+<p>由于我们的服务器是多线程（通过 Tokio 异步任务）并发处理请求的，因此存储层必须是<strong>线程安全</strong>的。</p>
+<p>最简单的方式是使用 <code>std::collections::HashMap</code> 配合 <code>std::sync::Mutex</code>。为了在多个任务间共享，我们需要将其包裹在 <code>std::sync::Arc</code> 中。</p>
+<h2 id="2-定义-db-结构体"><a class="header" href="#2-定义-db-结构体">2. 定义 Db 结构体</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use bytes::Bytes;
+
+#[derive(Clone)]
+pub struct Db {
+    shared: Arc&lt;Shared&gt;,
+}
+
+struct Shared {
+    state: Mutex&lt;State&gt;,
+}
+
+struct State {
+    entries: HashMap&lt;String, Bytes&gt;,
+}
+<span class="boring">}</span></code></pre>
+<p>这里我们多包裹了一层 <code>Shared</code> 和 <code>State</code>，虽然对于目前的需求看起来有点冗余，但这是为了后续扩展（例如添加 Pub/Sub 功能）做准备。</p>
+<h2 id="3-实现操作方法"><a class="header" href="#3-实现操作方法">3. 实现操作方法</a></h2>
+<p>我们需要实现 <code>new</code>, <code>get</code>, <code>set</code> 等基本操作：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Db {
+    pub fn new() -&gt; Db {
+        let shared = Arc::new(Shared {
+            state: Mutex::new(State {
+                entries: HashMap::new(),
+            }),
+        });
+        Db { shared }
+    }
+
+    pub fn get(&amp;self, key: &amp;str) -&gt; Option&lt;Bytes&gt; {
+        let state = self.shared.state.lock().unwrap();
+        state.entries.get(key).cloned()
+    }
+
+    pub fn set(&amp;self, key: String, value: Bytes) {
+        let mut state = self.shared.state.lock().unwrap();
+        state.entries.insert(key, value);
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>注意：在 Tokio 中使用 <code>std::sync::Mutex</code> 是可以的，只要临界区（锁持有的时间）非常短，且不跨越 <code>.await</code> 调用。对于简单的 HashMap 操作，这是满足要求的，且比 <code>tokio::sync::Mutex</code> 性能更好。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-50-异步网络层-tokio"><a class="header" href="#day-50-异步网络层-tokio">Day 50: 异步网络层 (Tokio)</a></h1>
+<p>今天我们将完成 Mini-Redis 的最后一块拼图：网络层。我们将把之前的组件（协议解析、命令处理、存储引擎）整合到一个基于 Tokio 的异步服务器中。</p>
+<h2 id="1-connection-抽象"><a class="header" href="#1-connection-抽象">1. Connection 抽象</a></h2>
+<p>直接操作 <code>TcpStream</code> 进行字节读写比较繁琐。我们封装一个 <code>Connection</code> 结构体，它负责：</p>
+<ol>
+<li>维护底层的 <code>TcpStream</code>。</li>
+<li>维护读写缓冲区 (<code>BytesMut</code> / <code>BufWriter</code>)。</li>
+<li>提供面向 Frame 的 API: <code>read_frame()</code> 和 <code>write_frame(frame)</code>。</li>
+</ol>
+<h2 id="2-server-主循环"><a class="header" href="#2-server-主循环">2. Server 主循环</a></h2>
+<p>服务器的逻辑非常标准：</p>
+<ol>
+<li><code>TcpListener</code> 监听端口。</li>
+<li>循环 <code>accept()</code> 获取连接。</li>
+<li>为每个连接 <code>tokio::spawn</code> 一个新的异步任务。</li>
+</ol>
+<h2 id="3-handler-逻辑"><a class="header" href="#3-handler-逻辑">3. Handler 逻辑</a></h2>
+<p>在每个任务中：</p>
+<ol>
+<li>循环调用 <code>connection.read_frame()</code>。</li>
+<li>如果有数据，调用 <code>Command::from_frame()</code> 解析为命令。</li>
+<li>调用 <code>command.apply(&amp;db)</code> 执行命令。</li>
+<li>将结果写入 <code>connection.write_frame()</code>。</li>
+</ol>
+<h2 id="4-运行验证"><a class="header" href="#4-运行验证">4. 运行验证</a></h2>
+<p>完成后，我们就可以使用真正的 Redis 客户端（如 <code>redis-cli</code>）来测试我们的服务器了！</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-51-并发控制与锁"><a class="header" href="#day-51-并发控制与锁">Day 51: 并发控制与锁</a></h1>
+<p>在 Day 50 中，我们使用了 <code>Mutex</code> 来保护 HashMap。这意味着在任何时刻，只能有一个任务访问数据库，无论是读还是写。对于读多写少的场景（如缓存），这会成为严重的性能瓶颈。</p>
+<p>今天我们将优化并发控制，使用 <strong>读写锁 (<code>RwLock</code>)</strong> 来替代互斥锁。</p>
+<h2 id="1-mutex-vs-rwlock"><a class="header" href="#1-mutex-vs-rwlock">1. Mutex vs RwLock</a></h2>
+<ul>
+<li><strong>Mutex (互斥锁)</strong>: 一次只允许一个线程持有锁。</li>
+<li><strong>RwLock (读写锁)</strong>:
+<ul>
+<li>允许多个<strong>读者</strong>同时持有读锁。</li>
+<li>只允许一个<strong>写者</strong>持有写锁。</li>
+<li>读锁与写锁互斥。</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-选择合适的-rwlock"><a class="header" href="#2-选择合适的-rwlock">2. 选择合适的 RwLock</a></h2>
+<p>Rust 标准库提供了 <code>std::sync::RwLock</code>，Tokio 提供了 <code>tokio::sync::RwLock</code>。</p>
+<ul>
+<li>如果临界区非常短且非异步（如单纯的 HashMap 查找），推荐使用 <code>std::sync::RwLock</code> (或者性能更好的 <code>parking_lot::RwLock</code>)。因为它开销小，且不会阻塞 Tokio 调度器太久。</li>
+<li>如果临界区包含 <code>.await</code> 点（如 IO 操作），<strong>必须</strong>使用 <code>tokio::sync::RwLock</code>。</li>
+</ul>
+<p>由于我们的 <code>Db</code> 操作（<code>get</code>/<code>set</code>）仅仅是内存操作，不包含 IO，因此我们选择同步的 <code>std::sync::RwLock</code>。</p>
+<h2 id="3-实现"><a class="header" href="#3-实现">3. 实现</a></h2>
+<p>修改 <code>src/db.rs</code>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::{Arc, RwLock};
+
+struct Shared {
+    state: RwLock&lt;State&gt;,
+}
+
+// ...
+
+impl Db {
+    pub fn get(&amp;self, key: &amp;str) -&gt; Option&lt;Bytes&gt; {
+        // 获取读锁
+        let state = self.shared.state.read().unwrap();
+        state.entries.get(key).cloned()
+    }
+
+    pub fn set(&amp;self, key: String, value: Bytes) {
+        // 获取写锁
+        let mut state = self.shared.state.write().unwrap();
+        state.entries.insert(key, value);
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-进一步优化分片-sharding"><a class="header" href="#4-进一步优化分片-sharding">4. 进一步优化：分片 (Sharding)</a></h2>
+<p>虽然 <code>RwLock</code> 解决了读并发问题，但在高并发写入时，单一的锁仍然是热点。
+一种常见的优化是<strong>分片</strong> (Sharding)：将数据分散到多个 HashMap 中，每个 HashMap 有自己的锁。通过 Hash(key) % N 来决定使用哪个分片。
+Rust 社区有一个优秀的库 <strong><code>dashmap</code></strong> 实现了这种并发 Hash Map，我们在后续可以探索使用。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-52-持久化机制-aof"><a class="header" href="#day-52-持久化机制-aof">Day 52: 持久化机制 (AOF)</a></h1>
+<p>内存数据库虽然速度快，但一旦重启数据就会丢失。为了解决这个问题，我们需要引入<strong>持久化</strong>机制。</p>
+<p>Redis 主要支持两种持久化方式：</p>
+<ol>
+<li><strong>RDB (Redis Database)</strong>: 定期将内存快照保存到磁盘。</li>
+<li><strong>AOF (Append Only File)</strong>: 记录服务器接收到的每一个写命令。重启时重新执行这些命令即可恢复数据。</li>
+</ol>
+<p>考虑到实现的复杂度与教学目的，我们将实现一个简化版的 <strong>AOF</strong> 持久化。</p>
+<h2 id="1-aof-原理"><a class="header" href="#1-aof-原理">1. AOF 原理</a></h2>
+<p>AOF 的核心逻辑非常简单：</p>
+<ol>
+<li>当服务器执行一个写命令（如 <code>SET</code>）成功后。</li>
+<li>将该命令以 RESP 协议格式追加写入到 AOF 文件中。</li>
+<li>服务器启动时，读取 AOF 文件，逐条回放命令。</li>
+</ol>
+<h2 id="2-序列化命令"><a class="header" href="#2-序列化命令">2. 序列化命令</a></h2>
+<p>我们需要将 <code>Command</code> 结构体转换回 RESP 字节流。这其实就是解析的逆过程。</p>
+<p>例如 <code>SET key value</code> 需要转换为：
+<code>*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n</code></p>
+<h2 id="3-异步写入"><a class="header" href="#3-异步写入">3. 异步写入</a></h2>
+<p>为了不阻塞主线程，文件写入通常也应该是异步的，或者使用缓冲。在 Tokio 中，我们可以使用 <code>tokio::fs::File</code> 和 <code>BufWriter</code>。</p>
+<p>但为了简化，我们暂时可以使用同步的 <code>std::fs</code> 配合 <code>BufWriter</code> 在独立的线程或者在该教学阶段暂且容忍少量的阻塞（或者使用 <code>tokio::fs</code>）。考虑到这是异步项目，我们尽量使用 <code>tokio::fs</code>。</p>
+<p>不过，AOF 写入通常需要保证顺序，最简单的做法是在处理完命令后，await 写入操作。</p>
+<h2 id="4-架构调整"><a class="header" href="#4-架构调整">4. 架构调整</a></h2>
+<p>我们需要在 <code>process</code> 处理循环中，引入 <code>Aof</code> 处理器。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Aof {
+    file: File, // tokio::fs::File
+}
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-53-发布订阅-pubsub"><a class="header" href="#day-53-发布订阅-pubsub">Day 53: 发布订阅 (Pub/Sub)</a></h1>
+<p>Redis 的发布订阅 (Pub/Sub) 是一种消息通信模式：发送者 (Publisher) 发送消息，订阅者 (Subscriber) 接收消息，它们之间不需要直接建立联系。</p>
+<h2 id="1-核心概念"><a class="header" href="#1-核心概念">1. 核心概念</a></h2>
+<ul>
+<li><strong>Channel (频道)</strong>: 消息传递的载体。</li>
+<li><strong>Publish (发布)</strong>: 向指定频道发送消息。</li>
+<li><strong>Subscribe (订阅)</strong>: 订阅一个或多个频道，接收发往该频道的消息。</li>
+</ul>
+<h2 id="2-实现思路"><a class="header" href="#2-实现思路">2. 实现思路</a></h2>
+<p>在 Mini-Redis 中，我们需要在 <code>Db</code> 中维护频道的订阅关系。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tokio::sync::broadcast;
+
+struct State {
+    entries: HashMap&lt;String, Bytes&gt;,
+    /// Map channel name -&gt; broadcast sender
+    pub_sub: HashMap&lt;String, broadcast::Sender&lt;Bytes&gt;&gt;,
+}
+<span class="boring">}</span></code></pre>
+<p>我们使用 <code>tokio::sync::broadcast</code> 通道。这是一个多生产者、多消费者的通道，非常适合实现 Pub/Sub。当有客户端订阅某个频道时，我们如果该频道不存在，就创建一个新的 broadcast channel。</p>
+<h2 id="3-命令处理"><a class="header" href="#3-命令处理">3. 命令处理</a></h2>
+<ul>
+<li>
+<p><strong>PUBLISH channel message</strong>:</p>
+<ol>
+<li>查找 <code>pub_sub</code> Map 中是否存在该 <code>channel</code>。</li>
+<li>如果有，向其 <code>Sender</code> 发送 <code>message</code>。</li>
+<li>返回接收到消息的订阅者数量。</li>
+</ol>
+</li>
+<li>
+<p><strong>SUBSCRIBE channel</strong>:</p>
+<ol>
+<li>查找或创建 <code>channel</code> 对应的 <code>Sender</code>。</li>
+<li>调用 <code>sender.subscribe()</code> 获取 <code>Receiver</code>。</li>
+<li>进入<strong>订阅模式</strong>：不再处理普通命令，而是循环读取 <code>Receiver</code> 中的消息，并将其封装为 Frame 发送给客户端。</li>
+</ol>
+</li>
+</ul>
+<h2 id="4-限制"><a class="header" href="#4-限制">4. 限制</a></h2>
+<p>为了简化，今天的实现中，一旦客户端进入订阅模式，就只能接收订阅的消息，无法再退出（Ctrl+C 断开连接除外），也无法动态增加订阅频道（标准的 Redis 是支持的）。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-54-客户端-sdk-实现"><a class="header" href="#day-54-客户端-sdk-实现">Day 54: 客户端 SDK 实现</a></h1>
+<p>到目前为止，我们已经构建了一个功能相对完善的 Mini-Redis 服务器。现在，为了让开发者更方便地使用它，我们需要提供一个 <strong>Client SDK</strong>。</p>
+<h2 id="1-目标"><a class="header" href="#1-目标">1. 目标</a></h2>
+<p>封装底层的 TCP 连接、Frame 编解码，提供符合 Rust 习惯的高级 API。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 目标 API
+let mut client = Client::connect("127.0.0.1:6379").await?;
+client.set("hello", "world".into()).await?;
+let val = client.get("hello").await?;
+<span class="boring">}</span></code></pre>
+<h2 id="2-结构设计"><a class="header" href="#2-结构设计">2. 结构设计</a></h2>
+<ul>
+<li><code>Client</code>: 核心结构体，持有一个 <code>Connection</code>。</li>
+<li><code>Subscriber</code>: 专门用于 Pub/Sub 模式的结构体。</li>
+</ul>
+<h2 id="3-实现-1"><a class="header" href="#3-实现-1">3. 实现</a></h2>
+<p>我们将重用之前定义的 <code>Connection</code> 和 <code>Frame</code>，并暴露给外部（在 <code>lib.rs</code> 中）。</p>
+<p>在 <code>src/client.rs</code> 中：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Client {
+    connection: Connection,
+}
+
+impl Client {
+    pub async fn connect(addr: &amp;str) -&gt; Result&lt;Client&gt; { ... }
+    pub async fn get(&amp;mut self, key: &amp;str) -&gt; Result&lt;Option&lt;Bytes&gt;&gt; { ... }
+    pub async fn set(&amp;mut self, key: &amp;str, value: Bytes) -&gt; Result&lt;()&gt; { ... }
+    // ...
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-示例"><a class="header" href="#4-示例">4. 示例</a></h2>
+<p>提供 <code>examples/hello_world.rs</code> 来展示用法。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-55-性能基准测试"><a class="header" href="#day-55-性能基准测试">Day 55: 性能基准测试</a></h1>
+<p>在软件开发中，性能优化离不开<strong>基准测试 (Benchmarking)</strong>。Rust 社区最流行的基准测试库是 <strong>Criterion.rs</strong>。</p>
+<h2 id="1-criterion-简介"><a class="header" href="#1-criterion-简介">1. Criterion 简介</a></h2>
+<p>Criterion.rs 提供了统计驱动的基准测试，能够自动处理预热、多次迭代、统计分析，并生成详细的 HTML 报告。</p>
+<h2 id="2-配置-benchmarking"><a class="header" href="#2-配置-benchmarking">2. 配置 Benchmarking</a></h2>
+<p>首先，在 <code>Cargo.toml</code> 中添加依赖，并配置 <code>[[bench]]</code>：</p>
+<pre><code class="language-toml">[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "my_benchmark"
+harness = false
+</code></pre>
+<h2 id="3-编写-benchmark"><a class="header" href="#3-编写-benchmark">3. 编写 Benchmark</a></h2>
+<p>我们将在 <code>benches/my_benchmark.rs</code> 中编写测试代码。为了简单起见，我们直接测试核心组件（如 RESP 解析或内存数据库操作），避免网络 I/O 的干扰，从而获得更纯粹的代码性能数据。</p>
+<h3 id="测试用例frame-解析"><a class="header" href="#测试用例frame-解析">测试用例：Frame 解析</a></h3>
+<p>我们将测试 <code>Frame::parse</code> 在处理大量数据时的性能。</p>
+<h3 id="测试用例db-操作"><a class="header" href="#测试用例db-操作">测试用例：DB 操作</a></h3>
+<p>我们将测试 <code>Db::set</code> 和 <code>Db::get</code> 在高并发下的吞吐量（虽然 Criterion 主要测试延迟，但我们可以通过迭代次数估算）。</p>
+<h2 id="4-运行测试"><a class="header" href="#4-运行测试">4. 运行测试</a></h2>
+<p>使用 <code>cargo bench</code> 命令运行。</p>
+<pre><code class="language-bash">cargo bench
+</code></pre>
+<p>运行完成后，可以在 <code>target/criterion/report/index.html</code> 查看可视化的报告。</p>
 
                     </main>
 
