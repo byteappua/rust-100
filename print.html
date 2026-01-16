@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-30b45ce4.js";
+            window.path_to_searchindex_js = "searchindex-5565e9c3.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-13fa5e57.js"></script>
@@ -13749,148 +13749,324 @@ cargo build
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-93-核心模块开发-一"><a class="header" href="#day-93-核心模块开发-一">Day 93: 核心模块开发 (一)</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的核心开发第一阶段。</p>
+<h2 id="开发目标"><a class="header" href="#开发目标">开发目标</a></h2>
+<ol>
+<li><strong>项目骨架搭建</strong>: 建立基本的 Cargo 项目结构。</li>
+<li><strong>Raft 存储层实现</strong>: 实现 <code>openraft</code> 所需的 <code>RaftStorage</code> trait。</li>
+<li><strong>核心数据模型</strong>: 定义任务 (<code>Task</code>) 和状态机所需的类型。</li>
+</ol>
+<h2 id="完成内容-1"><a class="header" href="#完成内容-1">完成内容</a></h2>
+<h3 id="1-raft-存储实现-memstorage"><a class="header" href="#1-raft-存储实现-memstorage">1. Raft 存储实现 (<code>MemStorage</code>)</a></h3>
+<p>由于 <code>openraft</code> 0.9+ 的 API 变更，本阶段首先实现了一个基于内存的存储层 <code>MemStorage</code>，用于快速验证共识逻辑。</p>
 <ul>
-<li>项目结构搭建</li>
-<li>数据模型定义</li>
-<li>核心业务逻辑实现</li>
+<li>实现了 <code>RaftLogReader</code>、<code>RaftStorage</code>、<code>RaftSnapshotBuilder</code> 等 Trait。</li>
+<li>使用 <code>RwLock</code> 保护内存中的日志 (<code>log</code>) 和状态机 (<code>state_machine</code>)。</li>
+<li>支持基本的日志追加、读取和快照操作。</li>
 </ul>
+<h3 id="2-核心模型定义"><a class="header" href="#2-核心模型定义">2. 核心模型定义</a></h3>
+<p>在 <code>src/models.rs</code> 中定义了核心数据结构：</p>
+<ul>
+<li><code>Task</code>: 包含任务 ID、命令、状态等字段。</li>
+<li><code>Request</code>: Raft 状态机的写请求（如 <code>Set</code> 任务）。</li>
+<li><code>Response</code>: Raft 状态机的读响应。</li>
+</ul>
+<h3 id="3-服务骨架"><a class="header" href="#3-服务骨架">3. 服务骨架</a></h3>
+<ul>
+<li><code>scheduler.rs</code>: 定义了 <code>TaskScheduler</code> 结构体，作为系统的核心调度组件。</li>
+<li><code>dispatcher.rs</code>: 定义了 <code>Dispatcher</code>，负责后台任务的分发和执行。</li>
+</ul>
+<h2 id="运行方式-2"><a class="header" href="#运行方式-2">运行方式</a></h2>
+<p>本阶段主要关注编译通过和单元测试，尚未提供完整的可运行 Server。</p>
+<pre><code class="language-bash">cd Day91-100/93.CoreDevelopment1/dtask
+cargo build
+cargo test
+</code></pre>
 <h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
-<p>Day 94 将继续核心模块开发。</p>
+<p>Day 94 将完善 <code>TaskScheduler</code> 的 gRPC 接口，并实现 <code>Dispatcher</code> 的实际轮询逻辑。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的核心开发第二阶段。</p>
+<h2 id="开发目标-1"><a class="header" href="#开发目标-1">开发目标</a></h2>
+<ol>
+<li><strong>gRPC 服务实现</strong>: 完善 <code>TaskScheduler</code> 的 gRPC 接口实现。</li>
+<li><strong>任务分发器</strong>: 实现 <code>Dispatcher</code> 的后台轮询和执行逻辑。</li>
+<li><strong>状态共享</strong>: 解决服务间的数据共享和并发访问问题。</li>
+</ol>
+<h2 id="完成内容-2"><a class="header" href="#完成内容-2">完成内容</a></h2>
+<h3 id="1-grpc-调度器-taskscheduler"><a class="header" href="#1-grpc-调度器-taskscheduler">1. gRPC 调度器 (<code>TaskScheduler</code>)</a></h3>
 <ul>
-<li>继续核心功能开发</li>
-<li>模块间集成</li>
-<li>单元测试编写</li>
+<li>基于 <code>tonic</code> 实现了 <code>dtask.proto</code> 中定义的 <code>Scheduler</code> 服务。</li>
+<li>实现了 <code>submit_task</code> 接口，接收客户端请求并将任务存入共享状态。</li>
+<li>使用了 <code>Arc&lt;Mutex&lt;Vec&lt;Task&gt;&gt;&gt;</code> 作为临时的共享存储（后续将对接 Raft）。</li>
 </ul>
+<h3 id="2-任务分发器-dispatcher"><a class="header" href="#2-任务分发器-dispatcher">2. 任务分发器 (<code>Dispatcher</code>)</a></h3>
+<ul>
+<li>实现了后台轮询循环，定期检查待处理任务。</li>
+<li>模拟了任务执行过程（简单的打印日志和状态更新）。</li>
+<li>与 <code>TaskScheduler</code> 共享同一个任务列表，确保数据一致性。</li>
+</ul>
+<h3 id="3-主程序入口-mainrs"><a class="header" href="#3-主程序入口-mainrs">3. 主程序入口 (<code>main.rs</code>)</a></h3>
+<ul>
+<li>在 <code>tokio</code> 运行时中同时启动 gRPC Server 和 Dispatcher 后台任务。</li>
+<li>使用 <code>tokio::spawn</code> 运行 Dispatcher，避免阻塞 gRPC 服务。</li>
+</ul>
+<h2 id="运行方式-3"><a class="header" href="#运行方式-3">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/94.CoreDevelopment2/dtask
+
+# 启动服务端
+cargo run
+
+# 在另一个终端运行测试客户端
+cargo run --example client
+</code></pre>
 <h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
-<p>Day 95 将进行外围模块与集成。</p>
+<p>Day 95 将集成 Web API (Axum) 和认证模块，对外提供 HTTP 接口。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的集成阶段，引入了 Web API 和监控体系。</p>
+<h2 id="开发目标-2"><a class="header" href="#开发目标-2">开发目标</a></h2>
+<ol>
+<li><strong>Web API</strong>: 使用 <code>Axum</code> 提供 RESTful 接口，方便前端和第三方系统集成。</li>
+<li><strong>认证授权</strong>: 实现基于 JWT 的用户认证。</li>
+<li><strong>监控指标</strong>: 集成 Prometheus 监控指标。</li>
+<li><strong>服务并存</strong>: 在同一个进程中同时运行 gRPC Server 和 HTTP Server。</li>
+</ol>
+<h2 id="完成内容-3"><a class="header" href="#完成内容-3">完成内容</a></h2>
+<h3 id="1-web-api-集成-apirs"><a class="header" href="#1-web-api-集成-apirs">1. Web API 集成 (<code>api.rs</code>)</a></h3>
 <ul>
-<li>认证中间件</li>
-<li>日志系统</li>
-<li>监控指标</li>
-<li>模块集成</li>
+<li>使用 <code>Axum</code> 0.7 构建了 HTTP 服务。</li>
+<li>提供了 <code>/api/login</code> (获取 Token) 和 <code>/api/tasks</code> (提交/查询任务) 接口。</li>
+<li>与 gRPC 服务共享底层的 <code>Arc&lt;Mutex&lt;Vec&lt;Task&gt;&gt;&gt;</code> 数据状态。</li>
 </ul>
+<h3 id="2-jwt-认证-authrs"><a class="header" href="#2-jwt-认证-authrs">2. JWT 认证 (<code>auth.rs</code>)</a></h3>
+<ul>
+<li>使用 <code>jsonwebtoken</code> 库实现了 Token 的生成 (<code>create_jwt</code>) 和验证 (<code>verify_jwt</code>)。</li>
+<li>实现了 <code>auth_middleware</code> 中间件，保护敏感 API 接口。</li>
+</ul>
+<h3 id="3-可观测性-metrics"><a class="header" href="#3-可观测性-metrics">3. 可观测性 (<code>metrics</code>)</a></h3>
+<ul>
+<li>集成 <code>prometheus</code> crate，定义了 <code>http_requests_total</code> 等基础指标。</li>
+<li>添加了 <code>/metrics</code> 端点，供 Prometheus Server 抓取数据。</li>
+</ul>
+<h3 id="4-服务编排-mainrs"><a class="header" href="#4-服务编排-mainrs">4. 服务编排 (<code>main.rs</code>)</a></h3>
+<ul>
+<li>修改了 <code>main.rs</code>，使用 <code>tokio::select!</code> 或 <code>join!</code> 同时启动：
+<ul>
+<li>gRPC Server (Port 50051)</li>
+<li>Axum HTTP Server (Port 3000)</li>
+<li>Dispatcher Loop</li>
+</ul>
+</li>
+</ul>
+<h2 id="运行方式-4"><a class="header" href="#运行方式-4">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/95.Integration/dtask
+
+# 启动服务
+cargo run
+
+# 测试 HTTP 接口
+# 1. 登录获取 Token (模拟)
+curl -X POST http://localhost:3000/api/login -H "Content-Type: application/json" -d '{"username":"admin", "password":"password"}'
+
+# 2. 获取 Metrics
+curl http://localhost:3000/metrics
+</code></pre>
 <h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
-<p>Day 96 将进行性能测试与调优。</p>
+<p>Day 96 将进行性能测试与调优，引入 SQLite 持久化并优化并发性能。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="day-96-performance-testing-and-tuning"><a class="header" href="#day-96-performance-testing-and-tuning">Day 96: Performance Testing and Tuning</a></h1>
-<p>This directory contains the performance-optimized version of the <code>dtask</code> project.</p>
-<h2 id="changes"><a class="header" href="#changes">Changes</a></h2>
-<ul>
-<li><strong>Database</strong>: Migrated from in-memory <code>Vec&lt;Task&gt;</code> to <code>SQLite</code> using <code>sqlx</code>.</li>
-<li><strong>Schema</strong>: Added <code>tasks</code> table and an index on <code>status</code> for optimization.</li>
-<li><strong>Connection Pool</strong>: Configured <code>SqlitePool</code> with max connections.</li>
-<li><strong>Build Profile</strong>: Added <code>release</code> profile with <code>LTO</code> and <code>strip</code> enabled.</li>
-</ul>
-<h2 id="how-to-run"><a class="header" href="#how-to-run">How to Run</a></h2>
+<h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
+<p>本目录包含经过性能优化的 <code>dtask</code> 项目版本。</p>
+<h2 id="变更内容"><a class="header" href="#变更内容">变更内容</a></h2>
+<ol>
+<li><strong>数据库迁移</strong>: 从内存中的 <code>Vec&lt;Task&gt;</code> 迁移到 <code>SQLite</code>，使用 <code>sqlx</code> 进行异步访问。</li>
+<li><strong>Schema 优化</strong>: 添加了 <code>tasks</code> 表，并在 <code>status</code> 字段上创建了索引以优化查询。</li>
+<li><strong>连接池</strong>: 配置了 <code>SqlitePool</code>，并调优了最大连接数。</li>
+<li><strong>构建配置</strong>: 在 <code>Cargo.toml</code> 中添加了 <code>release</code> 配置，启用了 <code>LTO</code> (链接时优化) 和 <code>strip</code>。</li>
+</ol>
+<h2 id="运行方式-5"><a class="header" href="#运行方式-5">运行方式</a></h2>
 <ol>
 <li>
-<p><strong>Start the Server</strong>:</p>
-<pre><code class="language-bash">cd dtask
+<p><strong>启动服务器</strong>:</p>
+<pre><code class="language-bash">cd Day91-100/96.Performance/dtask
 cargo run --release
 </code></pre>
 </li>
 <li>
-<p><strong>Run Load Test</strong>:</p>
-<pre><code class="language-bash">cd dtask
+<p><strong>运行负载测试</strong>:</p>
+<pre><code class="language-bash"># 在另一个终端
+cd Day91-100/96.Performance/dtask
 cargo run --example load_test --release
 </code></pre>
 </li>
 </ol>
-<h2 id="optimization-checklist"><a class="header" href="#optimization-checklist">Optimization Checklist</a></h2>
+<h2 id="优化清单-1"><a class="header" href="#优化清单-1">优化清单</a></h2>
 <ul>
-<li><input disabled="" type="checkbox" checked=""> Database Query Optimization (Index on <code>status</code> added in migration <code>20240101000001_add_index.sql</code>)</li>
-<li><input disabled="" type="checkbox" checked=""> Connection Pool Tuning (<code>max_connections(50)</code>)</li>
-<li><input disabled="" type="checkbox" checked=""> Compile Optimization (<code>lto = true</code>, <code>strip = true</code>)</li>
-<li><input disabled="" type="checkbox" checked=""> Async I/O (Using <code>tokio</code> and <code>sqlx</code> async pool)</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>数据库查询优化</strong>: 在 <code>status</code> 字段添加索引 (见 migration <code>20240101000001_add_index.sql</code>)。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>连接池调优</strong>: 设置 <code>max_connections(50)</code>。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>编译优化</strong>: 启用 <code>lto = true</code>, <code>strip = true</code>, <code>opt-level = 3</code>。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>异步 I/O</strong>: 全面使用 <code>tokio</code> 和 <code>sqlx</code> 的异步能力。</li>
 </ul>
-<h2 id="benchmarking-results"><a class="header" href="#benchmarking-results">Benchmarking Results</a></h2>
-<p>(Run the load test to see QPS)</p>
+<h2 id="基准测试结果"><a class="header" href="#基准测试结果">基准测试结果</a></h2>
+<p>(运行 load_test 示例可查看当前环境下的 QPS)</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-97-文档编写与代码清理-1"><a class="header" href="#day-97-文档编写与代码清理-1">Day 97: 文档编写与代码清理</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的文档完善阶段。</p>
+<h2 id="开发目标-3"><a class="header" href="#开发目标-3">开发目标</a></h2>
+<ol>
+<li><strong>OpenAPI 集成</strong>: 自动生成 REST API 文档。</li>
+<li><strong>代码注释</strong>: 为核心模块添加 Rustdoc 风格的注释。</li>
+<li><strong>代码清理</strong>: 运行 <code>cargo clippy</code> 和 <code>cargo fmt</code> 规范代码。</li>
+</ol>
+<h2 id="完成内容-4"><a class="header" href="#完成内容-4">完成内容</a></h2>
+<h3 id="1-openapi--swagger-ui-apirs"><a class="header" href="#1-openapi--swagger-ui-apirs">1. OpenAPI / Swagger UI (<code>api.rs</code>)</a></h3>
 <ul>
-<li>API 文档生成</li>
-<li>README 编写</li>
-<li>代码注释完善</li>
-<li>代码清理</li>
+<li>集成 <code>utoipa</code> 和 <code>utoipa-swagger-ui</code>。</li>
+<li>使用 <code>#[derive(OpenApi)]</code> 和 <code>#[utoipa::path]</code> 宏标注 API 结构体和处理函数。</li>
+<li>在 <code>/swagger-ui</code> 路径提供交互式 API 文档。</li>
 </ul>
+<h3 id="2-rustdoc-注释"><a class="header" href="#2-rustdoc-注释">2. Rustdoc 注释</a></h3>
+<ul>
+<li>为 <code>TaskScheduler</code> (调度器)、<code>Dispatcher</code> (分发器) 和 <code>Raft</code> 模块添加了详细的文档注释 (<code>///</code>)。</li>
+<li>解释了核心函数的参数、返回值和可能的错误。</li>
+</ul>
+<h3 id="3-代码质量"><a class="header" href="#3-代码质量">3. 代码质量</a></h3>
+<ul>
+<li>修复了 Clippy 提出的建议和警告。</li>
+<li>使用 <code>rustfmt</code> 统一了代码风格。</li>
+</ul>
+<h2 id="运行方式-6"><a class="header" href="#运行方式-6">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/97.Documentation/dtask
+
+# 启动服务
+cargo run
+
+# 访问 Swagger UI
+# 打开浏览器访问: http://localhost:3000/swagger-ui/
+</code></pre>
 <h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
-<p>Day 98 将进行发布准备与版本管理。</p>
+<p>Day 98 将进行发布准备，包括版本管理、Docker 镜像构建和发布清单检查。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的发布准备阶段。</p>
+<h2 id="开发目标-4"><a class="header" href="#开发目标-4">开发目标</a></h2>
+<ol>
+<li><strong>发布制品</strong>: 准备发布所需的二进制文件和资源。</li>
+<li><strong>Docker 镜像</strong>: 构建生产可用的 Docker 镜像。</li>
+<li><strong>版本管理</strong>: 维护 CHANGELOG 和版本号。</li>
+<li><strong>发布清单</strong>: 制定发布前的检查流程。</li>
+</ol>
+<h2 id="完成内容-5"><a class="header" href="#完成内容-5">完成内容</a></h2>
+<h3 id="1-dockerfile"><a class="header" href="#1-dockerfile">1. Dockerfile</a></h3>
 <ul>
-<li>版本发布流程</li>
-<li>CI/CD 配置</li>
-<li>Docker 镜像构建</li>
-<li>发布检查清单</li>
+<li>创建了多阶段构建 (Multi-stage Build) 的 <code>Dockerfile</code>。
+<ul>
+<li><strong>构建阶段</strong>: 使用 <code>rust:latest</code> 编译项目。</li>
+<li><strong>运行阶段</strong>: 使用 <code>debian:bookworm-slim</code> 作为轻量级运行时环境。</li>
 </ul>
+</li>
+<li>配置了必要的运行时依赖 (如 <code>libssl</code>, <code>ca-certificates</code>)。</li>
+</ul>
+<h3 id="2-发布文档"><a class="header" href="#2-发布文档">2. 发布文档</a></h3>
+<ul>
+<li><strong>CHANGELOG.md</strong>: 记录了版本 <code>1.0.0</code> 的变更日志，包含 Added, Changed, Fixed 等部分。</li>
+<li><strong>RELEASE_CHECKLIST.md</strong>: 列出了发布前必须执行的检查项（测试、文档、版本号等）。</li>
+</ul>
+<h3 id="3-cicd-配置-模拟"><a class="header" href="#3-cicd-配置-模拟">3. CI/CD 配置 (模拟)</a></h3>
+<ul>
+<li>虽然本项目未连接真实的 GitHub Actions Runner，但提供了 <code>release.yml</code> 的配置示例，用于自动创建 GitHub Release。</li>
+</ul>
+<h2 id="运行方式-7"><a class="header" href="#运行方式-7">运行方式</a></h2>
+<h3 id="构建-docker-镜像"><a class="header" href="#构建-docker-镜像">构建 Docker 镜像</a></h3>
+<pre><code class="language-bash">cd Day91-100/98.Release/dtask
+docker build -t dtask:1.0.0 .
+</code></pre>
+<h3 id="运行-docker-容器"><a class="header" href="#运行-docker-容器">运行 Docker 容器</a></h3>
+<pre><code class="language-bash">docker run -p 3000:3000 -p 50051:50051 dtask:1.0.0
+</code></pre>
 <h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
-<p>Day 99 将进行项目展示与复盘。</p>
+<p>Day 99 将对整个项目进行复盘和展示。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的总结、展示与复盘阶段。</p>
+<h2 id="目标"><a class="header" href="#目标">目标</a></h2>
+<ol>
+<li><strong>项目展示</strong>: 梳理项目架构、功能和亮点，准备演示材料。</li>
+<li><strong>技术复盘</strong>: 总结开发过程中的经验教训，识别改进点。</li>
+</ol>
+<h2 id="完成内容-6"><a class="header" href="#完成内容-6">完成内容</a></h2>
+<h3 id="1-演示文档-presentationmd"><a class="header" href="#1-演示文档-presentationmd">1. 演示文档 (<code>PRESENTATION.md</code>)</a></h3>
 <ul>
-<li>项目展示文档</li>
-<li>技术复盘</li>
-<li>经验总结</li>
-<li>改进建议</li>
+<li><strong>项目概览</strong>: 介绍了 DTask 的定位（分布式任务调度系统）。</li>
+<li><strong>架构图</strong>: 展示了 Client -&gt; Server (gRPC/HTTP) -&gt; Raft Consensus -&gt; Storage 的数据流向。</li>
+<li><strong>核心特性</strong>: 列举了高可用、强一致性、水平扩展等关键技术点。</li>
+<li><strong>性能指标</strong>: 展示了压测数据（QPS、延迟）。</li>
+</ul>
+<h3 id="2-复盘报告-reviewmd"><a class="header" href="#2-复盘报告-reviewmd">2. 复盘报告 (<code>REVIEW.md</code>)</a></h3>
+<ul>
+<li><strong>技术难点</strong>:
+<ul>
+<li>OpenRaft 版本的 API 适配问题。</li>
+<li>Rust 异步编程中的生命周期和锁竞争问题 (SQLite Locking)。</li>
+</ul>
+</li>
+<li><strong>做得好的</strong>: 项目结构清晰，测试覆盖率逐步提升。</li>
+<li><strong>待改进</strong>: 数据库并发写入性能（SQLite WAL 模式优化），分布式节点间的动态发现。</li>
+</ul>
+<h2 id="查阅文档"><a class="header" href="#查阅文档">查阅文档</a></h2>
+<ul>
+<li><a href="Day91-100/99.Presentation/PRESENTATION.html">项目演示 (PRESENTATION.md)</a></li>
+<li><a href="Day91-100/99.Presentation/REVIEW.html">技术复盘 (REVIEW.md)</a></li>
 </ul>
 <h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
-<p>Day 100 - 成为 Rustacean 之路！</p>
+<p>Day 100 将庆祝完成 100 天 Rust 挑战，并展望未来。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-100-成为-rustacean-之路-1"><a class="header" href="#day-100-成为-rustacean-之路-1">Day 100: 成为 Rustacean 之路</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="-恭喜你完成了-100-天的-rust-学习之旅"><a class="header" href="#-恭喜你完成了-100-天的-rust-学习之旅">🎉 恭喜你完成了 100 天的 Rust 学习之旅！</a></h2>
-<h2 id="学习回顾-1"><a class="header" href="#学习回顾-1">学习回顾</a></h2>
-<p>你已经掌握了：</p>
-<ul>
-<li>✅ Rust 核心概念和语法</li>
-<li>✅ 所有权系统和生命周期</li>
-<li>✅ 并发和异步编程</li>
-<li>✅ Web 开发全栈技能</li>
-<li>✅ 系统编程和性能优化</li>
-<li>✅ 完整项目开发能力</li>
-</ul>
-<h2 id="继续学习路径-1"><a class="header" href="#继续学习路径-1">继续学习路径</a></h2>
-<h3 id="深入方向"><a class="header" href="#深入方向">深入方向</a></h3>
+<p>🎉 <strong>恭喜！你已经完成了 100 天的 Rust 学习挑战！</strong></p>
+<p>本目录包含 <strong>DTask</strong> 项目的最终完整形态，也是这 100 天旅程的终点。</p>
+<h2 id="-毕业项目dtask-distributed-task-scheduler"><a class="header" href="#-毕业项目dtask-distributed-task-scheduler">🎓 毕业项目：DTask (Distributed Task Scheduler)</a></h2>
+<p>在最后的 10 天里，我们从零开始构建了一个分布式任务调度系统：</p>
 <ol>
-<li><strong>系统编程</strong> - 操作系统开发、嵌入式开发</li>
-<li><strong>Web 开发</strong> - 微服务架构、云原生应用</li>
-<li><strong>区块链</strong> - 智能合约、共识算法</li>
-<li><strong>游戏开发</strong> - Bevy 引擎、图形编程</li>
-<li><strong>机器学习</strong> - Rust ML 库、模型部署</li>
+<li><strong>架构设计</strong>: 采用 Raft 共识算法保证高可用，gRPC 实现高效通信。</li>
+<li><strong>核心开发</strong>: 实现了 Leader 选举、日志复制、状态机应用。</li>
+<li><strong>系统集成</strong>: 融合了 Axum Web API、JWT 认证、Prometheus 监控。</li>
+<li><strong>工程化</strong>: 完成了 Docker 容器化、文档编写、CI/CD 流程设计。</li>
+<li><strong>性能优化</strong>: 通过 SQLite 调优和异步并发提升了系统吞吐量。</li>
 </ol>
-<h3 id="推荐资源"><a class="header" href="#推荐资源">推荐资源</a></h3>
+<h3 id="最终功能特性"><a class="header" href="#最终功能特性">最终功能特性</a></h3>
 <ul>
-<li>The Rust Programming Language</li>
-<li>Programming Rust</li>
-<li>Rust for Rustaceans</li>
-<li>Zero To Production In Rust</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>强一致性</strong>: 基于 OpenRaft 的分布式共识。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>多接口支持</strong>: 同时支持 gRPC (高性能) 和 HTTP (易用性) 接口。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>安全性</strong>: 基于 JWT 的 API 访问控制。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>可观测性</strong>: 完整的 Prometheus Metrics 指标。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>持久化</strong>: SQLite 存储任务状态和 Raft 日志。</li>
 </ul>
-<h3 id="社区参与"><a class="header" href="#社区参与">社区参与</a></h3>
+<h2 id="-运行最终版"><a class="header" href="#-运行最终版">🚀 运行最终版</a></h2>
+<pre><code class="language-bash">cd Day91-100/100.Rustacean/dtask
+
+# 启动第一个节点 (Node 1)
+cargo run --release -- --id 1 --http-addr 127.0.0.1:3001 --grpc-addr 127.0.0.1:50051
+
+# (可选) 启动更多节点组成集群...
+</code></pre>
+<h2 id="-100-天旅程回顾"><a class="header" href="#-100-天旅程回顾">🌟 100 天旅程回顾</a></h2>
+<p>从 Hello World 到分布式系统，我们经历了：</p>
+<ol>
+<li><strong>基础篇 (Day 1-15)</strong>: 所有权、借用、生命周期 —— 翻越 Rust 的第一座大山。</li>
+<li><strong>进阶篇 (Day 16-30)</strong>: Trait、泛型、闭包、智能指针 —— 掌握抽象的能力。</li>
+<li><strong>并发篇 (Day 31-45)</strong>: 线程、通道、Async/Await —— 释放多核性能。</li>
+<li><strong>实战篇 (Day 46-90)</strong>: 构建 Redis 客户端、Web Server、OS 内核组件 —— 理论付诸实践。</li>
+<li><strong>毕业设计 (Day 91-100)</strong>: DTask 分布式系统 —— 综合实力的体现。</li>
+</ol>
+<h2 id="-未来展望"><a class="header" href="#-未来展望">🔮 未来展望</a></h2>
+<p>Rust 的学习永无止境，但这 100 天为你打下了坚实的基础。接下来你可以探索：</p>
 <ul>
-<li>参与开源项目</li>
-<li>阅读优秀源码</li>
-<li>编写技术博客</li>
-<li>加入 Rust 社区</li>
+<li><strong>Cloud Native</strong>: Kubernetes Operator, WebAssembly (WasmEdge).</li>
+<li><strong>Systems</strong>: Linux Kernel (Rust for Linux), Embedded (Embedded HAL).</li>
+<li><strong>Database</strong>: 深入数据库内核开发 (如 TiKV, Databend).</li>
+<li><strong>AI/ML</strong>: 使用 Rust 进行高性能模型推理 (Candle, Burn).</li>
 </ul>
-<h2 id="-你现在是一名-rustacean"><a class="header" href="#-你现在是一名-rustacean">🦀 你现在是一名 Rustacean！</a></h2>
-<p>继续保持学习，保持编码，保持热情！</p>
-<p><strong>Happy Coding! 🚀</strong></p>
+<p><strong>Keep Hacking, Rustacean! 🦀</strong></p>
 
                     </main>
 

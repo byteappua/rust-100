@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-30b45ce4.js";
+            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -177,39 +177,40 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-96-performance-testing-and-tuning"><a class="header" href="#day-96-performance-testing-and-tuning">Day 96: Performance Testing and Tuning</a></h1>
-<p>This directory contains the performance-optimized version of the <code>dtask</code> project.</p>
-<h2 id="changes"><a class="header" href="#changes">Changes</a></h2>
-<ul>
-<li><strong>Database</strong>: Migrated from in-memory <code>Vec&lt;Task&gt;</code> to <code>SQLite</code> using <code>sqlx</code>.</li>
-<li><strong>Schema</strong>: Added <code>tasks</code> table and an index on <code>status</code> for optimization.</li>
-<li><strong>Connection Pool</strong>: Configured <code>SqlitePool</code> with max connections.</li>
-<li><strong>Build Profile</strong>: Added <code>release</code> profile with <code>LTO</code> and <code>strip</code> enabled.</li>
-</ul>
-<h2 id="how-to-run"><a class="header" href="#how-to-run">How to Run</a></h2>
+                        <h1 id="day-96-性能测试与调优"><a class="header" href="#day-96-性能测试与调优">Day 96: 性能测试与调优</a></h1>
+<p>本目录包含经过性能优化的 <code>dtask</code> 项目版本。</p>
+<h2 id="变更内容"><a class="header" href="#变更内容">变更内容</a></h2>
+<ol>
+<li><strong>数据库迁移</strong>: 从内存中的 <code>Vec&lt;Task&gt;</code> 迁移到 <code>SQLite</code>，使用 <code>sqlx</code> 进行异步访问。</li>
+<li><strong>Schema 优化</strong>: 添加了 <code>tasks</code> 表，并在 <code>status</code> 字段上创建了索引以优化查询。</li>
+<li><strong>连接池</strong>: 配置了 <code>SqlitePool</code>，并调优了最大连接数。</li>
+<li><strong>构建配置</strong>: 在 <code>Cargo.toml</code> 中添加了 <code>release</code> 配置，启用了 <code>LTO</code> (链接时优化) 和 <code>strip</code>。</li>
+</ol>
+<h2 id="运行方式"><a class="header" href="#运行方式">运行方式</a></h2>
 <ol>
 <li>
-<p><strong>Start the Server</strong>:</p>
-<pre><code class="language-bash">cd dtask
+<p><strong>启动服务器</strong>:</p>
+<pre><code class="language-bash">cd Day91-100/96.Performance/dtask
 cargo run --release
 </code></pre>
 </li>
 <li>
-<p><strong>Run Load Test</strong>:</p>
-<pre><code class="language-bash">cd dtask
+<p><strong>运行负载测试</strong>:</p>
+<pre><code class="language-bash"># 在另一个终端
+cd Day91-100/96.Performance/dtask
 cargo run --example load_test --release
 </code></pre>
 </li>
 </ol>
-<h2 id="optimization-checklist"><a class="header" href="#optimization-checklist">Optimization Checklist</a></h2>
+<h2 id="优化清单"><a class="header" href="#优化清单">优化清单</a></h2>
 <ul>
-<li><input disabled="" type="checkbox" checked=""> Database Query Optimization (Index on <code>status</code> added in migration <code>20240101000001_add_index.sql</code>)</li>
-<li><input disabled="" type="checkbox" checked=""> Connection Pool Tuning (<code>max_connections(50)</code>)</li>
-<li><input disabled="" type="checkbox" checked=""> Compile Optimization (<code>lto = true</code>, <code>strip = true</code>)</li>
-<li><input disabled="" type="checkbox" checked=""> Async I/O (Using <code>tokio</code> and <code>sqlx</code> async pool)</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>数据库查询优化</strong>: 在 <code>status</code> 字段添加索引 (见 migration <code>20240101000001_add_index.sql</code>)。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>连接池调优</strong>: 设置 <code>max_connections(50)</code>。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>编译优化</strong>: 启用 <code>lto = true</code>, <code>strip = true</code>, <code>opt-level = 3</code>。</li>
+<li><input disabled="" type="checkbox" checked=""> <strong>异步 I/O</strong>: 全面使用 <code>tokio</code> 和 <code>sqlx</code> 的异步能力。</li>
 </ul>
-<h2 id="benchmarking-results"><a class="header" href="#benchmarking-results">Benchmarking Results</a></h2>
-<p>(Run the load test to see QPS)</p>
+<h2 id="基准测试结果"><a class="header" href="#基准测试结果">基准测试结果</a></h2>
+<p>(运行 load_test 示例可查看当前环境下的 QPS)</p>
 
                     </main>
 

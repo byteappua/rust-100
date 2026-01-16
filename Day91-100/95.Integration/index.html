@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-30b45ce4.js";
+            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -178,16 +178,56 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-95-外围模块与集成"><a class="header" href="#day-95-外围模块与集成">Day 95: 外围模块与集成</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的集成阶段，引入了 Web API 和监控体系。</p>
+<h2 id="开发目标"><a class="header" href="#开发目标">开发目标</a></h2>
+<ol>
+<li><strong>Web API</strong>: 使用 <code>Axum</code> 提供 RESTful 接口，方便前端和第三方系统集成。</li>
+<li><strong>认证授权</strong>: 实现基于 JWT 的用户认证。</li>
+<li><strong>监控指标</strong>: 集成 Prometheus 监控指标。</li>
+<li><strong>服务并存</strong>: 在同一个进程中同时运行 gRPC Server 和 HTTP Server。</li>
+</ol>
+<h2 id="完成内容"><a class="header" href="#完成内容">完成内容</a></h2>
+<h3 id="1-web-api-集成-apirs"><a class="header" href="#1-web-api-集成-apirs">1. Web API 集成 (<code>api.rs</code>)</a></h3>
 <ul>
-<li>认证中间件</li>
-<li>日志系统</li>
-<li>监控指标</li>
-<li>模块集成</li>
+<li>使用 <code>Axum</code> 0.7 构建了 HTTP 服务。</li>
+<li>提供了 <code>/api/login</code> (获取 Token) 和 <code>/api/tasks</code> (提交/查询任务) 接口。</li>
+<li>与 gRPC 服务共享底层的 <code>Arc&lt;Mutex&lt;Vec&lt;Task&gt;&gt;&gt;</code> 数据状态。</li>
 </ul>
+<h3 id="2-jwt-认证-authrs"><a class="header" href="#2-jwt-认证-authrs">2. JWT 认证 (<code>auth.rs</code>)</a></h3>
+<ul>
+<li>使用 <code>jsonwebtoken</code> 库实现了 Token 的生成 (<code>create_jwt</code>) 和验证 (<code>verify_jwt</code>)。</li>
+<li>实现了 <code>auth_middleware</code> 中间件，保护敏感 API 接口。</li>
+</ul>
+<h3 id="3-可观测性-metrics"><a class="header" href="#3-可观测性-metrics">3. 可观测性 (<code>metrics</code>)</a></h3>
+<ul>
+<li>集成 <code>prometheus</code> crate，定义了 <code>http_requests_total</code> 等基础指标。</li>
+<li>添加了 <code>/metrics</code> 端点，供 Prometheus Server 抓取数据。</li>
+</ul>
+<h3 id="4-服务编排-mainrs"><a class="header" href="#4-服务编排-mainrs">4. 服务编排 (<code>main.rs</code>)</a></h3>
+<ul>
+<li>修改了 <code>main.rs</code>，使用 <code>tokio::select!</code> 或 <code>join!</code> 同时启动：
+<ul>
+<li>gRPC Server (Port 50051)</li>
+<li>Axum HTTP Server (Port 3000)</li>
+<li>Dispatcher Loop</li>
+</ul>
+</li>
+</ul>
+<h2 id="运行方式"><a class="header" href="#运行方式">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/95.Integration/dtask
+
+# 启动服务
+cargo run
+
+# 测试 HTTP 接口
+# 1. 登录获取 Token (模拟)
+curl -X POST http://localhost:3000/api/login -H "Content-Type: application/json" -d '{"username":"admin", "password":"password"}'
+
+# 2. 获取 Metrics
+curl http://localhost:3000/metrics
+</code></pre>
 <h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
-<p>Day 96 将进行性能测试与调优。</p>
+<p>Day 96 将进行性能测试与调优，引入 SQLite 持久化并优化并发性能。</p>
 
                     </main>
 

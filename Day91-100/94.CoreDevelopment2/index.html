@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-30b45ce4.js";
+            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -178,15 +178,42 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的核心开发第二阶段。</p>
+<h2 id="开发目标"><a class="header" href="#开发目标">开发目标</a></h2>
+<ol>
+<li><strong>gRPC 服务实现</strong>: 完善 <code>TaskScheduler</code> 的 gRPC 接口实现。</li>
+<li><strong>任务分发器</strong>: 实现 <code>Dispatcher</code> 的后台轮询和执行逻辑。</li>
+<li><strong>状态共享</strong>: 解决服务间的数据共享和并发访问问题。</li>
+</ol>
+<h2 id="完成内容"><a class="header" href="#完成内容">完成内容</a></h2>
+<h3 id="1-grpc-调度器-taskscheduler"><a class="header" href="#1-grpc-调度器-taskscheduler">1. gRPC 调度器 (<code>TaskScheduler</code>)</a></h3>
 <ul>
-<li>继续核心功能开发</li>
-<li>模块间集成</li>
-<li>单元测试编写</li>
+<li>基于 <code>tonic</code> 实现了 <code>dtask.proto</code> 中定义的 <code>Scheduler</code> 服务。</li>
+<li>实现了 <code>submit_task</code> 接口，接收客户端请求并将任务存入共享状态。</li>
+<li>使用了 <code>Arc&lt;Mutex&lt;Vec&lt;Task&gt;&gt;&gt;</code> 作为临时的共享存储（后续将对接 Raft）。</li>
 </ul>
+<h3 id="2-任务分发器-dispatcher"><a class="header" href="#2-任务分发器-dispatcher">2. 任务分发器 (<code>Dispatcher</code>)</a></h3>
+<ul>
+<li>实现了后台轮询循环，定期检查待处理任务。</li>
+<li>模拟了任务执行过程（简单的打印日志和状态更新）。</li>
+<li>与 <code>TaskScheduler</code> 共享同一个任务列表，确保数据一致性。</li>
+</ul>
+<h3 id="3-主程序入口-mainrs"><a class="header" href="#3-主程序入口-mainrs">3. 主程序入口 (<code>main.rs</code>)</a></h3>
+<ul>
+<li>在 <code>tokio</code> 运行时中同时启动 gRPC Server 和 Dispatcher 后台任务。</li>
+<li>使用 <code>tokio::spawn</code> 运行 Dispatcher，避免阻塞 gRPC 服务。</li>
+</ul>
+<h2 id="运行方式"><a class="header" href="#运行方式">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/94.CoreDevelopment2/dtask
+
+# 启动服务端
+cargo run
+
+# 在另一个终端运行测试客户端
+cargo run --example client
+</code></pre>
 <h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
-<p>Day 95 将进行外围模块与集成。</p>
+<p>Day 95 将集成 Web API (Axum) 和认证模块，对外提供 HTTP 接口。</p>
 
                     </main>
 
