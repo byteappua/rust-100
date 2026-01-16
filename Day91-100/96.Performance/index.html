@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-73b09bd7.js";
+            window.path_to_searchindex_js = "../../searchindex-30b45ce4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -177,17 +177,39 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-96-性能测试与调优"><a class="header" href="#day-96-性能测试与调优">Day 96: 性能测试与调优</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+                        <h1 id="day-96-performance-testing-and-tuning"><a class="header" href="#day-96-performance-testing-and-tuning">Day 96: Performance Testing and Tuning</a></h1>
+<p>This directory contains the performance-optimized version of the <code>dtask</code> project.</p>
+<h2 id="changes"><a class="header" href="#changes">Changes</a></h2>
 <ul>
-<li>负载测试</li>
-<li>性能分析</li>
-<li>优化实施</li>
-<li>性能验证</li>
+<li><strong>Database</strong>: Migrated from in-memory <code>Vec&lt;Task&gt;</code> to <code>SQLite</code> using <code>sqlx</code>.</li>
+<li><strong>Schema</strong>: Added <code>tasks</code> table and an index on <code>status</code> for optimization.</li>
+<li><strong>Connection Pool</strong>: Configured <code>SqlitePool</code> with max connections.</li>
+<li><strong>Build Profile</strong>: Added <code>release</code> profile with <code>LTO</code> and <code>strip</code> enabled.</li>
 </ul>
-<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
-<p>Day 97 将进行文档编写与代码清理。</p>
+<h2 id="how-to-run"><a class="header" href="#how-to-run">How to Run</a></h2>
+<ol>
+<li>
+<p><strong>Start the Server</strong>:</p>
+<pre><code class="language-bash">cd dtask
+cargo run --release
+</code></pre>
+</li>
+<li>
+<p><strong>Run Load Test</strong>:</p>
+<pre><code class="language-bash">cd dtask
+cargo run --example load_test --release
+</code></pre>
+</li>
+</ol>
+<h2 id="optimization-checklist"><a class="header" href="#optimization-checklist">Optimization Checklist</a></h2>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Database Query Optimization (Index on <code>status</code> added in migration <code>20240101000001_add_index.sql</code>)</li>
+<li><input disabled="" type="checkbox" checked=""> Connection Pool Tuning (<code>max_connections(50)</code>)</li>
+<li><input disabled="" type="checkbox" checked=""> Compile Optimization (<code>lto = true</code>, <code>strip = true</code>)</li>
+<li><input disabled="" type="checkbox" checked=""> Async I/O (Using <code>tokio</code> and <code>sqlx</code> async pool)</li>
+</ul>
+<h2 id="benchmarking-results"><a class="header" href="#benchmarking-results">Benchmarking Results</a></h2>
+<p>(Run the load test to see QPS)</p>
 
                     </main>
 
