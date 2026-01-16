@@ -1,0 +1,23 @@
+[package]
+name = "mini-redis-cicd"
+version = "0.1.0"
+edition = "2021"
+authors = ["Rust 100 Days"]
+description = "A minimal Redis implementation in Rust - CI/CD Demo"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Start-Rust/100-days-of-rust"
+readme = "README.md"
+keywords = ["redis", "database", "async", "tokio"]
+categories = ["database", "network-programming"]
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+bytes = "1"
+
+[dev-dependencies]
+criterion = "0.5"
+# cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-test", "run-cargo-clippy", "run-cargo-fmt"] }
+
+[[bench]]
+name = "version_benchmark"
+harness = false

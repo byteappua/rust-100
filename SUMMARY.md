@@ -86,11 +86,11 @@
     - [Day 54: 客户端 SDK 实现](Day46-60/54.ClientSDK/README.md)
     - [Day 55: 性能基准测试](Day46-60/55.Benchmark/README.md)
 - [进阶功能]()
-    - [Day 56: 集群模式探索]()
-    - [Day 57: 哨兵与高可用]()
-    - [Day 58: 安全性 (TLS)]()
-    - [Day 59: 完善文档与示例]()
-    - [Day 60: 项目发布与 CI/CD]()
+    - [Day 56: 集群模式探索](Day46-60/56.ClusterMode/README.md)
+    - [Day 57: 哨兵与高可用](Day46-60/57.Sentinel/README.md)
+    - [Day 58: 安全性 (TLS)](Day46-60/58.TLS/README.md)
+    - [Day 59: 完善文档与示例](Day46-60/59.Documentation/README.md)
+    - [Day 60: 项目发布与 CI/CD](Day46-60/60.CICD/README.md)
 
 # 第五阶段：Web 开发实战 (Days 61-80)
 
