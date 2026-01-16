@@ -14,18 +14,27 @@ Askama 是一个类型安全的模板引擎，在编译时检查模板。
 
 ```toml
 [dependencies]
-askama = "0.12"
-askama_axum = "0.4"
-axum = "0.7"
+askama = "0.15"
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 ```
 
 ## 基本使用
 
-### 简单模板
+### 简单模板与 Axum 集成
+
+由于 Askama 0.13+ 移除了 `askama_axum` 集成库，我们需要手动实现 `IntoResponse` 包装器：
 
 ```rust
 use askama::Template;
-use axum::{response::Html, routing::get, Router};
+use axum::{
+    response::{Html, IntoResponse, Response},
+    routing::get,
+    Router,
+    http::StatusCode,
+};
 
 #[derive(Template)]
 #[template(path = "hello.html")]
@@ -33,11 +42,30 @@ struct HelloTemplate {
     name: String,
 }
 
-async fn hello() -> Html<String> {
+// 包装器结构体，用于为任意 Askama 模板实现 IntoResponse
+struct HtmlTemplate<T>(T);
+
+impl<T> IntoResponse for HtmlTemplate<T>
+where
+    T: Template,
+{
+    fn into_response(self) -> Response {
+        match self.0.render() {
+            Ok(html) => Html(html).into_response(),
+            Err(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to render template. Error: {}", err),
+            )
+                .into_response(),
+        }
+    }
+}
+
+async fn hello() -> impl IntoResponse {
     let template = HelloTemplate {
         name: "World".to_string(),
     };
-    Html(template.render().unwrap())
+    HtmlTemplate(template)
 }
 ```
 
@@ -156,20 +184,20 @@ struct BlogPostTemplate {
     comments: Vec<Comment>,
 }
 
-async fn blog_index(State(state): State<AppState>) -> Html<String> {
+async fn blog_index(State(state): State<AppState>) -> impl IntoResponse {
     let posts = get_all_posts(&state.db).await.unwrap();
     let template = BlogIndexTemplate { posts };
-    Html(template.render().unwrap())
+    HtmlTemplate(template)
 }
 
 async fn blog_post(
     State(state): State<AppState>,
     Path(id): Path<i32>
-) -> Html<String> {
+) -> impl IntoResponse {
     let post = get_post(&state.db, id).await.unwrap();
     let comments = get_comments(&state.db, id).await.unwrap();
     let template = BlogPostTemplate { post, comments };
-    Html(template.render().unwrap())
+    HtmlTemplate(template)
 }
 ```
 
