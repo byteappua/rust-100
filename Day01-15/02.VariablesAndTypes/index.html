@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
+            window.path_to_searchindex_js = "../../searchindex-1a72cc2b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,18 +178,32 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-02-变量与数据类型"><a class="header" href="#day-02-变量与数据类型">Day 02: 变量与数据类型</a></h1>
-<h2 id="1-变量与可变性"><a class="header" href="#1-变量与可变性">1. 变量与可变性</a></h2>
-<p>在 Rust 中，变量默认是<strong>不可变</strong>（Immutable）的。这是 Rust 推动编写安全且易于并发代码的重要方式之一。</p>
-<h3 id="声明变量"><a class="header" href="#声明变量">声明变量</a></h3>
-<p>使用 <code>let</code> 关键字声明变量：</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>理解 Rust 中的变量不可变性 (Immutability)</li>
+<li>掌握如何定义可变变量 (<code>mut</code>)</li>
+<li>了解常量 (<code>const</code>) 与变量的区别</li>
+<li>理解变量隐藏 (Shadowing) 的机制</li>
+<li>熟悉 Rust 的基本数据类型 (标量类型和复合类型)</li>
+</ul>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<p>变量和数据类型是任何编程语言的基石。在 Rust 中，这些概念尤为特殊：</p>
+<ul>
+<li><strong>默认不可变</strong>：这是 Rust 内存安全和并发安全设计的核心，强迫你思考数据的变化。</li>
+<li><strong>静态强类型</strong>：Rust 编译器在编译期就能捕获大量类型错误，避免运行时的崩溃。</li>
+<li><strong>隐藏 (Shadowing)</strong>：提供了一种优雅的方式来处理变量转换，而无需创建临时变量名。</li>
+</ul>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-变量与可变性"><a class="header" href="#1-变量与可变性">1. 变量与可变性</a></h3>
+<p>在 Rust 中，变量默认是<strong>不可变</strong>的。一旦值被绑定到一个变量名，你就不能改变它。</p>
+<h4 id="不可变变量"><a class="header" href="#不可变变量">不可变变量</a></h4>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let x = 5;
-println!("The value of x is: {}", x);
-// x = 6; // 这行代码会报错，因为 x 是不可变的
+// x = 6; // 编译错误！不能修改不可变变量
 <span class="boring">}</span></code></pre>
-<h3 id="可变变量"><a class="header" href="#可变变量">可变变量</a></h3>
-<p>如果你想让变量可变，需要在 <code>let</code> 后加上 <code>mut</code> 关键字：</p>
+<h4 id="可变变量"><a class="header" href="#可变变量">可变变量</a></h4>
+<p>如果你需要修改变量的值，必须使用 <code>mut</code> 关键字。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let mut x = 5;
@@ -197,87 +211,146 @@ println!("The value of x is: {}", x);
 x = 6;
 println!("The value of x is: {}", x);
 <span class="boring">}</span></code></pre>
-<h3 id="常量"><a class="header" href="#常量">常量</a></h3>
-<p>常量使用 <code>const</code> 关键字声明，必须注明类型，且只能被设置为常量表达式，不能是函数调用的结果。</p>
+<h3 id="2-常量-constants"><a class="header" href="#2-常量-constants">2. 常量 (Constants)</a></h3>
+<p>常量使用 <code>const</code> 关键字声明，必须注明类型。它们不仅不可变，而且总是不可变。</p>
+<ul>
+<li>可以在任何作用域声明，包括全局作用域。</li>
+<li>只能被设置为常量表达式，不能是函数调用的结果。</li>
+</ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>const MAX_POINTS: u32 = 100_000;
 <span class="boring">}</span></code></pre>
-<h3 id="隐藏-shadowing"><a class="header" href="#隐藏-shadowing">隐藏 (Shadowing)</a></h3>
-<p>你可以声明和前面变量同名的新变量，这被称为“隐藏”。通常用于类型转换。</p>
+<h3 id="3-隐藏-shadowing"><a class="header" href="#3-隐藏-shadowing">3. 隐藏 (Shadowing)</a></h3>
+<p>你可以声明和前面变量同名的新变量，新变量会“隐藏“旧变量。</p>
+<ul>
+<li>使用 <code>let</code> 关键字再次声明。</li>
+<li>可以改变变量的类型。</li>
+<li>原变量在隐藏后不可访问，但在作用域结束后如果新变量销毁，原变量不会恢复（因为是覆盖绑定）。</li>
+</ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let x = 5;
-let x = x + 1; // 新的 x 隐藏了旧的 x
-let x = "spaces"; // 甚至可以改变类型
+let x = x + 1; // x 现在是 6
+let x = "spaces"; // x 现在是字符串类型
 <span class="boring">}</span></code></pre>
-<h2 id="2-数据类型"><a class="header" href="#2-数据类型">2. 数据类型</a></h2>
-<p>Rust 是静态类型语言。如果不明确，编译器通常可以推断出类型。</p>
-<h3 id="标量类型-scalar-types"><a class="header" href="#标量类型-scalar-types">标量类型 (Scalar Types)</a></h3>
-<p>标量类型代表一个单独的值。</p>
-<ol>
-<li>
-<p><strong>整型 (Integer)</strong>:</p>
+<h3 id="4-数据类型"><a class="header" href="#4-数据类型">4. 数据类型</a></h3>
+<p>Rust 是静态类型语言，必须在编译期知道所有变量的类型。编译器通常可以根据值推断类型。</p>
+<h4 id="标量类型-scalar-types"><a class="header" href="#标量类型-scalar-types">标量类型 (Scalar Types)</a></h4>
+<p>代表一个单独的值。</p>
 <ul>
-<li>有符号: <code>i8</code>, <code>i16</code>, <code>i32</code> (默认), <code>i64</code>, <code>i128</code>, <code>isize</code></li>
-<li>无符号: <code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
+<li><strong>整型</strong>: <code>i8</code> - <code>i128</code>, <code>u8</code> - <code>u128</code>, <code>isize</code>, <code>usize</code> (基于架构)。默认为 <code>i32</code>。</li>
+<li><strong>浮点型</strong>: <code>f32</code>, <code>f64</code>. 默认为 <code>f64</code>。</li>
+<li><strong>布尔型</strong>: <code>bool</code> (<code>true</code>, <code>false</code>).</li>
+<li><strong>字符型</strong>: <code>char</code>. 代表 Unicode 标量值 (4字节)。例如 <code>'a'</code>, <code>'ℤ'</code>, <code>'😻'</code>.</li>
 </ul>
-</li>
-<li>
-<p><strong>浮点型 (Floating-Point)</strong>:</p>
+<h4 id="复合类型-compound-types"><a class="header" href="#复合类型-compound-types">复合类型 (Compound Types)</a></h4>
+<p>可以将多个值组合成一个类型。</p>
 <ul>
-<li><code>f32</code></li>
-<li><code>f64</code> (默认)</li>
-</ul>
-</li>
-<li>
-<p><strong>布尔型 (Boolean)</strong>:</p>
-<ul>
-<li><code>bool</code> (值为 <code>true</code> 或 <code>false</code>)</li>
-</ul>
-</li>
-<li>
-<p><strong>字符类型 (Character)</strong>:</p>
-<ul>
-<li><code>char</code> (4字节，代表 Unicode 标量值)</li>
-</ul>
-</li>
-</ol>
-<h3 id="复合类型-compound-types"><a class="header" href="#复合类型-compound-types">复合类型 (Compound Types)</a></h3>
-<ol>
 <li>
 <p><strong>元组 (Tuple)</strong>:</p>
 <ul>
-<li>可以将多个不同类型的值组合在一起。</li>
 <li>长度固定。</li>
+<li>可以包含不同类型。</li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let tup: (i32, f64, u8) = (500, 6.4, 1);
 let (x, y, z) = tup; // 解构
-let five_hundred = tup.0; // 索引访问
+let five_hundred = tup.0; // 点号访问
 <span class="boring">}</span></code></pre>
 </li>
 <li>
 <p><strong>数组 (Array)</strong>:</p>
 <ul>
-<li>包含多个相同类型的值。</li>
 <li>长度固定。</li>
+<li>必须包含相同类型。</li>
+<li>数据存储在栈 (stack) 上。</li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let a = [1, 2, 3, 4, 5];
 let first = a[0];
+let months = ["January", "February", "March"];
 <span class="boring">}</span></code></pre>
 </li>
-</ol>
-<h2 id="3-练习"><a class="header" href="#3-练习">3. 练习</a></h2>
-<p>创建一个名为 <code>variables</code> 的项目，尝试以下操作：</p>
+</ul>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-1-变量与可变性"><a class="header" href="#示例-1-变量与可变性">示例 1: 变量与可变性</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let x = 5;
+    println!("x = {}", x);
+    // x = 6; // 错误
+
+    let mut y = 10;
+    println!("y = {}", y);
+    y = 20;
+    println!("y updated = {}", y);
+}</code></pre>
+<h3 id="示例-2-变量隐藏"><a class="header" href="#示例-2-变量隐藏">示例 2: 变量隐藏</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let spaces = "   "; // 字符串类型
+    let spaces = spaces.len(); // usize 类型
+    println!("Spaces length: {}", spaces);
+}</code></pre>
+<h3 id="示例-3-数学运算"><a class="header" href="#示例-3-数学运算">示例 3: 数学运算</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    // 加法
+    let sum = 5 + 10;
+    // 减法
+    let difference = 95.5 - 4.3;
+    // 乘法
+    let product = 4 * 30;
+    // 除法
+    let quotient = 56.7 / 32.2;
+    let floored = 2 / 3; // 结果为 0
+    // 取余
+    let remainder = 43 % 5;
+
+    println!("Sum: {}", sum);
+}</code></pre>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>我们为你准备了专门的练习题来巩固这些概念。</p>
+<ul>
+<li><strong>练习 1</strong>: 变量绑定与可变性</li>
+<li><strong>练习 2</strong>: 基本数据类型的使用</li>
+<li><strong>练习 3</strong>: 元组和数组的操作</li>
+</ul>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
+<h3 id="q1-为什么-rust-默认变量是不可变的"><a class="header" href="#q1-为什么-rust-默认变量是不可变的">Q1: 为什么 Rust 默认变量是不可变的？</a></h3>
+<p>A: 这是一个权衡。不可变性使得代码更易于推理（尤其是在并发环境下），消除了“数据竞争“的一大来源。当你明确需要修改数据时，<code>mut</code> 关键字作为一个显式的标记，提醒读者注意这里的状态变化。</p>
+<h3 id="q2-let-隐藏-shadowing-和-mut-有什么区别"><a class="header" href="#q2-let-隐藏-shadowing-和-mut-有什么区别">Q2: <code>let</code> 隐藏 (Shadowing) 和 <code>mut</code> 有什么区别？</a></h3>
+<p>A:</p>
 <ol>
-<li>定义一个不可变变量，尝试修改它，观察编译器错误。</li>
-<li>定义一个可变变量，修改它的值。</li>
-<li>定义一个元组，包含你的年龄（整数）和身高（浮点数），并打印出来。</li>
+<li><code>mut</code> 允许你改变同一个变量绑定的<strong>值</strong>，但不能改变<strong>类型</strong>。</li>
+<li>Shadowing 是使用 <code>let</code> 声明了一个<strong>全新</strong>的变量，只是名字相同。它可以改变<strong>类型</strong>，也可以改变<strong>可变性</strong>（例如从可变变为不可变）。</li>
 </ol>
+<h3 id="q3-什么时候应该用数组什么时候用-vector"><a class="header" href="#q3-什么时候应该用数组什么时候用-vector">Q3: 什么时候应该用数组，什么时候用 Vector？</a></h3>
+<p>A: 数组长度是固定的，分配在栈上，速度快。如果你知道元素的数量不会改变（比如月份、一周的天数），用数组。如果你需要动态增删元素，使用标准库提供的 <code>Vec&lt;T&gt;</code>（向量）。</p>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ul>
+<li><strong>优先不可变</strong>：除非你确定需要修改它，否则不要加 <code>mut</code>。</li>
+<li><strong>显式类型标注</strong>：虽然编译器能推断类型，但在定义复杂类型或公共 API 时，显式标注类型能提高代码可读性。</li>
+<li><strong>使用下划线</strong>：在数字字面量中使用 <code>_</code> 提高可读性，如 <code>1_000_000</code>。</li>
+<li><strong>未使用的变量</strong>：如果声明了变量但未被使用，编译器会警告。如果你是有意为之，给变量名加下划线前缀 <code>_x</code>。</li>
+</ul>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html">Rust 程序设计语言 - 变量和可变性</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch03-02-data-types.html">Rust 程序设计语言 - 数据类型</a></li>
+</ul>
+<h2 id="-本节要点回顾"><a class="header" href="#-本节要点回顾">📚 本节要点回顾</a></h2>
+<ul>
+<li>变量默认不可变，需用 <code>mut</code> 声明可变。</li>
+<li>常量 <code>const</code> 始终不可变且需标注类型。</li>
+<li>Shadowing 允许重用变量名并改变类型。</li>
+<li>标量类型包括整数、浮点数、布尔值和字符。</li>
+<li>复合类型包括元组（异构、定长）和数组（同构、定长）。</li>
+</ul>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>熟悉了数据的存储方式，接下来我们将学习如何控制程序的执行流程。</p>
+<p>下一节: <a href="../03.FunctionsAndControlFlow/README.html">Day 03: 函数与控制流</a></p>
 
                     </main>
 

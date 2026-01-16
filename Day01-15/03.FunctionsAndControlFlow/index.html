@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
+            window.path_to_searchindex_js = "../../searchindex-1a72cc2b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,119 +178,140 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-03-函数与控制流"><a class="header" href="#day-03-函数与控制流">Day 03: 函数与控制流</a></h1>
-<h2 id="1-函数-functions"><a class="header" href="#1-函数-functions">1. 函数 (Functions)</a></h2>
-<p>函数在 Rust 代码中非常普遍。你已经见过语言中最重要的函数之一：<code>main</code> 函数，它是许多程序的入口点。</p>
-<h3 id="定义函数"><a class="header" href="#定义函数">定义函数</a></h3>
-<p>使用 <code>fn</code> 关键字定义函数。</p>
-<pre class="playground"><code class="language-rust">fn main() {
-    println!("Hello, world!");
-    another_function();
-}
-
-fn another_function() {
-    println!("Another function.");
-}</code></pre>
-<h3 id="参数-parameters"><a class="header" href="#参数-parameters">参数 (Parameters)</a></h3>
-<p>Rust 是强类型语言，定义函数时必须指定参数的类型。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>fn print_labeled_measurement(value: i32, unit_label: char) {
-    println!("The measurement is: {}{}", value, unit_label);
-}
-<span class="boring">}</span></code></pre>
-<h3 id="语句与表达式-statements-and-expressions"><a class="header" href="#语句与表达式-statements-and-expressions">语句与表达式 (Statements and Expressions)</a></h3>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li><strong>语句</strong>：执行操作但不返回值的指令。</li>
-<li><strong>表达式</strong>：计算并产生一个值。</li>
+<li>掌握 Rust 函数的定义与调用</li>
+<li>理解参数传递与返回值机制</li>
+<li>区分<strong>语句</strong> (Statements) 与<strong>表达式</strong> (Expressions)</li>
+<li>熟练使用 <code>if</code> 条件表达式</li>
+<li>掌握三种循环结构：<code>loop</code>, <code>while</code>, <code>for</code></li>
 </ul>
-<p>Rust 是基于表达式的语言。注意表达式末尾没有分号。如果加了分号，它就变成了语句，不再返回值。</p>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<ul>
+<li><strong>函数</strong>是代码复用和模块化的基本单元。</li>
+<li><strong>表达式</strong>是 Rust 的核心特性之一，理解它对于写出“Rust味“（Idiomatic）的代码至关重要。</li>
+<li><strong>控制流</strong>决定了程序的逻辑走向，灵活运用循环和判断是解决问题的基础。</li>
+</ul>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-函数-functions"><a class="header" href="#1-函数-functions">1. 函数 (Functions)</a></h3>
+<p>函数使用 <code>fn</code> 关键字定义。Rust 代码中的函数定义顺序不重要，只要编译器能找到即可。</p>
+<h4 id="参数-parameters"><a class="header" href="#参数-parameters">参数 (Parameters)</a></h4>
+<p>Rust 是强类型语言，必须在函数签名中显式指定每个参数的类型。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let y = {
-    let x = 3;
-    x + 1 // 这是一个表达式，返回 4
-};
+</span>fn print_sum(a: i32, b: i32) {
+    println!("Sum: {}", a + b);
+}
 <span class="boring">}</span></code></pre>
-<h3 id="具有返回值的函数"><a class="header" href="#具有返回值的函数">具有返回值的函数</a></h3>
-<p>函数可以向调用它的代码返回值。不需要命名返回值，但必须声明它们的类型。使用 <code>-&gt;</code> 箭头。</p>
+<h4 id="返回值-return-values"><a class="header" href="#返回值-return-values">返回值 (Return Values)</a></h4>
+<p>函数可以有返回值。在箭头 <code>-&gt;</code> 后声明返回类型。
+在 Rust 中，函数的最后一个表达式（没有分号）将作为返回值。也可以使用 <code>return</code> 关键字提前返回。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>fn five() -&gt; i32 {
+</span>fn add_one(x: i32) -&gt; i32 {
+    x + 1 // 注意这里没有分号，这是一个表达式
+}
+<span class="boring">}</span></code></pre>
+<h3 id="2-语句与表达式"><a class="header" href="#2-语句与表达式">2. 语句与表达式</a></h3>
+<p>这是 Rust 与很多其他语言的一个重要区别：</p>
+<ul>
+<li><strong>语句 (Statements)</strong>：执行操作但不返回值。例如 <code>let x = 6;</code>。</li>
+<li><strong>表达式 (Expressions)</strong>：进行计算并产生一个值。例如 <code>5 + 6</code>，或者 <code>{ let x = 3; x + 1 }</code>。</li>
+</ul>
+<p><strong>关键规则</strong>：如果表达式末尾加上分号，它就变成了语句，不再返回值（或者说返回单元类型 <code>()</code>）。</p>
+<h3 id="3-控制流-control-flow"><a class="header" href="#3-控制流-control-flow">3. 控制流 (Control Flow)</a></h3>
+<h4 id="if-表达式"><a class="header" href="#if-表达式"><code>if</code> 表达式</a></h4>
+<p><code>if</code> 在 Rust 中是一个表达式，这意味着它可以返回值。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let number = if condition { 5 } else { 6 };
+<span class="boring">}</span></code></pre>
+<h4 id="循环-loops"><a class="header" href="#循环-loops">循环 (Loops)</a></h4>
+<p>Rust 提供了三种循环：</p>
+<ol>
+<li><strong><code>loop</code></strong>: 无限循环。可以使用 <code>break</code> 退出，甚至通过 <code>break value</code> 返回值。</li>
+<li><strong><code>while</code></strong>: 当条件为真时循环。</li>
+<li><strong><code>for</code></strong>: 遍历集合或范围。这是 Rust 中最常用、最安全的循环方式。</li>
+</ol>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-1-具有返回值的函数"><a class="header" href="#示例-1-具有返回值的函数">示例 1: 具有返回值的函数</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let x = five();
+    println!("The value of x is: {}", x);
+}
+
+fn five() -&gt; i32 {
     5 // 隐式返回
-}
-
-fn plus_one(x: i32) -&gt; i32 {
-    x + 1
-}
-<span class="boring">}</span></code></pre>
-<h2 id="2-控制流-control-flow"><a class="header" href="#2-控制流-control-flow">2. 控制流 (Control Flow)</a></h2>
-<h3 id="if-表达式"><a class="header" href="#if-表达式">if 表达式</a></h3>
-<p><code>if</code> 表达式允许根据条件执行不同的代码分支。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let number = 3;
-
-if number &lt; 5 {
-    println!("condition was true");
-} else {
-    println!("condition was false");
-}
-<span class="boring">}</span></code></pre>
-<p>因为 <code>if</code> 是一个表达式，我们可以要在 <code>let</code> 语句的右侧使用它：</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let condition = true;
-let number = if condition { 5 } else { 6 };
-<span class="boring">}</span></code></pre>
-<h3 id="循环-loops"><a class="header" href="#循环-loops">循环 (Loops)</a></h3>
-<p>Rust 有三种循环：<code>loop</code>、<code>while</code> 和 <code>for</code>。</p>
-<ol>
-<li>
-<p><strong>loop</strong>: 无限循环，直到显式停止 (<code>break</code>)。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let mut counter = 0;
-let result = loop {
-    counter += 1;
-    if counter == 10 {
-        break counter * 2; // 可以返回值
+}</code></pre>
+<h3 id="示例-2-if-作为表达式"><a class="header" href="#示例-2-if-作为表达式">示例 2: <code>if</code> 作为表达式</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let condition = true;
+    // if 分支和 else 分支返回的类型必须相同
+    let number = if condition { 5 } else { 6 };
+    println!("The value of number is: {}", number);
+}</code></pre>
+<h3 id="示例-3-loop-循环返回值"><a class="header" href="#示例-3-loop-循环返回值">示例 3: <code>loop</code> 循环返回值</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let mut counter = 0;
+    let result = loop {
+        counter += 1;
+        if counter == 10 {
+            break counter * 2; // 返回 20
+        }
+    };
+    println!("The result is {}", result);
+}</code></pre>
+<h3 id="示例-4-for-循环遍历"><a class="header" href="#示例-4-for-循环遍历">示例 4: <code>for</code> 循环遍历</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    // 遍历范围 (左闭右开)
+    for number in 1..4 {
+        println!("{}!", number);
     }
-};
-<span class="boring">}</span></code></pre>
-</li>
-<li>
-<p><strong>while</strong>: 条件循环。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let mut number = 3;
-while number != 0 {
-    println!("{}!", number);
-    number -= 1;
-}
-<span class="boring">}</span></code></pre>
-</li>
-<li>
-<p><strong>for</strong>: 遍历集合。这是最常用的循环方式，因为安全且简洁。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let a = [10, 20, 30, 40, 50];
-for element in a {
-    println!("the value is: {}", element);
-}
 
-// Range
-for number in (1..4).rev() {
-    println!("{}!", number);
-}
-<span class="boring">}</span></code></pre>
-</li>
-</ol>
-<h2 id="3-练习"><a class="header" href="#3-练习">3. 练习</a></h2>
-<ol>
-<li>编写一个函数，将摄氏温度转换为华氏温度。</li>
-<li>生成第 n 个斐波那契数。</li>
-<li>打印圣诞颂歌 “The Twelve Days of Christmas” 的歌词，利用循环重复的部分。</li>
-</ol>
+    // 遍历数组
+    let a = [10, 20, 30];
+    for element in a {
+        println!("Value: {}", element);
+    }
+}</code></pre>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>我们为你准备了专门的练习题来巩固这些概念。</p>
+<ul>
+<li><strong>练习 1</strong>: 编写简单的数学函数</li>
+<li><strong>练习 2</strong>: 使用 <code>if</code> 表达式处理条件</li>
+<li><strong>练习 3</strong>: 斐波那契数列生成</li>
+<li><strong>练习 4</strong>: 摄氏度与华氏度转换</li>
+</ul>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
+<h3 id="q1-为什么函数最后一行不加分号"><a class="header" href="#q1-为什么函数最后一行不加分号">Q1: 为什么函数最后一行不加分号？</a></h3>
+<p>A: 在 Rust 中，不加分号表示这是一个<strong>表达式</strong>，它的值会被返回。如果加了分号，它就变成了<strong>语句</strong>，返回值变成 <code>()</code>（单元类型），这通常会导致类型不匹配的编译错误。</p>
+<h3 id="q2-for-循环中的-14-是什么"><a class="header" href="#q2-for-循环中的-14-是什么">Q2: <code>for</code> 循环中的 <code>1..4</code> 是什么？</a></h3>
+<p>A: 这是一个 <code>Range</code> 类型，表示从 1 到 3 的序列（包含 1，不包含 4）。如果想要包含 4，可以使用 <code>1..=4</code>。</p>
+<h3 id="q3-什么时候用-loop什么时候用-while"><a class="header" href="#q3-什么时候用-loop什么时候用-while">Q3: 什么时候用 <code>loop</code>，什么时候用 <code>while</code>？</a></h3>
+<p>A: 如果你需要一个无限循环（例如服务器的主循环），或者需要在循环结束时返回一个值，使用 <code>loop</code>。如果循环取决于某个条件，使用 <code>while</code>。但大多数情况下，遍历集合或范围时应优先使用 <code>for</code>，因为它更安全（不会越界）且性能更好（编译器优化）。</p>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ul>
+<li><strong>优先使用表达式</strong>：利用 Rust 基于表达式的特性，减少临时变量的声明。</li>
+<li><strong>优先使用 <code>for</code> 循环</strong>：相比 <code>while</code> 和索引访问，<code>for</code> 循环更简洁且不易出错。</li>
+<li><strong>函数简短专注</strong>：保持函数短小，只做一件事，有助于代码复用和测试。</li>
+</ul>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch03-03-how-functions-work.html">Rust 程序设计语言 - 函数</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch03-05-control-flow.html">Rust 程序设计语言 - 控制流</a></li>
+</ul>
+<h2 id="-本节要点回顾"><a class="header" href="#-本节要点回顾">📚 本节要点回顾</a></h2>
+<ul>
+<li>函数参数必须标注类型。</li>
+<li>函数最后一个表达式作为返回值（无分号）。</li>
+<li><code>if</code> 是表达式，可以赋值给变量。</li>
+<li><code>loop</code> 是无限循环，可以返回值。</li>
+<li><code>for</code> 循环是遍历集合的首选。</li>
+</ul>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>有了变量、函数和控制流的基础，接下来我们将进入 Rust 最独特、最核心的概念——所有权。这是 Rust 内存安全的关键。</p>
+<p>下一节: <a href="../04.Ownership/README.html">Day 04: 所有权</a></p>
 
                     </main>
 
