@@ -134,7 +134,7 @@
 - [阶段概览](Day81-90/STAGE6_OVERVIEW.md)
 - [系统编程]()
     - [Day 81: 操作系统概念回顾](Day81-90/81.OSConcepts/README.md)
-    - [Day 82: 文件系统操作深入]()
+    - [Day 82: 文件系统操作深入](Day81-90/82.FileSystem/README.md)
     - [Day 83: 进程管理与信号处理](Day81-90/83.ProcessManagement/README.md)
     - [Day 84: 原始套接字 (Raw Sockets)](Day81-90/84.RawSockets/README.md)
     - [Day 85: 嵌入式 Rust 简介](Day81-90/85.EmbeddedRust/README.md)
