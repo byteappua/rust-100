@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-eb0ad07d.js";
+            window.path_to_searchindex_js = "searchindex-4c4eb806.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-87d7fd95.js"></script>
+        <script src="toc-ad554735.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -2318,6 +2318,474 @@ tokio = { version = "1", features = ["full"] }
 let f2 = task_two();
 tokio::join!(f1, f2);
 <span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-36-unsafe-rust-介绍"><a class="header" href="#day-36-unsafe-rust-介绍">Day 36: Unsafe Rust 介绍</a></h1>
+<p>Rust 的核心承诺是内存安全。然而，Rust 也提供了一种逃生舱（Escape Hatch），称为 <strong>Unsafe Rust</strong>。它允许你绕过编译器的某些安全检查，以获得对内存和底层硬件的更多控制。</p>
+<h2 id="为什么需要-unsafe-rust"><a class="header" href="#为什么需要-unsafe-rust">为什么需要 Unsafe Rust？</a></h2>
+<ol>
+<li><strong>底层系统编程</strong>：直接与操作系统或硬件交互。</li>
+<li><strong>性能优化</strong>：在借用检查器无法理解代码安全性的情况下，手动管理内存以提升性能。</li>
+<li><strong>互操作性 (FFI)</strong>：调用 C 语言或其他语言的代码。</li>
+</ol>
+<h2 id="unsafe-的-5-种超能力"><a class="header" href="#unsafe-的-5-种超能力">Unsafe 的 5 种超能力</a></h2>
+<p>在 <code>unsafe</code> 块中，你可以执行以下 5 种在安全 Rust 中被禁止的操作：</p>
+<ol>
+<li>解引用裸指针。</li>
+<li>调用不安全的函数或方法。</li>
+<li>访问或修改可变静态变量。</li>
+<li>实现不安全的 Trait。</li>
+<li>访问 <code>union</code> 的字段。</li>
+</ol>
+<blockquote>
+<p>注意：<code>unsafe</code> 并不会关闭借用检查器或禁用其他 Rust 安全检查。它只是赋予了你上述特定的权限。你仍然需要对自己写的代码的安全性负责。</p>
+</blockquote>
+<h2 id="1-裸指针-raw-pointers"><a class="header" href="#1-裸指针-raw-pointers">1. 裸指针 (Raw Pointers)</a></h2>
+<p>裸指针 (<code>*const T</code> 和 <code>*mut T</code>) 类似于 C 语言的指针。与引用不同：</p>
+<ul>
+<li>允许忽略借用规则（可以同时拥有多个可变指针）。</li>
+<li>不保证指向有效的内存。</li>
+<li>允许为空。</li>
+<li>不实现自动清理。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut num = 5;
+
+// 创建裸指针是安全的
+let r1 = &amp;num as *const i32;
+let r2 = &amp;mut num as *mut i32;
+
+unsafe {
+    // 解引用裸指针是不安全的
+    println!("r1 is: {}", *r1);
+    *r2 = 10;
+}
+<span class="boring">}</span></code></pre>
+<h2 id="2-调用不安全的函数"><a class="header" href="#2-调用不安全的函数">2. 调用不安全的函数</a></h2>
+<p>如果一个函数被标记为 <code>unsafe</code>，说明编译器无法验证其安全性，需要程序员担保。</p>
+<pre class="playground"><code class="language-rust">unsafe fn dangerous() {}
+
+fn main() {
+    unsafe {
+        dangerous();
+    }
+}</code></pre>
+<h2 id="3-创建安全抽象"><a class="header" href="#3-创建安全抽象">3. 创建安全抽象</a></h2>
+<p>通常我们将 unsafe 代码封装在安全的 API 后面。例如，标准库的 <code>split_at_mut</code> 方法内部使用了 unsafe 代码来分割切片，但对外提供了安全的接口。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::slice;
+
+fn split_at_mut(values: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) {
+    let len = values.len();
+    let ptr = values.as_mut_ptr();
+
+    assert!(mid &lt;= len);
+
+    unsafe {
+        (
+            slice::from_raw_parts_mut(ptr, mid),
+            slice::from_raw_parts_mut(ptr.add(mid), len - mid),
+        )
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-访问可变静态变量"><a class="header" href="#4-访问可变静态变量">4. 访问可变静态变量</a></h2>
+<p>全局变量在 Rust 中称为静态变量 (<code>static</code>)。如果它们是可变的 (<code>static mut</code>)，多线程访问可能会导致数据竞争，因此访问它们必须在 <code>unsafe</code> 块中。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>static mut COUNTER: u32 = 0;
+
+fn add_to_count(inc: u32) {
+    unsafe {
+        COUNTER += inc;
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="5-ffi-外部函数接口"><a class="header" href="#5-ffi-外部函数接口">5. FFI (外部函数接口)</a></h2>
+<p>调用 C 语言库函数需要使用 <code>extern</code> 块，并且调用过程是 unsafe 的。</p>
+<pre class="playground"><code class="language-rust">extern "C" {
+    fn abs(input: i32) -&gt; i32;
+}
+
+fn main() {
+    unsafe {
+        println!("Absolute value of -3: {}", abs(-3));
+    }
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-37-过程宏-procedural-macros"><a class="header" href="#day-37-过程宏-procedural-macros">Day 37: 过程宏 (Procedural Macros)</a></h1>
+<p>宏（Macros）是 Rust 中一种进行<strong>元编程</strong>（Meta-programming）的方式，即编写“写代码的代码”。</p>
+<p>在 Day 30 中我们提到了<strong>声明宏</strong>（<code>macro_rules!</code>）。今天我们将深入探讨更强大的<strong>过程宏</strong>（Procedural Macros）。</p>
+<h2 id="过程宏-vs-声明宏"><a class="header" href="#过程宏-vs-声明宏">过程宏 vs 声明宏</a></h2>
+<ul>
+<li><strong>声明宏</strong>：类似于模式匹配替换。简单，易读，但能力有限。</li>
+<li><strong>过程宏</strong>：函数形式，接受 Rust 代码作为输入（TokenStream），对其进行操作，并生成新的 Rust 代码作为输出。它就像是一个运行在编译期间的插件。</li>
+</ul>
+<p>过程宏必须定义在独立的 crate 中，且该 crate 的类型必须标记为 <code>proc-macro</code>。</p>
+<h2 id="过程宏的三种类型"><a class="header" href="#过程宏的三种类型">过程宏的三种类型</a></h2>
+<ol>
+<li><strong>自定义派生宏 (Custom Derive Macro)</strong>: <code>#[derive(CustomDerive)]</code>，用于结构体和枚举。</li>
+<li><strong>属性宏 (Attribute Macro)</strong>: <code>#[CustomAttribute]</code>，可用于函数、结构体、模块等。</li>
+<li><strong>函数宏 (Function-like Macro)</strong>: <code>custom!(...)</code>，看起来像声明宏，但更灵活。</li>
+</ol>
+<h2 id="本日实战实现一个-hellomacro-派生宏"><a class="header" href="#本日实战实现一个-hellomacro-派生宏">本日实战：实现一个 <code>HelloMacro</code> 派生宏</a></h2>
+<p>我们将实现一个类似于 <code>Debug</code> 的 derive 宏。任何添加了 <code>#[derive(HelloMacro)]</code> 的结构体，都会自动获得一个 <code>hello_macro</code> 关联函数，打印出该结构体的名称。</p>
+<h3 id="核心库"><a class="header" href="#核心库">核心库</a></h3>
+<p>编写过程宏通常需要两个核心库：</p>
+<ol>
+<li><strong><code>syn</code></strong>: 将 Rust 代码（TokenStream）解析为语法树（AST），方便我们分析代码结构（如获取结构体名称）。</li>
+<li><strong><code>quote</code></strong>: 将语法树或我们构建的数据结构转换回 Rust 代码（TokenStream）。</li>
+</ol>
+<h3 id="代码结构-1"><a class="header" href="#代码结构-1">代码结构</a></h3>
+<p>由于过程宏必须在独立的 crate 中，本章节的项目结构如下：</p>
+<ul>
+<li>根目录 (消费者): 定义 Trait，使用宏。</li>
+<li><code>hello_macro_derive/</code> (宏定义): 这是一个库 crate，设置了 <code>proc-macro = true</code>。</li>
+</ul>
+<h3 id="实现细节"><a class="header" href="#实现细节">实现细节</a></h3>
+<p>在 <code>hello_macro_derive/src/lib.rs</code> 中：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[proc_macro_derive(HelloMacro)]
+pub fn hello_macro_derive(input: TokenStream) -&gt; TokenStream {
+    // 1. 解析输入代码
+    let ast = syn::parse(input).unwrap();
+
+    // 2. 构建实现
+    impl_hello_macro(&amp;ast)
+}
+<span class="boring">}</span></code></pre>
+<p>我们利用 <code>quote!</code> 宏来生成代码模板：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn impl_hello_macro(ast: &amp;syn::DeriveInput) -&gt; TokenStream {
+    let name = &amp;ast.ident;
+    let gen = quote! {
+        impl HelloMacro for #name {
+            fn hello_macro() {
+                println!("Hello, Macro! My name is {}!", stringify!(#name));
+            }
+        }
+    };
+    gen.into()
+}
+<span class="boring">}</span></code></pre>
+<h3 id="使用宏"><a class="header" href="#使用宏">使用宏</a></h3>
+<pre class="playground"><code class="language-rust">#[derive(HelloMacro)]
+struct Pancakes;
+
+fn main() {
+    Pancakes::hello_macro(); // 输出: Hello, Macro! My name is Pancakes!
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-38-ffi---与-c-语言交互"><a class="header" href="#day-38-ffi---与-c-语言交互">Day 38: FFI - 与 C 语言交互</a></h1>
+<p>Rust 拥有强大的<strong>外部函数接口 (Foreign Function Interface, FFI)</strong>，这使得它可以无缝地调用 C 语言代码，或者被 C 语言调用。这对于利用现有的 C 库生态系统或将 Rust 集成到现有的 C/C++ 项目中至关重要。</p>
+<h2 id="核心概念"><a class="header" href="#核心概念">核心概念</a></h2>
+<ol>
+<li><strong><code>extern "C"</code> 块</strong>: 用于在 Rust 中声明 C 语言定义的函数签名。</li>
+<li><strong><code>unsafe</code> 块</strong>: 调用外部函数被认为是不安全的，因为编译器无法检查 C 代码的内存安全性和类型正确性。</li>
+<li><strong><code>#[repr(C)]</code></strong>: 告诉 Rust 编译器按照 C 语言的规则来布局结构体内存，以确保两边看到的数据结构一致。</li>
+<li><strong><code>libc</code> crate</strong>: 提供了 C 标准库中的类型定义（如 <code>c_int</code>, <code>c_void</code> 等），确保跨平台兼容性。</li>
+</ol>
+<h2 id="本日实战rust-调用-c-代码"><a class="header" href="#本日实战rust-调用-c-代码">本日实战：Rust 调用 C 代码</a></h2>
+<p>我们将创建一个包含 C 代码的 Cargo 项目，并使用 <code>cc</code> crate 在构建时编译 C 代码，然后在 Rust 中调用它。</p>
+<h3 id="1-编译-c-代码-buildrs"><a class="header" href="#1-编译-c-代码-buildrs">1. 编译 C 代码 (<code>build.rs</code>)</a></h3>
+<p>Cargo 允许通过 <code>build.rs</code> 脚本自定义构建过程。我们使用 <code>cc</code> crate 来编译 <code>src/mylib.c</code>。</p>
+<pre><code class="language-toml"># Cargo.toml
+[build-dependencies]
+cc = "1.0"
+</code></pre>
+<pre class="playground"><code class="language-rust">// build.rs
+fn main() {
+    cc::Build::new()
+        .file("src/mylib.c")
+        .compile("mylib");
+}</code></pre>
+<h3 id="2-声明与调用-mainrs"><a class="header" href="#2-声明与调用-mainrs">2. 声明与调用 (<code>main.rs</code>)</a></h3>
+<p>在 Rust 中，我们需要使用 <code>extern "C"</code> 声明 C 函数。</p>
+<pre class="playground"><code class="language-rust">use std::os::raw::c_int;
+
+extern "C" {
+    fn c_add(a: c_int, b: c_int) -&gt; c_int;
+}
+
+fn main() {
+    unsafe {
+        println!("Result: {}", c_add(10, 20));
+    }
+}</code></pre>
+<h3 id="3-处理字符串-cstring-vs-cstr"><a class="header" href="#3-处理字符串-cstring-vs-cstr">3. 处理字符串 (<code>CString</code> vs <code>CStr</code>)</a></h3>
+<p>Rust 的字符串 (<code>String</code>, <code>&amp;str</code>) 不是以空字符结尾的，而 C 字符串是 (<code>char*</code>)。</p>
+<ul>
+<li><strong><code>std::ffi::CString</code></strong>: 用于创建拥有所有权的、兼容 C 的字符串（自动添加 <code>\0</code>）。用于传给 C。</li>
+<li><strong><code>std::ffi::CStr</code></strong>: 用于借用 C 字符串。用于从 C 接收。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::ffi::CString;
+
+let c_name = CString::new("Rust").expect("Failed");
+unsafe {
+    c_print_hello(c_name.as_ptr());
+}
+<span class="boring">}</span></code></pre>
+<h3 id="4-结构体布局-reprc"><a class="header" href="#4-结构体布局-reprc">4. 结构体布局 (<code>#[repr(C)]</code>)</a></h3>
+<p>如果要在 Rust 和 C 之间传递结构体，必须保证内存布局一致。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[repr(C)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+<span class="boring">}</span></code></pre>
+<blockquote>
+<p><strong>注意</strong>: 在实际项目中，手动维护 FFI 绑定非常繁琐且容易出错。通常建议使用 <strong><code>bindgen</code></strong> 工具自动生成 Rust 绑定代码。</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-39-tokio-运行时深入"><a class="header" href="#day-39-tokio-运行时深入">Day 39: Tokio 运行时深入</a></h1>
+<p>Tokio 是 Rust 生态中最流行的异步运行时。不仅提供了 executor（执行器），还提供了基于 reactor 模式的非阻塞 I/O 驱动，以及定时器、文件系统操作等工具。</p>
+<h2 id="1-任务-tasks-vs-线程-threads"><a class="header" href="#1-任务-tasks-vs-线程-threads">1. 任务 (Tasks) vs 线程 (Threads)</a></h2>
+<ul>
+<li><strong>OS 线程</strong>：重量级，由操作系统调度，上下文切换开销大。</li>
+<li><strong>Tokio 任务</strong>：轻量级（Green Threads），由 Tokio 运行时在用户态调度。</li>
+<li><strong><code>tokio::spawn</code></strong>：生成一个新的异步任务。它需要一个 <code>Future</code>，并且该 <code>Future</code> 必须是 <code>Send</code> + <code>'static</code>（因为它可能在不同线程间移动）。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>tokio::spawn(async {
+    // 这是一个并发运行的任务
+});
+<span class="boring">}</span></code></pre>
+<h2 id="2-消息传递-channels"><a class="header" href="#2-消息传递-channels">2. 消息传递 (Channels)</a></h2>
+<p>Tokio 提供了几种异步通信原语：</p>
+<ul>
+<li><strong><code>mpsc</code></strong> (Multi-Producer, Single-Consumer): 多生产者单消费者。最常用。</li>
+<li><strong><code>oneshot</code></strong>: 一次性通道，发送一个值。</li>
+<li><strong><code>broadcast</code></strong>: 多生产者多消费者（广播）。</li>
+<li><strong><code>watch</code></strong>: 单生产者多消费者，只保存最新值。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let (tx, mut rx) = mpsc::channel(32);
+tx.send("message").await.unwrap();
+let msg = rx.recv().await;
+<span class="boring">}</span></code></pre>
+<h2 id="3-tokioselect"><a class="header" href="#3-tokioselect">3. <code>tokio::select!</code></a></h2>
+<p>允许同时等待多个异步操作，并在<strong>第一个</strong>操作完成时继续执行。其他的操作会被取消（Dropped）。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>tokio::select! {
+    val = op1() =&gt; { println!("op1 finished: {:?}", val)},
+    val = op2() =&gt; { println!("op2 finished: {:?}", val)},
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-阻塞操作-spawn_blocking"><a class="header" href="#4-阻塞操作-spawn_blocking">4. 阻塞操作 (<code>spawn_blocking</code>)</a></h2>
+<p><strong>永远不要在异步函数中执行阻塞操作！</strong>
+如果执行了阻塞操作（如大量的 CPU 计算、同步的文件 IO、<code>std::thread::sleep</code>），会阻塞整个 Tokio 调度器线程，导致其他任务无法执行。</p>
+<p>解决方案：
+使用 <code>tokio::task::spawn_blocking</code> 将阻塞任务放入专门的线程池中执行。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let res = tokio::task::spawn_blocking(|| {
+    // 这里可以放心地执行阻塞代码
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    "done"
+}).await?;
+<span class="boring">}</span></code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-40-构建异步-web-服务器-hyper"><a class="header" href="#day-40-构建异步-web-服务器-hyper">Day 40: 构建异步 Web 服务器 (Hyper)</a></h1>
+<p>在 Rust 生态中，<strong>Hyper</strong> 是一个快速且正确的 HTTP 实现（包括客户端和服务器）。它是许多高级 Web 框架（如 Axum, Warp, Reqwest）的基础。</p>
+<p>今天，我们不使用高级框架，而是直接使用 Hyper 1.0 来构建一个底层的异步 Web 服务器，以理解其工作原理。</p>
+<h2 id="1-hyper-10-架构"><a class="header" href="#1-hyper-10-架构">1. Hyper 1.0 架构</a></h2>
+<p>Hyper 1.0 经历了重大的 API 变革，旨在更加模块化和解耦。</p>
+<ul>
+<li><strong><code>hyper</code></strong>: 核心库，包含 HTTP 协议实现。</li>
+<li><strong><code>hyper-util</code></strong>: 提供与运行时（如 Tokio）集成的工具。</li>
+<li><strong><code>http-body-util</code></strong>: 处理请求和响应体的工具。</li>
+</ul>
+<h2 id="2-核心组件"><a class="header" href="#2-核心组件">2. 核心组件</a></h2>
+<h3 id="service-trait"><a class="header" href="#service-trait">Service Trait</a></h3>
+<p>Hyper 基于 <code>Service</code> 模式。一个 <code>Service</code> 只是一个异步函数，它接受一个 Request 并返回一个 Response。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn hello(req: Request&lt;Incoming&gt;) -&gt; Result&lt;Response&lt;Full&lt;Bytes&gt;&gt;, Infallible&gt; {
+    Ok(Response::new(Full::new(Bytes::from("Hello World"))))
+}
+<span class="boring">}</span></code></pre>
+<h3 id="io-适配器-tokioio"><a class="header" href="#io-适配器-tokioio">IO 适配器 (<code>TokioIo</code>)</a></h3>
+<p>Hyper 是运行时无关的。为了使用 Tokio 的 TCP 流，我们需要用 <code>hyper_util::rt::TokioIo</code> 包装它，使其满足 Hyper 的 IO Trait 要求。</p>
+<h3 id="连接处理-loop"><a class="header" href="#连接处理-loop">连接处理 Loop</a></h3>
+<p>我们需要手动编写一个循环来接受 TCP 连接，并为每个连接生成一个新的 Tokio 任务来处理。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>loop {
+    let (stream, _) = listener.accept().await?;
+    let io = TokioIo::new(stream);
+
+    tokio::task::spawn(async move {
+        // ... serve connection
+    });
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-运行与测试"><a class="header" href="#3-运行与测试">3. 运行与测试</a></h2>
+<p>启动服务器：</p>
+<pre><code class="language-bash">cargo run
+</code></pre>
+<p>测试 Endpoint：</p>
+<ul>
+<li><strong>GET /</strong>: 返回 “Hello, World!…”</li>
+<li><strong>POST /echo</strong>: 回显请求体内容。</li>
+</ul>
+<pre><code class="language-bash">curl http://127.0.0.1:3000
+curl -X POST -d "Rust is awesome" http://127.0.0.1:3000/echo
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-41-数据库交互-sqlx"><a class="header" href="#day-41-数据库交互-sqlx">Day 41: 数据库交互 (SQLx)</a></h1>
+<p>在 Rust 中，<strong>SQLx</strong> 是一个现代的异步 SQL 数据库 crate。与其他 ORM (如 Diesel) 不同，SQLx 倾向于使用原生 SQL，但提供了强大的类型安全检查。</p>
+<h2 id="为什么选择-sqlx"><a class="header" href="#为什么选择-sqlx">为什么选择 SQLx？</a></h2>
+<ul>
+<li><strong>异步设计</strong>: 从头开始构建的 async/await 支持（基于 Tokio 或 async-std）。</li>
+<li><strong>编译时检查</strong>: 如果使用 <code>sqlx::query!</code> 宏，它可以在编译时连接数据库检查 SQL 语法和类型正确性。</li>
+<li><strong>数据库支持</strong>: Postgres, MySQL, SQLite, MSSQL。</li>
+<li><strong>非 ORM</strong>: 它不尝试隐藏 SQL，而是拥抱 SQL。</li>
+</ul>
+<h2 id="核心概念-1"><a class="header" href="#核心概念-1">核心概念</a></h2>
+<h3 id="1-连接池-pool"><a class="header" href="#1-连接池-pool">1. 连接池 (<code>Pool</code>)</a></h3>
+<p>在 Web 应用中，我们通常使用连接池来管理数据库连接，以提高性能。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pool = SqlitePoolOptions::new()
+    .connect("sqlite::memory:")
+    .await?;
+<span class="boring">}</span></code></pre>
+<h3 id="2-查询-query-vs-query_as"><a class="header" href="#2-查询-query-vs-query_as">2. 查询 (<code>query</code> vs <code>query_as</code>)</a></h3>
+<ul>
+<li><code>query</code>: 返回未类型化的行 (<code>Row</code>)。</li>
+<li><code>query_as</code>: 将结果映射到 Rust 结构体（需要实现 <code>FromRow</code> Trait）。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(FromRow)]
+struct User { id: i32, name: String }
+
+let users: Vec&lt;User&gt; = sqlx::query_as("SELECT * FROM users")
+    .fetch_all(&amp;pool)
+    .await?;
+<span class="boring">}</span></code></pre>
+<h3 id="3-参数绑定-bind"><a class="header" href="#3-参数绑定-bind">3. 参数绑定 (<code>bind</code>)</a></h3>
+<p><strong>永远不要拼接 SQL 字符串！</strong> 使用 <code>bind</code> 或占位符（SQLite 中是 <code>?</code>，Postgres 中是 <code>$1</code>）来防止 SQL 注入。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>sqlx::query("INSERT INTO users (name) VALUES (?)")
+    .bind("Alice")
+    .execute(&amp;pool)
+    .await?;
+<span class="boring">}</span></code></pre>
+<h2 id="本日示例"><a class="header" href="#本日示例">本日示例</a></h2>
+<p>为了简化运行，本示例使用内存中的 SQLite 数据库 (<code>sqlite::memory:</code>)，无需安装额外数据库服务。</p>
+<p>运行：</p>
+<pre><code class="language-bash">cargo run
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-42-日志与监控-tracing"><a class="header" href="#day-42-日志与监控-tracing">Day 42: 日志与监控 (Tracing)</a></h1>
+<p>在传统的应用中，我们使用日志（Logging）来记录发生的事件。但在异步和并发系统中，传统的日志很难追踪一个请求的完整生命周期。</p>
+<p>Rust 社区推出了 <strong>Tracing</strong>，一个用于应用程序级跟踪的框架。</p>
+<h2 id="1-结构化日志-vs-文本日志"><a class="header" href="#1-结构化日志-vs-文本日志">1. 结构化日志 vs 文本日志</a></h2>
+<ul>
+<li><strong>Log</strong>: 只是文本行。<code>INFO: User logged in</code>.</li>
+<li><strong>Tracing</strong>: 结构化事件。<code>{ level: "INFO", message: "User logged in", user_id: 42, span: "auth" }</code>.</li>
+</ul>
+<h2 id="2-核心概念"><a class="header" href="#2-核心概念">2. 核心概念</a></h2>
+<h3 id="span-跨度"><a class="header" href="#span-跨度">Span (跨度)</a></h3>
+<p>表示一段时间内的执行上下文。例如，一个 HTTP 请求的处理过程就是一个 Span。Span 可以嵌套。</p>
+<h3 id="event-事件"><a class="header" href="#event-事件">Event (事件)</a></h3>
+<p>表示某个时间点发生的事情。类似于传统的日志记录。</p>
+<h3 id="subscriber-订阅者"><a class="header" href="#subscriber-订阅者">Subscriber (订阅者)</a></h3>
+<p>负责收集 Span 和 Event 并将其记录下来（如打印到 stdout，发送到 Jaeger 等）。</p>
+<h2 id="3-使用方法"><a class="header" href="#3-使用方法">3. 使用方法</a></h2>
+<h3 id="初始化"><a class="header" href="#初始化">初始化</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>tracing_subscriber::fmt::init();
+<span class="boring">}</span></code></pre>
+<h3 id="记录事件"><a class="header" href="#记录事件">记录事件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tracing::{info, error};
+info!("Something happened");
+error!("Something bad happened");
+<span class="boring">}</span></code></pre>
+<h3 id="使用-span"><a class="header" href="#使用-span">使用 Span</a></h3>
+<p>手动创建：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let span = tracing::info_span!("my_span");
+let _enter = span.enter();
+// ... code ...
+<span class="boring">}</span></code></pre>
+<p>使用宏自动 instrument 函数：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[tracing::instrument]
+fn my_function(arg: i32) {
+    // ...
+}
+<span class="boring">}</span></code></pre>
+<h2 id="运行"><a class="header" href="#运行">运行</a></h2>
+<p>默认情况下 <code>tracing-subscriber</code> 可能会过滤掉部分日志。使用 <code>RUST_LOG</code> 环境变量控制级别。</p>
+<pre><code class="language-bash">RUST_LOG=info cargo run
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-43-错误处理最佳实践"><a class="header" href="#day-43-错误处理最佳实践">Day 43: 错误处理最佳实践</a></h1>
+<p>Rust 的错误处理非常强大，但也需要根据场景选择合适的工具。今天我们介绍两个事实标准的库：<strong><code>thiserror</code></strong> 和 <strong><code>anyhow</code></strong>。</p>
+<h2 id="1-库-vs-应用-library-vs-application"><a class="header" href="#1-库-vs-应用-library-vs-application">1. 库 vs 应用 (Library vs Application)</a></h2>
+<p>在 Rust 中，错误处理通常分为两种场景：</p>
+<ol>
+<li><strong>库 (Library)</strong>: 你在编写供他人使用的库。
+<ul>
+<li><strong>需求</strong>: 用户需要能够匹配 (<code>match</code>) 特定的错误类型，以便进行恢复处理。</li>
+<li><strong>工具</strong>: <code>thiserror</code>。它帮助你轻松派生 <code>Error</code> trait，而无需手写繁琐的样板代码。</li>
+</ul>
+</li>
+<li><strong>应用 (Application)</strong>: 你在编写最终的二进制程序 (CLI, Web Server)。
+<ul>
+<li><strong>需求</strong>: 你通常不关心具体的错误类型，只关心发生了错误，并希望以人类可读的方式报告出来（包含上下文堆栈）。</li>
+<li><strong>工具</strong>: <code>anyhow</code>。它提供了一个类似 <code>Box&lt;dyn Error&gt;</code> 的包装器，支持添加上下文 (<code>.context()</code>)。</li>
+</ul>
+</li>
+</ol>
+<h2 id="2-使用-thiserror-定义错误"><a class="header" href="#2-使用-thiserror-定义错误">2. 使用 <code>thiserror</code> (定义错误)</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum MyError {
+    #[error("io error")]
+    Io(#[from] std::io::Error), // 自动实现 From&lt;io::Error&gt;
+
+    #[error("invalid header (expected {expected:?}, found {found:?})")]
+    InvalidHeader { expected: String, found: String },
+}
+<span class="boring">}</span></code></pre>
+<h2 id="3-使用-anyhow-处理错误"><a class="header" href="#3-使用-anyhow-处理错误">3. 使用 <code>anyhow</code> (处理错误)</a></h2>
+<p><code>anyhow::Result&lt;T&gt;</code> 是 <code>Result&lt;T, anyhow::Error&gt;</code> 的别名。</p>
+<pre class="playground"><code class="language-rust">use anyhow::{Context, Result};
+
+fn main() -&gt; Result&lt;()&gt; {
+    let content = std::fs::read_to_string("config.toml")
+        .context("Failed to read config file")?; // 添加上下文
+
+    Ok(())
+}</code></pre>
+<p>输出的错误信息会包含上下文链，方便调试：</p>
+<pre><code>Error: Failed to read config file
+
+Caused by:
+    No such file or directory (os error 2)
+</code></pre>
 
                     </main>
 
