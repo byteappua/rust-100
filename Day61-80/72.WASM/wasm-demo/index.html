@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rust WASM Demo</title>
+</head>
+<body>
+    <h1>Rust WASM Demo</h1>
+    <p>Open the browser console to see the results.</p>
+    <button onclick="run()">Run WASM</button>
+
+    <script type="module">
+        // Note: This assumes you have built the project with `wasm-pack build --target web`
+        // and the output is in the `pkg` directory.
+        import init, { greet, add, fibonacci } from './pkg/wasm_demo.js';
+
+        async function run() {
+            await init();
+
+            console.log("Adding 5 + 3:", add(5, 3));
+            console.log("Fibonacci(10):", fibonacci(10));
+            greet("World");
+        }
+
+        window.run = run;
+    </script>
+</body>
+</html>
