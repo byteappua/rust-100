@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-eedc7498.js";
+            window.path_to_searchindex_js = "searchindex-361327c2.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-13fa5e57.js"></script>
@@ -11123,16 +11123,53 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <p>Day 73 将学习前端集成实战。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-73-前端集成实战-1"><a class="header" href="#day-73-前端集成实战-1">Day 73: 前端集成实战</a></h1>
-<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的前端集成部分。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
-<ul>
-<li>静态文件服务</li>
-<li>SPA 路由配置</li>
-<li>API 代理</li>
-<li>前后端分离架构</li>
-</ul>
+<p>本章节通过一个完整的示例演示如何在 Axum 项目中集成前端 SPA (Single Page Application) 应用。</p>
+<h2 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h2>
+<pre><code>frontend-integration-demo/
+├── Cargo.toml      # Rust 项目配置
+├── assets/         # 前端静态资源 (模拟构建产物)
+│   ├── app.js      # 简单的 SPA 路由逻辑
+│   ├── index.html  # 入口 HTML
+│   └── style.css   # 样式
+└── src/
+    └── main.rs     # 后端服务
+</code></pre>
+<h2 id="核心功能"><a class="header" href="#核心功能">核心功能</a></h2>
+<ol>
+<li><strong>静态文件服务</strong>: 使用 <code>tower_http::services::ServeDir</code> 服务 <code>assets</code> 目录。</li>
+<li><strong>SPA 路由 fallback</strong>: 前端路由（如 <code>/users</code>, <code>/about</code>）在后端不存在对应 API 时，统一返回 <code>index.html</code>，由前端 JS 接管路由。</li>
+<li><strong>API 代理</strong>: 提供 <code>/api/users</code> 等后端接口，供前端调用。</li>
+</ol>
+<h2 id="运行-demo"><a class="header" href="#运行-demo">运行 demo</a></h2>
+<p>进入 <code>frontend-integration-demo</code> 目录并运行：</p>
+<pre><code class="language-bash">cd frontend-integration-demo
+cargo run
+</code></pre>
+<p>然后访问 <code>http://localhost:3000</code>。</p>
+<h3 id="演示效果"><a class="header" href="#演示效果">演示效果</a></h3>
+<ol>
+<li><strong>Home</strong>: 默认首页。</li>
+<li><strong>Users</strong>: 点击导航栏的 “Users”，前端 JS 会发起 <code>fetch('/api/users')</code> 请求，并将返回的 JSON 数据渲染到页面上。这展示了前后端分离的数据交互。</li>
+<li><strong>About</strong>: 纯前端页面切换。</li>
+<li><strong>SPA Routing</strong>: 尝试直接访问 <code>http://localhost:3000/about</code>，后端会返回 <code>index.html</code>，前端 JS 初始化后会解析 URL 并显示 About 页面。</li>
+</ol>
+<h2 id="代码解析"><a class="header" href="#代码解析">代码解析</a></h2>
+<h3 id="后端-axum"><a class="header" href="#后端-axum">后端 (Axum)</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 定义静态文件服务，如果文件找不到则返回 index.html (SPA 模式)
+let assets_path = std::env::current_dir().unwrap().join("assets");
+let spa_service = ServeDir::new(&amp;assets_path)
+    .fallback(ServeFile::new(assets_path.join("index.html")));
+
+let app = Router::new()
+    .nest("/api", api_routes) // 优先匹配 API
+    .fallback_service(spa_service); // 其他所有请求交给静态文件服务
+<span class="boring">}</span></code></pre>
+<h3 id="前端-js"><a class="header" href="#前端-js">前端 (JS)</a></h3>
+<p>前端使用 HTML5 History API 实现无刷新跳转，并在页面加载时根据 URL 渲染不同组件。</p>
 <h2 id="下一步-13"><a class="header" href="#下一步-13">下一步</a></h2>
-<p>Day 74 将学习 API 文档生成 (OpenAPI)。</p>
+<p>Day 74 将学习 API 文档生成 (OpenAPI)，为前后端协作提供更好的文档支持。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-74-api-文档生成-openapi-1"><a class="header" href="#day-74-api-文档生成-openapi-1">Day 74: API 文档生成 (OpenAPI)</a></h1>
 <h2 id="学习目标-12"><a class="header" href="#学习目标-12">学习目标</a></h2>
@@ -11281,7 +11318,7 @@ cargo run
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-76-博客系统---需求分析与设计"><a class="header" href="#day-76-博客系统---需求分析与设计">Day 76: 博客系统 - 需求分析与设计</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的博客系统设计部分。</p>
-<h2 id="核心内容-1"><a class="header" href="#核心内容-1">核心内容</a></h2>
+<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
 <ul>
 <li>功能需求分析</li>
 <li>数据库设计</li>
@@ -11293,7 +11330,7 @@ cargo run
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-77-博客系统---核心业务实现"><a class="header" href="#day-77-博客系统---核心业务实现">Day 77: 博客系统 - 核心业务实现</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的核心业务实现部分。</p>
-<h2 id="核心内容-2"><a class="header" href="#核心内容-2">核心内容</a></h2>
+<h2 id="核心内容-1"><a class="header" href="#核心内容-1">核心内容</a></h2>
 <ul>
 <li>用户服务实现</li>
 <li>文章服务实现</li>
@@ -11305,7 +11342,7 @@ cargo run
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-78-博客系统---api-接口开发"><a class="header" href="#day-78-博客系统---api-接口开发">Day 78: 博客系统 - API 接口开发</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的 API 接口开发部分。</p>
-<h2 id="核心内容-3"><a class="header" href="#核心内容-3">核心内容</a></h2>
+<h2 id="核心内容-2"><a class="header" href="#核心内容-2">核心内容</a></h2>
 <ul>
 <li>RESTful API 设计</li>
 <li>路由配置</li>
@@ -11317,7 +11354,7 @@ cargo run
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-79-博客系统---测试与优化"><a class="header" href="#day-79-博客系统---测试与优化">Day 79: 博客系统 - 测试与优化</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的测试与优化部分。</p>
-<h2 id="核心内容-4"><a class="header" href="#核心内容-4">核心内容</a></h2>
+<h2 id="核心内容-3"><a class="header" href="#核心内容-3">核心内容</a></h2>
 <ul>
 <li>单元测试</li>
 <li>集成测试</li>
@@ -11329,7 +11366,7 @@ cargo run
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-80-博客系统---项目总结与展示"><a class="header" href="#day-80-博客系统---项目总结与展示">Day 80: 博客系统 - 项目总结与展示</a></h1>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的项目总结部分。</p>
-<h2 id="核心内容-5"><a class="header" href="#核心内容-5">核心内容</a></h2>
+<h2 id="核心内容-4"><a class="header" href="#核心内容-4">核心内容</a></h2>
 <ul>
 <li>架构回顾</li>
 <li>技术栈总结</li>
@@ -11986,7 +12023,7 @@ cargo bench
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-81-操作系统概念回顾-1"><a class="header" href="#day-81-操作系统概念回顾-1">Day 81: 操作系统概念回顾</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
+<h2 id="核心内容-5"><a class="header" href="#核心内容-5">核心内容</a></h2>
 <ul>
 <li>进程与线程</li>
 <li>内存管理</li>
@@ -12211,7 +12248,7 @@ cargo run -- daemon
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-84-原始套接字-raw-sockets-1"><a class="header" href="#day-84-原始套接字-raw-sockets-1">Day 84: 原始套接字 (Raw Sockets)</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
+<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
 <ul>
 <li>TCP/UDP 底层操作</li>
 <li>原始套接字编程</li>
@@ -12223,7 +12260,7 @@ cargo run -- daemon
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-85-嵌入式-rust-简介-1"><a class="header" href="#day-85-嵌入式-rust-简介-1">Day 85: 嵌入式 Rust 简介</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
+<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
 <ul>
 <li>no_std 环境</li>
 <li>嵌入式 HAL</li>
@@ -12674,7 +12711,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-87-内存优化技巧-1"><a class="header" href="#day-87-内存优化技巧-1">Day 87: 内存优化技巧</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
+<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
 <ul>
 <li>内存布局优化</li>
 <li>零拷贝技术</li>
@@ -12686,7 +12723,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-88-simd-与底层优化-1"><a class="header" href="#day-88-simd-与底层优化-1">Day 88: SIMD 与底层优化</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
+<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
 <ul>
 <li>SIMD 指令集</li>
 <li>向量化计算</li>
@@ -12698,7 +12735,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-89-持续集成流水线-1"><a class="header" href="#day-89-持续集成流水线-1">Day 89: 持续集成流水线</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
+<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
 <ul>
 <li>GitHub Actions 配置</li>
 <li>自动化测试</li>
@@ -12710,7 +12747,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-90-rust-编译优化与配置-1"><a class="header" href="#day-90-rust-编译优化与配置-1">Day 90: Rust 编译优化与配置</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
+<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
 <ul>
 <li>Cargo.toml 优化配置</li>
 <li>编译时间优化</li>
@@ -12909,7 +12946,7 @@ criterion_group!(benches, benchmark_core_operations);
 criterion_main!(benches);
 <span class="boring">}</span></code></pre>
 <h3 id="day-93-94-核心模块开发"><a class="header" href="#day-93-94-核心模块开发">Day 93-94: 核心模块开发</a></h3>
-<h4 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h4>
+<h4 id="项目结构-1"><a class="header" href="#项目结构-1">项目结构</a></h4>
 <pre><code>project/
 ├── Cargo.toml
 ├── src/
@@ -13530,7 +13567,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-91-选题与架构设计-1"><a class="header" href="#day-91-选题与架构设计-1">Day 91: 选题与架构设计</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
+<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
 <ul>
 <li>需求分析</li>
 <li>架构设计</li>
@@ -13541,7 +13578,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-92-原型验证-poc-1"><a class="header" href="#day-92-原型验证-poc-1">Day 92: 原型验证 (PoC)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
+<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
 <ul>
 <li>核心功能验证</li>
 <li>性能基准测试</li>
@@ -13552,7 +13589,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-93-核心模块开发-一"><a class="header" href="#day-93-核心模块开发-一">Day 93: 核心模块开发 (一)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
+<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
 <ul>
 <li>项目结构搭建</li>
 <li>数据模型定义</li>
@@ -13563,7 +13600,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
+<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
 <ul>
 <li>继续核心功能开发</li>
 <li>模块间集成</li>
@@ -13574,7 +13611,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
+<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
 <ul>
 <li>认证中间件</li>
 <li>日志系统</li>
@@ -13586,7 +13623,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-18"><a class="header" href="#核心内容-18">核心内容</a></h2>
+<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
 <ul>
 <li>负载测试</li>
 <li>性能分析</li>
@@ -13598,7 +13635,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-97-文档编写与代码清理-1"><a class="header" href="#day-97-文档编写与代码清理-1">Day 97: 文档编写与代码清理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-19"><a class="header" href="#核心内容-19">核心内容</a></h2>
+<h2 id="核心内容-18"><a class="header" href="#核心内容-18">核心内容</a></h2>
 <ul>
 <li>API 文档生成</li>
 <li>README 编写</li>
@@ -13610,7 +13647,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-20"><a class="header" href="#核心内容-20">核心内容</a></h2>
+<h2 id="核心内容-19"><a class="header" href="#核心内容-19">核心内容</a></h2>
 <ul>
 <li>版本发布流程</li>
 <li>CI/CD 配置</li>
@@ -13622,7 +13659,7 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-21"><a class="header" href="#核心内容-21">核心内容</a></h2>
+<h2 id="核心内容-20"><a class="header" href="#核心内容-20">核心内容</a></h2>
 <ul>
 <li>项目展示文档</li>
 <li>技术复盘</li>
