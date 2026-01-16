@@ -1,0 +1,7 @@
+[package]
+name = "raw-sockets"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+socket2 = "0.6.1"
