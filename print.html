@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f9866866.js";
+            window.path_to_searchindex_js = "searchindex-73b09bd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-13fa5e57.js"></script>
@@ -13685,107 +13685,149 @@ jobs:
 <p>欢迎加入 Rustacean 大家庭！🦀</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-91-选题与架构设计-1"><a class="header" href="#day-91-选题与架构设计-1">Day 91: 选题与架构设计</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
-<ul>
-<li>需求分析</li>
-<li>架构设计</li>
-<li>技术选型文档</li>
-</ul>
-<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
-<p>Day 92 将进行原型验证 (PoC)。</p>
+<p>本项目选择了 <strong>Option 1: 分布式任务调度系统</strong> 作为毕业设计课题。</p>
+<p>项目名称：<strong>DTask</strong> (Distributed Task Scheduler)</p>
+<h2 id="完成内容"><a class="header" href="#完成内容">完成内容</a></h2>
+<p>详细的设计文档已创建于 <a href="Day91-100/91.ProjectDesign/design.html">DESIGN.md</a>。</p>
+<p>主要包含：</p>
+<ol>
+<li><strong>需求分析</strong>：定义了任务提交、分布式执行、集群管理等核心功能。</li>
+<li><strong>架构设计</strong>：采用 Leader-Follower 架构，利用 Raft 算法保证调度器的高可用，Worker 节点支持水平扩展。</li>
+<li><strong>技术选型</strong>：Rust + Tokio + Tonic (gRPC) + OpenRaft + PostgreSQL。</li>
+<li><strong>数据模型</strong>：设计了任务表和执行日志表的数据库 Schema。</li>
+<li><strong>接口设计</strong>：初步定义了 gRPC 服务接口。</li>
+</ol>
+<h2 id="下一步计划"><a class="header" href="#下一步计划">下一步计划</a></h2>
+<p>Day 92 将进行原型验证 (PoC)，主要验证 gRPC 通信链路和 Raft 节点的基本组网。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-92-原型验证-poc-1"><a class="header" href="#day-92-原型验证-poc-1">Day 92: 原型验证 (PoC)</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的原型验证阶段。</p>
+<h2 id="验证目标"><a class="header" href="#验证目标">验证目标</a></h2>
+<ol>
+<li><strong>gRPC 通信</strong>: 验证 Client -&gt; Server 的 RPC 调用链路。</li>
+<li><strong>Raft 共识</strong>: 验证 OpenRaft 库的集成和类型定义。</li>
+</ol>
+<h2 id="验证结果"><a class="header" href="#验证结果">验证结果</a></h2>
+<h3 id="1-grpc-通信-成功"><a class="header" href="#1-grpc-通信-成功">1. gRPC 通信 (成功)</a></h3>
+<p>使用 <code>tonic</code> 实现了简单的 Echo 服务。</p>
 <ul>
-<li>核心功能验证</li>
-<li>性能基准测试</li>
-<li>技术可行性验证</li>
+<li>Server 监听 <code>[::1]:50051</code>。</li>
+<li>Client 发送 “Hello Tonic”。</li>
+<li>成功接收响应 “Echo: Hello Tonic”。</li>
 </ul>
-<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
-<p>Day 93-94 将进行核心模块开发。</p>
+<h3 id="2-raft-集成-部分完成"><a class="header" href="#2-raft-集成-部分完成">2. Raft 集成 (部分完成)</a></h3>
+<ul>
+<li>成功定义了 Raft 类型 (<code>TypeConfig</code>, <code>Request</code>, <code>Response</code>)。</li>
+<li>成功搭建了 <code>RaftNetwork</code> 和 <code>RaftStorage</code> 的基础结构。</li>
+<li><strong>发现问题</strong>: <code>openraft</code> 0.9 版本引入了较大的 API 变更 (V2 Storage)，实现完整的 <code>RaftStorage</code> trait 需要处理复杂的类型约束和宏 (<code>async_trait</code>) 兼容性问题。</li>
+<li><strong>决策</strong>: 在 Day 93 (Core Development) 中集中解决 Storage 实现问题，或者回退到更稳定的 <code>openraft</code> 版本，或者使用 <code>openraft</code> 提供的默认 <code>MemStore</code> (如果适用)。</li>
+</ul>
+<h2 id="运行方式-1"><a class="header" href="#运行方式-1">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/92.PoC/dtask-poc
+
+# 编译
+cargo build
+
+# 运行 gRPC Server
+./target/debug/grpc_server &amp;
+
+# 运行 gRPC Client
+./target/debug/grpc_client
+</code></pre>
+<h2 id="项目结构-3"><a class="header" href="#项目结构-3">项目结构</a></h2>
+<ul>
+<li><code>dtask-poc/</code>: Cargo 项目根目录
+<ul>
+<li><code>proto/</code>: gRPC 协议定义</li>
+<li><code>src/bin/grpc_server.rs</code>: gRPC 服务端</li>
+<li><code>src/bin/grpc_client.rs</code>: gRPC 客户端</li>
+<li><code>src/lib.rs</code>: Raft 类型定义</li>
+<li><code>src/store.rs</code>: Raft 存储接口存根</li>
+<li><code>src/network.rs</code>: Raft 网络接口存根</li>
+</ul>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-93-核心模块开发-一"><a class="header" href="#day-93-核心模块开发-一">Day 93: 核心模块开发 (一)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
+<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
 <ul>
 <li>项目结构搭建</li>
 <li>数据模型定义</li>
 <li>核心业务逻辑实现</li>
 </ul>
-<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
+<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
 <p>Day 94 将继续核心模块开发。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
+<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
 <ul>
 <li>继续核心功能开发</li>
 <li>模块间集成</li>
 <li>单元测试编写</li>
 </ul>
-<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
+<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
 <p>Day 95 将进行外围模块与集成。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
+<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
 <ul>
 <li>认证中间件</li>
 <li>日志系统</li>
 <li>监控指标</li>
 <li>模块集成</li>
 </ul>
-<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
+<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
 <p>Day 96 将进行性能测试与调优。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
+<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
 <ul>
 <li>负载测试</li>
 <li>性能分析</li>
 <li>优化实施</li>
 <li>性能验证</li>
 </ul>
-<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
+<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
 <p>Day 97 将进行文档编写与代码清理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-97-文档编写与代码清理-1"><a class="header" href="#day-97-文档编写与代码清理-1">Day 97: 文档编写与代码清理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
+<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
 <ul>
 <li>API 文档生成</li>
 <li>README 编写</li>
 <li>代码注释完善</li>
 <li>代码清理</li>
 </ul>
-<h2 id="下一步-34"><a class="header" href="#下一步-34">下一步</a></h2>
+<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
 <p>Day 98 将进行发布准备与版本管理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
+<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
 <ul>
 <li>版本发布流程</li>
 <li>CI/CD 配置</li>
 <li>Docker 镜像构建</li>
 <li>发布检查清单</li>
 </ul>
-<h2 id="下一步-35"><a class="header" href="#下一步-35">下一步</a></h2>
+<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
 <p>Day 99 将进行项目展示与复盘。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
+<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
 <ul>
 <li>项目展示文档</li>
 <li>技术复盘</li>
 <li>经验总结</li>
 <li>改进建议</li>
 </ul>
-<h2 id="下一步-36"><a class="header" href="#下一步-36">下一步</a></h2>
+<h2 id="下一步-34"><a class="header" href="#下一步-34">下一步</a></h2>
 <p>Day 100 - 成为 Rustacean 之路！</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-100-成为-rustacean-之路-1"><a class="header" href="#day-100-成为-rustacean-之路-1">Day 100: 成为 Rustacean 之路</a></h1>

@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-f9866866.js";
+            window.path_to_searchindex_js = "../../searchindex-73b09bd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -178,15 +178,20 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-91-选题与架构设计"><a class="header" href="#day-91-选题与架构设计">Day 91: 选题与架构设计</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
-<ul>
-<li>需求分析</li>
-<li>架构设计</li>
-<li>技术选型文档</li>
-</ul>
-<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
-<p>Day 92 将进行原型验证 (PoC)。</p>
+<p>本项目选择了 <strong>Option 1: 分布式任务调度系统</strong> 作为毕业设计课题。</p>
+<p>项目名称：<strong>DTask</strong> (Distributed Task Scheduler)</p>
+<h2 id="完成内容"><a class="header" href="#完成内容">完成内容</a></h2>
+<p>详细的设计文档已创建于 <a href="./design.html">DESIGN.md</a>。</p>
+<p>主要包含：</p>
+<ol>
+<li><strong>需求分析</strong>：定义了任务提交、分布式执行、集群管理等核心功能。</li>
+<li><strong>架构设计</strong>：采用 Leader-Follower 架构，利用 Raft 算法保证调度器的高可用，Worker 节点支持水平扩展。</li>
+<li><strong>技术选型</strong>：Rust + Tokio + Tonic (gRPC) + OpenRaft + PostgreSQL。</li>
+<li><strong>数据模型</strong>：设计了任务表和执行日志表的数据库 Schema。</li>
+<li><strong>接口设计</strong>：初步定义了 gRPC 服务接口。</li>
+</ol>
+<h2 id="下一步计划"><a class="header" href="#下一步计划">下一步计划</a></h2>
+<p>Day 92 将进行原型验证 (PoC)，主要验证 gRPC 通信链路和 Raft 节点的基本组网。</p>
 
                     </main>
 

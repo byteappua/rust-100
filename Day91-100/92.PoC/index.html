@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-f9866866.js";
+            window.path_to_searchindex_js = "../../searchindex-73b09bd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -178,15 +178,52 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-92-原型验证-poc"><a class="header" href="#day-92-原型验证-poc">Day 92: 原型验证 (PoC)</a></h1>
-<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+<p>本项目 (<strong>DTask</strong>) 的原型验证阶段。</p>
+<h2 id="验证目标"><a class="header" href="#验证目标">验证目标</a></h2>
+<ol>
+<li><strong>gRPC 通信</strong>: 验证 Client -&gt; Server 的 RPC 调用链路。</li>
+<li><strong>Raft 共识</strong>: 验证 OpenRaft 库的集成和类型定义。</li>
+</ol>
+<h2 id="验证结果"><a class="header" href="#验证结果">验证结果</a></h2>
+<h3 id="1-grpc-通信-成功"><a class="header" href="#1-grpc-通信-成功">1. gRPC 通信 (成功)</a></h3>
+<p>使用 <code>tonic</code> 实现了简单的 Echo 服务。</p>
 <ul>
-<li>核心功能验证</li>
-<li>性能基准测试</li>
-<li>技术可行性验证</li>
+<li>Server 监听 <code>[::1]:50051</code>。</li>
+<li>Client 发送 “Hello Tonic”。</li>
+<li>成功接收响应 “Echo: Hello Tonic”。</li>
 </ul>
-<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
-<p>Day 93-94 将进行核心模块开发。</p>
+<h3 id="2-raft-集成-部分完成"><a class="header" href="#2-raft-集成-部分完成">2. Raft 集成 (部分完成)</a></h3>
+<ul>
+<li>成功定义了 Raft 类型 (<code>TypeConfig</code>, <code>Request</code>, <code>Response</code>)。</li>
+<li>成功搭建了 <code>RaftNetwork</code> 和 <code>RaftStorage</code> 的基础结构。</li>
+<li><strong>发现问题</strong>: <code>openraft</code> 0.9 版本引入了较大的 API 变更 (V2 Storage)，实现完整的 <code>RaftStorage</code> trait 需要处理复杂的类型约束和宏 (<code>async_trait</code>) 兼容性问题。</li>
+<li><strong>决策</strong>: 在 Day 93 (Core Development) 中集中解决 Storage 实现问题，或者回退到更稳定的 <code>openraft</code> 版本，或者使用 <code>openraft</code> 提供的默认 <code>MemStore</code> (如果适用)。</li>
+</ul>
+<h2 id="运行方式"><a class="header" href="#运行方式">运行方式</a></h2>
+<pre><code class="language-bash">cd Day91-100/92.PoC/dtask-poc
+
+# 编译
+cargo build
+
+# 运行 gRPC Server
+./target/debug/grpc_server &amp;
+
+# 运行 gRPC Client
+./target/debug/grpc_client
+</code></pre>
+<h2 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h2>
+<ul>
+<li><code>dtask-poc/</code>: Cargo 项目根目录
+<ul>
+<li><code>proto/</code>: gRPC 协议定义</li>
+<li><code>src/bin/grpc_server.rs</code>: gRPC 服务端</li>
+<li><code>src/bin/grpc_client.rs</code>: gRPC 客户端</li>
+<li><code>src/lib.rs</code>: Raft 类型定义</li>
+<li><code>src/store.rs</code>: Raft 存储接口存根</li>
+<li><code>src/network.rs</code>: Raft 网络接口存根</li>
+</ul>
+</li>
+</ul>
 
                     </main>
 
