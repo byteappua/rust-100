@@ -6,6 +6,9 @@ Rust 是一门赋予每个人构建可靠且高效软件能力的系统编程语
 
 ## 目录
 
+### 🗺️ [知识图谱 (Knowledge Map)](KNOWLEDGE_MAP.md)
+按概念分类的 Rust 知识点索引，帮助你快速找到对应 Day 的学习内容。
+
 ### 第一阶段：Rust 语言基础 (Day 01 - 15)
 - **Day 01**: 初识 Rust - 环境搭建、Cargo 使用、Hello World
 - **Day 02**: 变量与数据类型 - 变量绑定、可变性、基本类型
