@@ -1,12 +1,32 @@
-# Day 96: 性能测试与调优
+# Day 96: Performance Testing and Tuning
 
-详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。
+This directory contains the performance-optimized version of the `dtask` project.
 
-## 核心内容
-- 负载测试
-- 性能分析
-- 优化实施
-- 性能验证
+## Changes
+- **Database**: Migrated from in-memory `Vec<Task>` to `SQLite` using `sqlx`.
+- **Schema**: Added `tasks` table and an index on `status` for optimization.
+- **Connection Pool**: Configured `SqlitePool` with max connections.
+- **Build Profile**: Added `release` profile with `LTO` and `strip` enabled.
 
-## 下一步
-Day 97 将进行文档编写与代码清理。
+## How to Run
+
+1. **Start the Server**:
+   ```bash
+   cd dtask
+   cargo run --release
+   ```
+
+2. **Run Load Test**:
+   ```bash
+   cd dtask
+   cargo run --example load_test --release
+   ```
+
+## Optimization Checklist
+- [x] Database Query Optimization (Index on `status` added in migration `20240101000001_add_index.sql`)
+- [x] Connection Pool Tuning (`max_connections(50)`)
+- [x] Compile Optimization (`lto = true`, `strip = true`)
+- [x] Async I/O (Using `tokio` and `sqlx` async pool)
+
+## Benchmarking Results
+(Run the load test to see QPS)
