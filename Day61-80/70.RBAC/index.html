@@ -1,0 +1,891 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Day 70: 权限控制 (RBAC) - Rust - 100天从新手到大师</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../../searchindex-8da50af6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc-28b84ce8.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust - 100天从新手到大师</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Start-Rust/100-days-of-rust" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="day-70-权限控制-rbac"><a class="header" href="#day-70-权限控制-rbac">Day 70: 权限控制 (RBAC)</a></h1>
+<h2 id="学习目标"><a class="header" href="#学习目标">学习目标</a></h2>
+<ul>
+<li>理解 RBAC 概念</li>
+<li>设计权限模型</li>
+<li>实现角色和权限系统</li>
+<li>创建权限检查中间件</li>
+</ul>
+<h2 id="rbac-概念"><a class="header" href="#rbac-概念">RBAC 概念</a></h2>
+<p>RBAC (Role-Based Access Control) 是一种基于角色的访问控制模型。</p>
+<pre><code>用户 → 角色 → 权限 → 资源
+</code></pre>
+<h3 id="核心概念"><a class="header" href="#核心概念">核心概念</a></h3>
+<ul>
+<li><strong>用户 (User)</strong>: 系统的使用者</li>
+<li><strong>角色 (Role)</strong>: 用户的职能分类</li>
+<li><strong>权限 (Permission)</strong>: 对资源的操作许可</li>
+<li><strong>资源 (Resource)</strong>: 被保护的对象</li>
+</ul>
+<h2 id="数据库设计"><a class="header" href="#数据库设计">数据库设计</a></h2>
+<pre><code class="language-sql">-- 用户表
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 角色表
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 权限表
+CREATE TABLE permissions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    resource VARCHAR(50) NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 用户角色关联表
+CREATE TABLE user_roles (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- 角色权限关联表
+CREATE TABLE role_permissions (
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id INTEGER REFERENCES permissions(id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, permission_id)
+);
+
+-- 索引
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
+CREATE INDEX idx_role_permissions_role_id ON role_permissions(role_id);
+CREATE INDEX idx_role_permissions_permission_id ON role_permissions(permission_id);
+</code></pre>
+<h2 id="数据模型"><a class="header" href="#数据模型">数据模型</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub password_hash: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct Role {
+    pub id: i32,
+    pub name: String,
+    pub description: Option&lt;String&gt;,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct Permission {
+    pub id: i32,
+    pub name: String,
+    pub resource: String,
+    pub action: String,
+    pub description: Option&lt;String&gt;,
+}
+
+#[derive(Debug, Clone)]
+pub struct UserWithRoles {
+    pub user: User,
+    pub roles: Vec&lt;Role&gt;,
+    pub permissions: Vec&lt;Permission&gt;,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限枚举"><a class="header" href="#权限枚举">权限枚举</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Resource {
+    User,
+    Post,
+    Comment,
+    Category,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Action {
+    Create,
+    Read,
+    Update,
+    Delete,
+    List,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PermissionCheck {
+    pub resource: Resource,
+    pub action: Action,
+}
+
+impl PermissionCheck {
+    pub fn new(resource: Resource, action: Action) -&gt; Self {
+        Self { resource, action }
+    }
+    
+    pub fn to_string(&amp;self) -&gt; String {
+        format!("{}:{:?}", self.resource_name(), self.action)
+    }
+    
+    fn resource_name(&amp;self) -&gt; &amp;str {
+        match self.resource {
+            Resource::User =&gt; "user",
+            Resource::Post =&gt; "post",
+            Resource::Comment =&gt; "comment",
+            Resource::Category =&gt; "category",
+        }
+    }
+}
+
+// 便捷宏
+macro_rules! permission {
+    ($resource:ident, $action:ident) =&gt; {
+        PermissionCheck::new(Resource::$resource, Action::$action)
+    };
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限服务"><a class="header" href="#权限服务">权限服务</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::PgPool;
+use std::collections::HashSet;
+
+pub struct PermissionService {
+    pool: PgPool,
+}
+
+impl PermissionService {
+    pub fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+    
+    // 获取用户的所有角色
+    pub async fn get_user_roles(&amp;self, user_id: i32) -&gt; Result&lt;Vec&lt;Role&gt;&gt; {
+        let roles = sqlx::query_as!(
+            Role,
+            r#"
+            SELECT r.id, r.name, r.description
+            FROM roles r
+            INNER JOIN user_roles ur ON r.id = ur.role_id
+            WHERE ur.user_id = $1
+            "#,
+            user_id
+        )
+        .fetch_all(&amp;self.pool)
+        .await?;
+        
+        Ok(roles)
+    }
+    
+    // 获取用户的所有权限
+    pub async fn get_user_permissions(&amp;self, user_id: i32) -&gt; Result&lt;Vec&lt;Permission&gt;&gt; {
+        let permissions = sqlx::query_as!(
+            Permission,
+            r#"
+            SELECT DISTINCT p.id, p.name, p.resource, p.action, p.description
+            FROM permissions p
+            INNER JOIN role_permissions rp ON p.id = rp.permission_id
+            INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+            WHERE ur.user_id = $1
+            "#,
+            user_id
+        )
+        .fetch_all(&amp;self.pool)
+        .await?;
+        
+        Ok(permissions)
+    }
+    
+    // 检查用户是否有特定权限
+    pub async fn has_permission(
+        &amp;self,
+        user_id: i32,
+        resource: &amp;str,
+        action: &amp;str,
+    ) -&gt; Result&lt;bool&gt; {
+        let result = sqlx::query!(
+            r#"
+            SELECT EXISTS(
+                SELECT 1
+                FROM permissions p
+                INNER JOIN role_permissions rp ON p.id = rp.permission_id
+                INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+                WHERE ur.user_id = $1
+                  AND p.resource = $2
+                  AND p.action = $3
+            ) as "exists!"
+            "#,
+            user_id,
+            resource,
+            action
+        )
+        .fetch_one(&amp;self.pool)
+        .await?;
+        
+        Ok(result.exists)
+    }
+    
+    // 分配角色给用户
+    pub async fn assign_role(&amp;self, user_id: i32, role_id: i32) -&gt; Result&lt;()&gt; {
+        sqlx::query!(
+            "INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            user_id,
+            role_id
+        )
+        .execute(&amp;self.pool)
+        .await?;
+        
+        Ok(())
+    }
+    
+    // 移除用户角色
+    pub async fn remove_role(&amp;self, user_id: i32, role_id: i32) -&gt; Result&lt;()&gt; {
+        sqlx::query!(
+            "DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2",
+            user_id,
+            role_id
+        )
+        .execute(&amp;self.pool)
+        .await?;
+        
+        Ok(())
+    }
+    
+    // 分配权限给角色
+    pub async fn assign_permission(&amp;self, role_id: i32, permission_id: i32) -&gt; Result&lt;()&gt; {
+        sqlx::query!(
+            "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            role_id,
+            permission_id
+        )
+        .execute(&amp;self.pool)
+        .await?;
+        
+        Ok(())
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限中间件"><a class="header" href="#权限中间件">权限中间件</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::{Request, State},
+    middleware::Next,
+    response::{Response, IntoResponse},
+    http::StatusCode,
+};
+
+// 权限检查中间件
+pub async fn require_permission(
+    resource: String,
+    action: String,
+) -&gt; impl Fn(Request, Next) -&gt; impl Future&lt;Output = Result&lt;Response, StatusCode&gt;&gt; {
+    move |request: Request, next: Next| {
+        let resource = resource.clone();
+        let action = action.clone();
+        
+        async move {
+            // 从请求扩展中获取用户信息
+            let user = request
+                .extensions()
+                .get::&lt;AuthUser&gt;()
+                .ok_or(StatusCode::UNAUTHORIZED)?;
+            
+            // 检查权限
+            if !user.has_permission(&amp;resource, &amp;action) {
+                return Err(StatusCode::FORBIDDEN);
+            }
+            
+            Ok(next.run(request).await)
+        }
+    }
+}
+
+// 角色检查中间件
+pub async fn require_role(
+    required_role: String,
+) -&gt; impl Fn(Request, Next) -&gt; impl Future&lt;Output = Result&lt;Response, StatusCode&gt;&gt; {
+    move |request: Request, next: Next| {
+        let required_role = required_role.clone();
+        
+        async move {
+            let user = request
+                .extensions()
+                .get::&lt;AuthUser&gt;()
+                .ok_or(StatusCode::UNAUTHORIZED)?;
+            
+            if !user.has_role(&amp;required_role) {
+                return Err(StatusCode::FORBIDDEN);
+            }
+            
+            Ok(next.run(request).await)
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="认证用户扩展"><a class="header" href="#认证用户扩展">认证用户扩展</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::collections::HashSet;
+
+#[derive(Debug, Clone)]
+pub struct AuthUser {
+    pub id: i32,
+    pub username: String,
+    pub roles: HashSet&lt;String&gt;,
+    pub permissions: HashSet&lt;String&gt;,
+}
+
+impl AuthUser {
+    pub fn has_role(&amp;self, role: &amp;str) -&gt; bool {
+        self.roles.contains(role)
+    }
+    
+    pub fn has_permission(&amp;self, resource: &amp;str, action: &amp;str) -&gt; bool {
+        let permission = format!("{}:{}", resource, action);
+        self.permissions.contains(&amp;permission)
+    }
+    
+    pub fn has_any_role(&amp;self, roles: &amp;[&amp;str]) -&gt; bool {
+        roles.iter().any(|role| self.has_role(role))
+    }
+    
+    pub fn has_all_roles(&amp;self, roles: &amp;[&amp;str]) -&gt; bool {
+        roles.iter().all(|role| self.has_role(role))
+    }
+}
+
+// 从数据库加载用户权限
+pub async fn load_auth_user(
+    user_id: i32,
+    service: &amp;PermissionService,
+) -&gt; Result&lt;AuthUser&gt; {
+    let user = service.get_user(user_id).await?;
+    let roles = service.get_user_roles(user_id).await?;
+    let permissions = service.get_user_permissions(user_id).await?;
+    
+    let role_names: HashSet&lt;String&gt; = roles
+        .into_iter()
+        .map(|r| r.name)
+        .collect();
+    
+    let permission_names: HashSet&lt;String&gt; = permissions
+        .into_iter()
+        .map(|p| format!("{}:{}", p.resource, p.action))
+        .collect();
+    
+    Ok(AuthUser {
+        id: user.id,
+        username: user.username,
+        roles: role_names,
+        permissions: permission_names,
+    })
+}
+<span class="boring">}</span></code></pre>
+<h2 id="路由保护"><a class="header" href="#路由保护">路由保护</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    Router,
+    routing::{get, post, put, delete},
+    middleware,
+};
+
+// 用户管理路由（需要管理员权限）
+fn admin_routes() -&gt; Router {
+    Router::new()
+        .route("/users", get(list_users).post(create_user))
+        .route("/users/:id", put(update_user).delete(delete_user))
+        .route("/roles", get(list_roles).post(create_role))
+        .layer(middleware::from_fn(require_role("admin")))
+}
+
+// 文章管理路由（需要编辑权限）
+fn post_routes() -&gt; Router {
+    Router::new()
+        .route("/posts", post(create_post))
+        .route("/posts/:id", put(update_post).delete(delete_post))
+        .layer(middleware::from_fn(|req, next| {
+            require_permission("post".to_string(), "write".to_string())(req, next)
+        }))
+}
+
+// 公开路由
+fn public_routes() -&gt; Router {
+    Router::new()
+        .route("/posts", get(list_posts))
+        .route("/posts/:id", get(get_post))
+}
+
+fn app() -&gt; Router {
+    Router::new()
+        .nest("/admin", admin_routes())
+        .nest("/api", post_routes())
+        .merge(public_routes())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="处理器中的权限检查"><a class="header" href="#处理器中的权限检查">处理器中的权限检查</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::{Path, State, Extension},
+    Json,
+    http::StatusCode,
+};
+
+// 更新文章（检查所有权）
+async fn update_post(
+    Path(post_id): Path&lt;i32&gt;,
+    Extension(user): Extension&lt;AuthUser&gt;,
+    State(service): State&lt;PostService&gt;,
+    Json(payload): Json&lt;UpdatePostRequest&gt;,
+) -&gt; Result&lt;Json&lt;Post&gt;, StatusCode&gt; {
+    let post = service
+        .get_post(post_id)
+        .await
+        .map_err(|_| StatusCode::NOT_FOUND)?;
+    
+    // 检查是否是文章作者或管理员
+    if post.author_id != user.id &amp;&amp; !user.has_role("admin") {
+        return Err(StatusCode::FORBIDDEN);
+    }
+    
+    let updated = service
+        .update_post(post_id, payload)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(updated))
+}
+
+// 删除用户（仅管理员）
+async fn delete_user(
+    Path(user_id): Path&lt;i32&gt;,
+    Extension(auth_user): Extension&lt;AuthUser&gt;,
+    State(service): State&lt;UserService&gt;,
+) -&gt; Result&lt;StatusCode, StatusCode&gt; {
+    // 检查管理员权限
+    if !auth_user.has_role("admin") {
+        return Err(StatusCode::FORBIDDEN);
+    }
+    
+    // 不能删除自己
+    if user_id == auth_user.id {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    
+    service
+        .delete_user(user_id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(StatusCode::NO_CONTENT)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限初始化"><a class="header" href="#权限初始化">权限初始化</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub async fn init_permissions(pool: &amp;PgPool) -&gt; Result&lt;()&gt; {
+    // 创建角色
+    let admin_role = sqlx::query!(
+        "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
+        "admin",
+        "Administrator with full access"
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    let editor_role = sqlx::query!(
+        "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
+        "editor",
+        "Can create and edit posts"
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    let user_role = sqlx::query!(
+        "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
+        "user",
+        "Regular user"
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    // 创建权限
+    let permissions = vec![
+        ("user:create", "user", "create"),
+        ("user:read", "user", "read"),
+        ("user:update", "user", "update"),
+        ("user:delete", "user", "delete"),
+        ("post:create", "post", "create"),
+        ("post:read", "post", "read"),
+        ("post:update", "post", "update"),
+        ("post:delete", "post", "delete"),
+    ];
+    
+    for (name, resource, action) in permissions {
+        let perm = sqlx::query!(
+            "INSERT INTO permissions (name, resource, action) VALUES ($1, $2, $3) RETURNING id",
+            name,
+            resource,
+            action
+        )
+        .fetch_one(pool)
+        .await?;
+        
+        // 管理员拥有所有权限
+        sqlx::query!(
+            "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+            admin_role.id,
+            perm.id
+        )
+        .execute(pool)
+        .await?;
+        
+        // 编辑拥有文章相关权限
+        if resource == "post" {
+            sqlx::query!(
+                "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+                editor_role.id,
+                perm.id
+            )
+            .execute(pool)
+            .await?;
+        }
+        
+        // 普通用户只有读权限
+        if action == "read" {
+            sqlx::query!(
+                "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+                user_role.id,
+                perm.id
+            )
+            .execute(pool)
+            .await?;
+        }
+    }
+    
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整示例"><a class="header" href="#完整示例">完整示例</a></h2>
+<pre class="playground"><code class="language-rust">use axum::{
+    Router,
+    routing::{get, post},
+    middleware,
+    extract::{State, Extension},
+    Json,
+    http::StatusCode,
+};
+use sqlx::PgPool;
+
+#[tokio::main]
+async fn main() {
+    // 连接数据库
+    let pool = PgPool::connect("postgres://localhost/rbac_db")
+        .await
+        .unwrap();
+    
+    // 初始化权限
+    init_permissions(&amp;pool).await.unwrap();
+    
+    // 创建服务
+    let permission_service = PermissionService::new(pool.clone());
+    
+    // 构建应用
+    let app = Router::new()
+        // 公开路由
+        .route("/api/posts", get(list_posts))
+        .route("/api/posts/:id", get(get_post))
+        
+        // 需要认证的路由
+        .route("/api/posts", post(create_post))
+        .layer(middleware::from_fn(auth_middleware))
+        
+        // 管理员路由
+        .route("/api/admin/users", get(list_users))
+        .layer(middleware::from_fn(require_role("admin")))
+        
+        .with_state(permission_service);
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h2 id="测试"><a class="header" href="#测试">测试</a></h2>
+<pre><code class="language-bash"># 以管理员身份登录
+TOKEN=$(curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' \
+  | jq -r '.token')
+
+# 访问管理员路由
+curl http://localhost:3000/api/admin/users \
+  -H "Authorization: Bearer $TOKEN"
+
+# 创建文章（需要编辑权限）
+curl -X POST http://localhost:3000/api/posts \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"New Post","content":"Content here"}'
+</code></pre>
+<h2 id="练习"><a class="header" href="#练习">练习</a></h2>
+<ol>
+<li>实现资源级权限（如只能编辑自己的文章）</li>
+<li>添加权限继承机制</li>
+<li>实现动态权限加载</li>
+<li>创建权限管理 API</li>
+<li>添加权限缓存机制</li>
+</ol>
+<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
+<p>Day 71 将学习模板引擎，实现服务端渲染。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../Day61-80/69.JWT/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../../Day61-80/71.Templates/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../Day61-80/69.JWT/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../../Day61-80/71.Templates/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
+
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-abc7f01d.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

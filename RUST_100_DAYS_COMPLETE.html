@@ -1,0 +1,786 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>完整学习指南 - Rust - 100天从新手到大师</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-8da50af6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-28b84ce8.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust - 100天从新手到大师</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Start-Rust/100-days-of-rust" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="rust-100-天学习计划---完整指南"><a class="header" href="#rust-100-天学习计划---完整指南">Rust 100 天学习计划 - 完整指南</a></h1>
+<h2 id="-项目概述"><a class="header" href="#-项目概述">📚 项目概述</a></h2>
+<p>这是一个全面的 Rust 学习计划，从零基础到生产级项目开发，涵盖 100 天的系统化学习内容。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">🎯 学习目标</a></h2>
+<ul>
+<li>掌握 Rust 核心概念和语法</li>
+<li>理解所有权、借用和生命周期</li>
+<li>熟练使用 Rust 标准库和生态系统</li>
+<li>完成多个实战项目</li>
+<li>具备生产环境开发能力</li>
+</ul>
+<h2 id="-学习路线图"><a class="header" href="#-学习路线图">📅 学习路线图</a></h2>
+<h3 id="第一阶段基础入门-days-1-15"><a class="header" href="#第一阶段基础入门-days-1-15">第一阶段：基础入门 (Days 1-15)</a></h3>
+<p><strong>目标：掌握 Rust 基础语法和核心概念</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 01</td><td>Introduction</td><td>Hello World, Cargo 基础</td></tr>
+<tr><td>Day 02</td><td>Variables and Types</td><td>变量、数据类型、常量</td></tr>
+<tr><td>Day 03</td><td>Functions and Control Flow</td><td>函数、if/loop/while/for</td></tr>
+<tr><td>Day 04</td><td>Ownership</td><td>所有权规则、移动语义</td></tr>
+<tr><td>Day 05</td><td>References and Borrowing</td><td>引用、可变引用、借用规则</td></tr>
+<tr><td>Day 06</td><td>Slices</td><td>字符串切片、数组切片</td></tr>
+<tr><td>Day 07</td><td>Structs</td><td>结构体定义、方法、关联函数</td></tr>
+<tr><td>Day 08</td><td>Enums</td><td>枚举、Option、Result</td></tr>
+<tr><td>Day 09</td><td>Modules</td><td>模块系统、可见性、use</td></tr>
+<tr><td>Day 10</td><td>Common Collections</td><td>Vec, String, HashMap</td></tr>
+<tr><td>Day 11</td><td>Error Handling</td><td>panic!, Result, ? 操作符</td></tr>
+<tr><td>Day 12</td><td>Generics</td><td>泛型函数、结构体、枚举</td></tr>
+<tr><td>Day 13</td><td>Traits</td><td>trait 定义、实现、trait bounds</td></tr>
+<tr><td>Day 14</td><td>Lifetimes</td><td>生命周期注解、规则</td></tr>
+<tr><td>Day 15</td><td>Testing</td><td>单元测试、集成测试、文档测试</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>学习成果：</strong></p>
+<ul>
+<li>✅ 理解 Rust 核心概念</li>
+<li>✅ 能够编写基本的 Rust 程序</li>
+<li>✅ 掌握所有权系统</li>
+<li>✅ 熟悉错误处理模式</li>
+</ul>
+<h3 id="第二阶段进阶特性-days-16-30"><a class="header" href="#第二阶段进阶特性-days-16-30">第二阶段：进阶特性 (Days 16-30)</a></h3>
+<p><strong>目标：掌握 Rust 高级特性和并发编程</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 16</td><td>Closures</td><td>闭包语法、捕获环境</td></tr>
+<tr><td>Day 17</td><td>Iterators</td><td>迭代器、适配器、消费器</td></tr>
+<tr><td>Day 18</td><td>Cargo and Crates</td><td>依赖管理、发布 crate</td></tr>
+<tr><td>Day 19</td><td>Smart Pointers - Box</td><td>Box<t>, 递归类型</t></td></tr>
+<tr><td>Day 20</td><td>Smart Pointers - Rc/RefCell</td><td>引用计数、内部可变性</td></tr>
+<tr><td>Day 21</td><td>Reference Cycles</td><td>循环引用、Weak<t></t></td></tr>
+<tr><td>Day 22</td><td>Threads</td><td>线程创建、join</td></tr>
+<tr><td>Day 23</td><td>Message Passing</td><td>channel, mpsc</td></tr>
+<tr><td>Day 24</td><td>Shared State</td><td>Mutex, Arc</td></tr>
+<tr><td>Day 25</td><td>Send and Sync</td><td>并发 trait</td></tr>
+<tr><td>Day 26</td><td>OOP - Trait Objects</td><td>动态分发、trait 对象</td></tr>
+<tr><td>Day 27</td><td>Patterns</td><td>模式匹配、解构</td></tr>
+<tr><td>Day 28</td><td>Advanced Traits</td><td>关联类型、默认泛型参数</td></tr>
+<tr><td>Day 29</td><td>Advanced Types</td><td>newtype, 类型别名</td></tr>
+<tr><td>Day 30</td><td>Advanced Functions and Macros</td><td>函数指针、宏</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>学习成果：</strong></p>
+<ul>
+<li>✅ 掌握智能指针使用</li>
+<li>✅ 理解并发编程模型</li>
+<li>✅ 熟悉高级类型系统</li>
+<li>✅ 能够编写宏</li>
+</ul>
+<h3 id="第三阶段实用技能-days-31-45"><a class="header" href="#第三阶段实用技能-days-31-45">第三阶段：实用技能 (Days 31-45)</a></h3>
+<p><strong>目标：掌握实际开发中的常用技能</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 31</td><td>File I/O</td><td>文件读写、路径操作</td></tr>
+<tr><td>Day 32</td><td>Serialization - Serde</td><td>JSON, TOML 序列化</td></tr>
+<tr><td>Day 33</td><td>Minigrep</td><td>CLI 工具项目</td></tr>
+<tr><td>Day 34</td><td>Network - TCP</td><td>TCP 客户端/服务器</td></tr>
+<tr><td>Day 35</td><td>Async/Await</td><td>异步编程基础</td></tr>
+<tr><td>Day 36</td><td>Unsafe Rust</td><td>unsafe 代码、FFI</td></tr>
+<tr><td>Day 37</td><td>Procedural Macros</td><td>过程宏、derive 宏</td></tr>
+<tr><td>Day 38</td><td>FFI</td><td>C 互操作</td></tr>
+<tr><td>Day 39</td><td>Tokio Deep Dive</td><td>Tokio 运行时详解</td></tr>
+<tr><td>Day 40</td><td>Async Web Server</td><td>异步 HTTP 服务器</td></tr>
+<tr><td>Day 41</td><td>Database - SQLx</td><td>数据库操作</td></tr>
+<tr><td>Day 42</td><td>Tracing</td><td>日志和追踪</td></tr>
+<tr><td>Day 43</td><td>Error Handling</td><td>thiserror, anyhow</td></tr>
+<tr><td>Day 44</td><td>Clap</td><td>命令行参数解析</td></tr>
+<tr><td>Day 45</td><td>Reqwest</td><td>HTTP 客户端</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>学习成果：</strong></p>
+<ul>
+<li>✅ 掌握文件和网络 I/O</li>
+<li>✅ 熟练使用异步编程</li>
+<li>✅ 能够操作数据库</li>
+<li>✅ 掌握常用第三方库</li>
+</ul>
+<h3 id="第四阶段项目实战---redis-克隆-days-46-60"><a class="header" href="#第四阶段项目实战---redis-克隆-days-46-60">第四阶段：项目实战 - Redis 克隆 (Days 46-60)</a></h3>
+<p><strong>目标：构建一个完整的 Redis 克隆项目</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 46</td><td>Project Init</td><td>项目架构设计</td></tr>
+<tr><td>Day 47</td><td>RESP Parsing</td><td>RESP 协议解析</td></tr>
+<tr><td>Day 48</td><td>Command Architecture</td><td>命令模式设计</td></tr>
+<tr><td>Day 49</td><td>Storage Engine</td><td>内存存储引擎</td></tr>
+<tr><td>Day 50</td><td>Async Network</td><td>异步网络处理</td></tr>
+<tr><td>Day 51</td><td>Concurrency</td><td>并发控制</td></tr>
+<tr><td>Day 52</td><td>Persistence</td><td>AOF 持久化</td></tr>
+<tr><td>Day 53</td><td>Pub/Sub</td><td>发布订阅</td></tr>
+<tr><td>Day 54</td><td>Client SDK</td><td>客户端 SDK</td></tr>
+<tr><td>Day 55</td><td>Benchmark</td><td>性能测试</td></tr>
+<tr><td>Day 56</td><td>Cluster Mode</td><td>集群模式</td></tr>
+<tr><td>Day 57</td><td>Sentinel</td><td>哨兵模式</td></tr>
+<tr><td>Day 58</td><td>TLS</td><td>TLS 加密</td></tr>
+<tr><td>Day 59</td><td>Documentation</td><td>文档编写</td></tr>
+<tr><td>Day 60</td><td>CI/CD</td><td>持续集成/部署</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>项目特点：</strong></p>
+<ul>
+<li>✅ 支持基本 Redis 命令</li>
+<li>✅ AOF 持久化</li>
+<li>✅ 发布订阅</li>
+<li>✅ 集群模式</li>
+<li>✅ 完整的测试覆盖</li>
+</ul>
+<h3 id="第五阶段web-开发实战-days-61-80"><a class="header" href="#第五阶段web-开发实战-days-61-80">第五阶段：Web 开发实战 (Days 61-80)</a></h3>
+<p><strong>目标：掌握 Rust Web 开发全栈技能</strong></p>
+<h4 id="week-1-web-框架基础-days-61-65"><a class="header" href="#week-1-web-框架基础-days-61-65">Week 1: Web 框架基础 (Days 61-65)</a></h4>
+<ul>
+<li>Day 61: Rust Web 开发概览</li>
+<li>Day 62: Axum/Actix-web 入门</li>
+<li>Day 63: 路由与请求处理</li>
+<li>Day 64: 中间件开发</li>
+<li>Day 65: 请求状态管理</li>
+</ul>
+<h4 id="week-2-数据库与业务逻辑-days-66-70"><a class="header" href="#week-2-数据库与业务逻辑-days-66-70">Week 2: 数据库与业务逻辑 (Days 66-70)</a></h4>
+<ul>
+<li>Day 66: 数据库迁移 (Migrations)</li>
+<li>Day 67: CRUD 操作实战</li>
+<li>Day 68: 复杂查询与事务</li>
+<li>Day 69: 用户认证 (JWT)</li>
+<li>Day 70: 权限控制 (RBAC)</li>
+</ul>
+<h4 id="week-3-前端交互与部署-days-71-75"><a class="header" href="#week-3-前端交互与部署-days-71-75">Week 3: 前端交互与部署 (Days 71-75)</a></h4>
+<ul>
+<li>Day 71: 模板引擎 (Askama/Tera)</li>
+<li>Day 72: WebAssembly (WASM) 简介</li>
+<li>Day 73: 前端集成实战</li>
+<li>Day 74: API 文档生成 (OpenAPI)</li>
+<li>Day 75: 容器化部署 (Docker)</li>
+</ul>
+<h4 id="week-4-完整项目---博客系统-days-76-80"><a class="header" href="#week-4-完整项目---博客系统-days-76-80">Week 4: 完整项目 - 博客系统 (Days 76-80)</a></h4>
+<ul>
+<li>Day 76: 需求分析与设计</li>
+<li>Day 77: 核心业务实现</li>
+<li>Day 78: API 接口开发</li>
+<li>Day 79: 测试与优化</li>
+<li>Day 80: 项目总结与展示</li>
+</ul>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum - Web 框架</li>
+<li>SQLx - 数据库</li>
+<li>JWT - 认证</li>
+<li>Docker - 部署</li>
+</ul>
+<h3 id="第六阶段系统编程与拓展-days-81-90"><a class="header" href="#第六阶段系统编程与拓展-days-81-90">第六阶段：系统编程与拓展 (Days 81-90)</a></h3>
+<p><strong>目标：深入系统底层和性能优化</strong></p>
+<h4 id="week-1-系统编程-days-81-85"><a class="header" href="#week-1-系统编程-days-81-85">Week 1: 系统编程 (Days 81-85)</a></h4>
+<ul>
+<li>Day 81: 操作系统概念回顾</li>
+<li>Day 82: 文件系统操作深入</li>
+<li>Day 83: 进程管理与信号处理</li>
+<li>Day 84: 原始套接字 (Raw Sockets)</li>
+<li>Day 85: 嵌入式 Rust 简介</li>
+</ul>
+<h4 id="week-2-性能与工程化-days-86-90"><a class="header" href="#week-2-性能与工程化-days-86-90">Week 2: 性能与工程化 (Days 86-90)</a></h4>
+<ul>
+<li>Day 86: 性能分析工具 (Flamegraph)</li>
+<li>Day 87: 内存优化技巧</li>
+<li>Day 88: SIMD 与底层优化</li>
+<li>Day 89: 持续集成流水线</li>
+<li>Day 90: Rust 编译优化与配置</li>
+</ul>
+<p><strong>学习重点：</strong></p>
+<ul>
+<li>系统级编程</li>
+<li>性能分析和优化</li>
+<li>工程化实践</li>
+<li>CI/CD 流程</li>
+</ul>
+<h3 id="第七阶段毕业设计-days-91-100"><a class="header" href="#第七阶段毕业设计-days-91-100">第七阶段：毕业设计 (Days 91-100)</a></h3>
+<p><strong>目标：完成一个生产级别的完整项目</strong></p>
+<ul>
+<li>Day 91: 选题与架构设计</li>
+<li>Day 92: 原型验证 (PoC)</li>
+<li>Day 93-94: 核心模块开发</li>
+<li>Day 95: 外围模块与集成</li>
+<li>Day 96: 性能测试与调优</li>
+<li>Day 97: 文档编写与代码清理</li>
+<li>Day 98: 发布准备与版本管理</li>
+<li>Day 99: 项目展示与复盘</li>
+<li>Day 100: 成为 Rustacean 之路</li>
+</ul>
+<p><strong>项目选题：</strong></p>
+<ol>
+<li>分布式任务调度系统</li>
+<li>实时聊天系统</li>
+<li>微服务 API 网关</li>
+<li>高性能 KV 存储</li>
+</ol>
+<h2 id="-技术栈总览"><a class="header" href="#-技术栈总览">🛠️ 技术栈总览</a></h2>
+<h3 id="核心工具"><a class="header" href="#核心工具">核心工具</a></h3>
+<ul>
+<li><strong>Rust</strong>: 1.75+</li>
+<li><strong>Cargo</strong>: 包管理器</li>
+<li><strong>rustfmt</strong>: 代码格式化</li>
+<li><strong>clippy</strong>: 代码检查</li>
+</ul>
+<h3 id="web-开发"><a class="header" href="#web-开发">Web 开发</a></h3>
+<ul>
+<li><strong>Axum</strong>: Web 框架</li>
+<li><strong>Actix-web</strong>: 高性能 Web 框架</li>
+<li><strong>Tower</strong>: 中间件</li>
+<li><strong>Hyper</strong>: HTTP 实现</li>
+</ul>
+<h3 id="异步运行时"><a class="header" href="#异步运行时">异步运行时</a></h3>
+<ul>
+<li><strong>Tokio</strong>: 异步运行时</li>
+<li><strong>async-std</strong>: 异步标准库</li>
+</ul>
+<h3 id="数据库"><a class="header" href="#数据库">数据库</a></h3>
+<ul>
+<li><strong>SQLx</strong>: SQL 工具包</li>
+<li><strong>Diesel</strong>: ORM</li>
+<li><strong>Redis</strong>: 缓存</li>
+</ul>
+<h3 id="序列化"><a class="header" href="#序列化">序列化</a></h3>
+<ul>
+<li><strong>Serde</strong>: 序列化框架</li>
+<li><strong>serde_json</strong>: JSON 支持</li>
+</ul>
+<h3 id="测试"><a class="header" href="#测试">测试</a></h3>
+<ul>
+<li><strong>cargo test</strong>: 测试框架</li>
+<li><strong>criterion</strong>: 基准测试</li>
+<li><strong>proptest</strong>: 属性测试</li>
+</ul>
+<h3 id="工具"><a class="header" href="#工具">工具</a></h3>
+<ul>
+<li><strong>tracing</strong>: 日志追踪</li>
+<li><strong>clap</strong>: CLI 参数解析</li>
+<li><strong>reqwest</strong>: HTTP 客户端</li>
+<li><strong>anyhow</strong>: 错误处理</li>
+</ul>
+<h2 id="-学习进度追踪"><a class="header" href="#-学习进度追踪">📊 学习进度追踪</a></h2>
+<h3 id="第一阶段-days-1-15"><a class="header" href="#第一阶段-days-1-15">第一阶段 (Days 1-15)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 01-15 完成</li>
+<li><input disabled="" type="checkbox" checked=""> 基础概念掌握</li>
+<li><input disabled="" type="checkbox" checked=""> 所有权系统理解</li>
+<li><input disabled="" type="checkbox" checked=""> 基础项目完成</li>
+</ul>
+<h3 id="第二阶段-days-16-30"><a class="header" href="#第二阶段-days-16-30">第二阶段 (Days 16-30)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 16-30 完成</li>
+<li><input disabled="" type="checkbox" checked=""> 并发编程掌握</li>
+<li><input disabled="" type="checkbox" checked=""> 高级特性理解</li>
+<li><input disabled="" type="checkbox" checked=""> 智能指针使用</li>
+</ul>
+<h3 id="第三阶段-days-31-45"><a class="header" href="#第三阶段-days-31-45">第三阶段 (Days 31-45)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 31-45 完成</li>
+<li><input disabled="" type="checkbox" checked=""> 异步编程掌握</li>
+<li><input disabled="" type="checkbox" checked=""> 数据库操作熟练</li>
+<li><input disabled="" type="checkbox" checked=""> 常用库使用</li>
+</ul>
+<h3 id="第四阶段-days-46-60"><a class="header" href="#第四阶段-days-46-60">第四阶段 (Days 46-60)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 46-60 完成</li>
+<li><input disabled="" type="checkbox" checked=""> Redis 克隆完成</li>
+<li><input disabled="" type="checkbox" checked=""> 集群模式实现</li>
+<li><input disabled="" type="checkbox" checked=""> CI/CD 配置</li>
+</ul>
+<h3 id="第五阶段-days-61-80"><a class="header" href="#第五阶段-days-61-80">第五阶段 (Days 61-80)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Day 61-80 进行中</li>
+<li><input disabled="" type="checkbox"> Web 框架掌握</li>
+<li><input disabled="" type="checkbox"> 认证授权实现</li>
+<li><input disabled="" type="checkbox"> 博客系统完成</li>
+</ul>
+<h3 id="第六阶段-days-81-90"><a class="header" href="#第六阶段-days-81-90">第六阶段 (Days 81-90)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Day 81-90 待开始</li>
+<li><input disabled="" type="checkbox"> 系统编程掌握</li>
+<li><input disabled="" type="checkbox"> 性能优化实践</li>
+<li><input disabled="" type="checkbox"> 工程化完善</li>
+</ul>
+<h3 id="第七阶段-days-91-100"><a class="header" href="#第七阶段-days-91-100">第七阶段 (Days 91-100)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Day 91-100 待开始</li>
+<li><input disabled="" type="checkbox"> 毕业项目完成</li>
+<li><input disabled="" type="checkbox"> 生产部署成功</li>
+<li><input disabled="" type="checkbox"> 成为 Rustacean</li>
+</ul>
+<h2 id="-学习资源"><a class="header" href="#-学习资源">🎓 学习资源</a></h2>
+<h3 id="官方资源"><a class="header" href="#官方资源">官方资源</a></h3>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
+<li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
+<li><a href="https://rust-lang.github.io/api-guidelines/">Rust API Guidelines</a></li>
+</ul>
+<h3 id="推荐书籍"><a class="header" href="#推荐书籍">推荐书籍</a></h3>
+<ul>
+<li><strong>Programming Rust</strong> (2nd Edition)</li>
+<li><strong>Rust for Rustaceans</strong></li>
+<li><strong>Zero To Production In Rust</strong></li>
+<li><strong>The Rustonomicon</strong></li>
+</ul>
+<h3 id="在线课程"><a class="header" href="#在线课程">在线课程</a></h3>
+<ul>
+<li><a href="https://www.youtube.com/c/JonGjengset">Rust Course by Jon Gjengset</a></li>
+<li><a href="https://www.youtube.com/c/LetsGetRusty">Let’s Get Rusty</a></li>
+<li><a href="https://www.udemy.com/course/rust-lang/">Rust Programming Course</a></li>
+</ul>
+<h3 id="社区"><a class="header" href="#社区">社区</a></h3>
+<ul>
+<li><a href="https://users.rust-lang.org/">Rust 官方论坛</a></li>
+<li><a href="https://www.reddit.com/r/rust/">Reddit r/rust</a></li>
+<li><a href="https://rustcc.cn/">Rust 中文社区</a></li>
+<li><a href="https://discord.gg/rust-lang">Discord Rust 频道</a></li>
+</ul>
+<h3 id="实践平台"><a class="header" href="#实践平台">实践平台</a></h3>
+<ul>
+<li><a href="https://exercism.org/tracks/rust">Exercism Rust Track</a></li>
+<li><a href="https://github.com/rust-lang/rustlings">Rustlings</a></li>
+<li><a href="https://play.rust-lang.org/">Rust Playground</a></li>
+</ul>
+<h2 id="-学习建议"><a class="header" href="#-学习建议">💡 学习建议</a></h2>
+<h3 id="每日学习流程"><a class="header" href="#每日学习流程">每日学习流程</a></h3>
+<ol>
+<li>
+<p><strong>理论学习</strong> (30分钟)</p>
+<ul>
+<li>阅读文档和教程</li>
+<li>理解核心概念</li>
+</ul>
+</li>
+<li>
+<p><strong>代码实践</strong> (60分钟)</p>
+<ul>
+<li>跟随示例编码</li>
+<li>完成练习题</li>
+</ul>
+</li>
+<li>
+<p><strong>项目实战</strong> (30分钟)</p>
+<ul>
+<li>应用到实际项目</li>
+<li>解决实际问题</li>
+</ul>
+</li>
+<li>
+<p><strong>复习总结</strong> (15分钟)</p>
+<ul>
+<li>记录学习笔记</li>
+<li>总结关键点</li>
+</ul>
+</li>
+</ol>
+<h3 id="学习技巧"><a class="header" href="#学习技巧">学习技巧</a></h3>
+<ul>
+<li>✅ 每天坚持编码</li>
+<li>✅ 多读优秀源码</li>
+<li>✅ 参与开源项目</li>
+<li>✅ 写技术博客</li>
+<li>✅ 加入社区讨论</li>
+</ul>
+<h3 id="常见陷阱"><a class="header" href="#常见陷阱">常见陷阱</a></h3>
+<ul>
+<li>❌ 过度关注语法细节</li>
+<li>❌ 忽视所有权系统</li>
+<li>❌ 不写测试代码</li>
+<li>❌ 过早优化</li>
+<li>❌ 孤立学习</li>
+</ul>
+<h2 id="-项目展示"><a class="header" href="#-项目展示">🚀 项目展示</a></h2>
+<h3 id="已完成项目"><a class="header" href="#已完成项目">已完成项目</a></h3>
+<h4 id="1-redis-克隆-days-46-60"><a class="header" href="#1-redis-克隆-days-46-60">1. Redis 克隆 (Days 46-60)</a></h4>
+<p><strong>功能特点：</strong></p>
+<ul>
+<li>支持基本 Redis 命令 (GET, SET, DEL, etc.)</li>
+<li>AOF 持久化</li>
+<li>发布订阅模式</li>
+<li>集群模式</li>
+<li>哨兵模式</li>
+<li>TLS 加密</li>
+</ul>
+<p><strong>技术亮点：</strong></p>
+<ul>
+<li>异步 I/O (Tokio)</li>
+<li>并发控制 (Arc + RwLock)</li>
+<li>协议解析 (RESP)</li>
+<li>性能优化</li>
+</ul>
+<p><strong>性能指标：</strong></p>
+<ul>
+<li>QPS: 50000+</li>
+<li>延迟: P99 &lt; 10ms</li>
+<li>内存占用: &lt; 100MB</li>
+</ul>
+<h4 id="2-博客系统-days-76-80"><a class="header" href="#2-博客系统-days-76-80">2. 博客系统 (Days 76-80)</a></h4>
+<p><strong>功能特点：</strong></p>
+<ul>
+<li>用户认证 (JWT)</li>
+<li>文章 CRUD</li>
+<li>评论系统</li>
+<li>标签分类</li>
+<li>Markdown 支持</li>
+</ul>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum Web 框架</li>
+<li>PostgreSQL 数据库</li>
+<li>Redis 缓存</li>
+<li>Docker 部署</li>
+</ul>
+<h2 id="-技能树"><a class="header" href="#-技能树">📈 技能树</a></h2>
+<pre><code>Rust 技能树
+├── 基础语法 ✅
+│   ├── 变量和类型
+│   ├── 函数和控制流
+│   └── 模式匹配
+├── 所有权系统 ✅
+│   ├── 所有权规则
+│   ├── 借用和引用
+│   └── 生命周期
+├── 类型系统 ✅
+│   ├── 结构体和枚举
+│   ├── 泛型
+│   └── Trait
+├── 并发编程 ✅
+│   ├── 线程
+│   ├── 消息传递
+│   └── 共享状态
+├── 异步编程 ✅
+│   ├── async/await
+│   ├── Future
+│   └── Tokio
+├── Web 开发 🔄
+│   ├── HTTP 服务器
+│   ├── 数据库操作
+│   └── 认证授权
+├── 系统编程 ⏳
+│   ├── 文件系统
+│   ├── 网络编程
+│   └── 进程管理
+└── 性能优化 ⏳
+    ├── 性能分析
+    ├── 内存优化
+    └── SIMD
+
+图例: ✅ 已掌握 | 🔄 学习中 | ⏳ 待学习
+</code></pre>
+<h2 id="-下一步计划"><a class="header" href="#-下一步计划">🎯 下一步计划</a></h2>
+<h3 id="短期目标-1-2-周"><a class="header" href="#短期目标-1-2-周">短期目标 (1-2 周)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 完成 Web 开发阶段 (Days 61-80)</li>
+<li><input disabled="" type="checkbox"> 掌握 Axum 框架</li>
+<li><input disabled="" type="checkbox"> 实现完整的博客系统</li>
+<li><input disabled="" type="checkbox"> 学习 Docker 部署</li>
+</ul>
+<h3 id="中期目标-1-个月"><a class="header" href="#中期目标-1-个月">中期目标 (1 个月)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 完成系统编程阶段 (Days 81-90)</li>
+<li><input disabled="" type="checkbox"> 掌握性能优化技巧</li>
+<li><input disabled="" type="checkbox"> 学习 CI/CD 流程</li>
+<li><input disabled="" type="checkbox"> 参与开源项目</li>
+</ul>
+<h3 id="长期目标-3-个月"><a class="header" href="#长期目标-3-个月">长期目标 (3 个月)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 完成毕业设计 (Days 91-100)</li>
+<li><input disabled="" type="checkbox"> 构建生产级项目</li>
+<li><input disabled="" type="checkbox"> 发布开源项目</li>
+<li><input disabled="" type="checkbox"> 成为 Rustacean</li>
+</ul>
+<h2 id="-成就系统"><a class="header" href="#-成就系统">🏆 成就系统</a></h2>
+<h3 id="基础成就"><a class="header" href="#基础成就">基础成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> 🎓 Hello World - 完成第一个 Rust 程序</li>
+<li><input disabled="" type="checkbox" checked=""> 📚 基础入门 - 完成前 15 天学习</li>
+<li><input disabled="" type="checkbox" checked=""> 🔧 工具掌握 - 熟练使用 Cargo</li>
+<li><input disabled="" type="checkbox" checked=""> ✅ 测试驱动 - 编写第一个测试</li>
+</ul>
+<h3 id="进阶成就"><a class="header" href="#进阶成就">进阶成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> 🧵 并发大师 - 掌握并发编程</li>
+<li><input disabled="" type="checkbox" checked=""> ⚡ 异步专家 - 熟练使用 async/await</li>
+<li><input disabled="" type="checkbox" checked=""> 🗄️ 数据库达人 - 完成数据库操作</li>
+<li><input disabled="" type="checkbox" checked=""> 🌐 网络高手 - 实现网络服务</li>
+</ul>
+<h3 id="项目成就"><a class="header" href="#项目成就">项目成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> 🎮 Redis 克隆 - 完成 Redis 项目</li>
+<li><input disabled="" type="checkbox"> 🌐 Web 大师 - 完成博客系统</li>
+<li><input disabled="" type="checkbox"> 🚀 性能优化 - 达到性能目标</li>
+<li><input disabled="" type="checkbox"> 🎓 毕业项目 - 完成最终项目</li>
+</ul>
+<h3 id="社区成就"><a class="header" href="#社区成就">社区成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 📝 技术博客 - 发布 10 篇文章</li>
+<li><input disabled="" type="checkbox"> 🤝 开源贡献 - 提交 PR</li>
+<li><input disabled="" type="checkbox"> 💬 社区活跃 - 帮助他人</li>
+<li><input disabled="" type="checkbox"> 🌟 项目之星 - 获得 100+ stars</li>
+</ul>
+<h2 id="-联系方式"><a class="header" href="#-联系方式">📞 联系方式</a></h2>
+<p>如有问题或建议，欢迎通过以下方式联系：</p>
+<ul>
+<li>GitHub Issues</li>
+<li>Email</li>
+<li>Discord</li>
+<li>微信群</li>
+</ul>
+<h2 id="-许可证"><a class="header" href="#-许可证">📄 许可证</a></h2>
+<p>本项目采用 MIT 许可证。</p>
+<hr>
+<p><strong>记住：学习 Rust 是一场马拉松，不是短跑。保持耐心，持续练习，你一定能成为优秀的 Rustacean！🦀</strong></p>
+<p><strong>Happy Coding! 🚀</strong></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="QUICK_START.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="PROJECT_COMPLETION_STATUS.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="QUICK_START.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="PROJECT_COMPLETION_STATUS.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

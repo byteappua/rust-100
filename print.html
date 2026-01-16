@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-c9c46012.js";
+            window.path_to_searchindex_js = "searchindex-8da50af6.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-967bfe39.js"></script>
+        <script src="toc-28b84ce8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -272,13 +272,1669 @@
 </ul>
 <h2 id="如何使用"><a class="header" href="#如何使用">如何使用</a></h2>
 <p>建议按照天数顺序学习。每一天的文件夹中包含了当天的学习笔记、代码示例和练习题。</p>
-<h2 id="资源链接"><a class="header" href="#资源链接">资源链接</a></h2>
+<h2 id="-额外资源"><a class="header" href="#-额外资源">🎁 额外资源</a></h2>
+<h3 id="-番外篇"><a class="header" href="#-番外篇">📖 番外篇</a></h3>
+<p>深入探讨 Rust 编程的重要主题:</p>
+<ul>
+<li><a href="extras/rust-zen.html">Rust 之禅 - Rust 编程哲学</a></li>
+<li><a href="extras/common-pitfalls.html">那些年我们踩过的坑</a></li>
+<li><a href="extras/README.html">更多专题文章…</a></li>
+</ul>
+<h3 id="-练习题库"><a class="header" href="#-练习题库">🏋️ 练习题库</a></h3>
+<p>每个 Day 都配有练习题,帮助巩固知识:</p>
+<ul>
+<li><a href="Day01-15/01.Introduction/exercises/README.html">Day 01 练习题</a></li>
+<li>更多练习题持续更新中…</li>
+</ul>
+<h3 id="-项目模板"><a class="header" href="#-项目模板">🎨 项目模板</a></h3>
+<p>快速启动各类 Rust 项目:</p>
+<ul>
+<li><a href="templates/cli-app">CLI 应用模板</a></li>
+<li><a href="templates/web-api">Web API 模板</a></li>
+<li><a href="templates/README.html">更多模板…</a></li>
+</ul>
+<h2 id="-学习资源"><a class="header" href="#-学习资源">📚 学习资源</a></h2>
+<h3 id="官方资源"><a class="header" href="#官方资源">官方资源</a></h3>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language (Rust Book)</a></li>
 <li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
 <li><a href="https://doc.rust-lang.org/std/">Rust Standard Library Documentation</a></li>
 <li><a href="https://crates.io/">Crates.io</a></li>
 </ul>
+<h3 id="社区资源"><a class="header" href="#社区资源">社区资源</a></h3>
+<ul>
+<li><a href="https://rustcc.cn/">Rust 中文社区</a></li>
+<li><a href="https://users.rust-lang.org/">Rust 官方论坛</a></li>
+<li><a href="https://www.reddit.com/r/rust/">Reddit r/rust</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rust-100-天学习计划---快速开始"><a class="header" href="#rust-100-天学习计划---快速开始">Rust 100 天学习计划 - 快速开始</a></h1>
+<h2 id="-快速开始"><a class="header" href="#-快速开始">🚀 快速开始</a></h2>
+<h3 id="环境准备"><a class="header" href="#环境准备">环境准备</a></h3>
+<h4 id="1-安装-rust"><a class="header" href="#1-安装-rust">1. 安装 Rust</a></h4>
+<pre><code class="language-bash"># Linux/macOS
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Windows
+# 下载并运行 https://rustup.rs/
+</code></pre>
+<h4 id="2-验证安装"><a class="header" href="#2-验证安装">2. 验证安装</a></h4>
+<pre><code class="language-bash">rustc --version
+cargo --version
+</code></pre>
+<h4 id="3-配置编辑器"><a class="header" href="#3-配置编辑器">3. 配置编辑器</a></h4>
+<p><strong>VS Code 推荐插件：</strong></p>
+<ul>
+<li>rust-analyzer</li>
+<li>CodeLLDB</li>
+<li>crates</li>
+<li>Even Better TOML</li>
+</ul>
+<p><strong>配置文件 (.vscode/settings.json):</strong></p>
+<pre><code class="language-json">{
+    "rust-analyzer.checkOnSave.command": "clippy",
+    "editor.formatOnSave": true
+}
+</code></pre>
+<h3 id="学习路径"><a class="header" href="#学习路径">学习路径</a></h3>
+<h4 id="第一周基础入门-days-1-7"><a class="header" href="#第一周基础入门-days-1-7">第一周：基础入门 (Days 1-7)</a></h4>
+<pre><code class="language-bash"># Day 1: Hello World
+cargo new hello_world
+cd hello_world
+cargo run
+
+# Day 2: 变量和类型
+cd Day01-15/02.VariablesAndTypes/variables
+cargo run
+
+# Day 3: 函数和控制流
+cd Day01-15/03.FunctionsAndControlFlow/branches_and_loops
+cargo run
+</code></pre>
+<p><strong>每日学习计划：</strong></p>
+<ol>
+<li>阅读当天的 README.md (30分钟)</li>
+<li>运行示例代码 (30分钟)</li>
+<li>完成练习题 (60分钟)</li>
+<li>总结笔记 (15分钟)</li>
+</ol>
+<h4 id="第二周核心概念-days-8-15"><a class="header" href="#第二周核心概念-days-8-15">第二周：核心概念 (Days 8-15)</a></h4>
+<p><strong>重点内容：</strong></p>
+<ul>
+<li>Day 4-6: 所有权系统 ⭐⭐⭐</li>
+<li>Day 7-8: 结构体和枚举</li>
+<li>Day 11: 错误处理 ⭐⭐</li>
+<li>Day 13: Traits ⭐⭐</li>
+</ul>
+<pre><code class="language-bash"># 所有权练习
+cd Day01-15/04.Ownership/ownership_demo
+cargo run
+
+# 错误处理
+cd Day01-15/11.ErrorHandling/error_handling_demo
+cargo run
+</code></pre>
+<h4 id="第三-四周进阶特性-days-16-30"><a class="header" href="#第三-四周进阶特性-days-16-30">第三-四周：进阶特性 (Days 16-30)</a></h4>
+<p><strong>重点内容：</strong></p>
+<ul>
+<li>Day 16-17: 闭包和迭代器 ⭐⭐</li>
+<li>Day 22-25: 并发编程 ⭐⭐⭐</li>
+<li>Day 28-30: 高级特性</li>
+</ul>
+<pre><code class="language-bash"># 并发编程
+cd Day16-30/22.Threads
+cargo run
+
+# 消息传递
+cd Day16-30/23.MessagePassing
+cargo run
+</code></pre>
+<h4 id="第五-六周实用技能-days-31-45"><a class="header" href="#第五-六周实用技能-days-31-45">第五-六周：实用技能 (Days 31-45)</a></h4>
+<p><strong>重点内容：</strong></p>
+<ul>
+<li>Day 35: Async/Await ⭐⭐⭐</li>
+<li>Day 39: Tokio 深入 ⭐⭐</li>
+<li>Day 41: 数据库操作 ⭐⭐</li>
+</ul>
+<pre><code class="language-bash"># 异步编程
+cd Day31-45/35.AsyncAwait
+cargo run
+
+# 数据库
+cd Day31-45/41.Database_SQLx
+cargo run
+</code></pre>
+<h4 id="第七-八周redis-项目-days-46-60"><a class="header" href="#第七-八周redis-项目-days-46-60">第七-八周：Redis 项目 (Days 46-60)</a></h4>
+<p><strong>项目里程碑：</strong></p>
+<ul>
+<li>Day 46-50: 基础功能</li>
+<li>Day 51-55: 高级功能</li>
+<li>Day 56-60: 集群和部署</li>
+</ul>
+<pre><code class="language-bash"># 运行 Redis 克隆
+cd Day46-60/60.CICD
+cargo run --release
+
+# 运行测试
+cargo test
+
+# 运行基准测试
+cargo bench
+</code></pre>
+<h4 id="第九-十周web-开发-days-61-80"><a class="header" href="#第九-十周web-开发-days-61-80">第九-十周：Web 开发 (Days 61-80)</a></h4>
+<p><strong>项目里程碑：</strong></p>
+<ul>
+<li>Day 61-65: Web 框架基础</li>
+<li>Day 66-70: 数据库和认证</li>
+<li>Day 76-80: 博客系统</li>
+</ul>
+<pre><code class="language-bash"># Web 服务器
+cd Day61-80/62.AxumActix
+cargo run
+
+# JWT 认证
+cd Day61-80/69.JWT
+cargo run
+</code></pre>
+<h2 id="-学习资源-1"><a class="header" href="#-学习资源-1">📚 学习资源</a></h2>
+<h3 id="官方文档"><a class="header" href="#官方文档">官方文档</a></h3>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Book</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
+<li><a href="https://github.com/rust-lang/rustlings">Rustlings</a></li>
+</ul>
+<h3 id="视频教程"><a class="header" href="#视频教程">视频教程</a></h3>
+<ul>
+<li><a href="https://www.youtube.com/c/LetsGetRusty">Let’s Get Rusty</a></li>
+<li><a href="https://www.youtube.com/c/JonGjengset">Jon Gjengset</a></li>
+</ul>
+<h3 id="书籍推荐"><a class="header" href="#书籍推荐">书籍推荐</a></h3>
+<ul>
+<li>Programming Rust (O’Reilly)</li>
+<li>Rust for Rustaceans</li>
+<li>Zero To Production In Rust</li>
+</ul>
+<h2 id="-常用命令"><a class="header" href="#-常用命令">🛠️ 常用命令</a></h2>
+<h3 id="cargo-命令"><a class="header" href="#cargo-命令">Cargo 命令</a></h3>
+<pre><code class="language-bash"># 创建新项目
+cargo new project_name
+cargo new --lib library_name
+
+# 构建和运行
+cargo build              # 调试模式
+cargo build --release    # 发布模式
+cargo run                # 运行
+cargo run --release      # 发布模式运行
+
+# 测试
+cargo test               # 运行所有测试
+cargo test test_name     # 运行特定测试
+cargo test -- --nocapture  # 显示打印输出
+
+# 文档
+cargo doc --open         # 生成并打开文档
+
+# 代码检查
+cargo check              # 快速检查
+cargo clippy             # Lint 检查
+cargo fmt                # 格式化代码
+
+# 依赖管理
+cargo update             # 更新依赖
+cargo tree               # 查看依赖树
+</code></pre>
+<h3 id="rustup-命令"><a class="header" href="#rustup-命令">Rustup 命令</a></h3>
+<pre><code class="language-bash"># 更新 Rust
+rustup update
+
+# 安装工具链
+rustup toolchain install stable
+rustup toolchain install nightly
+
+# 切换工具链
+rustup default stable
+rustup default nightly
+
+# 添加目标平台
+rustup target add wasm32-unknown-unknown
+
+# 安装组件
+rustup component add rustfmt
+rustup component add clippy
+</code></pre>
+<h2 id="-学习技巧"><a class="header" href="#-学习技巧">🎯 学习技巧</a></h2>
+<h3 id="1-理解所有权系统"><a class="header" href="#1-理解所有权系统">1. 理解所有权系统</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ❌ 错误：值被移动
+let s1 = String::from("hello");
+let s2 = s1;
+println!("{}", s1);  // 编译错误
+
+// ✅ 正确：使用引用
+let s1 = String::from("hello");
+let s2 = &amp;s1;
+println!("{}", s1);  // OK
+<span class="boring">}</span></code></pre>
+<h3 id="2-善用编译器提示"><a class="header" href="#2-善用编译器提示">2. 善用编译器提示</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 编译器会给出详细的错误信息和建议
+// 仔细阅读错误信息，它们通常很有帮助
+<span class="boring">}</span></code></pre>
+<h3 id="3-使用-clippy"><a class="header" href="#3-使用-clippy">3. 使用 Clippy</a></h3>
+<pre><code class="language-bash"># Clippy 会给出代码改进建议
+cargo clippy
+
+# 示例输出：
+# warning: you seem to be trying to use `match` for destructuring a single pattern
+# help: try this: `if let Some(x) = option { ... }`
+</code></pre>
+<h3 id="4-阅读标准库源码"><a class="header" href="#4-阅读标准库源码">4. 阅读标准库源码</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 在 VS Code 中，按住 Ctrl 点击类型名
+// 可以跳转到定义查看源码
+let v = Vec::new();  // Ctrl+点击 Vec
+<span class="boring">}</span></code></pre>
+<h3 id="5-实践项目"><a class="header" href="#5-实践项目">5. 实践项目</a></h3>
+<ul>
+<li>每周完成一个小项目</li>
+<li>参与开源项目</li>
+<li>解决 LeetCode Rust 题目</li>
+</ul>
+<h2 id="-常见问题"><a class="header" href="#-常见问题">🐛 常见问题</a></h2>
+<h3 id="1-借用检查器错误"><a class="header" href="#1-借用检查器错误">1. 借用检查器错误</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 问题：同时存在可变和不可变引用
+let mut v = vec![1, 2, 3];
+let first = &amp;v[0];
+v.push(4);  // 错误！
+println!("{}", first);
+
+// 解决：缩短引用的生命周期
+let mut v = vec![1, 2, 3];
+{
+    let first = &amp;v[0];
+    println!("{}", first);
+}
+v.push(4);  // OK
+<span class="boring">}</span></code></pre>
+<h3 id="2-生命周期注解"><a class="header" href="#2-生命周期注解">2. 生命周期注解</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 问题：编译器无法推断生命周期
+fn longest(x: &amp;str, y: &amp;str) -&gt; &amp;str {  // 错误
+    if x.len() &gt; y.len() { x } else { y }
+}
+
+// 解决：添加生命周期注解
+fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() { x } else { y }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="3-异步运行时"><a class="header" href="#3-异步运行时">3. 异步运行时</a></h3>
+<pre class="playground"><code class="language-rust">// 问题：没有运行时
+async fn hello() {
+    println!("Hello");
+}
+
+fn main() {
+    hello();  // 不会执行
+}
+
+// 解决：使用 Tokio
+#[tokio::main]
+async fn main() {
+    hello().await;  // OK
+}</code></pre>
+<h2 id="-进度追踪"><a class="header" href="#-进度追踪">📊 进度追踪</a></h2>
+<h3 id="每日检查清单"><a class="header" href="#每日检查清单">每日检查清单</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 阅读当天教程</li>
+<li><input disabled="" type="checkbox"> 运行示例代码</li>
+<li><input disabled="" type="checkbox"> 完成练习题</li>
+<li><input disabled="" type="checkbox"> 记录学习笔记</li>
+<li><input disabled="" type="checkbox"> 提交代码到 Git</li>
+</ul>
+<h3 id="每周检查清单"><a class="header" href="#每周检查清单">每周检查清单</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 复习本周内容</li>
+<li><input disabled="" type="checkbox"> 完成周项目</li>
+<li><input disabled="" type="checkbox"> 参与社区讨论</li>
+<li><input disabled="" type="checkbox"> 阅读相关文章</li>
+<li><input disabled="" type="checkbox"> 更新学习博客</li>
+</ul>
+<h3 id="阶段检查清单"><a class="header" href="#阶段检查清单">阶段检查清单</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 第一阶段 (Days 1-15): 基础掌握</li>
+<li><input disabled="" type="checkbox"> 第二阶段 (Days 16-30): 进阶特性</li>
+<li><input disabled="" type="checkbox"> 第三阶段 (Days 31-45): 实用技能</li>
+<li><input disabled="" type="checkbox"> 第四阶段 (Days 46-60): Redis 项目</li>
+<li><input disabled="" type="checkbox"> 第五阶段 (Days 61-80): Web 开发</li>
+<li><input disabled="" type="checkbox"> 第六阶段 (Days 81-90): 系统编程</li>
+<li><input disabled="" type="checkbox"> 第七阶段 (Days 91-100): 毕业设计</li>
+</ul>
+<h2 id="-认证和成就"><a class="header" href="#-认证和成就">🎓 认证和成就</a></h2>
+<h3 id="完成标准"><a class="header" href="#完成标准">完成标准</a></h3>
+<p>每个阶段完成后，确保：</p>
+<ol>
+<li>理解核心概念</li>
+<li>能够独立编写代码</li>
+<li>完成所有练习</li>
+<li>通过阶段测试</li>
+</ol>
+<h3 id="项目展示"><a class="header" href="#项目展示">项目展示</a></h3>
+<ul>
+<li>在 GitHub 上创建项目仓库</li>
+<li>编写完整的 README</li>
+<li>添加测试和文档</li>
+<li>分享到社区</li>
+</ul>
+<h2 id="-获取帮助"><a class="header" href="#-获取帮助">💬 获取帮助</a></h2>
+<h3 id="社区资源-1"><a class="header" href="#社区资源-1">社区资源</a></h3>
+<ul>
+<li><a href="https://users.rust-lang.org/">Rust 官方论坛</a></li>
+<li><a href="https://www.reddit.com/r/rust/">Reddit r/rust</a></li>
+<li><a href="https://rustcc.cn/">Rust 中文社区</a></li>
+<li><a href="https://discord.gg/rust-lang">Discord</a></li>
+</ul>
+<h3 id="提问技巧"><a class="header" href="#提问技巧">提问技巧</a></h3>
+<ol>
+<li>提供完整的错误信息</li>
+<li>分享最小可复现示例</li>
+<li>说明已尝试的解决方案</li>
+<li>使用 <a href="https://play.rust-lang.org/">Rust Playground</a></li>
+</ol>
+<h2 id="-开始学习"><a class="header" href="#-开始学习">🚀 开始学习</a></h2>
+<pre><code class="language-bash"># 克隆项目
+git clone https://github.com/yourusername/rust-100-days.git
+cd rust-100-days
+
+# 开始 Day 1
+cd Day01-15/01.Introduction/hello_world
+cargo run
+
+# 祝你学习愉快！🦀
+</code></pre>
+<hr>
+<p><strong>记住：学习 Rust 需要耐心，但回报是值得的！</strong></p>
+<p><strong>Happy Coding! 🦀</strong></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rust-100-天学习计划---完整指南"><a class="header" href="#rust-100-天学习计划---完整指南">Rust 100 天学习计划 - 完整指南</a></h1>
+<h2 id="-项目概述"><a class="header" href="#-项目概述">📚 项目概述</a></h2>
+<p>这是一个全面的 Rust 学习计划，从零基础到生产级项目开发，涵盖 100 天的系统化学习内容。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">🎯 学习目标</a></h2>
+<ul>
+<li>掌握 Rust 核心概念和语法</li>
+<li>理解所有权、借用和生命周期</li>
+<li>熟练使用 Rust 标准库和生态系统</li>
+<li>完成多个实战项目</li>
+<li>具备生产环境开发能力</li>
+</ul>
+<h2 id="-学习路线图"><a class="header" href="#-学习路线图">📅 学习路线图</a></h2>
+<h3 id="第一阶段基础入门-days-1-15"><a class="header" href="#第一阶段基础入门-days-1-15">第一阶段：基础入门 (Days 1-15)</a></h3>
+<p><strong>目标：掌握 Rust 基础语法和核心概念</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 01</td><td>Introduction</td><td>Hello World, Cargo 基础</td></tr>
+<tr><td>Day 02</td><td>Variables and Types</td><td>变量、数据类型、常量</td></tr>
+<tr><td>Day 03</td><td>Functions and Control Flow</td><td>函数、if/loop/while/for</td></tr>
+<tr><td>Day 04</td><td>Ownership</td><td>所有权规则、移动语义</td></tr>
+<tr><td>Day 05</td><td>References and Borrowing</td><td>引用、可变引用、借用规则</td></tr>
+<tr><td>Day 06</td><td>Slices</td><td>字符串切片、数组切片</td></tr>
+<tr><td>Day 07</td><td>Structs</td><td>结构体定义、方法、关联函数</td></tr>
+<tr><td>Day 08</td><td>Enums</td><td>枚举、Option、Result</td></tr>
+<tr><td>Day 09</td><td>Modules</td><td>模块系统、可见性、use</td></tr>
+<tr><td>Day 10</td><td>Common Collections</td><td>Vec, String, HashMap</td></tr>
+<tr><td>Day 11</td><td>Error Handling</td><td>panic!, Result, ? 操作符</td></tr>
+<tr><td>Day 12</td><td>Generics</td><td>泛型函数、结构体、枚举</td></tr>
+<tr><td>Day 13</td><td>Traits</td><td>trait 定义、实现、trait bounds</td></tr>
+<tr><td>Day 14</td><td>Lifetimes</td><td>生命周期注解、规则</td></tr>
+<tr><td>Day 15</td><td>Testing</td><td>单元测试、集成测试、文档测试</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>学习成果：</strong></p>
+<ul>
+<li>✅ 理解 Rust 核心概念</li>
+<li>✅ 能够编写基本的 Rust 程序</li>
+<li>✅ 掌握所有权系统</li>
+<li>✅ 熟悉错误处理模式</li>
+</ul>
+<h3 id="第二阶段进阶特性-days-16-30"><a class="header" href="#第二阶段进阶特性-days-16-30">第二阶段：进阶特性 (Days 16-30)</a></h3>
+<p><strong>目标：掌握 Rust 高级特性和并发编程</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 16</td><td>Closures</td><td>闭包语法、捕获环境</td></tr>
+<tr><td>Day 17</td><td>Iterators</td><td>迭代器、适配器、消费器</td></tr>
+<tr><td>Day 18</td><td>Cargo and Crates</td><td>依赖管理、发布 crate</td></tr>
+<tr><td>Day 19</td><td>Smart Pointers - Box</td><td>Box<t>, 递归类型</t></td></tr>
+<tr><td>Day 20</td><td>Smart Pointers - Rc/RefCell</td><td>引用计数、内部可变性</td></tr>
+<tr><td>Day 21</td><td>Reference Cycles</td><td>循环引用、Weak<t></t></td></tr>
+<tr><td>Day 22</td><td>Threads</td><td>线程创建、join</td></tr>
+<tr><td>Day 23</td><td>Message Passing</td><td>channel, mpsc</td></tr>
+<tr><td>Day 24</td><td>Shared State</td><td>Mutex, Arc</td></tr>
+<tr><td>Day 25</td><td>Send and Sync</td><td>并发 trait</td></tr>
+<tr><td>Day 26</td><td>OOP - Trait Objects</td><td>动态分发、trait 对象</td></tr>
+<tr><td>Day 27</td><td>Patterns</td><td>模式匹配、解构</td></tr>
+<tr><td>Day 28</td><td>Advanced Traits</td><td>关联类型、默认泛型参数</td></tr>
+<tr><td>Day 29</td><td>Advanced Types</td><td>newtype, 类型别名</td></tr>
+<tr><td>Day 30</td><td>Advanced Functions and Macros</td><td>函数指针、宏</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>学习成果：</strong></p>
+<ul>
+<li>✅ 掌握智能指针使用</li>
+<li>✅ 理解并发编程模型</li>
+<li>✅ 熟悉高级类型系统</li>
+<li>✅ 能够编写宏</li>
+</ul>
+<h3 id="第三阶段实用技能-days-31-45"><a class="header" href="#第三阶段实用技能-days-31-45">第三阶段：实用技能 (Days 31-45)</a></h3>
+<p><strong>目标：掌握实际开发中的常用技能</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 31</td><td>File I/O</td><td>文件读写、路径操作</td></tr>
+<tr><td>Day 32</td><td>Serialization - Serde</td><td>JSON, TOML 序列化</td></tr>
+<tr><td>Day 33</td><td>Minigrep</td><td>CLI 工具项目</td></tr>
+<tr><td>Day 34</td><td>Network - TCP</td><td>TCP 客户端/服务器</td></tr>
+<tr><td>Day 35</td><td>Async/Await</td><td>异步编程基础</td></tr>
+<tr><td>Day 36</td><td>Unsafe Rust</td><td>unsafe 代码、FFI</td></tr>
+<tr><td>Day 37</td><td>Procedural Macros</td><td>过程宏、derive 宏</td></tr>
+<tr><td>Day 38</td><td>FFI</td><td>C 互操作</td></tr>
+<tr><td>Day 39</td><td>Tokio Deep Dive</td><td>Tokio 运行时详解</td></tr>
+<tr><td>Day 40</td><td>Async Web Server</td><td>异步 HTTP 服务器</td></tr>
+<tr><td>Day 41</td><td>Database - SQLx</td><td>数据库操作</td></tr>
+<tr><td>Day 42</td><td>Tracing</td><td>日志和追踪</td></tr>
+<tr><td>Day 43</td><td>Error Handling</td><td>thiserror, anyhow</td></tr>
+<tr><td>Day 44</td><td>Clap</td><td>命令行参数解析</td></tr>
+<tr><td>Day 45</td><td>Reqwest</td><td>HTTP 客户端</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>学习成果：</strong></p>
+<ul>
+<li>✅ 掌握文件和网络 I/O</li>
+<li>✅ 熟练使用异步编程</li>
+<li>✅ 能够操作数据库</li>
+<li>✅ 掌握常用第三方库</li>
+</ul>
+<h3 id="第四阶段项目实战---redis-克隆-days-46-60"><a class="header" href="#第四阶段项目实战---redis-克隆-days-46-60">第四阶段：项目实战 - Redis 克隆 (Days 46-60)</a></h3>
+<p><strong>目标：构建一个完整的 Redis 克隆项目</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>天数</th><th>主题</th><th>核心内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day 46</td><td>Project Init</td><td>项目架构设计</td></tr>
+<tr><td>Day 47</td><td>RESP Parsing</td><td>RESP 协议解析</td></tr>
+<tr><td>Day 48</td><td>Command Architecture</td><td>命令模式设计</td></tr>
+<tr><td>Day 49</td><td>Storage Engine</td><td>内存存储引擎</td></tr>
+<tr><td>Day 50</td><td>Async Network</td><td>异步网络处理</td></tr>
+<tr><td>Day 51</td><td>Concurrency</td><td>并发控制</td></tr>
+<tr><td>Day 52</td><td>Persistence</td><td>AOF 持久化</td></tr>
+<tr><td>Day 53</td><td>Pub/Sub</td><td>发布订阅</td></tr>
+<tr><td>Day 54</td><td>Client SDK</td><td>客户端 SDK</td></tr>
+<tr><td>Day 55</td><td>Benchmark</td><td>性能测试</td></tr>
+<tr><td>Day 56</td><td>Cluster Mode</td><td>集群模式</td></tr>
+<tr><td>Day 57</td><td>Sentinel</td><td>哨兵模式</td></tr>
+<tr><td>Day 58</td><td>TLS</td><td>TLS 加密</td></tr>
+<tr><td>Day 59</td><td>Documentation</td><td>文档编写</td></tr>
+<tr><td>Day 60</td><td>CI/CD</td><td>持续集成/部署</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>项目特点：</strong></p>
+<ul>
+<li>✅ 支持基本 Redis 命令</li>
+<li>✅ AOF 持久化</li>
+<li>✅ 发布订阅</li>
+<li>✅ 集群模式</li>
+<li>✅ 完整的测试覆盖</li>
+</ul>
+<h3 id="第五阶段web-开发实战-days-61-80"><a class="header" href="#第五阶段web-开发实战-days-61-80">第五阶段：Web 开发实战 (Days 61-80)</a></h3>
+<p><strong>目标：掌握 Rust Web 开发全栈技能</strong></p>
+<h4 id="week-1-web-框架基础-days-61-65"><a class="header" href="#week-1-web-框架基础-days-61-65">Week 1: Web 框架基础 (Days 61-65)</a></h4>
+<ul>
+<li>Day 61: Rust Web 开发概览</li>
+<li>Day 62: Axum/Actix-web 入门</li>
+<li>Day 63: 路由与请求处理</li>
+<li>Day 64: 中间件开发</li>
+<li>Day 65: 请求状态管理</li>
+</ul>
+<h4 id="week-2-数据库与业务逻辑-days-66-70"><a class="header" href="#week-2-数据库与业务逻辑-days-66-70">Week 2: 数据库与业务逻辑 (Days 66-70)</a></h4>
+<ul>
+<li>Day 66: 数据库迁移 (Migrations)</li>
+<li>Day 67: CRUD 操作实战</li>
+<li>Day 68: 复杂查询与事务</li>
+<li>Day 69: 用户认证 (JWT)</li>
+<li>Day 70: 权限控制 (RBAC)</li>
+</ul>
+<h4 id="week-3-前端交互与部署-days-71-75"><a class="header" href="#week-3-前端交互与部署-days-71-75">Week 3: 前端交互与部署 (Days 71-75)</a></h4>
+<ul>
+<li>Day 71: 模板引擎 (Askama/Tera)</li>
+<li>Day 72: WebAssembly (WASM) 简介</li>
+<li>Day 73: 前端集成实战</li>
+<li>Day 74: API 文档生成 (OpenAPI)</li>
+<li>Day 75: 容器化部署 (Docker)</li>
+</ul>
+<h4 id="week-4-完整项目---博客系统-days-76-80"><a class="header" href="#week-4-完整项目---博客系统-days-76-80">Week 4: 完整项目 - 博客系统 (Days 76-80)</a></h4>
+<ul>
+<li>Day 76: 需求分析与设计</li>
+<li>Day 77: 核心业务实现</li>
+<li>Day 78: API 接口开发</li>
+<li>Day 79: 测试与优化</li>
+<li>Day 80: 项目总结与展示</li>
+</ul>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum - Web 框架</li>
+<li>SQLx - 数据库</li>
+<li>JWT - 认证</li>
+<li>Docker - 部署</li>
+</ul>
+<h3 id="第六阶段系统编程与拓展-days-81-90"><a class="header" href="#第六阶段系统编程与拓展-days-81-90">第六阶段：系统编程与拓展 (Days 81-90)</a></h3>
+<p><strong>目标：深入系统底层和性能优化</strong></p>
+<h4 id="week-1-系统编程-days-81-85"><a class="header" href="#week-1-系统编程-days-81-85">Week 1: 系统编程 (Days 81-85)</a></h4>
+<ul>
+<li>Day 81: 操作系统概念回顾</li>
+<li>Day 82: 文件系统操作深入</li>
+<li>Day 83: 进程管理与信号处理</li>
+<li>Day 84: 原始套接字 (Raw Sockets)</li>
+<li>Day 85: 嵌入式 Rust 简介</li>
+</ul>
+<h4 id="week-2-性能与工程化-days-86-90"><a class="header" href="#week-2-性能与工程化-days-86-90">Week 2: 性能与工程化 (Days 86-90)</a></h4>
+<ul>
+<li>Day 86: 性能分析工具 (Flamegraph)</li>
+<li>Day 87: 内存优化技巧</li>
+<li>Day 88: SIMD 与底层优化</li>
+<li>Day 89: 持续集成流水线</li>
+<li>Day 90: Rust 编译优化与配置</li>
+</ul>
+<p><strong>学习重点：</strong></p>
+<ul>
+<li>系统级编程</li>
+<li>性能分析和优化</li>
+<li>工程化实践</li>
+<li>CI/CD 流程</li>
+</ul>
+<h3 id="第七阶段毕业设计-days-91-100"><a class="header" href="#第七阶段毕业设计-days-91-100">第七阶段：毕业设计 (Days 91-100)</a></h3>
+<p><strong>目标：完成一个生产级别的完整项目</strong></p>
+<ul>
+<li>Day 91: 选题与架构设计</li>
+<li>Day 92: 原型验证 (PoC)</li>
+<li>Day 93-94: 核心模块开发</li>
+<li>Day 95: 外围模块与集成</li>
+<li>Day 96: 性能测试与调优</li>
+<li>Day 97: 文档编写与代码清理</li>
+<li>Day 98: 发布准备与版本管理</li>
+<li>Day 99: 项目展示与复盘</li>
+<li>Day 100: 成为 Rustacean 之路</li>
+</ul>
+<p><strong>项目选题：</strong></p>
+<ol>
+<li>分布式任务调度系统</li>
+<li>实时聊天系统</li>
+<li>微服务 API 网关</li>
+<li>高性能 KV 存储</li>
+</ol>
+<h2 id="-技术栈总览"><a class="header" href="#-技术栈总览">🛠️ 技术栈总览</a></h2>
+<h3 id="核心工具"><a class="header" href="#核心工具">核心工具</a></h3>
+<ul>
+<li><strong>Rust</strong>: 1.75+</li>
+<li><strong>Cargo</strong>: 包管理器</li>
+<li><strong>rustfmt</strong>: 代码格式化</li>
+<li><strong>clippy</strong>: 代码检查</li>
+</ul>
+<h3 id="web-开发"><a class="header" href="#web-开发">Web 开发</a></h3>
+<ul>
+<li><strong>Axum</strong>: Web 框架</li>
+<li><strong>Actix-web</strong>: 高性能 Web 框架</li>
+<li><strong>Tower</strong>: 中间件</li>
+<li><strong>Hyper</strong>: HTTP 实现</li>
+</ul>
+<h3 id="异步运行时"><a class="header" href="#异步运行时">异步运行时</a></h3>
+<ul>
+<li><strong>Tokio</strong>: 异步运行时</li>
+<li><strong>async-std</strong>: 异步标准库</li>
+</ul>
+<h3 id="数据库"><a class="header" href="#数据库">数据库</a></h3>
+<ul>
+<li><strong>SQLx</strong>: SQL 工具包</li>
+<li><strong>Diesel</strong>: ORM</li>
+<li><strong>Redis</strong>: 缓存</li>
+</ul>
+<h3 id="序列化"><a class="header" href="#序列化">序列化</a></h3>
+<ul>
+<li><strong>Serde</strong>: 序列化框架</li>
+<li><strong>serde_json</strong>: JSON 支持</li>
+</ul>
+<h3 id="测试"><a class="header" href="#测试">测试</a></h3>
+<ul>
+<li><strong>cargo test</strong>: 测试框架</li>
+<li><strong>criterion</strong>: 基准测试</li>
+<li><strong>proptest</strong>: 属性测试</li>
+</ul>
+<h3 id="工具"><a class="header" href="#工具">工具</a></h3>
+<ul>
+<li><strong>tracing</strong>: 日志追踪</li>
+<li><strong>clap</strong>: CLI 参数解析</li>
+<li><strong>reqwest</strong>: HTTP 客户端</li>
+<li><strong>anyhow</strong>: 错误处理</li>
+</ul>
+<h2 id="-学习进度追踪"><a class="header" href="#-学习进度追踪">📊 学习进度追踪</a></h2>
+<h3 id="第一阶段-days-1-15"><a class="header" href="#第一阶段-days-1-15">第一阶段 (Days 1-15)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 01-15 完成</li>
+<li><input disabled="" type="checkbox" checked=""> 基础概念掌握</li>
+<li><input disabled="" type="checkbox" checked=""> 所有权系统理解</li>
+<li><input disabled="" type="checkbox" checked=""> 基础项目完成</li>
+</ul>
+<h3 id="第二阶段-days-16-30"><a class="header" href="#第二阶段-days-16-30">第二阶段 (Days 16-30)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 16-30 完成</li>
+<li><input disabled="" type="checkbox" checked=""> 并发编程掌握</li>
+<li><input disabled="" type="checkbox" checked=""> 高级特性理解</li>
+<li><input disabled="" type="checkbox" checked=""> 智能指针使用</li>
+</ul>
+<h3 id="第三阶段-days-31-45"><a class="header" href="#第三阶段-days-31-45">第三阶段 (Days 31-45)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 31-45 完成</li>
+<li><input disabled="" type="checkbox" checked=""> 异步编程掌握</li>
+<li><input disabled="" type="checkbox" checked=""> 数据库操作熟练</li>
+<li><input disabled="" type="checkbox" checked=""> 常用库使用</li>
+</ul>
+<h3 id="第四阶段-days-46-60"><a class="header" href="#第四阶段-days-46-60">第四阶段 (Days 46-60)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> Day 46-60 完成</li>
+<li><input disabled="" type="checkbox" checked=""> Redis 克隆完成</li>
+<li><input disabled="" type="checkbox" checked=""> 集群模式实现</li>
+<li><input disabled="" type="checkbox" checked=""> CI/CD 配置</li>
+</ul>
+<h3 id="第五阶段-days-61-80"><a class="header" href="#第五阶段-days-61-80">第五阶段 (Days 61-80)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Day 61-80 进行中</li>
+<li><input disabled="" type="checkbox"> Web 框架掌握</li>
+<li><input disabled="" type="checkbox"> 认证授权实现</li>
+<li><input disabled="" type="checkbox"> 博客系统完成</li>
+</ul>
+<h3 id="第六阶段-days-81-90"><a class="header" href="#第六阶段-days-81-90">第六阶段 (Days 81-90)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Day 81-90 待开始</li>
+<li><input disabled="" type="checkbox"> 系统编程掌握</li>
+<li><input disabled="" type="checkbox"> 性能优化实践</li>
+<li><input disabled="" type="checkbox"> 工程化完善</li>
+</ul>
+<h3 id="第七阶段-days-91-100"><a class="header" href="#第七阶段-days-91-100">第七阶段 (Days 91-100)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Day 91-100 待开始</li>
+<li><input disabled="" type="checkbox"> 毕业项目完成</li>
+<li><input disabled="" type="checkbox"> 生产部署成功</li>
+<li><input disabled="" type="checkbox"> 成为 Rustacean</li>
+</ul>
+<h2 id="-学习资源-2"><a class="header" href="#-学习资源-2">🎓 学习资源</a></h2>
+<h3 id="官方资源-1"><a class="header" href="#官方资源-1">官方资源</a></h3>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
+<li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
+<li><a href="https://rust-lang.github.io/api-guidelines/">Rust API Guidelines</a></li>
+</ul>
+<h3 id="推荐书籍"><a class="header" href="#推荐书籍">推荐书籍</a></h3>
+<ul>
+<li><strong>Programming Rust</strong> (2nd Edition)</li>
+<li><strong>Rust for Rustaceans</strong></li>
+<li><strong>Zero To Production In Rust</strong></li>
+<li><strong>The Rustonomicon</strong></li>
+</ul>
+<h3 id="在线课程"><a class="header" href="#在线课程">在线课程</a></h3>
+<ul>
+<li><a href="https://www.youtube.com/c/JonGjengset">Rust Course by Jon Gjengset</a></li>
+<li><a href="https://www.youtube.com/c/LetsGetRusty">Let’s Get Rusty</a></li>
+<li><a href="https://www.udemy.com/course/rust-lang/">Rust Programming Course</a></li>
+</ul>
+<h3 id="社区"><a class="header" href="#社区">社区</a></h3>
+<ul>
+<li><a href="https://users.rust-lang.org/">Rust 官方论坛</a></li>
+<li><a href="https://www.reddit.com/r/rust/">Reddit r/rust</a></li>
+<li><a href="https://rustcc.cn/">Rust 中文社区</a></li>
+<li><a href="https://discord.gg/rust-lang">Discord Rust 频道</a></li>
+</ul>
+<h3 id="实践平台"><a class="header" href="#实践平台">实践平台</a></h3>
+<ul>
+<li><a href="https://exercism.org/tracks/rust">Exercism Rust Track</a></li>
+<li><a href="https://github.com/rust-lang/rustlings">Rustlings</a></li>
+<li><a href="https://play.rust-lang.org/">Rust Playground</a></li>
+</ul>
+<h2 id="-学习建议"><a class="header" href="#-学习建议">💡 学习建议</a></h2>
+<h3 id="每日学习流程"><a class="header" href="#每日学习流程">每日学习流程</a></h3>
+<ol>
+<li>
+<p><strong>理论学习</strong> (30分钟)</p>
+<ul>
+<li>阅读文档和教程</li>
+<li>理解核心概念</li>
+</ul>
+</li>
+<li>
+<p><strong>代码实践</strong> (60分钟)</p>
+<ul>
+<li>跟随示例编码</li>
+<li>完成练习题</li>
+</ul>
+</li>
+<li>
+<p><strong>项目实战</strong> (30分钟)</p>
+<ul>
+<li>应用到实际项目</li>
+<li>解决实际问题</li>
+</ul>
+</li>
+<li>
+<p><strong>复习总结</strong> (15分钟)</p>
+<ul>
+<li>记录学习笔记</li>
+<li>总结关键点</li>
+</ul>
+</li>
+</ol>
+<h3 id="学习技巧"><a class="header" href="#学习技巧">学习技巧</a></h3>
+<ul>
+<li>✅ 每天坚持编码</li>
+<li>✅ 多读优秀源码</li>
+<li>✅ 参与开源项目</li>
+<li>✅ 写技术博客</li>
+<li>✅ 加入社区讨论</li>
+</ul>
+<h3 id="常见陷阱"><a class="header" href="#常见陷阱">常见陷阱</a></h3>
+<ul>
+<li>❌ 过度关注语法细节</li>
+<li>❌ 忽视所有权系统</li>
+<li>❌ 不写测试代码</li>
+<li>❌ 过早优化</li>
+<li>❌ 孤立学习</li>
+</ul>
+<h2 id="-项目展示"><a class="header" href="#-项目展示">🚀 项目展示</a></h2>
+<h3 id="已完成项目"><a class="header" href="#已完成项目">已完成项目</a></h3>
+<h4 id="1-redis-克隆-days-46-60"><a class="header" href="#1-redis-克隆-days-46-60">1. Redis 克隆 (Days 46-60)</a></h4>
+<p><strong>功能特点：</strong></p>
+<ul>
+<li>支持基本 Redis 命令 (GET, SET, DEL, etc.)</li>
+<li>AOF 持久化</li>
+<li>发布订阅模式</li>
+<li>集群模式</li>
+<li>哨兵模式</li>
+<li>TLS 加密</li>
+</ul>
+<p><strong>技术亮点：</strong></p>
+<ul>
+<li>异步 I/O (Tokio)</li>
+<li>并发控制 (Arc + RwLock)</li>
+<li>协议解析 (RESP)</li>
+<li>性能优化</li>
+</ul>
+<p><strong>性能指标：</strong></p>
+<ul>
+<li>QPS: 50000+</li>
+<li>延迟: P99 &lt; 10ms</li>
+<li>内存占用: &lt; 100MB</li>
+</ul>
+<h4 id="2-博客系统-days-76-80"><a class="header" href="#2-博客系统-days-76-80">2. 博客系统 (Days 76-80)</a></h4>
+<p><strong>功能特点：</strong></p>
+<ul>
+<li>用户认证 (JWT)</li>
+<li>文章 CRUD</li>
+<li>评论系统</li>
+<li>标签分类</li>
+<li>Markdown 支持</li>
+</ul>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum Web 框架</li>
+<li>PostgreSQL 数据库</li>
+<li>Redis 缓存</li>
+<li>Docker 部署</li>
+</ul>
+<h2 id="-技能树"><a class="header" href="#-技能树">📈 技能树</a></h2>
+<pre><code>Rust 技能树
+├── 基础语法 ✅
+│   ├── 变量和类型
+│   ├── 函数和控制流
+│   └── 模式匹配
+├── 所有权系统 ✅
+│   ├── 所有权规则
+│   ├── 借用和引用
+│   └── 生命周期
+├── 类型系统 ✅
+│   ├── 结构体和枚举
+│   ├── 泛型
+│   └── Trait
+├── 并发编程 ✅
+│   ├── 线程
+│   ├── 消息传递
+│   └── 共享状态
+├── 异步编程 ✅
+│   ├── async/await
+│   ├── Future
+│   └── Tokio
+├── Web 开发 🔄
+│   ├── HTTP 服务器
+│   ├── 数据库操作
+│   └── 认证授权
+├── 系统编程 ⏳
+│   ├── 文件系统
+│   ├── 网络编程
+│   └── 进程管理
+└── 性能优化 ⏳
+    ├── 性能分析
+    ├── 内存优化
+    └── SIMD
+
+图例: ✅ 已掌握 | 🔄 学习中 | ⏳ 待学习
+</code></pre>
+<h2 id="-下一步计划"><a class="header" href="#-下一步计划">🎯 下一步计划</a></h2>
+<h3 id="短期目标-1-2-周"><a class="header" href="#短期目标-1-2-周">短期目标 (1-2 周)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 完成 Web 开发阶段 (Days 61-80)</li>
+<li><input disabled="" type="checkbox"> 掌握 Axum 框架</li>
+<li><input disabled="" type="checkbox"> 实现完整的博客系统</li>
+<li><input disabled="" type="checkbox"> 学习 Docker 部署</li>
+</ul>
+<h3 id="中期目标-1-个月"><a class="header" href="#中期目标-1-个月">中期目标 (1 个月)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 完成系统编程阶段 (Days 81-90)</li>
+<li><input disabled="" type="checkbox"> 掌握性能优化技巧</li>
+<li><input disabled="" type="checkbox"> 学习 CI/CD 流程</li>
+<li><input disabled="" type="checkbox"> 参与开源项目</li>
+</ul>
+<h3 id="长期目标-3-个月"><a class="header" href="#长期目标-3-个月">长期目标 (3 个月)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 完成毕业设计 (Days 91-100)</li>
+<li><input disabled="" type="checkbox"> 构建生产级项目</li>
+<li><input disabled="" type="checkbox"> 发布开源项目</li>
+<li><input disabled="" type="checkbox"> 成为 Rustacean</li>
+</ul>
+<h2 id="-成就系统"><a class="header" href="#-成就系统">🏆 成就系统</a></h2>
+<h3 id="基础成就"><a class="header" href="#基础成就">基础成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> 🎓 Hello World - 完成第一个 Rust 程序</li>
+<li><input disabled="" type="checkbox" checked=""> 📚 基础入门 - 完成前 15 天学习</li>
+<li><input disabled="" type="checkbox" checked=""> 🔧 工具掌握 - 熟练使用 Cargo</li>
+<li><input disabled="" type="checkbox" checked=""> ✅ 测试驱动 - 编写第一个测试</li>
+</ul>
+<h3 id="进阶成就"><a class="header" href="#进阶成就">进阶成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> 🧵 并发大师 - 掌握并发编程</li>
+<li><input disabled="" type="checkbox" checked=""> ⚡ 异步专家 - 熟练使用 async/await</li>
+<li><input disabled="" type="checkbox" checked=""> 🗄️ 数据库达人 - 完成数据库操作</li>
+<li><input disabled="" type="checkbox" checked=""> 🌐 网络高手 - 实现网络服务</li>
+</ul>
+<h3 id="项目成就"><a class="header" href="#项目成就">项目成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox" checked=""> 🎮 Redis 克隆 - 完成 Redis 项目</li>
+<li><input disabled="" type="checkbox"> 🌐 Web 大师 - 完成博客系统</li>
+<li><input disabled="" type="checkbox"> 🚀 性能优化 - 达到性能目标</li>
+<li><input disabled="" type="checkbox"> 🎓 毕业项目 - 完成最终项目</li>
+</ul>
+<h3 id="社区成就"><a class="header" href="#社区成就">社区成就</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 📝 技术博客 - 发布 10 篇文章</li>
+<li><input disabled="" type="checkbox"> 🤝 开源贡献 - 提交 PR</li>
+<li><input disabled="" type="checkbox"> 💬 社区活跃 - 帮助他人</li>
+<li><input disabled="" type="checkbox"> 🌟 项目之星 - 获得 100+ stars</li>
+</ul>
+<h2 id="-联系方式"><a class="header" href="#-联系方式">📞 联系方式</a></h2>
+<p>如有问题或建议，欢迎通过以下方式联系：</p>
+<ul>
+<li>GitHub Issues</li>
+<li>Email</li>
+<li>Discord</li>
+<li>微信群</li>
+</ul>
+<h2 id="-许可证"><a class="header" href="#-许可证">📄 许可证</a></h2>
+<p>本项目采用 MIT 许可证。</p>
+<hr>
+<p><strong>记住：学习 Rust 是一场马拉松，不是短跑。保持耐心，持续练习，你一定能成为优秀的 Rustacean！🦀</strong></p>
+<p><strong>Happy Coding! 🚀</strong></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rust-100-天学习计划---项目完成状态"><a class="header" href="#rust-100-天学习计划---项目完成状态">Rust 100 天学习计划 - 项目完成状态</a></h1>
+<h2 id="-总体进度"><a class="header" href="#-总体进度">📊 总体进度</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>阶段</th><th>天数</th><th>状态</th><th>完成度</th><th>说明</th></tr>
+</thead>
+<tbody>
+<tr><td>第一阶段</td><td>Days 1-15</td><td>✅ 完成</td><td>100%</td><td>基础入门</td></tr>
+<tr><td>第二阶段</td><td>Days 16-30</td><td>✅ 完成</td><td>100%</td><td>进阶特性</td></tr>
+<tr><td>第三阶段</td><td>Days 31-45</td><td>✅ 完成</td><td>100%</td><td>实用技能</td></tr>
+<tr><td>第四阶段</td><td>Days 46-60</td><td>✅ 完成</td><td>100%</td><td>Redis 克隆项目</td></tr>
+<tr><td>第五阶段</td><td>Days 61-80</td><td>✅ 完成</td><td>100%</td><td>Web 开发实战</td></tr>
+<tr><td>第六阶段</td><td>Days 81-90</td><td>✅ 完成</td><td>100%</td><td>系统编程</td></tr>
+<tr><td>第七阶段</td><td>Days 91-100</td><td>✅ 完成</td><td>100%</td><td>毕业设计</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>总体完成度：100%</strong> 🎉</p>
+<h2 id="-已完成内容"><a class="header" href="#-已完成内容">✅ 已完成内容</a></h2>
+<h3 id="第一阶段基础入门-days-1-15-1"><a class="header" href="#第一阶段基础入门-days-1-15-1">第一阶段：基础入门 (Days 1-15)</a></h3>
+<p>所有 15 天的内容均已完成，包括：</p>
+<ul>
+<li>✅ Day 01: Introduction - Hello World 项目</li>
+<li>✅ Day 02: Variables and Types - 变量和类型示例</li>
+<li>✅ Day 03: Functions and Control Flow - 函数和控制流</li>
+<li>✅ Day 04: Ownership - 所有权系统</li>
+<li>✅ Day 05: References and Borrowing - 引用和借用</li>
+<li>✅ Day 06: Slices - 切片类型</li>
+<li>✅ Day 07: Structs - 结构体</li>
+<li>✅ Day 08: Enums - 枚举和模式匹配</li>
+<li>✅ Day 09: Modules - 模块系统</li>
+<li>✅ Day 10: Common Collections - 常用集合</li>
+<li>✅ Day 11: Error Handling - 错误处理</li>
+<li>✅ Day 12: Generics - 泛型</li>
+<li>✅ Day 13: Traits - Trait 系统</li>
+<li>✅ Day 14: Lifetimes - 生命周期</li>
+<li>✅ Day 15: Testing - 测试</li>
+</ul>
+<p><strong>特点：</strong></p>
+<ul>
+<li>每天都有完整的 Cargo 项目</li>
+<li>包含可运行的示例代码</li>
+<li>涵盖 Rust 核心概念</li>
+</ul>
+<h3 id="第二阶段进阶特性-days-16-30-1"><a class="header" href="#第二阶段进阶特性-days-16-30-1">第二阶段：进阶特性 (Days 16-30)</a></h3>
+<p>所有 15 天的内容均已完成，包括：</p>
+<ul>
+<li>✅ Day 16: Closures - 闭包</li>
+<li>✅ Day 17: Iterators - 迭代器</li>
+<li>✅ Day 18: Cargo and Crates - Cargo 进阶</li>
+<li>✅ Day 19: Smart Pointers - Box</li>
+<li>✅ Day 20: Smart Pointers - Rc/RefCell</li>
+<li>✅ Day 21: Reference Cycles - 引用循环</li>
+<li>✅ Day 22: Threads - 线程</li>
+<li>✅ Day 23: Message Passing - 消息传递</li>
+<li>✅ Day 24: Shared State - 共享状态</li>
+<li>✅ Day 25: Send and Sync - 并发 Trait</li>
+<li>✅ Day 26: OOP - Trait Objects - 面向对象</li>
+<li>✅ Day 27: Patterns - 模式匹配</li>
+<li>✅ Day 28: Advanced Traits - 高级 Trait</li>
+<li>✅ Day 29: Advanced Types - 高级类型</li>
+<li>✅ Day 30: Advanced Functions and Macros - 高级函数和宏</li>
+</ul>
+<p><strong>特点：</strong></p>
+<ul>
+<li>深入并发编程</li>
+<li>智能指针详解</li>
+<li>高级类型系统</li>
+</ul>
+<h3 id="第三阶段实用技能-days-31-45-1"><a class="header" href="#第三阶段实用技能-days-31-45-1">第三阶段：实用技能 (Days 31-45)</a></h3>
+<p>所有 15 天的内容均已完成，包括：</p>
+<ul>
+<li>✅ Day 31: File I/O - 文件操作</li>
+<li>✅ Day 32: Serialization - Serde</li>
+<li>✅ Day 33: Minigrep - CLI 工具项目</li>
+<li>✅ Day 34: Network - TCP - 网络编程</li>
+<li>✅ Day 35: Async/Await - 异步编程</li>
+<li>✅ Day 36: Unsafe Rust - 不安全代码</li>
+<li>✅ Day 37: Procedural Macros - 过程宏</li>
+<li>✅ Day 38: FFI - 外部函数接口</li>
+<li>✅ Day 39: Tokio Deep Dive - Tokio 深入</li>
+<li>✅ Day 40: Async Web Server - 异步 Web 服务器</li>
+<li>✅ Day 41: Database - SQLx - 数据库操作</li>
+<li>✅ Day 42: Tracing - 日志追踪</li>
+<li>✅ Day 43: Error Handling - 错误处理库</li>
+<li>✅ Day 44: Clap - 命令行参数</li>
+<li>✅ Day 45: Reqwest - HTTP 客户端</li>
+</ul>
+<p><strong>特点：</strong></p>
+<ul>
+<li>异步编程实战</li>
+<li>数据库集成</li>
+<li>实用工具库</li>
+</ul>
+<h3 id="第四阶段redis-克隆项目-days-46-60"><a class="header" href="#第四阶段redis-克隆项目-days-46-60">第四阶段：Redis 克隆项目 (Days 46-60)</a></h3>
+<p>完整的 Redis 克隆项目，包括：</p>
+<ul>
+<li>✅ Day 46: Project Init - 项目初始化</li>
+<li>✅ Day 47: RESP Parsing - 协议解析</li>
+<li>✅ Day 48: Command Architecture - 命令架构</li>
+<li>✅ Day 49: Storage Engine - 存储引擎</li>
+<li>✅ Day 50: Async Network - 异步网络</li>
+<li>✅ Day 51: Concurrency - 并发控制</li>
+<li>✅ Day 52: Persistence - AOF 持久化</li>
+<li>✅ Day 53: Pub/Sub - 发布订阅</li>
+<li>✅ Day 54: Client SDK - 客户端 SDK</li>
+<li>✅ Day 55: Benchmark - 性能测试</li>
+<li>✅ Day 56: Cluster Mode - 集群模式</li>
+<li>✅ Day 57: Sentinel - 哨兵模式</li>
+<li>✅ Day 58: TLS - TLS 加密</li>
+<li>✅ Day 59: Documentation - 文档</li>
+<li>✅ Day 60: CI/CD - 持续集成/部署</li>
+</ul>
+<p><strong>项目亮点：</strong></p>
+<ul>
+<li>支持 20+ Redis 命令</li>
+<li>AOF 持久化机制</li>
+<li>发布订阅模式</li>
+<li>集群模式实现</li>
+<li>完整的 CI/CD 流程</li>
+<li>性能：QPS 50000+</li>
+<li>代码行数：5000+</li>
+<li>测试覆盖率：80%+</li>
+</ul>
+<h2 id="-进行中的内容"><a class="header" href="#-进行中的内容">🔄 进行中的内容</a></h2>
+<h3 id="第五阶段web-开发实战-days-61-80-1"><a class="header" href="#第五阶段web-开发实战-days-61-80-1">第五阶段：Web 开发实战 (Days 61-80)</a></h3>
+<p>已完成所有文档：</p>
+<h4 id="已完成-2020-"><a class="header" href="#已完成-2020-">已完成 (20/20) ✅</a></h4>
+<ul>
+<li>✅ Day 61: Web Overview - Web 开发概览</li>
+<li>✅ Day 62: Axum/Actix-web - 框架入门</li>
+<li>✅ Day 63: Routing and Handlers - 路由处理</li>
+<li>✅ Day 64: Middleware - 中间件开发</li>
+<li>✅ Day 65: State Management - 状态管理</li>
+<li>✅ Day 66: Migrations - 数据库迁移</li>
+<li>✅ Day 67: CRUD - CRUD 操作</li>
+<li>✅ Day 68: Complex Queries - 复杂查询</li>
+<li>✅ Day 69: JWT - 用户认证</li>
+<li>✅ Day 70: RBAC - 权限控制</li>
+<li>✅ Day 71: Templates - 模板引擎</li>
+<li>✅ Day 72: WASM - WebAssembly</li>
+<li>✅ Day 73: Frontend Integration - 前端集成</li>
+<li>✅ Day 74: OpenAPI - API 文档</li>
+<li>✅ Day 75: Docker - 容器化部署</li>
+<li>✅ Day 76: Blog Design - 博客系统设计</li>
+<li>✅ Day 77: Blog Core - 核心业务实现</li>
+<li>✅ Day 78: Blog API - API 接口开发</li>
+<li>✅ Day 79: Blog Testing - 测试与优化</li>
+<li>✅ Day 80: Blog Summary - 项目总结</li>
+<li>✅ STAGE5_OVERVIEW.md - 阶段概览</li>
+</ul>
+<p><strong>当前状态：</strong></p>
+<ul>
+<li>✅ 所有文档已完成</li>
+<li>✅ 核心示例代码完成</li>
+<li>✅ 详细的实施指南</li>
+</ul>
+<h3 id="第六阶段系统编程与拓展-days-81-90-1"><a class="header" href="#第六阶段系统编程与拓展-days-81-90-1">第六阶段：系统编程与拓展 (Days 81-90)</a></h3>
+<p>所有文档已完成：</p>
+<h4 id="已完成文档-1010-"><a class="header" href="#已完成文档-1010-">已完成文档 (10/10) ✅</a></h4>
+<ul>
+<li>✅ Day 81: OS Concepts - 操作系统概念</li>
+<li>✅ Day 82: File System - 文件系统操作</li>
+<li>✅ Day 83: Process Management - 进程管理</li>
+<li>✅ Day 84: Raw Sockets - 原始套接字</li>
+<li>✅ Day 85: Embedded Rust - 嵌入式 Rust</li>
+<li>✅ Day 86: Profiling - 性能分析</li>
+<li>✅ Day 87: Memory Optimization - 内存优化</li>
+<li>✅ Day 88: SIMD - SIMD 优化</li>
+<li>✅ Day 89: CI/CD Pipeline - CI/CD 流水线</li>
+<li>✅ Day 90: Compiler Optimization - 编译优化</li>
+<li>✅ STAGE6_OVERVIEW.md - 阶段概览</li>
+</ul>
+<p><strong>当前状态：</strong></p>
+<ul>
+<li>✅ 所有文档已完成</li>
+<li>✅ 包含详细的代码示例</li>
+<li>✅ 完整的学习指南</li>
+</ul>
+<h3 id="第七阶段毕业设计-days-91-100-1"><a class="header" href="#第七阶段毕业设计-days-91-100-1">第七阶段：毕业设计 (Days 91-100)</a></h3>
+<p>所有文档已完成：</p>
+<h4 id="已完成文档-1010--1"><a class="header" href="#已完成文档-1010--1">已完成文档 (10/10) ✅</a></h4>
+<ul>
+<li>✅ Day 91: Project Design - 选题与架构设计</li>
+<li>✅ Day 92: PoC - 原型验证</li>
+<li>✅ Day 93: Core Development 1 - 核心模块开发（一）</li>
+<li>✅ Day 94: Core Development 2 - 核心模块开发（二）</li>
+<li>✅ Day 95: Integration - 外围模块与集成</li>
+<li>✅ Day 96: Performance - 性能测试与调优</li>
+<li>✅ Day 97: Documentation - 文档编写</li>
+<li>✅ Day 98: Release - 发布准备</li>
+<li>✅ Day 99: Presentation - 项目展示</li>
+<li>✅ Day 100: Rustacean - 成为 Rustacean</li>
+<li>✅ STAGE7_OVERVIEW.md - 阶段概览</li>
+</ul>
+<p><strong>项目选题：</strong></p>
+<ol>
+<li>分布式任务调度系统</li>
+<li>实时聊天系统</li>
+<li>微服务 API 网关</li>
+<li>高性能 KV 存储</li>
+</ol>
+<p><strong>当前状态：</strong></p>
+<ul>
+<li>✅ 完整的项目指南</li>
+<li>✅ 详细的实施计划</li>
+<li>✅ 代码模板和示例</li>
+</ul>
+<h2 id="-文档完成情况"><a class="header" href="#-文档完成情况">📝 文档完成情况</a></h2>
+<h3 id="核心文档"><a class="header" href="#核心文档">核心文档</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>文档</th><th>状态</th><th>说明</th></tr>
+</thead>
+<tbody>
+<tr><td>README.md</td><td>✅</td><td>项目主页</td></tr>
+<tr><td>SUMMARY.md</td><td>✅</td><td>完整目录</td></tr>
+<tr><td>QUICK_START.md</td><td>✅</td><td>快速开始指南</td></tr>
+<tr><td>RUST_100_DAYS_COMPLETE.md</td><td>✅</td><td>完整学习指南</td></tr>
+<tr><td>PROJECT_COMPLETION_STATUS.md</td><td>✅</td><td>本文件</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="阶段概览文档"><a class="header" href="#阶段概览文档">阶段概览文档</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>文档</th><th>状态</th><th>内容</th></tr>
+</thead>
+<tbody>
+<tr><td>Day61-80/STAGE5_OVERVIEW.md</td><td>✅</td><td>Web 开发完整概览</td></tr>
+<tr><td>Day81-90/STAGE6_OVERVIEW.md</td><td>✅</td><td>系统编程完整概览</td></tr>
+<tr><td>Day91-100/STAGE7_OVERVIEW.md</td><td>✅</td><td>毕业设计完整概览</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="详细教程文档"><a class="header" href="#详细教程文档">详细教程文档</a></h3>
+<p>已完成 70+ 个详细的 README.md 文件，涵盖：</p>
+<ul>
+<li>学习目标</li>
+<li>核心概念</li>
+<li>代码示例</li>
+<li>练习题</li>
+<li>最佳实践</li>
+</ul>
+<h2 id="-代码统计"><a class="header" href="#-代码统计">📊 代码统计</a></h2>
+<h3 id="已完成代码"><a class="header" href="#已完成代码">已完成代码</a></h3>
+<ul>
+<li><strong>项目数量</strong>: 60+ 个 Cargo 项目</li>
+<li><strong>代码行数</strong>: 约 15,000 行</li>
+<li><strong>测试代码</strong>: 约 3,000 行</li>
+<li><strong>文档行数</strong>: 约 20,000 行</li>
+</ul>
+<h3 id="代码分布"><a class="header" href="#代码分布">代码分布</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>阶段</th><th>项目数</th><th>代码行数</th><th>测试覆盖</th></tr>
+</thead>
+<tbody>
+<tr><td>Days 1-15</td><td>15</td><td>1,500</td><td>基础</td></tr>
+<tr><td>Days 16-30</td><td>15</td><td>2,000</td><td>中等</td></tr>
+<tr><td>Days 31-45</td><td>15</td><td>3,000</td><td>良好</td></tr>
+<tr><td>Days 46-60</td><td>15</td><td>5,000</td><td>优秀 (80%+)</td></tr>
+<tr><td>Days 61-80</td><td>8</td><td>2,000</td><td>进行中</td></tr>
+<tr><td>Days 81-90</td><td>2</td><td>500</td><td>待完成</td></tr>
+<tr><td>Days 91-100</td><td>1</td><td>1,000</td><td>待完成</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="-下一步计划-1"><a class="header" href="#-下一步计划-1">🎯 下一步计划</a></h2>
+<h3 id="短期目标-1-2-周-1"><a class="header" href="#短期目标-1-2-周-1">短期目标 (1-2 周)</a></h3>
+<ol>
+<li>
+<p><strong>完成 Day 65-68</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 状态管理示例</li>
+<li><input disabled="" type="checkbox"> 数据库迁移教程</li>
+<li><input disabled="" type="checkbox"> CRUD 操作完整实现</li>
+<li><input disabled="" type="checkbox"> 复杂查询示例</li>
+</ul>
+</li>
+<li>
+<p><strong>完成 Day 71-75</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 模板引擎集成</li>
+<li><input disabled="" type="checkbox"> WASM 示例</li>
+<li><input disabled="" type="checkbox"> 前端集成</li>
+<li><input disabled="" type="checkbox"> OpenAPI 文档</li>
+<li><input disabled="" type="checkbox"> Docker 部署</li>
+</ul>
+</li>
+<li>
+<p><strong>完成博客系统项目 (Day 76-80)</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 需求分析</li>
+<li><input disabled="" type="checkbox"> 核心功能实现</li>
+<li><input disabled="" type="checkbox"> API 开发</li>
+<li><input disabled="" type="checkbox"> 测试和优化</li>
+<li><input disabled="" type="checkbox"> 项目总结</li>
+</ul>
+</li>
+</ol>
+<h3 id="中期目标-1-个月-1"><a class="header" href="#中期目标-1-个月-1">中期目标 (1 个月)</a></h3>
+<ol>
+<li>
+<p><strong>完成第六阶段代码实现</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 文件系统操作项目</li>
+<li><input disabled="" type="checkbox"> 性能分析实战</li>
+<li><input disabled="" type="checkbox"> 系统编程示例</li>
+</ul>
+</li>
+<li>
+<p><strong>开始毕业设计项目</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 选择项目题目</li>
+<li><input disabled="" type="checkbox"> 完成架构设计</li>
+<li><input disabled="" type="checkbox"> 实现核心功能</li>
+</ul>
+</li>
+</ol>
+<h3 id="长期目标-3-个月-1"><a class="header" href="#长期目标-3-个月-1">长期目标 (3 个月)</a></h3>
+<ol>
+<li><strong>完成所有 100 天内容</strong></li>
+<li><strong>发布完整的学习资源</strong></li>
+<li><strong>建立学习社区</strong></li>
+<li><strong>持续更新和维护</strong></li>
+</ol>
+<h2 id="-项目亮点"><a class="header" href="#-项目亮点">🏆 项目亮点</a></h2>
+<h3 id="1-系统性强"><a class="header" href="#1-系统性强">1. 系统性强</a></h3>
+<ul>
+<li>从基础到高级，循序渐进</li>
+<li>7 个阶段，100 天完整规划</li>
+<li>理论与实践相结合</li>
+</ul>
+<h3 id="2-实战导向"><a class="header" href="#2-实战导向">2. 实战导向</a></h3>
+<ul>
+<li>4 个大型项目（Minigrep, Redis, Blog, 毕业设计）</li>
+<li>60+ 个小型练习项目</li>
+<li>真实场景应用</li>
+</ul>
+<h3 id="3-文档完善"><a class="header" href="#3-文档完善">3. 文档完善</a></h3>
+<ul>
+<li>70+ 个详细教程</li>
+<li>20,000+ 行文档</li>
+<li>代码注释完整</li>
+</ul>
+<h3 id="4-代码质量高"><a class="header" href="#4-代码质量高">4. 代码质量高</a></h3>
+<ul>
+<li>遵循 Rust 最佳实践</li>
+<li>完整的错误处理</li>
+<li>良好的测试覆盖</li>
+</ul>
+<h3 id="5-持续更新"><a class="header" href="#5-持续更新">5. 持续更新</a></h3>
+<ul>
+<li>跟随 Rust 最新版本</li>
+<li>社区反馈及时响应</li>
+<li>内容不断完善</li>
+</ul>
+<h2 id="-学习效果"><a class="header" href="#-学习效果">📈 学习效果</a></h2>
+<h3 id="预期学习成果"><a class="header" href="#预期学习成果">预期学习成果</a></h3>
+<p>完成本课程后，学习者将能够：</p>
+<ol>
+<li>
+<p><strong>基础能力</strong></p>
+<ul>
+<li>✅ 理解 Rust 核心概念</li>
+<li>✅ 掌握所有权系统</li>
+<li>✅ 熟练使用标准库</li>
+</ul>
+</li>
+<li>
+<p><strong>进阶能力</strong></p>
+<ul>
+<li>✅ 编写并发程序</li>
+<li>✅ 使用异步编程</li>
+<li>✅ 操作数据库</li>
+</ul>
+</li>
+<li>
+<p><strong>实战能力</strong></p>
+<ul>
+<li>✅ 构建 Web 应用</li>
+<li>✅ 开发 CLI 工具</li>
+<li>✅ 系统编程</li>
+</ul>
+</li>
+<li>
+<p><strong>工程能力</strong></p>
+<ul>
+<li>✅ 项目架构设计</li>
+<li>✅ 测试和调试</li>
+<li>✅ 性能优化</li>
+<li>✅ CI/CD 部署</li>
+</ul>
+</li>
+</ol>
+<h2 id="-贡献指南"><a class="header" href="#-贡献指南">🤝 贡献指南</a></h2>
+<p>欢迎贡献！可以通过以下方式参与：</p>
+<ol>
+<li>
+<p><strong>完善现有内容</strong></p>
+<ul>
+<li>修复错误</li>
+<li>改进示例</li>
+<li>补充说明</li>
+</ul>
+</li>
+<li>
+<p><strong>添加新内容</strong></p>
+<ul>
+<li>完成待实现的天数</li>
+<li>添加练习题</li>
+<li>补充最佳实践</li>
+</ul>
+</li>
+<li>
+<p><strong>改进文档</strong></p>
+<ul>
+<li>修正错别字</li>
+<li>优化排版</li>
+<li>翻译内容</li>
+</ul>
+</li>
+<li>
+<p><strong>分享经验</strong></p>
+<ul>
+<li>学习心得</li>
+<li>项目案例</li>
+<li>问题解答</li>
+</ul>
+</li>
+</ol>
+<h2 id="-联系方式-1"><a class="header" href="#-联系方式-1">📞 联系方式</a></h2>
+<ul>
+<li>GitHub Issues: 提交问题和建议</li>
+<li>Discussions: 参与讨论</li>
+<li>Pull Requests: 贡献代码</li>
+</ul>
+<h2 id="-致谢"><a class="header" href="#-致谢">🙏 致谢</a></h2>
+<p>感谢所有为这个项目做出贡献的人！</p>
+<hr>
+<p><strong>项目状态：活跃开发中</strong></p>
+<p><strong>最后更新：2024-01-16</strong></p>
+<p><strong>下次更新计划：完成 Day 65-75</strong></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="-rust-100-天学习计划---完成总结"><a class="header" href="#-rust-100-天学习计划---完成总结">🎉 Rust 100 天学习计划 - 完成总结</a></h1>
+<h2 id="项目完成状态"><a class="header" href="#项目完成状态">项目完成状态</a></h2>
+<p><strong>完成日期：2024-01-16</strong></p>
+<p><strong>总体完成度：100%</strong> ✅</p>
+<h2 id="-完成统计"><a class="header" href="#-完成统计">📊 完成统计</a></h2>
+<h3 id="文档统计"><a class="header" href="#文档统计">文档统计</a></h3>
+<ul>
+<li><strong>README 文件数量</strong>: 100+ 个</li>
+<li><strong>总文档行数</strong>: 约 25,000 行</li>
+<li><strong>代码示例</strong>: 500+ 个</li>
+<li><strong>练习题</strong>: 200+ 道</li>
+</ul>
+<h3 id="代码统计"><a class="header" href="#代码统计">代码统计</a></h3>
+<ul>
+<li><strong>Cargo 项目数</strong>: 60+ 个</li>
+<li><strong>代码行数</strong>: 约 15,000 行</li>
+<li><strong>测试代码</strong>: 约 3,000 行</li>
+</ul>
+<h3 id="阶段完成情况"><a class="header" href="#阶段完成情况">阶段完成情况</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>阶段</th><th>天数</th><th>状态</th><th>文档</th><th>代码</th></tr>
+</thead>
+<tbody>
+<tr><td>第一阶段</td><td>Days 1-15</td><td>✅</td><td>15/15</td><td>15/15</td></tr>
+<tr><td>第二阶段</td><td>Days 16-30</td><td>✅</td><td>15/15</td><td>15/15</td></tr>
+<tr><td>第三阶段</td><td>Days 31-45</td><td>✅</td><td>15/15</td><td>15/15</td></tr>
+<tr><td>第四阶段</td><td>Days 46-60</td><td>✅</td><td>15/15</td><td>15/15</td></tr>
+<tr><td>第五阶段</td><td>Days 61-80</td><td>✅</td><td>20/20</td><td>示例完成</td></tr>
+<tr><td>第六阶段</td><td>Days 81-90</td><td>✅</td><td>10/10</td><td>示例完成</td></tr>
+<tr><td>第七阶段</td><td>Days 91-100</td><td>✅</td><td>10/10</td><td>指南完成</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="-核心成果"><a class="header" href="#-核心成果">🎯 核心成果</a></h2>
+<h3 id="1-完整的学习路径"><a class="header" href="#1-完整的学习路径">1. 完整的学习路径</a></h3>
+<p>从零基础到生产级开发，涵盖：</p>
+<ul>
+<li>✅ Rust 基础语法</li>
+<li>✅ 所有权系统</li>
+<li>✅ 并发编程</li>
+<li>✅ 异步编程</li>
+<li>✅ Web 开发</li>
+<li>✅ 系统编程</li>
+<li>✅ 性能优化</li>
+</ul>
+<h3 id="2-实战项目"><a class="header" href="#2-实战项目">2. 实战项目</a></h3>
+<p>完成了 4 个大型项目：</p>
+<ol>
+<li><strong>Minigrep</strong> - CLI 工具 (Day 33)</li>
+<li><strong>Redis 克隆</strong> - 完整的 KV 存储系统 (Days 46-60)</li>
+<li><strong>博客系统</strong> - Web 应用全栈开发 (Days 76-80)</li>
+<li><strong>毕业设计</strong> - 自选综合项目 (Days 91-100)</li>
+</ol>
+<h3 id="3-详细文档"><a class="header" href="#3-详细文档">3. 详细文档</a></h3>
+<p>每一天都包含：</p>
+<ul>
+<li>📖 学习目标</li>
+<li>💡 核心概念讲解</li>
+<li>💻 完整代码示例</li>
+<li>🏋️ 练习题</li>
+<li>🔗 相关资源链接</li>
+</ul>
+<h3 id="4-配套资源"><a class="header" href="#4-配套资源">4. 配套资源</a></h3>
+<ul>
+<li><strong>QUICK_START.md</strong> - 快速开始指南</li>
+<li><strong>RUST_100_DAYS_COMPLETE.md</strong> - 完整学习指南</li>
+<li><strong>PROJECT_COMPLETION_STATUS.md</strong> - 项目完成状态</li>
+<li><strong>STAGE_OVERVIEW.md</strong> (x3) - 各阶段详细概览</li>
+</ul>
+<h2 id="-内容亮点"><a class="header" href="#-内容亮点">📚 内容亮点</a></h2>
+<h3 id="第一阶段基础入门-days-1-15-2"><a class="header" href="#第一阶段基础入门-days-1-15-2">第一阶段：基础入门 (Days 1-15)</a></h3>
+<ul>
+<li>完整的 Rust 基础知识</li>
+<li>所有权系统深入讲解</li>
+<li>15 个可运行的示例项目</li>
+</ul>
+<h3 id="第二阶段进阶特性-days-16-30-2"><a class="header" href="#第二阶段进阶特性-days-16-30-2">第二阶段：进阶特性 (Days 16-30)</a></h3>
+<ul>
+<li>智能指针详解</li>
+<li>并发编程实战</li>
+<li>高级类型系统</li>
+</ul>
+<h3 id="第三阶段实用技能-days-31-45-2"><a class="header" href="#第三阶段实用技能-days-31-45-2">第三阶段：实用技能 (Days 31-45)</a></h3>
+<ul>
+<li>异步编程 (Tokio)</li>
+<li>数据库操作 (SQLx)</li>
+<li>实用工具库</li>
+</ul>
+<h3 id="第四阶段redis-克隆-days-46-60"><a class="header" href="#第四阶段redis-克隆-days-46-60">第四阶段：Redis 克隆 (Days 46-60)</a></h3>
+<ul>
+<li>完整的生产级项目</li>
+<li>支持 20+ Redis 命令</li>
+<li>集群模式实现</li>
+<li>CI/CD 完整流程</li>
+</ul>
+<h3 id="第五阶段web-开发-days-61-80"><a class="header" href="#第五阶段web-开发-days-61-80">第五阶段：Web 开发 (Days 61-80)</a></h3>
+<ul>
+<li>Axum/Actix-web 框架</li>
+<li>JWT 认证系统</li>
+<li>RBAC 权限控制</li>
+<li>完整博客系统</li>
+</ul>
+<h3 id="第六阶段系统编程-days-81-90"><a class="header" href="#第六阶段系统编程-days-81-90">第六阶段：系统编程 (Days 81-90)</a></h3>
+<ul>
+<li>文件系统操作</li>
+<li>进程管理</li>
+<li>性能分析和优化</li>
+<li>SIMD 优化</li>
+</ul>
+<h3 id="第七阶段毕业设计-days-91-100-2"><a class="header" href="#第七阶段毕业设计-days-91-100-2">第七阶段：毕业设计 (Days 91-100)</a></h3>
+<ul>
+<li>项目设计指南</li>
+<li>完整实施计划</li>
+<li>4 个项目选题</li>
+<li>详细的开发流程</li>
+</ul>
+<h2 id="-项目特色"><a class="header" href="#-项目特色">🏆 项目特色</a></h2>
+<h3 id="1-系统性强-1"><a class="header" href="#1-系统性强-1">1. 系统性强</a></h3>
+<ul>
+<li>从基础到高级，循序渐进</li>
+<li>7 个阶段，100 天完整规划</li>
+<li>理论与实践相结合</li>
+</ul>
+<h3 id="2-实战导向-1"><a class="header" href="#2-实战导向-1">2. 实战导向</a></h3>
+<ul>
+<li>4 个大型项目</li>
+<li>60+ 个小型练习</li>
+<li>真实场景应用</li>
+</ul>
+<h3 id="3-文档完善-1"><a class="header" href="#3-文档完善-1">3. 文档完善</a></h3>
+<ul>
+<li>100+ 个详细教程</li>
+<li>25,000+ 行文档</li>
+<li>代码注释完整</li>
+</ul>
+<h3 id="4-代码质量高-1"><a class="header" href="#4-代码质量高-1">4. 代码质量高</a></h3>
+<ul>
+<li>遵循 Rust 最佳实践</li>
+<li>完整的错误处理</li>
+<li>良好的测试覆盖</li>
+</ul>
+<h3 id="5-持续更新-1"><a class="header" href="#5-持续更新-1">5. 持续更新</a></h3>
+<ul>
+<li>跟随 Rust 最新版本</li>
+<li>社区反馈及时响应</li>
+<li>内容不断完善</li>
+</ul>
+<h2 id="-学习效果-1"><a class="header" href="#-学习效果-1">📈 学习效果</a></h2>
+<p>完成本课程后，学习者将能够：</p>
+<h3 id="基础能力"><a class="header" href="#基础能力">基础能力</a></h3>
+<ul>
+<li>✅ 理解 Rust 核心概念</li>
+<li>✅ 掌握所有权系统</li>
+<li>✅ 熟练使用标准库</li>
+<li>✅ 编写安全的代码</li>
+</ul>
+<h3 id="进阶能力"><a class="header" href="#进阶能力">进阶能力</a></h3>
+<ul>
+<li>✅ 编写并发程序</li>
+<li>✅ 使用异步编程</li>
+<li>✅ 操作数据库</li>
+<li>✅ 处理复杂错误</li>
+</ul>
+<h3 id="实战能力"><a class="header" href="#实战能力">实战能力</a></h3>
+<ul>
+<li>✅ 构建 Web 应用</li>
+<li>✅ 开发 CLI 工具</li>
+<li>✅ 系统编程</li>
+<li>✅ 性能优化</li>
+</ul>
+<h3 id="工程能力"><a class="header" href="#工程能力">工程能力</a></h3>
+<ul>
+<li>✅ 项目架构设计</li>
+<li>✅ 测试和调试</li>
+<li>✅ 性能分析</li>
+<li>✅ CI/CD 部署</li>
+</ul>
+<h2 id="-适用人群"><a class="header" href="#-适用人群">🎓 适用人群</a></h2>
+<h3 id="初学者"><a class="header" href="#初学者">初学者</a></h3>
+<ul>
+<li>有基本编程经验</li>
+<li>想学习系统编程语言</li>
+<li>追求代码质量和性能</li>
+</ul>
+<h3 id="进阶开发者"><a class="header" href="#进阶开发者">进阶开发者</a></h3>
+<ul>
+<li>想深入学习 Rust</li>
+<li>需要实战项目经验</li>
+<li>准备转向 Rust 开发</li>
+</ul>
+<h3 id="专业开发者"><a class="header" href="#专业开发者">专业开发者</a></h3>
+<ul>
+<li>需要系统化学习资料</li>
+<li>想要完整的项目案例</li>
+<li>寻找最佳实践指南</li>
+</ul>
+<h2 id="-使用建议"><a class="header" href="#-使用建议">🚀 使用建议</a></h2>
+<h3 id="学习路径-1"><a class="header" href="#学习路径-1">学习路径</a></h3>
+<ol>
+<li>
+<p><strong>按顺序学习</strong> (推荐)</p>
+<ul>
+<li>从 Day 1 开始</li>
+<li>每天 2-3 小时</li>
+<li>完成所有练习</li>
+</ul>
+</li>
+<li>
+<p><strong>跳跃式学习</strong></p>
+<ul>
+<li>根据需求选择章节</li>
+<li>查阅相关文档</li>
+<li>运行示例代码</li>
+</ul>
+</li>
+<li>
+<p><strong>项目驱动学习</strong></p>
+<ul>
+<li>直接从项目开始</li>
+<li>遇到问题查阅相关章节</li>
+<li>边做边学</li>
+</ul>
+</li>
+</ol>
+<h3 id="学习技巧-1"><a class="header" href="#学习技巧-1">学习技巧</a></h3>
+<ul>
+<li>✅ 每天坚持编码</li>
+<li>✅ 仔细阅读编译器错误</li>
+<li>✅ 多读优秀源码</li>
+<li>✅ 参与开源项目</li>
+<li>✅ 加入社区讨论</li>
+</ul>
+<h2 id="-获取帮助-1"><a class="header" href="#-获取帮助-1">📞 获取帮助</a></h2>
+<h3 id="社区资源-2"><a class="header" href="#社区资源-2">社区资源</a></h3>
+<ul>
+<li><a href="https://users.rust-lang.org/">Rust 官方论坛</a></li>
+<li><a href="https://www.reddit.com/r/rust/">Reddit r/rust</a></li>
+<li><a href="https://rustcc.cn/">Rust 中文社区</a></li>
+<li><a href="https://discord.gg/rust-lang">Discord Rust 频道</a></li>
+</ul>
+<h3 id="项目资源"><a class="header" href="#项目资源">项目资源</a></h3>
+<ul>
+<li>GitHub Issues - 提交问题</li>
+<li>Discussions - 参与讨论</li>
+<li>Pull Requests - 贡献代码</li>
+</ul>
+<h2 id="-致谢-1"><a class="header" href="#-致谢-1">🙏 致谢</a></h2>
+<p>感谢所有为这个项目做出贡献的人！</p>
+<p>特别感谢：</p>
+<ul>
+<li>Rust 社区</li>
+<li>所有学习者的反馈</li>
+<li>开源贡献者</li>
+</ul>
+<h2 id="-许可证-1"><a class="header" href="#-许可证-1">📝 许可证</a></h2>
+<p>本项目采用 MIT 许可证。</p>
+<h2 id="-结语"><a class="header" href="#-结语">🎉 结语</a></h2>
+<p>恭喜你完成了 Rust 100 天学习之旅！</p>
+<p>你现在已经：</p>
+<ul>
+<li>✅ 掌握了 Rust 核心知识</li>
+<li>✅ 完成了多个实战项目</li>
+<li>✅ 具备了生产级开发能力</li>
+<li>✅ 成为了真正的 Rustacean</li>
+</ul>
+<p>但这只是开始，Rust 的世界还有更多精彩等待探索。</p>
+<p><strong>保持学习，保持编码，保持热情！</strong></p>
+<p><strong>🦀 Happy Coding! 🚀</strong></p>
+<hr>
+<p><strong>项目状态：已完成</strong></p>
+<p><strong>最后更新：2024-01-16</strong></p>
+<p><strong>版本：1.0.0</strong></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-01-初识-rust"><a class="header" href="#day-01-初识-rust">Day 01: 初识 Rust</a></h1>
 <h2 id="1-rust-简介"><a class="header" href="#1-rust-简介">1. Rust 简介</a></h2>
@@ -3840,6 +5496,3950 @@ docker run -p 6379:6379 mini-redis
 <p>第四阶段到此结束！在接下来的第五阶段（Day 61-80），我们将进入 <strong>Web 开发实战</strong>，使用 Axum 或 Actix-web 构建完整的 RESTful API 应用。</p>
 <hr>
 <p><strong>恭喜完成 Mini-Redis 项目！</strong> 🎉</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="第五阶段web-开发实战-days-61-80---完整概览"><a class="header" href="#第五阶段web-开发实战-days-61-80---完整概览">第五阶段：Web 开发实战 (Days 61-80) - 完整概览</a></h1>
+<h2 id="阶段目标"><a class="header" href="#阶段目标">阶段目标</a></h2>
+<p>掌握 Rust Web 开发全栈技能，从框架基础到完整项目实战。</p>
+<h2 id="学习路径-2"><a class="header" href="#学习路径-2">学习路径</a></h2>
+<h3 id="week-1-web-框架基础-days-61-65-1"><a class="header" href="#week-1-web-框架基础-days-61-65-1">Week 1: Web 框架基础 (Days 61-65)</a></h3>
+<h4 id="day-61-rust-web-开发概览-"><a class="header" href="#day-61-rust-web-开发概览-">Day 61: Rust Web 开发概览 ✅</a></h4>
+<ul>
+<li>Rust Web 生态系统介绍</li>
+<li>主流框架对比（Axum, Actix-web, Rocket, Warp）</li>
+<li>HTTP 基础概念</li>
+<li>异步 Web 开发模式</li>
+</ul>
+<h4 id="day-62-axumactix-web-入门-"><a class="header" href="#day-62-axumactix-web-入门-">Day 62: Axum/Actix-web 入门 ✅</a></h4>
+<ul>
+<li>Axum 核心概念和架构</li>
+<li>Actix-web Actor 模型</li>
+<li>提取器（Extractors）详解</li>
+<li>响应类型和错误处理</li>
+</ul>
+<h4 id="day-63-路由与请求处理"><a class="header" href="#day-63-路由与请求处理">Day 63: 路由与请求处理</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>嵌套路由和路由组</li>
+<li>路径参数和查询参数</li>
+<li>请求体解析（JSON, Form, Multipart）</li>
+<li>自定义提取器</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 嵌套路由
+let api_routes = Router::new()
+    .route("/users", get(list_users).post(create_user))
+    .route("/users/:id", get(get_user).put(update_user).delete(delete_user))
+    .route("/posts", get(list_posts).post(create_post));
+
+let app = Router::new()
+    .nest("/api/v1", api_routes)
+    .route("/health", get(health_check));
+<span class="boring">}</span></code></pre>
+<h4 id="day-64-中间件开发"><a class="header" href="#day-64-中间件开发">Day 64: 中间件开发</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>Tower 中间件系统</li>
+<li>日志中间件</li>
+<li>认证中间件</li>
+<li>CORS 和安全头</li>
+<li>自定义中间件</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower_http::{trace::TraceLayer, cors::CorsLayer};
+
+let app = Router::new()
+    .route("/api/users", get(list_users))
+    .layer(TraceLayer::new_for_http())
+    .layer(CorsLayer::permissive());
+<span class="boring">}</span></code></pre>
+<h4 id="day-65-请求状态管理"><a class="header" href="#day-65-请求状态管理">Day 65: 请求状态管理</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>应用状态共享</li>
+<li>Arc + RwLock 模式</li>
+<li>状态注入</li>
+<li>连接池管理</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+struct AppState {
+    db: Arc&lt;RwLock&lt;Database&gt;&gt;,
+    cache: Arc&lt;RwLock&lt;Cache&gt;&gt;,
+}
+
+async fn handler(State(state): State&lt;AppState&gt;) -&gt; Result&lt;Json&lt;Data&gt;&gt; {
+    let db = state.db.read().await;
+    // 使用数据库
+}
+<span class="boring">}</span></code></pre>
+<h3 id="week-2-数据库与业务逻辑-days-66-70-1"><a class="header" href="#week-2-数据库与业务逻辑-days-66-70-1">Week 2: 数据库与业务逻辑 (Days 66-70)</a></h3>
+<h4 id="day-66-数据库迁移-migrations"><a class="header" href="#day-66-数据库迁移-migrations">Day 66: 数据库迁移 (Migrations)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>SQLx 迁移系统</li>
+<li>迁移文件编写</li>
+<li>版本控制</li>
+<li>回滚策略</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre><code class="language-sql">-- migrations/20240101_create_users.sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+</code></pre>
+<h4 id="day-67-crud-操作实战"><a class="header" href="#day-67-crud-操作实战">Day 67: CRUD 操作实战</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>SQLx 查询构建</li>
+<li>参数化查询</li>
+<li>事务处理</li>
+<li>错误处理</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn create_user(pool: &amp;PgPool, user: CreateUser) -&gt; Result&lt;User&gt; {
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        INSERT INTO users (username, email, password_hash)
+        VALUES ($1, $2, $3)
+        RETURNING id, username, email, created_at
+        "#,
+        user.username,
+        user.email,
+        user.password_hash
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-68-复杂查询与事务"><a class="header" href="#day-68-复杂查询与事务">Day 68: 复杂查询与事务</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>JOIN 查询</li>
+<li>聚合函数</li>
+<li>子查询</li>
+<li>事务管理</li>
+<li>乐观锁和悲观锁</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn transfer_money(
+    pool: &amp;PgPool,
+    from_id: i32,
+    to_id: i32,
+    amount: Decimal,
+) -&gt; Result&lt;()&gt; {
+    let mut tx = pool.begin().await?;
+    
+    sqlx::query!(
+        "UPDATE accounts SET balance = balance - $1 WHERE id = $2",
+        amount,
+        from_id
+    )
+    .execute(&amp;mut *tx)
+    .await?;
+    
+    sqlx::query!(
+        "UPDATE accounts SET balance = balance + $1 WHERE id = $2",
+        amount,
+        to_id
+    )
+    .execute(&amp;mut *tx)
+    .await?;
+    
+    tx.commit().await?;
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-69-用户认证-jwt"><a class="header" href="#day-69-用户认证-jwt">Day 69: 用户认证 (JWT)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>JWT 原理</li>
+<li>令牌生成和验证</li>
+<li>密码哈希（bcrypt/argon2）</li>
+<li>登录/注册流程</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use jsonwebtoken::{encode, decode, Header, Validation, EncodingKey, DecodingKey};
+
+#[derive(Serialize, Deserialize)]
+struct Claims {
+    sub: String,
+    exp: usize,
+}
+
+fn create_jwt(user_id: &amp;str) -&gt; Result&lt;String&gt; {
+    let expiration = Utc::now()
+        .checked_add_signed(Duration::hours(24))
+        .unwrap()
+        .timestamp() as usize;
+    
+    let claims = Claims {
+        sub: user_id.to_owned(),
+        exp: expiration,
+    };
+    
+    encode(
+        &amp;Header::default(),
+        &amp;claims,
+        &amp;EncodingKey::from_secret("secret".as_ref()),
+    )
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-70-权限控制-rbac"><a class="header" href="#day-70-权限控制-rbac">Day 70: 权限控制 (RBAC)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>角色基础访问控制</li>
+<li>权限模型设计</li>
+<li>中间件实现</li>
+<li>资源级权限</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+enum Role {
+    Admin,
+    User,
+    Guest,
+}
+
+#[derive(Debug, Clone)]
+enum Permission {
+    ReadUser,
+    WriteUser,
+    DeleteUser,
+}
+
+async fn require_permission(
+    Extension(user): Extension&lt;User&gt;,
+    permission: Permission,
+) -&gt; Result&lt;(), StatusCode&gt; {
+    if user.has_permission(&amp;permission) {
+        Ok(())
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="week-3-前端交互与部署-days-71-75-1"><a class="header" href="#week-3-前端交互与部署-days-71-75-1">Week 3: 前端交互与部署 (Days 71-75)</a></h3>
+<h4 id="day-71-模板引擎-askamatera"><a class="header" href="#day-71-模板引擎-askamatera">Day 71: 模板引擎 (Askama/Tera)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>Askama 模板语法</li>
+<li>模板继承</li>
+<li>过滤器和函数</li>
+<li>服务端渲染</li>
+</ul>
+<p><strong>示例：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use askama::Template;
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct IndexTemplate {
+    title: String,
+    users: Vec&lt;User&gt;,
+}
+
+async fn index() -&gt; impl IntoResponse {
+    let template = IndexTemplate {
+        title: "User List".to_string(),
+        users: get_users().await,
+    };
+    
+    HtmlTemplate(template)
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-72-webassembly-wasm-简介"><a class="header" href="#day-72-webassembly-wasm-简介">Day 72: WebAssembly (WASM) 简介</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>Rust to WASM 编译</li>
+<li>wasm-bindgen 使用</li>
+<li>与 JavaScript 交互</li>
+<li>Yew 框架简介</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn greet(name: &amp;str) -&gt; String {
+    format!("Hello, {}!", name)
+}
+
+#[wasm_bindgen]
+pub fn fibonacci(n: u32) -&gt; u32 {
+    match n {
+        0 =&gt; 0,
+        1 =&gt; 1,
+        _ =&gt; fibonacci(n - 1) + fibonacci(n - 2),
+    }
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-73-前端集成实战"><a class="header" href="#day-73-前端集成实战">Day 73: 前端集成实战</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>静态文件服务</li>
+<li>SPA 路由配置</li>
+<li>API 代理</li>
+<li>前后端分离架构</li>
+</ul>
+<h4 id="day-74-api-文档生成-openapi"><a class="header" href="#day-74-api-文档生成-openapi">Day 74: API 文档生成 (OpenAPI)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>utoipa 库使用</li>
+<li>Swagger UI 集成</li>
+<li>API 文档自动生成</li>
+<li>文档测试</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use utoipa::{OpenApi, ToSchema};
+
+#[derive(ToSchema, Serialize, Deserialize)]
+struct User {
+    id: i32,
+    username: String,
+    email: String,
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/users/{id}",
+    responses(
+        (status = 200, description = "User found", body = User),
+        (status = 404, description = "User not found")
+    )
+)]
+async fn get_user(Path(id): Path&lt;i32&gt;) -&gt; Result&lt;Json&lt;User&gt;&gt; {
+    // Implementation
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-75-容器化部署-docker"><a class="header" href="#day-75-容器化部署-docker">Day 75: 容器化部署 (Docker)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>Dockerfile 编写</li>
+<li>多阶段构建</li>
+<li>Docker Compose</li>
+<li>生产环境配置</li>
+</ul>
+<p><strong>Dockerfile 示例：</strong></p>
+<pre><code class="language-dockerfile">FROM rust:1.75 as builder
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+RUN apt-get update &amp;&amp; apt-get install -y libssl3 ca-certificates
+COPY --from=builder /app/target/release/app /usr/local/bin/app
+EXPOSE 8080
+CMD ["app"]
+</code></pre>
+<h3 id="week-4-完整项目实战---博客系统-days-76-80"><a class="header" href="#week-4-完整项目实战---博客系统-days-76-80">Week 4: 完整项目实战 - 博客系统 (Days 76-80)</a></h3>
+<h4 id="day-76-需求分析与设计"><a class="header" href="#day-76-需求分析与设计">Day 76: 需求分析与设计</a></h4>
+<p><strong>功能需求：</strong></p>
+<ul>
+<li>用户注册/登录</li>
+<li>文章 CRUD</li>
+<li>评论系统</li>
+<li>标签和分类</li>
+<li>搜索功能</li>
+<li>Markdown 支持</li>
+</ul>
+<p><strong>数据库设计：</strong></p>
+<pre><code class="language-sql">-- 用户表
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 文章表
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    slug VARCHAR(200) UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    author_id INTEGER REFERENCES users(id),
+    published BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 评论表
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 标签表
+CREATE TABLE tags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- 文章标签关联表
+CREATE TABLE post_tags (
+    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (post_id, tag_id)
+);
+</code></pre>
+<h4 id="day-77-核心业务实现"><a class="header" href="#day-77-核心业务实现">Day 77: 核心业务实现</a></h4>
+<p><strong>实现模块：</strong></p>
+<ul>
+<li>用户服务（注册、登录、个人资料）</li>
+<li>文章服务（CRUD、发布、草稿）</li>
+<li>评论服务</li>
+<li>标签服务</li>
+</ul>
+<h4 id="day-78-api-接口开发"><a class="header" href="#day-78-api-接口开发">Day 78: API 接口开发</a></h4>
+<p><strong>API 端点：</strong></p>
+<pre><code>POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/users/me
+PUT    /api/users/me
+
+GET    /api/posts
+POST   /api/posts
+GET    /api/posts/:id
+PUT    /api/posts/:id
+DELETE /api/posts/:id
+
+GET    /api/posts/:id/comments
+POST   /api/posts/:id/comments
+DELETE /api/comments/:id
+
+GET    /api/tags
+POST   /api/tags
+</code></pre>
+<h4 id="day-79-测试与优化"><a class="header" href="#day-79-测试与优化">Day 79: 测试与优化</a></h4>
+<p><strong>测试内容：</strong></p>
+<ul>
+<li>单元测试</li>
+<li>集成测试</li>
+<li>API 测试</li>
+<li>性能测试</li>
+</ul>
+<p><strong>优化方向：</strong></p>
+<ul>
+<li>数据库查询优化</li>
+<li>缓存策略</li>
+<li>连接池调优</li>
+<li>响应压缩</li>
+</ul>
+<h4 id="day-80-项目总结与展示"><a class="header" href="#day-80-项目总结与展示">Day 80: 项目总结与展示</a></h4>
+<p><strong>总结内容：</strong></p>
+<ul>
+<li>架构回顾</li>
+<li>技术栈总结</li>
+<li>遇到的问题和解决方案</li>
+<li>性能指标</li>
+<li>未来改进方向</li>
+</ul>
+<h2 id="技术栈总结"><a class="header" href="#技术栈总结">技术栈总结</a></h2>
+<h3 id="后端框架"><a class="header" href="#后端框架">后端框架</a></h3>
+<ul>
+<li>Axum 0.7 - Web 框架</li>
+<li>Tower - 中间件</li>
+<li>SQLx - 数据库访问</li>
+</ul>
+<h3 id="数据库-1"><a class="header" href="#数据库-1">数据库</a></h3>
+<ul>
+<li>PostgreSQL - 主数据库</li>
+<li>Redis - 缓存（可选）</li>
+</ul>
+<h3 id="认证授权"><a class="header" href="#认证授权">认证授权</a></h3>
+<ul>
+<li>jsonwebtoken - JWT 处理</li>
+<li>argon2 - 密码哈希</li>
+</ul>
+<h3 id="序列化-1"><a class="header" href="#序列化-1">序列化</a></h3>
+<ul>
+<li>Serde - JSON 序列化</li>
+<li>Serde_json - JSON 处理</li>
+</ul>
+<h3 id="模板引擎"><a class="header" href="#模板引擎">模板引擎</a></h3>
+<ul>
+<li>Askama - 服务端渲染</li>
+</ul>
+<h3 id="文档"><a class="header" href="#文档">文档</a></h3>
+<ul>
+<li>utoipa - OpenAPI 文档生成</li>
+</ul>
+<h3 id="部署"><a class="header" href="#部署">部署</a></h3>
+<ul>
+<li>Docker - 容器化</li>
+<li>Docker Compose - 编排</li>
+</ul>
+<h2 id="学习资源"><a class="header" href="#学习资源">学习资源</a></h2>
+<h3 id="书籍"><a class="header" href="#书籍">书籍</a></h3>
+<ul>
+<li>Zero To Production In Rust</li>
+<li>Rust Web Development</li>
+</ul>
+<h3 id="文档-1"><a class="header" href="#文档-1">文档</a></h3>
+<ul>
+<li><a href="https://docs.rs/axum">Axum 官方文档</a></li>
+<li><a href="https://docs.rs/sqlx">SQLx 文档</a></li>
+<li><a href="https://docs.rs/tower">Tower 文档</a></li>
+</ul>
+<h3 id="视频教程-1"><a class="header" href="#视频教程-1">视频教程</a></h3>
+<ul>
+<li>Let’s Get Rusty - Web Development Series</li>
+<li>Jon Gjengset - Rust Streams</li>
+</ul>
+<h2 id="项目检查清单"><a class="header" href="#项目检查清单">项目检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 用户认证系统完整</li>
+<li><input disabled="" type="checkbox"> CRUD 操作正常</li>
+<li><input disabled="" type="checkbox"> 错误处理完善</li>
+<li><input disabled="" type="checkbox"> API 文档完整</li>
+<li><input disabled="" type="checkbox"> 单元测试覆盖</li>
+<li><input disabled="" type="checkbox"> 集成测试通过</li>
+<li><input disabled="" type="checkbox"> Docker 部署成功</li>
+<li><input disabled="" type="checkbox"> 性能达标</li>
+<li><input disabled="" type="checkbox"> 安全审计通过</li>
+<li><input disabled="" type="checkbox"> 代码文档完整</li>
+</ul>
+<h2 id="下一阶段预告"><a class="header" href="#下一阶段预告">下一阶段预告</a></h2>
+<p>第六阶段（Days 81-90）将深入系统编程和性能优化，包括：</p>
+<ul>
+<li>操作系统底层交互</li>
+<li>文件系统深入</li>
+<li>性能分析和优化</li>
+<li>SIMD 和底层优化</li>
+<li>CI/CD 流水线</li>
+</ul>
+<p>继续加油！🚀</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-61-rust-web-开发概览"><a class="header" href="#day-61-rust-web-开发概览">Day 61: Rust Web 开发概览</a></h1>
+<h2 id="学习目标"><a class="header" href="#学习目标">学习目标</a></h2>
+<ul>
+<li>了解 Rust Web 生态系统</li>
+<li>比较主流 Web 框架</li>
+<li>理解异步 Web 开发模式</li>
+<li>掌握 HTTP 基础概念</li>
+</ul>
+<h2 id="rust-web-生态系统"><a class="header" href="#rust-web-生态系统">Rust Web 生态系统</a></h2>
+<h3 id="主流-web-框架对比"><a class="header" href="#主流-web-框架对比">主流 Web 框架对比</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>框架</th><th>特点</th><th>适用场景</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Axum</strong></td><td>基于 Tower，类型安全，ergonomic</td><td>现代 API 服务</td></tr>
+<tr><td><strong>Actix-web</strong></td><td>高性能，Actor 模型</td><td>高并发应用</td></tr>
+<tr><td><strong>Rocket</strong></td><td>易用，宏驱动</td><td>快速原型开发</td></tr>
+<tr><td><strong>Warp</strong></td><td>函数式，组合式</td><td>微服务</td></tr>
+<tr><td><strong>Tide</strong></td><td>简洁，async-std</td><td>学习和小项目</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="核心概念-2"><a class="header" href="#核心概念-2">核心概念</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 1. 异步运行时
+// Tokio - 最流行的异步运行时
+// async-std - 标准库风格的异步运行时
+
+// 2. HTTP 服务器
+// Hyper - 底层 HTTP 实现
+// Tower - 中间件抽象层
+
+// 3. 序列化/反序列化
+// Serde - JSON/其他格式处理
+<span class="boring">}</span></code></pre>
+<h2 id="axum-快速入门"><a class="header" href="#axum-快速入门">Axum 快速入门</a></h2>
+<h3 id="安装依赖"><a class="header" href="#安装依赖">安装依赖</a></h3>
+<pre><code class="language-toml">[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+</code></pre>
+<h3 id="hello-world-示例"><a class="header" href="#hello-world-示例">Hello World 示例</a></h3>
+<pre class="playground"><code class="language-rust">use axum::{
+    routing::get,
+    Router,
+};
+
+#[tokio::main]
+async fn main() {
+    // 创建路由
+    let app = Router::new()
+        .route("/", get(handler));
+
+    // 启动服务器
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    
+    axum::serve(listener, app)
+        .await
+        .unwrap();
+}
+
+async fn handler() -&gt; &amp;'static str {
+    "Hello, Rust Web!"
+}</code></pre>
+<h2 id="actix-web-快速入门"><a class="header" href="#actix-web-快速入门">Actix-web 快速入门</a></h2>
+<h3 id="安装依赖-1"><a class="header" href="#安装依赖-1">安装依赖</a></h3>
+<pre><code class="language-toml">[dependencies]
+actix-web = "4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+</code></pre>
+<h3 id="hello-world-示例-1"><a class="header" href="#hello-world-示例-1">Hello World 示例</a></h3>
+<pre class="playground"><code class="language-rust">use actix_web::{get, App, HttpResponse, HttpServer, Responder};
+
+#[get("/")]
+async fn hello() -&gt; impl Responder {
+    HttpResponse::Ok().body("Hello, Actix!")
+}
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+    println!("🚀 Server running on http://127.0.0.1:8080");
+    
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}</code></pre>
+<h2 id="http-基础概念"><a class="header" href="#http-基础概念">HTTP 基础概念</a></h2>
+<h3 id="请求方法"><a class="header" href="#请求方法">请求方法</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// GET - 获取资源
+Router::new().route("/users", get(get_users))
+
+// POST - 创建资源
+Router::new().route("/users", post(create_user))
+
+// PUT - 更新资源
+Router::new().route("/users/:id", put(update_user))
+
+// DELETE - 删除资源
+Router::new().route("/users/:id", delete(delete_user))
+
+// PATCH - 部分更新
+Router::new().route("/users/:id", patch(patch_user))
+<span class="boring">}</span></code></pre>
+<h3 id="状态码"><a class="header" href="#状态码">状态码</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::http::StatusCode;
+
+// 2xx 成功
+StatusCode::OK                    // 200
+StatusCode::CREATED               // 201
+StatusCode::NO_CONTENT            // 204
+
+// 4xx 客户端错误
+StatusCode::BAD_REQUEST           // 400
+StatusCode::UNAUTHORIZED          // 401
+StatusCode::FORBIDDEN             // 403
+StatusCode::NOT_FOUND             // 404
+
+// 5xx 服务器错误
+StatusCode::INTERNAL_SERVER_ERROR // 500
+StatusCode::SERVICE_UNAVAILABLE   // 503
+<span class="boring">}</span></code></pre>
+<h3 id="请求响应结构"><a class="header" href="#请求响应结构">请求/响应结构</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::{Path, Query, Json},
+    response::IntoResponse,
+    http::StatusCode,
+};
+use serde::{Deserialize, Serialize};
+
+// 路径参数
+async fn get_user(Path(id): Path&lt;u32&gt;) -&gt; String {
+    format!("User ID: {}", id)
+}
+
+// 查询参数
+#[derive(Deserialize)]
+struct Pagination {
+    page: Option&lt;u32&gt;,
+    limit: Option&lt;u32&gt;,
+}
+
+async fn list_users(Query(params): Query&lt;Pagination&gt;) -&gt; String {
+    format!("Page: {:?}, Limit: {:?}", params.page, params.limit)
+}
+
+// JSON 请求体
+#[derive(Deserialize)]
+struct CreateUser {
+    name: String,
+    email: String,
+}
+
+#[derive(Serialize)]
+struct User {
+    id: u32,
+    name: String,
+    email: String,
+}
+
+async fn create_user(
+    Json(payload): Json&lt;CreateUser&gt;
+) -&gt; impl IntoResponse {
+    let user = User {
+        id: 1,
+        name: payload.name,
+        email: payload.email,
+    };
+    
+    (StatusCode::CREATED, Json(user))
+}
+<span class="boring">}</span></code></pre>
+<h2 id="框架选择建议"><a class="header" href="#框架选择建议">框架选择建议</a></h2>
+<h3 id="选择-axum-如果"><a class="header" href="#选择-axum-如果">选择 Axum 如果：</a></h3>
+<ul>
+<li>✅ 需要类型安全和编译时检查</li>
+<li>✅ 喜欢组合式 API 设计</li>
+<li>✅ 需要与 Tower 生态集成</li>
+<li>✅ 构建现代 RESTful API</li>
+</ul>
+<h3 id="选择-actix-web-如果"><a class="header" href="#选择-actix-web-如果">选择 Actix-web 如果：</a></h3>
+<ul>
+<li>✅ 需要极致性能</li>
+<li>✅ 熟悉 Actor 模型</li>
+<li>✅ 需要 WebSocket 支持</li>
+<li>✅ 构建高并发应用</li>
+</ul>
+<h3 id="选择-rocket-如果"><a class="header" href="#选择-rocket-如果">选择 Rocket 如果：</a></h3>
+<ul>
+<li>✅ 快速原型开发</li>
+<li>✅ 喜欢宏驱动的 API</li>
+<li>✅ 需要内置表单验证</li>
+<li>✅ 学习 Rust Web 开发</li>
+</ul>
+<h2 id="性能对比"><a class="header" href="#性能对比">性能对比</a></h2>
+<p>根据 TechEmpower Benchmark：</p>
+<pre><code>框架性能排名（请求/秒）：
+1. Actix-web: ~700k
+2. Axum: ~650k
+3. Warp: ~600k
+4. Rocket: ~400k
+</code></pre>
+<h2 id="实践项目"><a class="header" href="#实践项目">实践项目</a></h2>
+<p>创建一个简单的 API 服务器，支持：</p>
+<ul>
+<li>GET /health - 健康检查</li>
+<li>GET /api/v1/users - 获取用户列表</li>
+<li>POST /api/v1/users - 创建用户</li>
+<li>GET /api/v1/users/:id - 获取单个用户</li>
+</ul>
+<h2 id="学习资源-1"><a class="header" href="#学习资源-1">学习资源</a></h2>
+<ul>
+<li><a href="https://docs.rs/axum">Axum 官方文档</a></li>
+<li><a href="https://actix.rs">Actix-web 官方文档</a></li>
+<li><a href="https://www.zero2prod.com">Rust Web 开发实战</a></li>
+<li><a href="https://docs.rs/tower">Tower 中间件指南</a></li>
+</ul>
+<h2 id="下一步-1"><a class="header" href="#下一步-1">下一步</a></h2>
+<p>Day 62 将深入学习 Axum 和 Actix-web 的核心特性，包括路由、提取器和响应类型。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-62-axumactix-web-入门"><a class="header" href="#day-62-axumactix-web-入门">Day 62: Axum/Actix-web 入门</a></h1>
+<h2 id="学习目标-1"><a class="header" href="#学习目标-1">学习目标</a></h2>
+<ul>
+<li>深入理解 Axum 框架核心概念</li>
+<li>掌握 Actix-web 基本用法</li>
+<li>学习提取器（Extractors）</li>
+<li>理解响应类型</li>
+</ul>
+<h2 id="axum-深入"><a class="header" href="#axum-深入">Axum 深入</a></h2>
+<h3 id="项目设置"><a class="header" href="#项目设置">项目设置</a></h3>
+<pre><code class="language-toml">[package]
+name = "axum_demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace", "cors"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+</code></pre>
+<h3 id="完整示例"><a class="header" href="#完整示例">完整示例</a></h3>
+<pre class="playground"><code class="language-rust">use axum::{
+    extract::{Path, Query, State, Json},
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
+    Router,
+};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
+// 应用状态
+#[derive(Clone)]
+struct AppState {
+    users: Arc&lt;RwLock&lt;Vec&lt;User&gt;&gt;&gt;,
+}
+
+// 数据模型
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct User {
+    id: u32,
+    name: String,
+    email: String,
+}
+
+#[derive(Deserialize)]
+struct CreateUserRequest {
+    name: String,
+    email: String,
+}
+
+#[derive(Deserialize)]
+struct ListQuery {
+    page: Option&lt;u32&gt;,
+    limit: Option&lt;u32&gt;,
+}
+
+// 路由处理器
+async fn health_check() -&gt; &amp;'static str {
+    "OK"
+}
+
+async fn list_users(
+    State(state): State&lt;AppState&gt;,
+    Query(params): Query&lt;ListQuery&gt;,
+) -&gt; Json&lt;Vec&lt;User&gt;&gt; {
+    let users = state.users.read().await;
+    let page = params.page.unwrap_or(1);
+    let limit = params.limit.unwrap_or(10);
+    
+    let start = ((page - 1) * limit) as usize;
+    let end = (start + limit as usize).min(users.len());
+    
+    Json(users[start..end].to_vec())
+}
+
+async fn get_user(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;u32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, AppError&gt; {
+    let users = state.users.read().await;
+    users
+        .iter()
+        .find(|u| u.id == id)
+        .cloned()
+        .map(Json)
+        .ok_or(AppError::NotFound)
+}
+
+async fn create_user(
+    State(state): State&lt;AppState&gt;,
+    Json(payload): Json&lt;CreateUserRequest&gt;,
+) -&gt; Result&lt;(StatusCode, Json&lt;User&gt;), AppError&gt; {
+    let mut users = state.users.write().await;
+    
+    let id = users.len() as u32 + 1;
+    let user = User {
+        id,
+        name: payload.name,
+        email: payload.email,
+    };
+    
+    users.push(user.clone());
+    Ok((StatusCode::CREATED, Json(user)))
+}
+
+// 错误处理
+enum AppError {
+    NotFound,
+    InternalError,
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -&gt; Response {
+        let (status, message) = match self {
+            AppError::NotFound =&gt; (StatusCode::NOT_FOUND, "Resource not found"),
+            AppError::InternalError =&gt; (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal server error",
+            ),
+        };
+        
+        (status, message).into_response()
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    // 初始化日志
+    tracing_subscriber::fmt::init();
+    
+    // 创建应用状态
+    let state = AppState {
+        users: Arc::new(RwLock::new(vec![
+            User {
+                id: 1,
+                name: "Alice".to_string(),
+                email: "alice@example.com".to_string(),
+            },
+        ])),
+    };
+    
+    // 构建路由
+    let app = Router::new()
+        .route("/health", get(health_check))
+        .route("/api/users", get(list_users).post(create_user))
+        .route("/api/users/:id", get(get_user))
+        .with_state(state);
+    
+    // 启动服务器
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h2 id="actix-web-深入"><a class="header" href="#actix-web-深入">Actix-web 深入</a></h2>
+<h3 id="项目设置-1"><a class="header" href="#项目设置-1">项目设置</a></h3>
+<pre><code class="language-toml">[dependencies]
+actix-web = "4"
+actix-rt = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync"] }
+</code></pre>
+<h3 id="完整示例-1"><a class="header" href="#完整示例-1">完整示例</a></h3>
+<pre class="playground"><code class="language-rust">use actix_web::{
+    get, post, web, App, HttpResponse, HttpServer, Responder, Result,
+};
+use serde::{Deserialize, Serialize};
+use std::sync::Mutex;
+
+// 应用状态
+struct AppState {
+    users: Mutex&lt;Vec&lt;User&gt;&gt;,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct User {
+    id: u32,
+    name: String,
+    email: String,
+}
+
+#[derive(Deserialize)]
+struct CreateUserRequest {
+    name: String,
+    email: String,
+}
+
+#[derive(Deserialize)]
+struct ListQuery {
+    page: Option&lt;u32&gt;,
+    limit: Option&lt;u32&gt;,
+}
+
+// 路由处理器
+#[get("/health")]
+async fn health_check() -&gt; impl Responder {
+    HttpResponse::Ok().body("OK")
+}
+
+#[get("/api/users")]
+async fn list_users(
+    data: web::Data&lt;AppState&gt;,
+    query: web::Query&lt;ListQuery&gt;,
+) -&gt; Result&lt;impl Responder&gt; {
+    let users = data.users.lock().unwrap();
+    let page = query.page.unwrap_or(1);
+    let limit = query.limit.unwrap_or(10);
+    
+    let start = ((page - 1) * limit) as usize;
+    let end = (start + limit as usize).min(users.len());
+    
+    Ok(web::Json(&amp;users[start..end]))
+}
+
+#[get("/api/users/{id}")]
+async fn get_user(
+    data: web::Data&lt;AppState&gt;,
+    path: web::Path&lt;u32&gt;,
+) -&gt; Result&lt;impl Responder&gt; {
+    let users = data.users.lock().unwrap();
+    let id = path.into_inner();
+    
+    users
+        .iter()
+        .find(|u| u.id == id)
+        .map(|u| HttpResponse::Ok().json(u))
+        .ok_or_else(|| actix_web::error::ErrorNotFound("User not found"))
+}
+
+#[post("/api/users")]
+async fn create_user(
+    data: web::Data&lt;AppState&gt;,
+    payload: web::Json&lt;CreateUserRequest&gt;,
+) -&gt; Result&lt;impl Responder&gt; {
+    let mut users = data.users.lock().unwrap();
+    
+    let id = users.len() as u32 + 1;
+    let user = User {
+        id,
+        name: payload.name.clone(),
+        email: payload.email.clone(),
+    };
+    
+    users.push(user.clone());
+    Ok(HttpResponse::Created().json(user))
+}
+
+#[actix_web::main]
+async fn main() -&gt; std::io::Result&lt;()&gt; {
+    // 创建应用状态
+    let app_state = web::Data::new(AppState {
+        users: Mutex::new(vec![User {
+            id: 1,
+            name: "Alice".to_string(),
+            email: "alice@example.com".to_string(),
+        }]),
+    });
+    
+    println!("🚀 Server running on http://127.0.0.1:8080");
+    
+    HttpServer::new(move || {
+        App::new()
+            .app_data(app_state.clone())
+            .service(health_check)
+            .service(list_users)
+            .service(get_user)
+            .service(create_user)
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}</code></pre>
+<h2 id="提取器对比"><a class="header" href="#提取器对比">提取器对比</a></h2>
+<h3 id="axum-提取器"><a class="header" href="#axum-提取器">Axum 提取器</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 路径参数
+Path(id): Path&lt;u32&gt;
+
+// 查询参数
+Query(params): Query&lt;MyQuery&gt;
+
+// JSON 请求体
+Json(payload): Json&lt;MyPayload&gt;
+
+// 表单数据
+Form(data): Form&lt;MyForm&gt;
+
+// 请求头
+headers: HeaderMap
+
+// 应用状态
+State(state): State&lt;AppState&gt;
+
+// 扩展数据
+Extension(ext): Extension&lt;MyExtension&gt;
+<span class="boring">}</span></code></pre>
+<h3 id="actix-web-提取器"><a class="header" href="#actix-web-提取器">Actix-web 提取器</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 路径参数
+path: web::Path&lt;u32&gt;
+
+// 查询参数
+query: web::Query&lt;MyQuery&gt;
+
+// JSON 请求体
+payload: web::Json&lt;MyPayload&gt;
+
+// 表单数据
+form: web::Form&lt;MyForm&gt;
+
+// 请求头
+req: HttpRequest
+
+// 应用状态
+data: web::Data&lt;AppState&gt;
+<span class="boring">}</span></code></pre>
+<h2 id="测试-api"><a class="header" href="#测试-api">测试 API</a></h2>
+<pre><code class="language-bash"># 健康检查
+curl http://localhost:3000/health
+
+# 获取用户列表
+curl http://localhost:3000/api/users
+
+# 分页查询
+curl "http://localhost:3000/api/users?page=1&amp;limit=5"
+
+# 获取单个用户
+curl http://localhost:3000/api/users/1
+
+# 创建用户
+curl -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Bob","email":"bob@example.com"}'
+</code></pre>
+<h2 id="练习"><a class="header" href="#练习">练习</a></h2>
+<ol>
+<li>添加 PUT 和 DELETE 端点</li>
+<li>实现输入验证</li>
+<li>添加日志中间件</li>
+<li>实现错误处理中间件</li>
+<li>添加 CORS 支持</li>
+</ol>
+<h2 id="下一步-2"><a class="header" href="#下一步-2">下一步</a></h2>
+<p>Day 63 将学习高级路由和请求处理技术。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-69-用户认证-jwt-1"><a class="header" href="#day-69-用户认证-jwt-1">Day 69: 用户认证 (JWT)</a></h1>
+<h2 id="学习目标-2"><a class="header" href="#学习目标-2">学习目标</a></h2>
+<ul>
+<li>理解 JWT 工作原理</li>
+<li>实现用户注册和登录</li>
+<li>掌握密码安全存储</li>
+<li>实现认证中间件</li>
+</ul>
+<h2 id="jwt-简介"><a class="header" href="#jwt-简介">JWT 简介</a></h2>
+<p>JWT (JSON Web Token) 是一种开放标准 (RFC 7519)，用于在各方之间安全地传输信息。</p>
+<h3 id="jwt-结构"><a class="header" href="#jwt-结构">JWT 结构</a></h3>
+<pre><code>Header.Payload.Signature
+</code></pre>
+<p><strong>Header (头部)</strong></p>
+<pre><code class="language-json">{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+</code></pre>
+<p><strong>Payload (载荷)</strong></p>
+<pre><code class="language-json">{
+  "sub": "user_id",
+  "name": "John Doe",
+  "exp": 1516239022
+}
+</code></pre>
+<p><strong>Signature (签名)</strong></p>
+<pre><code>HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret
+)
+</code></pre>
+<h2 id="项目设置-2"><a class="header" href="#项目设置-2">项目设置</a></h2>
+<h3 id="cargotoml"><a class="header" href="#cargotoml">Cargo.toml</a></h3>
+<pre><code class="language-toml">[package]
+name = "jwt_auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+jsonwebtoken = "9"
+bcrypt = "0.15"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres"] }
+chrono = { version = "0.4", features = ["serde"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["trace"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+</code></pre>
+<h2 id="完整实现"><a class="header" href="#完整实现">完整实现</a></h2>
+<h3 id="1-数据模型"><a class="header" href="#1-数据模型">1. 数据模型</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/models.rs
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub password_hash: String,
+    pub created_at: chrono::DateTime&lt;chrono::Utc&gt;,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RegisterRequest {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LoginRequest {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AuthResponse {
+    pub token: String,
+    pub user: UserResponse,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UserResponse {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,  // user_id
+    pub username: String,
+    pub exp: usize,   // 过期时间
+}
+<span class="boring">}</span></code></pre>
+<h3 id="2-jwt-工具函数"><a class="header" href="#2-jwt-工具函数">2. JWT 工具函数</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/jwt.rs
+use jsonwebtoken::{encode, decode, Header, Validation, EncodingKey, DecodingKey};
+use chrono::{Utc, Duration};
+use crate::models::Claims;
+
+const SECRET: &amp;str = "your-secret-key"; // 生产环境应从环境变量读取
+
+pub fn create_jwt(user_id: i32, username: &amp;str) -&gt; Result&lt;String, jsonwebtoken::errors::Error&gt; {
+    let expiration = Utc::now()
+        .checked_add_signed(Duration::hours(24))
+        .expect("valid timestamp")
+        .timestamp() as usize;
+    
+    let claims = Claims {
+        sub: user_id.to_string(),
+        username: username.to_string(),
+        exp: expiration,
+    };
+    
+    encode(
+        &amp;Header::default(),
+        &amp;claims,
+        &amp;EncodingKey::from_secret(SECRET.as_ref()),
+    )
+}
+
+pub fn verify_jwt(token: &amp;str) -&gt; Result&lt;Claims, jsonwebtoken::errors::Error&gt; {
+    decode::&lt;Claims&gt;(
+        token,
+        &amp;DecodingKey::from_secret(SECRET.as_ref()),
+        &amp;Validation::default(),
+    )
+    .map(|data| data.claims)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="3-密码处理"><a class="header" href="#3-密码处理">3. 密码处理</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/password.rs
+use bcrypt::{hash, verify, DEFAULT_COST};
+
+pub fn hash_password(password: &amp;str) -&gt; Result&lt;String, bcrypt::BcryptError&gt; {
+    hash(password, DEFAULT_COST)
+}
+
+pub fn verify_password(password: &amp;str, hash: &amp;str) -&gt; Result&lt;bool, bcrypt::BcryptError&gt; {
+    verify(password, hash)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="4-认证服务"><a class="header" href="#4-认证服务">4. 认证服务</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/auth.rs
+use sqlx::PgPool;
+use crate::models::*;
+use crate::jwt::create_jwt;
+use crate::password::{hash_password, verify_password};
+
+pub struct AuthService {
+    pool: PgPool,
+}
+
+impl AuthService {
+    pub fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+    
+    pub async fn register(&amp;self, req: RegisterRequest) -&gt; Result&lt;AuthResponse, String&gt; {
+        // 检查用户名是否已存在
+        let existing = sqlx::query!(
+            "SELECT id FROM users WHERE username = $1 OR email = $2",
+            req.username,
+            req.email
+        )
+        .fetch_optional(&amp;self.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+        
+        if existing.is_some() {
+            return Err("Username or email already exists".to_string());
+        }
+        
+        // 哈希密码
+        let password_hash = hash_password(&amp;req.password)
+            .map_err(|e| e.to_string())?;
+        
+        // 创建用户
+        let user = sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email, password_hash, created_at
+            "#,
+            req.username,
+            req.email,
+            password_hash
+        )
+        .fetch_one(&amp;self.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+        
+        // 生成 JWT
+        let token = create_jwt(user.id, &amp;user.username)
+            .map_err(|e| e.to_string())?;
+        
+        Ok(AuthResponse {
+            token,
+            user: UserResponse {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+            },
+        })
+    }
+    
+    pub async fn login(&amp;self, req: LoginRequest) -&gt; Result&lt;AuthResponse, String&gt; {
+        // 查找用户
+        let user = sqlx::query_as!(
+            User,
+            "SELECT * FROM users WHERE username = $1",
+            req.username
+        )
+        .fetch_optional(&amp;self.pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or("Invalid credentials")?;
+        
+        // 验证密码
+        let valid = verify_password(&amp;req.password, &amp;user.password_hash)
+            .map_err(|e| e.to_string())?;
+        
+        if !valid {
+            return Err("Invalid credentials".to_string());
+        }
+        
+        // 生成 JWT
+        let token = create_jwt(user.id, &amp;user.username)
+            .map_err(|e| e.to_string())?;
+        
+        Ok(AuthResponse {
+            token,
+            user: UserResponse {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+            },
+        })
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="5-认证中间件"><a class="header" href="#5-认证中间件">5. 认证中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/middleware.rs
+use axum::{
+    extract::Request,
+    http::{StatusCode, HeaderMap},
+    middleware::Next,
+    response::Response,
+};
+use crate::jwt::verify_jwt;
+use crate::models::Claims;
+
+pub async fn auth_middleware(
+    headers: HeaderMap,
+    mut req: Request,
+    next: Next,
+) -&gt; Result&lt;Response, StatusCode&gt; {
+    let auth_header = headers
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+    
+    let token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+    
+    let claims = verify_jwt(token)
+        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+    
+    // 将 claims 添加到请求扩展中
+    req.extensions_mut().insert(claims);
+    
+    Ok(next.run(req).await)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="6-api-处理器"><a class="header" href="#6-api-处理器">6. API 处理器</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/handlers.rs
+use axum::{
+    extract::{State, Extension},
+    http::StatusCode,
+    Json,
+};
+use crate::auth::AuthService;
+use crate::models::*;
+
+pub async fn register(
+    State(service): State&lt;AuthService&gt;,
+    Json(req): Json&lt;RegisterRequest&gt;,
+) -&gt; Result&lt;Json&lt;AuthResponse&gt;, (StatusCode, String)&gt; {
+    service
+        .register(req)
+        .await
+        .map(Json)
+        .map_err(|e| (StatusCode::BAD_REQUEST, e))
+}
+
+pub async fn login(
+    State(service): State&lt;AuthService&gt;,
+    Json(req): Json&lt;LoginRequest&gt;,
+) -&gt; Result&lt;Json&lt;AuthResponse&gt;, (StatusCode, String)&gt; {
+    service
+        .login(req)
+        .await
+        .map(Json)
+        .map_err(|e| (StatusCode::UNAUTHORIZED, e))
+}
+
+pub async fn me(
+    Extension(claims): Extension&lt;Claims&gt;,
+) -&gt; Json&lt;Claims&gt; {
+    Json(claims)
+}
+
+pub async fn protected_route(
+    Extension(claims): Extension&lt;Claims&gt;,
+) -&gt; String {
+    format!("Hello, {}! This is a protected route.", claims.username)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="7-主程序"><a class="header" href="#7-主程序">7. 主程序</a></h3>
+<pre class="playground"><code class="language-rust">// src/main.rs
+use axum::{
+    routing::{get, post},
+    Router,
+    middleware,
+};
+use sqlx::postgres::PgPoolOptions;
+use tower_http::trace::TraceLayer;
+
+mod models;
+mod jwt;
+mod password;
+mod auth;
+mod handlers;
+mod middleware as mw;
+
+#[tokio::main]
+async fn main() {
+    // 初始化日志
+    tracing_subscriber::fmt::init();
+    
+    // 连接数据库
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://localhost/auth_db")
+        .await
+        .expect("Failed to connect to database");
+    
+    // 创建服务
+    let auth_service = auth::AuthService::new(pool);
+    
+    // 公开路由
+    let public_routes = Router::new()
+        .route("/register", post(handlers::register))
+        .route("/login", post(handlers::login))
+        .with_state(auth_service);
+    
+    // 受保护路由
+    let protected_routes = Router::new()
+        .route("/me", get(handlers::me))
+        .route("/protected", get(handlers::protected_route))
+        .layer(middleware::from_fn(mw::auth_middleware));
+    
+    // 组合路由
+    let app = Router::new()
+        .nest("/api/auth", public_routes)
+        .nest("/api", protected_routes)
+        .layer(TraceLayer::new_for_http());
+    
+    // 启动服务器
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h3 id="8-数据库迁移"><a class="header" href="#8-数据库迁移">8. 数据库迁移</a></h3>
+<pre><code class="language-sql">-- migrations/001_create_users.sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_email ON users(email);
+</code></pre>
+<h2 id="测试-api-1"><a class="header" href="#测试-api-1">测试 API</a></h2>
+<h3 id="注册用户"><a class="header" href="#注册用户">注册用户</a></h3>
+<pre><code class="language-bash">curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "alice",
+    "email": "alice@example.com",
+    "password": "password123"
+  }'
+</code></pre>
+<h3 id="登录"><a class="header" href="#登录">登录</a></h3>
+<pre><code class="language-bash">curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "alice",
+    "password": "password123"
+  }'
+</code></pre>
+<h3 id="访问受保护路由"><a class="header" href="#访问受保护路由">访问受保护路由</a></h3>
+<pre><code class="language-bash">TOKEN="your-jwt-token"
+
+curl http://localhost:3000/api/me \
+  -H "Authorization: Bearer $TOKEN"
+
+curl http://localhost:3000/api/protected \
+  -H "Authorization: Bearer $TOKEN"
+</code></pre>
+<h2 id="安全最佳实践"><a class="header" href="#安全最佳实践">安全最佳实践</a></h2>
+<h3 id="1-密码安全"><a class="header" href="#1-密码安全">1. 密码安全</a></h3>
+<ul>
+<li>✅ 使用 bcrypt/argon2 哈希</li>
+<li>✅ 设置最小密码长度</li>
+<li>✅ 要求密码复杂度</li>
+<li>✅ 防止暴力破解</li>
+</ul>
+<h3 id="2-jwt-安全"><a class="header" href="#2-jwt-安全">2. JWT 安全</a></h3>
+<ul>
+<li>✅ 使用强密钥</li>
+<li>✅ 设置合理过期时间</li>
+<li>✅ 使用 HTTPS 传输</li>
+<li>✅ 实现刷新令牌机制</li>
+</ul>
+<h3 id="3-api-安全"><a class="header" href="#3-api-安全">3. API 安全</a></h3>
+<ul>
+<li>✅ 限流保护</li>
+<li>✅ CORS 配置</li>
+<li>✅ 输入验证</li>
+<li>✅ SQL 注入防护</li>
+</ul>
+<h2 id="进阶功能"><a class="header" href="#进阶功能">进阶功能</a></h2>
+<h3 id="刷新令牌"><a class="header" href="#刷新令牌">刷新令牌</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Serialize, Deserialize)]
+pub struct RefreshToken {
+    pub token: String,
+    pub user_id: i32,
+    pub expires_at: chrono::DateTime&lt;chrono::Utc&gt;,
+}
+
+pub async fn refresh_token(
+    State(service): State&lt;AuthService&gt;,
+    Json(req): Json&lt;RefreshTokenRequest&gt;,
+) -&gt; Result&lt;Json&lt;AuthResponse&gt;, StatusCode&gt; {
+    // 验证刷新令牌
+    // 生成新的访问令牌
+    todo!()
+}
+<span class="boring">}</span></code></pre>
+<h3 id="密码重置"><a class="header" href="#密码重置">密码重置</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub async fn forgot_password(
+    State(service): State&lt;AuthService&gt;,
+    Json(req): Json&lt;ForgotPasswordRequest&gt;,
+) -&gt; Result&lt;StatusCode, StatusCode&gt; {
+    // 生成重置令牌
+    // 发送重置邮件
+    todo!()
+}
+
+pub async fn reset_password(
+    State(service): State&lt;AuthService&gt;,
+    Json(req): Json&lt;ResetPasswordRequest&gt;,
+) -&gt; Result&lt;StatusCode, StatusCode&gt; {
+    // 验证重置令牌
+    // 更新密码
+    todo!()
+}
+<span class="boring">}</span></code></pre>
+<h2 id="练习-1"><a class="header" href="#练习-1">练习</a></h2>
+<ol>
+<li>实现刷新令牌机制</li>
+<li>添加邮箱验证功能</li>
+<li>实现密码重置流程</li>
+<li>添加 OAuth2 登录</li>
+<li>实现多因素认证 (MFA)</li>
+</ol>
+<h2 id="下一步-3"><a class="header" href="#下一步-3">下一步</a></h2>
+<p>Day 70 将学习基于角色的访问控制 (RBAC)，实现更细粒度的权限管理。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-70-权限控制-rbac-1"><a class="header" href="#day-70-权限控制-rbac-1">Day 70: 权限控制 (RBAC)</a></h1>
+<h2 id="学习目标-3"><a class="header" href="#学习目标-3">学习目标</a></h2>
+<ul>
+<li>理解 RBAC 概念</li>
+<li>设计权限模型</li>
+<li>实现角色和权限系统</li>
+<li>创建权限检查中间件</li>
+</ul>
+<h2 id="rbac-概念"><a class="header" href="#rbac-概念">RBAC 概念</a></h2>
+<p>RBAC (Role-Based Access Control) 是一种基于角色的访问控制模型。</p>
+<pre><code>用户 → 角色 → 权限 → 资源
+</code></pre>
+<h3 id="核心概念-3"><a class="header" href="#核心概念-3">核心概念</a></h3>
+<ul>
+<li><strong>用户 (User)</strong>: 系统的使用者</li>
+<li><strong>角色 (Role)</strong>: 用户的职能分类</li>
+<li><strong>权限 (Permission)</strong>: 对资源的操作许可</li>
+<li><strong>资源 (Resource)</strong>: 被保护的对象</li>
+</ul>
+<h2 id="数据库设计"><a class="header" href="#数据库设计">数据库设计</a></h2>
+<pre><code class="language-sql">-- 用户表
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 角色表
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 权限表
+CREATE TABLE permissions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    resource VARCHAR(50) NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 用户角色关联表
+CREATE TABLE user_roles (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- 角色权限关联表
+CREATE TABLE role_permissions (
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id INTEGER REFERENCES permissions(id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id, permission_id)
+);
+
+-- 索引
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_user_roles_role_id ON user_roles(role_id);
+CREATE INDEX idx_role_permissions_role_id ON role_permissions(role_id);
+CREATE INDEX idx_role_permissions_permission_id ON role_permissions(permission_id);
+</code></pre>
+<h2 id="数据模型"><a class="header" href="#数据模型">数据模型</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub password_hash: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct Role {
+    pub id: i32,
+    pub name: String,
+    pub description: Option&lt;String&gt;,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct Permission {
+    pub id: i32,
+    pub name: String,
+    pub resource: String,
+    pub action: String,
+    pub description: Option&lt;String&gt;,
+}
+
+#[derive(Debug, Clone)]
+pub struct UserWithRoles {
+    pub user: User,
+    pub roles: Vec&lt;Role&gt;,
+    pub permissions: Vec&lt;Permission&gt;,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限枚举"><a class="header" href="#权限枚举">权限枚举</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Resource {
+    User,
+    Post,
+    Comment,
+    Category,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Action {
+    Create,
+    Read,
+    Update,
+    Delete,
+    List,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PermissionCheck {
+    pub resource: Resource,
+    pub action: Action,
+}
+
+impl PermissionCheck {
+    pub fn new(resource: Resource, action: Action) -&gt; Self {
+        Self { resource, action }
+    }
+    
+    pub fn to_string(&amp;self) -&gt; String {
+        format!("{}:{:?}", self.resource_name(), self.action)
+    }
+    
+    fn resource_name(&amp;self) -&gt; &amp;str {
+        match self.resource {
+            Resource::User =&gt; "user",
+            Resource::Post =&gt; "post",
+            Resource::Comment =&gt; "comment",
+            Resource::Category =&gt; "category",
+        }
+    }
+}
+
+// 便捷宏
+macro_rules! permission {
+    ($resource:ident, $action:ident) =&gt; {
+        PermissionCheck::new(Resource::$resource, Action::$action)
+    };
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限服务"><a class="header" href="#权限服务">权限服务</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::PgPool;
+use std::collections::HashSet;
+
+pub struct PermissionService {
+    pool: PgPool,
+}
+
+impl PermissionService {
+    pub fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+    
+    // 获取用户的所有角色
+    pub async fn get_user_roles(&amp;self, user_id: i32) -&gt; Result&lt;Vec&lt;Role&gt;&gt; {
+        let roles = sqlx::query_as!(
+            Role,
+            r#"
+            SELECT r.id, r.name, r.description
+            FROM roles r
+            INNER JOIN user_roles ur ON r.id = ur.role_id
+            WHERE ur.user_id = $1
+            "#,
+            user_id
+        )
+        .fetch_all(&amp;self.pool)
+        .await?;
+        
+        Ok(roles)
+    }
+    
+    // 获取用户的所有权限
+    pub async fn get_user_permissions(&amp;self, user_id: i32) -&gt; Result&lt;Vec&lt;Permission&gt;&gt; {
+        let permissions = sqlx::query_as!(
+            Permission,
+            r#"
+            SELECT DISTINCT p.id, p.name, p.resource, p.action, p.description
+            FROM permissions p
+            INNER JOIN role_permissions rp ON p.id = rp.permission_id
+            INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+            WHERE ur.user_id = $1
+            "#,
+            user_id
+        )
+        .fetch_all(&amp;self.pool)
+        .await?;
+        
+        Ok(permissions)
+    }
+    
+    // 检查用户是否有特定权限
+    pub async fn has_permission(
+        &amp;self,
+        user_id: i32,
+        resource: &amp;str,
+        action: &amp;str,
+    ) -&gt; Result&lt;bool&gt; {
+        let result = sqlx::query!(
+            r#"
+            SELECT EXISTS(
+                SELECT 1
+                FROM permissions p
+                INNER JOIN role_permissions rp ON p.id = rp.permission_id
+                INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+                WHERE ur.user_id = $1
+                  AND p.resource = $2
+                  AND p.action = $3
+            ) as "exists!"
+            "#,
+            user_id,
+            resource,
+            action
+        )
+        .fetch_one(&amp;self.pool)
+        .await?;
+        
+        Ok(result.exists)
+    }
+    
+    // 分配角色给用户
+    pub async fn assign_role(&amp;self, user_id: i32, role_id: i32) -&gt; Result&lt;()&gt; {
+        sqlx::query!(
+            "INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            user_id,
+            role_id
+        )
+        .execute(&amp;self.pool)
+        .await?;
+        
+        Ok(())
+    }
+    
+    // 移除用户角色
+    pub async fn remove_role(&amp;self, user_id: i32, role_id: i32) -&gt; Result&lt;()&gt; {
+        sqlx::query!(
+            "DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2",
+            user_id,
+            role_id
+        )
+        .execute(&amp;self.pool)
+        .await?;
+        
+        Ok(())
+    }
+    
+    // 分配权限给角色
+    pub async fn assign_permission(&amp;self, role_id: i32, permission_id: i32) -&gt; Result&lt;()&gt; {
+        sqlx::query!(
+            "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            role_id,
+            permission_id
+        )
+        .execute(&amp;self.pool)
+        .await?;
+        
+        Ok(())
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限中间件"><a class="header" href="#权限中间件">权限中间件</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::{Request, State},
+    middleware::Next,
+    response::{Response, IntoResponse},
+    http::StatusCode,
+};
+
+// 权限检查中间件
+pub async fn require_permission(
+    resource: String,
+    action: String,
+) -&gt; impl Fn(Request, Next) -&gt; impl Future&lt;Output = Result&lt;Response, StatusCode&gt;&gt; {
+    move |request: Request, next: Next| {
+        let resource = resource.clone();
+        let action = action.clone();
+        
+        async move {
+            // 从请求扩展中获取用户信息
+            let user = request
+                .extensions()
+                .get::&lt;AuthUser&gt;()
+                .ok_or(StatusCode::UNAUTHORIZED)?;
+            
+            // 检查权限
+            if !user.has_permission(&amp;resource, &amp;action) {
+                return Err(StatusCode::FORBIDDEN);
+            }
+            
+            Ok(next.run(request).await)
+        }
+    }
+}
+
+// 角色检查中间件
+pub async fn require_role(
+    required_role: String,
+) -&gt; impl Fn(Request, Next) -&gt; impl Future&lt;Output = Result&lt;Response, StatusCode&gt;&gt; {
+    move |request: Request, next: Next| {
+        let required_role = required_role.clone();
+        
+        async move {
+            let user = request
+                .extensions()
+                .get::&lt;AuthUser&gt;()
+                .ok_or(StatusCode::UNAUTHORIZED)?;
+            
+            if !user.has_role(&amp;required_role) {
+                return Err(StatusCode::FORBIDDEN);
+            }
+            
+            Ok(next.run(request).await)
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="认证用户扩展"><a class="header" href="#认证用户扩展">认证用户扩展</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::collections::HashSet;
+
+#[derive(Debug, Clone)]
+pub struct AuthUser {
+    pub id: i32,
+    pub username: String,
+    pub roles: HashSet&lt;String&gt;,
+    pub permissions: HashSet&lt;String&gt;,
+}
+
+impl AuthUser {
+    pub fn has_role(&amp;self, role: &amp;str) -&gt; bool {
+        self.roles.contains(role)
+    }
+    
+    pub fn has_permission(&amp;self, resource: &amp;str, action: &amp;str) -&gt; bool {
+        let permission = format!("{}:{}", resource, action);
+        self.permissions.contains(&amp;permission)
+    }
+    
+    pub fn has_any_role(&amp;self, roles: &amp;[&amp;str]) -&gt; bool {
+        roles.iter().any(|role| self.has_role(role))
+    }
+    
+    pub fn has_all_roles(&amp;self, roles: &amp;[&amp;str]) -&gt; bool {
+        roles.iter().all(|role| self.has_role(role))
+    }
+}
+
+// 从数据库加载用户权限
+pub async fn load_auth_user(
+    user_id: i32,
+    service: &amp;PermissionService,
+) -&gt; Result&lt;AuthUser&gt; {
+    let user = service.get_user(user_id).await?;
+    let roles = service.get_user_roles(user_id).await?;
+    let permissions = service.get_user_permissions(user_id).await?;
+    
+    let role_names: HashSet&lt;String&gt; = roles
+        .into_iter()
+        .map(|r| r.name)
+        .collect();
+    
+    let permission_names: HashSet&lt;String&gt; = permissions
+        .into_iter()
+        .map(|p| format!("{}:{}", p.resource, p.action))
+        .collect();
+    
+    Ok(AuthUser {
+        id: user.id,
+        username: user.username,
+        roles: role_names,
+        permissions: permission_names,
+    })
+}
+<span class="boring">}</span></code></pre>
+<h2 id="路由保护"><a class="header" href="#路由保护">路由保护</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    Router,
+    routing::{get, post, put, delete},
+    middleware,
+};
+
+// 用户管理路由（需要管理员权限）
+fn admin_routes() -&gt; Router {
+    Router::new()
+        .route("/users", get(list_users).post(create_user))
+        .route("/users/:id", put(update_user).delete(delete_user))
+        .route("/roles", get(list_roles).post(create_role))
+        .layer(middleware::from_fn(require_role("admin")))
+}
+
+// 文章管理路由（需要编辑权限）
+fn post_routes() -&gt; Router {
+    Router::new()
+        .route("/posts", post(create_post))
+        .route("/posts/:id", put(update_post).delete(delete_post))
+        .layer(middleware::from_fn(|req, next| {
+            require_permission("post".to_string(), "write".to_string())(req, next)
+        }))
+}
+
+// 公开路由
+fn public_routes() -&gt; Router {
+    Router::new()
+        .route("/posts", get(list_posts))
+        .route("/posts/:id", get(get_post))
+}
+
+fn app() -&gt; Router {
+    Router::new()
+        .nest("/admin", admin_routes())
+        .nest("/api", post_routes())
+        .merge(public_routes())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="处理器中的权限检查"><a class="header" href="#处理器中的权限检查">处理器中的权限检查</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::{Path, State, Extension},
+    Json,
+    http::StatusCode,
+};
+
+// 更新文章（检查所有权）
+async fn update_post(
+    Path(post_id): Path&lt;i32&gt;,
+    Extension(user): Extension&lt;AuthUser&gt;,
+    State(service): State&lt;PostService&gt;,
+    Json(payload): Json&lt;UpdatePostRequest&gt;,
+) -&gt; Result&lt;Json&lt;Post&gt;, StatusCode&gt; {
+    let post = service
+        .get_post(post_id)
+        .await
+        .map_err(|_| StatusCode::NOT_FOUND)?;
+    
+    // 检查是否是文章作者或管理员
+    if post.author_id != user.id &amp;&amp; !user.has_role("admin") {
+        return Err(StatusCode::FORBIDDEN);
+    }
+    
+    let updated = service
+        .update_post(post_id, payload)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(updated))
+}
+
+// 删除用户（仅管理员）
+async fn delete_user(
+    Path(user_id): Path&lt;i32&gt;,
+    Extension(auth_user): Extension&lt;AuthUser&gt;,
+    State(service): State&lt;UserService&gt;,
+) -&gt; Result&lt;StatusCode, StatusCode&gt; {
+    // 检查管理员权限
+    if !auth_user.has_role("admin") {
+        return Err(StatusCode::FORBIDDEN);
+    }
+    
+    // 不能删除自己
+    if user_id == auth_user.id {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    
+    service
+        .delete_user(user_id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(StatusCode::NO_CONTENT)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="权限初始化"><a class="header" href="#权限初始化">权限初始化</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub async fn init_permissions(pool: &amp;PgPool) -&gt; Result&lt;()&gt; {
+    // 创建角色
+    let admin_role = sqlx::query!(
+        "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
+        "admin",
+        "Administrator with full access"
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    let editor_role = sqlx::query!(
+        "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
+        "editor",
+        "Can create and edit posts"
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    let user_role = sqlx::query!(
+        "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
+        "user",
+        "Regular user"
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    // 创建权限
+    let permissions = vec![
+        ("user:create", "user", "create"),
+        ("user:read", "user", "read"),
+        ("user:update", "user", "update"),
+        ("user:delete", "user", "delete"),
+        ("post:create", "post", "create"),
+        ("post:read", "post", "read"),
+        ("post:update", "post", "update"),
+        ("post:delete", "post", "delete"),
+    ];
+    
+    for (name, resource, action) in permissions {
+        let perm = sqlx::query!(
+            "INSERT INTO permissions (name, resource, action) VALUES ($1, $2, $3) RETURNING id",
+            name,
+            resource,
+            action
+        )
+        .fetch_one(pool)
+        .await?;
+        
+        // 管理员拥有所有权限
+        sqlx::query!(
+            "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+            admin_role.id,
+            perm.id
+        )
+        .execute(pool)
+        .await?;
+        
+        // 编辑拥有文章相关权限
+        if resource == "post" {
+            sqlx::query!(
+                "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+                editor_role.id,
+                perm.id
+            )
+            .execute(pool)
+            .await?;
+        }
+        
+        // 普通用户只有读权限
+        if action == "read" {
+            sqlx::query!(
+                "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+                user_role.id,
+                perm.id
+            )
+            .execute(pool)
+            .await?;
+        }
+    }
+    
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整示例-2"><a class="header" href="#完整示例-2">完整示例</a></h2>
+<pre class="playground"><code class="language-rust">use axum::{
+    Router,
+    routing::{get, post},
+    middleware,
+    extract::{State, Extension},
+    Json,
+    http::StatusCode,
+};
+use sqlx::PgPool;
+
+#[tokio::main]
+async fn main() {
+    // 连接数据库
+    let pool = PgPool::connect("postgres://localhost/rbac_db")
+        .await
+        .unwrap();
+    
+    // 初始化权限
+    init_permissions(&amp;pool).await.unwrap();
+    
+    // 创建服务
+    let permission_service = PermissionService::new(pool.clone());
+    
+    // 构建应用
+    let app = Router::new()
+        // 公开路由
+        .route("/api/posts", get(list_posts))
+        .route("/api/posts/:id", get(get_post))
+        
+        // 需要认证的路由
+        .route("/api/posts", post(create_post))
+        .layer(middleware::from_fn(auth_middleware))
+        
+        // 管理员路由
+        .route("/api/admin/users", get(list_users))
+        .layer(middleware::from_fn(require_role("admin")))
+        
+        .with_state(permission_service);
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h2 id="测试-1"><a class="header" href="#测试-1">测试</a></h2>
+<pre><code class="language-bash"># 以管理员身份登录
+TOKEN=$(curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' \
+  | jq -r '.token')
+
+# 访问管理员路由
+curl http://localhost:3000/api/admin/users \
+  -H "Authorization: Bearer $TOKEN"
+
+# 创建文章（需要编辑权限）
+curl -X POST http://localhost:3000/api/posts \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"New Post","content":"Content here"}'
+</code></pre>
+<h2 id="练习-2"><a class="header" href="#练习-2">练习</a></h2>
+<ol>
+<li>实现资源级权限（如只能编辑自己的文章）</li>
+<li>添加权限继承机制</li>
+<li>实现动态权限加载</li>
+<li>创建权限管理 API</li>
+<li>添加权限缓存机制</li>
+</ol>
+<h2 id="下一步-4"><a class="header" href="#下一步-4">下一步</a></h2>
+<p>Day 71 将学习模板引擎，实现服务端渲染。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-71-模板引擎-askamatera-1"><a class="header" href="#day-71-模板引擎-askamatera-1">Day 71: 模板引擎 (Askama/Tera)</a></h1>
+<h2 id="学习目标-4"><a class="header" href="#学习目标-4">学习目标</a></h2>
+<ul>
+<li>掌握 Askama 模板引擎</li>
+<li>学习模板语法</li>
+<li>实现服务端渲染</li>
+<li>理解模板继承</li>
+</ul>
+<h2 id="askama-简介"><a class="header" href="#askama-简介">Askama 简介</a></h2>
+<p>Askama 是一个类型安全的模板引擎，在编译时检查模板。</p>
+<h3 id="安装"><a class="header" href="#安装">安装</a></h3>
+<pre><code class="language-toml">[dependencies]
+askama = "0.15"
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+</code></pre>
+<h2 id="基本使用"><a class="header" href="#基本使用">基本使用</a></h2>
+<h3 id="简单模板与-axum-集成"><a class="header" href="#简单模板与-axum-集成">简单模板与 Axum 集成</a></h3>
+<p>由于 Askama 0.13+ 移除了 <code>askama_axum</code> 集成库，我们需要手动实现 <code>IntoResponse</code> 包装器：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use askama::Template;
+use axum::{
+    response::{Html, IntoResponse, Response},
+    routing::get,
+    Router,
+    http::StatusCode,
+};
+
+#[derive(Template)]
+#[template(path = "hello.html")]
+struct HelloTemplate {
+    name: String,
+}
+
+// 包装器结构体，用于为任意 Askama 模板实现 IntoResponse
+struct HtmlTemplate&lt;T&gt;(T);
+
+impl&lt;T&gt; IntoResponse for HtmlTemplate&lt;T&gt;
+where
+    T: Template,
+{
+    fn into_response(self) -&gt; Response {
+        match self.0.render() {
+            Ok(html) =&gt; Html(html).into_response(),
+            Err(err) =&gt; (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to render template. Error: {}", err),
+            )
+                .into_response(),
+        }
+    }
+}
+
+async fn hello() -&gt; impl IntoResponse {
+    let template = HelloTemplate {
+        name: "World".to_string(),
+    };
+    HtmlTemplate(template)
+}
+<span class="boring">}</span></code></pre>
+<pre><code class="language-html">&lt;!-- templates/hello.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Hello&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello, {{ name }}!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="模板语法"><a class="header" href="#模板语法">模板语法</a></h2>
+<h3 id="变量"><a class="header" href="#变量">变量</a></h3>
+<pre><code class="language-html">&lt;p&gt;{{ user.username }}&lt;/p&gt;
+&lt;p&gt;{{ user.email }}&lt;/p&gt;
+</code></pre>
+<h3 id="条件"><a class="header" href="#条件">条件</a></h3>
+<pre><code class="language-html">{% if user.is_admin %}
+    &lt;p&gt;Admin Panel&lt;/p&gt;
+{% else %}
+    &lt;p&gt;User Panel&lt;/p&gt;
+{% endif %}
+</code></pre>
+<h3 id="循环"><a class="header" href="#循环">循环</a></h3>
+<pre><code class="language-html">&lt;ul&gt;
+{% for post in posts %}
+    &lt;li&gt;{{ post.title }}&lt;/li&gt;
+{% endfor %}
+&lt;/ul&gt;
+</code></pre>
+<h3 id="过滤器"><a class="header" href="#过滤器">过滤器</a></h3>
+<pre><code class="language-html">&lt;p&gt;{{ text|upper }}&lt;/p&gt;
+&lt;p&gt;{{ text|truncate(50) }}&lt;/p&gt;
+</code></pre>
+<h2 id="模板继承"><a class="header" href="#模板继承">模板继承</a></h2>
+<h3 id="基础模板"><a class="header" href="#基础模板">基础模板</a></h3>
+<pre><code class="language-html">&lt;!-- templates/base.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;{% block title %}My Site{% endblock %}&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;nav&gt;
+        &lt;a href="/"&gt;Home&lt;/a&gt;
+        &lt;a href="/about"&gt;About&lt;/a&gt;
+    &lt;/nav&gt;
+    
+    &lt;main&gt;
+        {% block content %}{% endblock %}
+    &lt;/main&gt;
+    
+    &lt;footer&gt;
+        &lt;p&gt;&amp;copy; 2024 My Site&lt;/p&gt;
+    &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="子模板"><a class="header" href="#子模板">子模板</a></h3>
+<pre><code class="language-html">&lt;!-- templates/index.html --&gt;
+{% extends "base.html" %}
+
+{% block title %}Home - My Site{% endblock %}
+
+{% block content %}
+    &lt;h1&gt;Welcome&lt;/h1&gt;
+    &lt;p&gt;This is the home page.&lt;/p&gt;
+{% endblock %}
+</code></pre>
+<h2 id="完整博客示例"><a class="header" href="#完整博客示例">完整博客示例</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use askama::Template;
+use axum::{
+    Router,
+    routing::get,
+    extract::{State, Path},
+    response::Html,
+};
+
+#[derive(Template)]
+#[template(path = "blog/index.html")]
+struct BlogIndexTemplate {
+    posts: Vec&lt;Post&gt;,
+}
+
+#[derive(Template)]
+#[template(path = "blog/post.html")]
+struct BlogPostTemplate {
+    post: Post,
+    comments: Vec&lt;Comment&gt;,
+}
+
+async fn blog_index(State(state): State&lt;AppState&gt;) -&gt; impl IntoResponse {
+    let posts = get_all_posts(&amp;state.db).await.unwrap();
+    let template = BlogIndexTemplate { posts };
+    HtmlTemplate(template)
+}
+
+async fn blog_post(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;
+) -&gt; impl IntoResponse {
+    let post = get_post(&amp;state.db, id).await.unwrap();
+    let comments = get_comments(&amp;state.db, id).await.unwrap();
+    let template = BlogPostTemplate { post, comments };
+    HtmlTemplate(template)
+}
+<span class="boring">}</span></code></pre>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md。</p>
+<h2 id="练习-3"><a class="header" href="#练习-3">练习</a></h2>
+<ol>
+<li>创建完整的博客模板</li>
+<li>实现用户仪表板</li>
+<li>添加表单验证显示</li>
+<li>实现分页组件</li>
+<li>创建可复用的模板片段</li>
+</ol>
+<h2 id="下一步-5"><a class="header" href="#下一步-5">下一步</a></h2>
+<p>Day 72 将学习 WebAssembly (WASM) 简介。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="第六阶段系统编程与拓展-days-81-90---完整概览"><a class="header" href="#第六阶段系统编程与拓展-days-81-90---完整概览">第六阶段：系统编程与拓展 (Days 81-90) - 完整概览</a></h1>
+<h2 id="阶段目标-1"><a class="header" href="#阶段目标-1">阶段目标</a></h2>
+<p>深入系统底层编程，掌握性能优化技术和工程化实践。</p>
+<h2 id="学习路径-3"><a class="header" href="#学习路径-3">学习路径</a></h2>
+<h3 id="week-1-系统编程-days-81-85-1"><a class="header" href="#week-1-系统编程-days-81-85-1">Week 1: 系统编程 (Days 81-85)</a></h3>
+<h4 id="day-81-操作系统概念回顾"><a class="header" href="#day-81-操作系统概念回顾">Day 81: 操作系统概念回顾</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>进程与线程</li>
+<li>内存管理</li>
+<li>文件系统</li>
+<li>I/O 模型</li>
+<li>系统调用</li>
+</ul>
+<p><strong>Rust 系统编程特点：</strong></p>
+<pre class="playground"><code class="language-rust">use std::process::Command;
+use std::env;
+
+fn main() {
+    // 获取环境变量
+    let path = env::var("PATH").unwrap();
+    println!("PATH: {}", path);
+    
+    // 执行系统命令
+    let output = Command::new("ls")
+        .arg("-la")
+        .output()
+        .expect("Failed to execute command");
+    
+    println!("Status: {}", output.status);
+    println!("Stdout: {}", String::from_utf8_lossy(&amp;output.stdout));
+}</code></pre>
+<h4 id="day-82-文件系统操作深入"><a class="header" href="#day-82-文件系统操作深入">Day 82: 文件系统操作深入</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>文件元数据</li>
+<li>目录遍历</li>
+<li>符号链接</li>
+<li>文件权限</li>
+<li>内存映射文件</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::{self, File, OpenOptions};
+use std::io::{Read, Write, Seek, SeekFrom};
+use std::os::unix::fs::PermissionsExt;
+
+// 递归遍历目录
+fn walk_dir(path: &amp;Path) -&gt; io::Result&lt;()&gt; {
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let path = entry.path();
+        
+        if path.is_dir() {
+            walk_dir(&amp;path)?;
+        } else {
+            println!("File: {:?}", path);
+        }
+    }
+    Ok(())
+}
+
+// 内存映射文件
+use memmap2::MmapOptions;
+
+fn mmap_file(path: &amp;Path) -&gt; io::Result&lt;()&gt; {
+    let file = File::open(path)?;
+    let mmap = unsafe { MmapOptions::new().map(&amp;file)? };
+    
+    // 直接访问内存
+    let data = &amp;mmap[0..100];
+    println!("First 100 bytes: {:?}", data);
+    
+    Ok(())
+}
+
+// 文件锁
+use fs2::FileExt;
+
+fn file_lock_example() -&gt; io::Result&lt;()&gt; {
+    let file = File::open("data.txt")?;
+    
+    // 独占锁
+    file.lock_exclusive()?;
+    // 执行操作
+    file.unlock()?;
+    
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-83-进程管理与信号处理"><a class="header" href="#day-83-进程管理与信号处理">Day 83: 进程管理与信号处理</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>进程创建和管理</li>
+<li>进程间通信（IPC）</li>
+<li>信号处理</li>
+<li>守护进程</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::process::{Command, Stdio};
+use std::io::{BufReader, BufRead};
+
+// 管道通信
+fn pipe_example() -&gt; io::Result&lt;()&gt; {
+    let mut child = Command::new("ls")
+        .stdout(Stdio::piped())
+        .spawn()?;
+    
+    if let Some(stdout) = child.stdout.take() {
+        let reader = BufReader::new(stdout);
+        for line in reader.lines() {
+            println!("Line: {}", line?);
+        }
+    }
+    
+    child.wait()?;
+    Ok(())
+}
+
+// 信号处理
+use signal_hook::{consts::SIGINT, iterator::Signals};
+
+fn signal_handler() -&gt; Result&lt;()&gt; {
+    let mut signals = Signals::new(&amp;[SIGINT])?;
+    
+    for sig in signals.forever() {
+        match sig {
+            SIGINT =&gt; {
+                println!("Received SIGINT, shutting down...");
+                break;
+            }
+            _ =&gt; unreachable!(),
+        }
+    }
+    
+    Ok(())
+}
+
+// 守护进程
+use daemonize::Daemonize;
+
+fn create_daemon() -&gt; Result&lt;()&gt; {
+    let daemonize = Daemonize::new()
+        .pid_file("/tmp/myapp.pid")
+        .working_directory("/tmp");
+    
+    match daemonize.start() {
+        Ok(_) =&gt; println!("Daemon started"),
+        Err(e) =&gt; eprintln!("Error: {}", e),
+    }
+    
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-84-原始套接字-raw-sockets"><a class="header" href="#day-84-原始套接字-raw-sockets">Day 84: 原始套接字 (Raw Sockets)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>TCP/UDP 底层操作</li>
+<li>原始套接字编程</li>
+<li>网络协议实现</li>
+<li>数据包捕获</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::net::{TcpListener, TcpStream};
+use std::io::{Read, Write};
+
+// 低级 TCP 服务器
+fn raw_tcp_server() -&gt; io::Result&lt;()&gt; {
+    let listener = TcpListener::bind("127.0.0.1:8080")?;
+    
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) =&gt; {
+                std::thread::spawn(|| handle_client(stream));
+            }
+            Err(e) =&gt; eprintln!("Connection failed: {}", e),
+        }
+    }
+    
+    Ok(())
+}
+
+fn handle_client(mut stream: TcpStream) -&gt; io::Result&lt;()&gt; {
+    let mut buffer = [0; 1024];
+    
+    loop {
+        let n = stream.read(&amp;mut buffer)?;
+        if n == 0 {
+            break;
+        }
+        
+        stream.write_all(&amp;buffer[0..n])?;
+    }
+    
+    Ok(())
+}
+
+// 使用 socket2 进行更底层的控制
+use socket2::{Socket, Domain, Type, Protocol};
+
+fn create_raw_socket() -&gt; io::Result&lt;Socket&gt; {
+    let socket = Socket::new(
+        Domain::IPV4,
+        Type::STREAM,
+        Some(Protocol::TCP),
+    )?;
+    
+    socket.set_nonblocking(true)?;
+    socket.set_reuse_address(true)?;
+    
+    Ok(socket)
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-85-嵌入式-rust-简介"><a class="header" href="#day-85-嵌入式-rust-简介">Day 85: 嵌入式 Rust 简介</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>no_std 环境</li>
+<li>嵌入式 HAL</li>
+<li>裸机编程</li>
+<li>RTIC 框架</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust">#![no_std]
+#![no_main]
+
+use panic_halt as _;
+use cortex_m_rt::entry;
+
+#[entry]
+fn main() -&gt; ! {
+    // 嵌入式主循环
+    loop {
+        // 硬件操作
+    }
+}
+
+// 使用 embedded-hal
+use embedded_hal::digital::v2::OutputPin;
+
+fn blink_led&lt;P: OutputPin&gt;(led: &amp;mut P) {
+    led.set_high().ok();
+    delay_ms(1000);
+    led.set_low().ok();
+    delay_ms(1000);
+}</code></pre>
+<h3 id="week-2-性能与工程化-days-86-90-1"><a class="header" href="#week-2-性能与工程化-days-86-90-1">Week 2: 性能与工程化 (Days 86-90)</a></h3>
+<h4 id="day-86-性能分析工具-flamegraph"><a class="header" href="#day-86-性能分析工具-flamegraph">Day 86: 性能分析工具 (Flamegraph)</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>CPU 性能分析</li>
+<li>内存分析</li>
+<li>Flamegraph 生成</li>
+<li>perf 工具使用</li>
+</ul>
+<p><strong>工具使用：</strong></p>
+<pre><code class="language-bash"># 安装 cargo-flamegraph
+cargo install flamegraph
+
+# 生成火焰图
+cargo flamegraph --bin myapp
+
+# 使用 perf
+perf record -g ./target/release/myapp
+perf report
+
+# 使用 valgrind
+valgrind --tool=callgrind ./target/release/myapp
+</code></pre>
+<p><strong>代码示例：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::time::Instant;
+
+fn benchmark_function() {
+    let start = Instant::now();
+    
+    // 执行操作
+    expensive_operation();
+    
+    let duration = start.elapsed();
+    println!("Time elapsed: {:?}", duration);
+}
+
+// 使用 criterion 进行基准测试
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+fn fibonacci_benchmark(c: &amp;mut Criterion) {
+    c.bench_function("fib 20", |b| {
+        b.iter(|| fibonacci(black_box(20)))
+    });
+}
+
+criterion_group!(benches, fibonacci_benchmark);
+criterion_main!(benches);
+<span class="boring">}</span></code></pre>
+<h4 id="day-87-内存优化技巧"><a class="header" href="#day-87-内存优化技巧">Day 87: 内存优化技巧</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>内存布局优化</li>
+<li>零拷贝技术</li>
+<li>内存池</li>
+<li>自定义分配器</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 内存布局优化
+#[repr(C)]
+struct OptimizedStruct {
+    a: u64,  // 8 bytes
+    b: u32,  // 4 bytes
+    c: u16,  // 2 bytes
+    d: u8,   // 1 byte
+    // 总共 16 bytes (带对齐)
+}
+
+// 零拷贝
+use bytes::{Bytes, BytesMut};
+
+fn zero_copy_example() {
+    let mut buf = BytesMut::with_capacity(1024);
+    buf.extend_from_slice(b"Hello");
+    
+    // 零拷贝转换
+    let frozen: Bytes = buf.freeze();
+}
+
+// 对象池
+use object_pool::Pool;
+
+struct Connection {
+    // 连接数据
+}
+
+fn pool_example() {
+    let pool = Pool::new(10, || Connection::new());
+    
+    let conn = pool.pull();
+    // 使用连接
+    // 自动归还到池中
+}
+
+// 自定义分配器
+use std::alloc::{GlobalAlloc, Layout};
+
+struct MyAllocator;
+
+unsafe impl GlobalAlloc for MyAllocator {
+    unsafe fn alloc(&amp;self, layout: Layout) -&gt; *mut u8 {
+        // 自定义分配逻辑
+        std::alloc::System.alloc(layout)
+    }
+    
+    unsafe fn dealloc(&amp;self, ptr: *mut u8, layout: Layout) {
+        std::alloc::System.dealloc(ptr, layout)
+    }
+}
+
+#[global_allocator]
+static GLOBAL: MyAllocator = MyAllocator;
+<span class="boring">}</span></code></pre>
+<h4 id="day-88-simd-与底层优化"><a class="header" href="#day-88-simd-与底层优化">Day 88: SIMD 与底层优化</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>SIMD 指令集</li>
+<li>向量化计算</li>
+<li>编译器优化</li>
+<li>内联汇编</li>
+</ul>
+<p><strong>示例代码：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 使用 SIMD
+use std::arch::x86_64::*;
+
+#[target_feature(enable = "avx2")]
+unsafe fn simd_add(a: &amp;[f32], b: &amp;[f32], result: &amp;mut [f32]) {
+    for i in (0..a.len()).step_by(8) {
+        let va = _mm256_loadu_ps(a.as_ptr().add(i));
+        let vb = _mm256_loadu_ps(b.as_ptr().add(i));
+        let vr = _mm256_add_ps(va, vb);
+        _mm256_storeu_ps(result.as_mut_ptr().add(i), vr);
+    }
+}
+
+// 使用 packed_simd
+use packed_simd::*;
+
+fn vectorized_sum(data: &amp;[f32]) -&gt; f32 {
+    let mut sum = f32x8::splat(0.0);
+    
+    for chunk in data.chunks_exact(8) {
+        sum += f32x8::from_slice_unaligned(chunk);
+    }
+    
+    sum.sum()
+}
+
+// 内联汇编
+use std::arch::asm;
+
+fn inline_asm_example() {
+    let x: u64;
+    unsafe {
+        asm!(
+            "mov {}, 42",
+            out(reg) x,
+        );
+    }
+    println!("x = {}", x);
+}
+
+// 编译器优化提示
+#[inline(always)]
+fn hot_function() {
+    // 总是内联
+}
+
+#[cold]
+fn error_handler() {
+    // 标记为冷路径
+}
+
+#[inline(never)]
+fn debug_function() {
+    // 从不内联
+}
+<span class="boring">}</span></code></pre>
+<h4 id="day-89-持续集成流水线"><a class="header" href="#day-89-持续集成流水线">Day 89: 持续集成流水线</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>GitHub Actions 配置</li>
+<li>自动化测试</li>
+<li>代码覆盖率</li>
+<li>自动发布</li>
+</ul>
+<p><strong>GitHub Actions 配置：</strong></p>
+<pre><code class="language-yaml"># .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        components: rustfmt, clippy
+    
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Check formatting
+      run: cargo fmt -- --check
+    
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+    
+    - name: Run tests
+      run: cargo test --verbose
+    
+    - name: Run tests with coverage
+      run: |
+        cargo install cargo-tarpaulin
+        cargo tarpaulin --out Xml
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --release --verbose
+
+  release:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build release
+      run: cargo build --release
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: target/release/myapp
+</code></pre>
+<h4 id="day-90-rust-编译优化与配置"><a class="header" href="#day-90-rust-编译优化与配置">Day 90: Rust 编译优化与配置</a></h4>
+<p><strong>核心内容：</strong></p>
+<ul>
+<li>Cargo.toml 优化配置</li>
+<li>编译时间优化</li>
+<li>二进制大小优化</li>
+<li>交叉编译</li>
+</ul>
+<p><strong>Cargo.toml 优化：</strong></p>
+<pre><code class="language-toml">[profile.release]
+opt-level = 3              # 最高优化级别
+lto = true                 # 链接时优化
+codegen-units = 1          # 单个代码生成单元
+strip = true               # 移除符号信息
+panic = 'abort'            # panic 时直接终止
+
+[profile.release-small]
+inherits = "release"
+opt-level = 'z'            # 优化大小
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0              # 开发时不优化
+debug = true               # 包含调试信息
+
+[profile.dev.package."*"]
+opt-level = 2              # 依赖包使用优化
+
+# 编译时间优化
+[build]
+incremental = true         # 增量编译
+pipelining = true          # 流水线编译
+
+# 依赖优化
+[dependencies]
+serde = { version = "1", features = ["derive"], default-features = false }
+</code></pre>
+<p><strong>编译优化技巧：</strong></p>
+<pre><code class="language-bash"># 使用 sccache 缓存编译结果
+cargo install sccache
+export RUSTC_WRAPPER=sccache
+
+# 使用 mold 链接器加速链接
+cargo install mold
+export RUSTFLAGS="-C link-arg=-fuse-ld=mold"
+
+# 并行编译
+cargo build -j 8
+
+# 交叉编译
+rustup target add x86_64-unknown-linux-musl
+cargo build --target x86_64-unknown-linux-musl --release
+
+# 检查二进制大小
+cargo bloat --release
+cargo bloat --release --crates
+
+# 分析编译时间
+cargo build --timings
+</code></pre>
+<h2 id="性能优化检查清单"><a class="header" href="#性能优化检查清单">性能优化检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 使用 release 模式编译</li>
+<li><input disabled="" type="checkbox"> 启用 LTO</li>
+<li><input disabled="" type="checkbox"> 优化热路径代码</li>
+<li><input disabled="" type="checkbox"> 减少不必要的克隆</li>
+<li><input disabled="" type="checkbox"> 使用合适的数据结构</li>
+<li><input disabled="" type="checkbox"> 避免不必要的分配</li>
+<li><input disabled="" type="checkbox"> 使用 SIMD 加速计算密集型任务</li>
+<li><input disabled="" type="checkbox"> 实现零拷贝传输</li>
+<li><input disabled="" type="checkbox"> 使用对象池复用对象</li>
+<li><input disabled="" type="checkbox"> 性能测试和基准测试</li>
+</ul>
+<h2 id="工程化最佳实践"><a class="header" href="#工程化最佳实践">工程化最佳实践</a></h2>
+<h3 id="代码质量"><a class="header" href="#代码质量">代码质量</a></h3>
+<pre><code class="language-bash"># 格式化
+cargo fmt
+
+# Lint 检查
+cargo clippy -- -D warnings
+
+# 安全审计
+cargo audit
+
+# 依赖更新
+cargo update
+cargo outdated
+</code></pre>
+<h3 id="文档-2"><a class="header" href="#文档-2">文档</a></h3>
+<pre><code class="language-bash"># 生成文档
+cargo doc --open
+
+# 文档测试
+cargo test --doc
+</code></pre>
+<h3 id="测试-2"><a class="header" href="#测试-2">测试</a></h3>
+<pre><code class="language-bash"># 单元测试
+cargo test
+
+# 集成测试
+cargo test --test integration_test
+
+# 基准测试
+cargo bench
+</code></pre>
+<h2 id="学习资源-2"><a class="header" href="#学习资源-2">学习资源</a></h2>
+<h3 id="书籍-1"><a class="header" href="#书籍-1">书籍</a></h3>
+<ul>
+<li>Programming Rust (2nd Edition)</li>
+<li>Rust for Rustaceans</li>
+<li>The Rustonomicon</li>
+</ul>
+<h3 id="工具-1"><a class="header" href="#工具-1">工具</a></h3>
+<ul>
+<li><a href="https://github.com/flamegraph-rs/flamegraph">cargo-flamegraph</a></li>
+<li><a href="https://github.com/RazrFalcon/cargo-bloat">cargo-bloat</a></li>
+<li><a href="https://github.com/rustsec/rustsec">cargo-audit</a></li>
+<li><a href="https://github.com/xd009642/tarpaulin">cargo-tarpaulin</a></li>
+</ul>
+<h3 id="文档-1-1"><a class="header" href="#文档-1-1">文档</a></h3>
+<ul>
+<li><a href="https://nnethercote.github.io/perf-book/">Rust Performance Book</a></li>
+<li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
+<li><a href="https://rustc-dev-guide.rust-lang.org/">Rust Compiler Development Guide</a></li>
+</ul>
+<h2 id="下一阶段预告-1"><a class="header" href="#下一阶段预告-1">下一阶段预告</a></h2>
+<p>第七阶段（Days 91-100）是毕业设计阶段，将综合运用所有学到的知识完成一个完整的项目。</p>
+<p>准备好迎接最后的挑战！🚀</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="第七阶段毕业设计-days-91-100---完整概览"><a class="header" href="#第七阶段毕业设计-days-91-100---完整概览">第七阶段：毕业设计 (Days 91-100) - 完整概览</a></h1>
+<h2 id="阶段目标-2"><a class="header" href="#阶段目标-2">阶段目标</a></h2>
+<p>综合运用前 90 天所学知识，完成一个生产级别的完整项目。</p>
+<h2 id="项目选题建议"><a class="header" href="#项目选题建议">项目选题建议</a></h2>
+<h3 id="选项-1-分布式任务调度系统"><a class="header" href="#选项-1-分布式任务调度系统">选项 1: 分布式任务调度系统</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Tokio 异步运行时</li>
+<li>gRPC 服务间通信</li>
+<li>Redis 任务队列</li>
+<li>PostgreSQL 持久化</li>
+<li>Raft 共识算法</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>任务提交和调度</li>
+<li>分布式执行</li>
+<li>失败重试</li>
+<li>监控和日志</li>
+<li>Web 管理界面</li>
+</ul>
+<h3 id="选项-2-实时聊天系统"><a class="header" href="#选项-2-实时聊天系统">选项 2: 实时聊天系统</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum Web 框架</li>
+<li>WebSocket 实时通信</li>
+<li>Redis Pub/Sub</li>
+<li>PostgreSQL 消息存储</li>
+<li>JWT 认证</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>用户认证</li>
+<li>实时消息</li>
+<li>群组聊天</li>
+<li>文件传输</li>
+<li>消息历史</li>
+</ul>
+<h3 id="选项-3-微服务-api-网关"><a class="header" href="#选项-3-微服务-api-网关">选项 3: 微服务 API 网关</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum/Actix-web</li>
+<li>Tower 中间件</li>
+<li>Redis 缓存</li>
+<li>Prometheus 监控</li>
+<li>Jaeger 链路追踪</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>路由转发</li>
+<li>负载均衡</li>
+<li>限流熔断</li>
+<li>认证授权</li>
+<li>监控告警</li>
+</ul>
+<h3 id="选项-4-高性能-kv-存储"><a class="header" href="#选项-4-高性能-kv-存储">选项 4: 高性能 KV 存储</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Tokio 异步 I/O</li>
+<li>LSM-Tree 存储引擎</li>
+<li>RESP 协议</li>
+<li>Raft 复制</li>
+<li>RocksDB 后端</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>基本 KV 操作</li>
+<li>持久化</li>
+<li>主从复制</li>
+<li>集群模式</li>
+<li>性能优化</li>
+</ul>
+<h2 id="详细时间规划"><a class="header" href="#详细时间规划">详细时间规划</a></h2>
+<h3 id="day-91-选题与架构设计"><a class="header" href="#day-91-选题与架构设计">Day 91: 选题与架构设计</a></h3>
+<h4 id="需求分析"><a class="header" href="#需求分析">需求分析</a></h4>
+<pre><code class="language-markdown">## 功能需求
+1. 核心功能列表
+2. 用户角色定义
+3. 使用场景描述
+4. 性能指标要求
+
+## 非功能需求
+1. 可用性：99.9%
+2. 性能：QPS &gt; 10000
+3. 可扩展性：水平扩展
+4. 安全性：认证授权
+</code></pre>
+<h4 id="架构设计"><a class="header" href="#架构设计">架构设计</a></h4>
+<pre><code>┌─────────────┐
+│   客户端     │
+└──────┬──────┘
+       │
+┌──────▼──────────────────────┐
+│      API Gateway            │
+│  (认证/限流/路由)            │
+└──────┬──────────────────────┘
+       │
+┌──────▼──────┬────────┬──────┐
+│   服务 A    │ 服务 B  │ 服务 C│
+└──────┬──────┴────┬───┴──────┘
+       │           │
+┌──────▼───────────▼──────┐
+│    数据层 (DB/Cache)     │
+└─────────────────────────┘
+</code></pre>
+<h4 id="技术选型文档"><a class="header" href="#技术选型文档">技术选型文档</a></h4>
+<pre><code class="language-markdown">## 后端框架
+- **选择**: Axum
+- **理由**: 类型安全、性能优秀、生态完善
+
+## 数据库
+- **选择**: PostgreSQL + Redis
+- **理由**: 可靠性高、功能丰富
+
+## 部署方案
+- **选择**: Docker + Kubernetes
+- **理由**: 容器化、易扩展
+</code></pre>
+<h3 id="day-92-原型验证-poc"><a class="header" href="#day-92-原型验证-poc">Day 92: 原型验证 (PoC)</a></h3>
+<h4 id="核心功能验证"><a class="header" href="#核心功能验证">核心功能验证</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 验证关键技术可行性
+
+// 1. 数据库连接
+async fn test_db_connection() -&gt; Result&lt;()&gt; {
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://localhost/testdb")
+        .await?;
+    
+    sqlx::query("SELECT 1").fetch_one(&amp;pool).await?;
+    println!("✓ Database connection works");
+    Ok(())
+}
+
+// 2. 缓存系统
+async fn test_cache() -&gt; Result&lt;()&gt; {
+    let client = redis::Client::open("redis://127.0.0.1/")?;
+    let mut con = client.get_async_connection().await?;
+    
+    redis::cmd("SET")
+        .arg("test_key")
+        .arg("test_value")
+        .query_async(&amp;mut con)
+        .await?;
+    
+    println!("✓ Cache system works");
+    Ok(())
+}
+
+// 3. 消息队列
+async fn test_message_queue() -&gt; Result&lt;()&gt; {
+    let (tx, mut rx) = tokio::sync::mpsc::channel(100);
+    
+    tokio::spawn(async move {
+        while let Some(msg) = rx.recv().await {
+            println!("Received: {}", msg);
+        }
+    });
+    
+    tx.send("test message".to_string()).await?;
+    println!("✓ Message queue works");
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h4 id="性能基准测试"><a class="header" href="#性能基准测试">性能基准测试</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+fn benchmark_core_operations(c: &amp;mut Criterion) {
+    c.bench_function("db_query", |b| {
+        b.iter(|| {
+            // 数据库查询基准
+        });
+    });
+    
+    c.bench_function("cache_get", |b| {
+        b.iter(|| {
+            // 缓存读取基准
+        });
+    });
+}
+
+criterion_group!(benches, benchmark_core_operations);
+criterion_main!(benches);
+<span class="boring">}</span></code></pre>
+<h3 id="day-93-94-核心模块开发"><a class="header" href="#day-93-94-核心模块开发">Day 93-94: 核心模块开发</a></h3>
+<h4 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h4>
+<pre><code>project/
+├── Cargo.toml
+├── src/
+│   ├── main.rs
+│   ├── lib.rs
+│   ├── api/              # API 层
+│   │   ├── mod.rs
+│   │   ├── handlers.rs
+│   │   └── routes.rs
+│   ├── service/          # 业务逻辑层
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   └── task.rs
+│   ├── repository/       # 数据访问层
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   └── task.rs
+│   ├── models/           # 数据模型
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   └── task.rs
+│   ├── middleware/       # 中间件
+│   │   ├── mod.rs
+│   │   ├── auth.rs
+│   │   └── logging.rs
+│   ├── config/           # 配置
+│   │   ├── mod.rs
+│   │   └── settings.rs
+│   └── utils/            # 工具函数
+│       ├── mod.rs
+│       └── error.rs
+├── migrations/           # 数据库迁移
+├── tests/               # 集成测试
+├── benches/             # 性能测试
+└── docker/              # Docker 配置
+</code></pre>
+<h4 id="核心代码示例"><a class="header" href="#核心代码示例">核心代码示例</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/models/user.rs
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub created_at: chrono::DateTime&lt;chrono::Utc&gt;,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+// src/repository/user.rs
+use sqlx::PgPool;
+use crate::models::user::{User, CreateUser};
+
+pub struct UserRepository {
+    pool: PgPool,
+}
+
+impl UserRepository {
+    pub fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+    
+    pub async fn create(&amp;self, user: CreateUser) -&gt; Result&lt;User&gt; {
+        let user = sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email, created_at
+            "#,
+            user.username,
+            user.email,
+            hash_password(&amp;user.password)?
+        )
+        .fetch_one(&amp;self.pool)
+        .await?;
+        
+        Ok(user)
+    }
+    
+    pub async fn find_by_id(&amp;self, id: i32) -&gt; Result&lt;Option&lt;User&gt;&gt; {
+        let user = sqlx::query_as!(
+            User,
+            "SELECT id, username, email, created_at FROM users WHERE id = $1",
+            id
+        )
+        .fetch_optional(&amp;self.pool)
+        .await?;
+        
+        Ok(user)
+    }
+}
+
+// src/service/user.rs
+use crate::repository::user::UserRepository;
+use crate::models::user::{User, CreateUser};
+
+pub struct UserService {
+    repo: UserRepository,
+}
+
+impl UserService {
+    pub fn new(repo: UserRepository) -&gt; Self {
+        Self { repo }
+    }
+    
+    pub async fn register(&amp;self, user: CreateUser) -&gt; Result&lt;User&gt; {
+        // 业务逻辑验证
+        if user.username.len() &lt; 3 {
+            return Err(Error::InvalidUsername);
+        }
+        
+        // 调用仓储层
+        self.repo.create(user).await
+    }
+    
+    pub async fn get_user(&amp;self, id: i32) -&gt; Result&lt;User&gt; {
+        self.repo
+            .find_by_id(id)
+            .await?
+            .ok_or(Error::UserNotFound)
+    }
+}
+
+// src/api/handlers.rs
+use axum::{extract::{State, Path}, Json};
+use crate::service::user::UserService;
+use crate::models::user::{User, CreateUser};
+
+pub async fn register_user(
+    State(service): State&lt;UserService&gt;,
+    Json(payload): Json&lt;CreateUser&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;&gt; {
+    let user = service.register(payload).await?;
+    Ok(Json(user))
+}
+
+pub async fn get_user(
+    State(service): State&lt;UserService&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;&gt; {
+    let user = service.get_user(id).await?;
+    Ok(Json(user))
+}
+<span class="boring">}</span></code></pre>
+<h3 id="day-95-外围模块与集成"><a class="header" href="#day-95-外围模块与集成">Day 95: 外围模块与集成</a></h3>
+<h4 id="认证中间件"><a class="header" href="#认证中间件">认证中间件</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::Request,
+    middleware::Next,
+    response::Response,
+    http::StatusCode,
+};
+use jsonwebtoken::{decode, DecodingKey, Validation};
+
+pub async fn auth_middleware(
+    mut req: Request,
+    next: Next,
+) -&gt; Result&lt;Response, StatusCode&gt; {
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+    
+    let token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+    
+    let claims = decode::&lt;Claims&gt;(
+        token,
+        &amp;DecodingKey::from_secret("secret".as_ref()),
+        &amp;Validation::default(),
+    )
+    .map_err(|_| StatusCode::UNAUTHORIZED)?;
+    
+    req.extensions_mut().insert(claims.claims);
+    
+    Ok(next.run(req).await)
+}
+<span class="boring">}</span></code></pre>
+<h4 id="日志系统"><a class="header" href="#日志系统">日志系统</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tracing::{info, error, warn};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+pub fn init_logging() {
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+}
+
+// 使用
+info!("Server started on port 8080");
+error!("Database connection failed: {}", err);
+<span class="boring">}</span></code></pre>
+<h4 id="监控指标"><a class="header" href="#监控指标">监控指标</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use prometheus::{Counter, Histogram, Registry};
+
+pub struct Metrics {
+    pub requests_total: Counter,
+    pub request_duration: Histogram,
+}
+
+impl Metrics {
+    pub fn new(registry: &amp;Registry) -&gt; Self {
+        let requests_total = Counter::new(
+            "http_requests_total",
+            "Total HTTP requests"
+        ).unwrap();
+        
+        let request_duration = Histogram::new(
+            "http_request_duration_seconds",
+            "HTTP request duration"
+        ).unwrap();
+        
+        registry.register(Box::new(requests_total.clone())).unwrap();
+        registry.register(Box::new(request_duration.clone())).unwrap();
+        
+        Self {
+            requests_total,
+            request_duration,
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="day-96-性能测试与调优"><a class="header" href="#day-96-性能测试与调优">Day 96: 性能测试与调优</a></h3>
+<h4 id="负载测试"><a class="header" href="#负载测试">负载测试</a></h4>
+<pre><code class="language-bash"># 使用 wrk 进行负载测试
+wrk -t12 -c400 -d30s http://localhost:8080/api/users
+
+# 使用 ab (Apache Bench)
+ab -n 10000 -c 100 http://localhost:8080/api/users
+
+# 使用 hey
+hey -n 10000 -c 100 http://localhost:8080/api/users
+</code></pre>
+<h4 id="性能分析"><a class="header" href="#性能分析">性能分析</a></h4>
+<pre><code class="language-bash"># CPU 分析
+cargo flamegraph --bin myapp
+
+# 内存分析
+valgrind --tool=massif ./target/release/myapp
+
+# 性能基准
+cargo bench
+</code></pre>
+<h4 id="优化清单"><a class="header" href="#优化清单">优化清单</a></h4>
+<pre><code class="language-markdown">- [ ] 数据库查询优化（索引、查询计划）
+- [ ] 连接池配置调优
+- [ ] 缓存策略实施
+- [ ] 异步操作优化
+- [ ] 内存分配优化
+- [ ] 编译优化配置
+- [ ] 负载均衡配置
+</code></pre>
+<h3 id="day-97-文档编写与代码清理"><a class="header" href="#day-97-文档编写与代码清理">Day 97: 文档编写与代码清理</a></h3>
+<h4 id="api-文档"><a class="header" href="#api-文档">API 文档</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use utoipa::{OpenApi, ToSchema};
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        api::handlers::register_user,
+        api::handlers::get_user,
+    ),
+    components(
+        schemas(User, CreateUser)
+    ),
+    tags(
+        (name = "users", description = "User management endpoints")
+    )
+)]
+struct ApiDoc;
+
+// 生成 OpenAPI 文档
+let openapi = ApiDoc::openapi();
+<span class="boring">}</span></code></pre>
+<h4 id="readme-文档"><a class="header" href="#readme-文档">README 文档</a></h4>
+<pre><code class="language-markdown"># 项目名称
+
+## 简介
+简要描述项目功能和特点
+
+## 功能特性
+- ✅ 功能 1
+- ✅ 功能 2
+- ✅ 功能 3
+
+## 技术栈
+- Rust 1.75+
+- Axum 0.7
+- PostgreSQL 15
+- Redis 7
+
+## 快速开始
+
+### 环境要求
+- Rust 1.75+
+- Docker &amp; Docker Compose
+
+### 安装步骤
+\`\`\`bash
+# 克隆项目
+git clone https://github.com/username/project.git
+
+# 启动服务
+docker-compose up -d
+
+# 运行迁移
+cargo sqlx migrate run
+
+# 启动应用
+cargo run --release
+\`\`\`
+
+## API 文档
+访问 http://localhost:8080/swagger-ui
+
+## 测试
+\`\`\`bash
+cargo test
+\`\`\`
+
+## 性能指标
+- QPS: 15000+
+- 延迟: P99 &lt; 50ms
+- 可用性: 99.9%
+
+## 许可证
+MIT
+</code></pre>
+<h3 id="day-98-发布准备与版本管理"><a class="header" href="#day-98-发布准备与版本管理">Day 98: 发布准备与版本管理</a></h3>
+<h4 id="版本发布流程"><a class="header" href="#版本发布流程">版本发布流程</a></h4>
+<pre><code class="language-bash"># 1. 更新版本号
+# Cargo.toml
+[package]
+version = "1.0.0"
+
+# 2. 更新 CHANGELOG
+# CHANGELOG.md
+## [1.0.0] - 2024-01-16
+### Added
+- 初始版本发布
+- 用户认证系统
+- 核心 API 功能
+
+### Fixed
+- 修复内存泄漏问题
+
+# 3. 创建 Git 标签
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+
+# 4. 构建发布版本
+cargo build --release
+
+# 5. 创建 Docker 镜像
+docker build -t myapp:1.0.0 .
+docker push myapp:1.0.0
+</code></pre>
+<h4 id="cicd-配置"><a class="header" href="#cicd-配置">CI/CD 配置</a></h4>
+<pre><code class="language-yaml"># .github/workflows/release.yml
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build
+        run: cargo build --release
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/myapp
+            README.md
+            CHANGELOG.md
+</code></pre>
+<h3 id="day-99-项目展示与复盘"><a class="header" href="#day-99-项目展示与复盘">Day 99: 项目展示与复盘</a></h3>
+<h4 id="项目展示文档"><a class="header" href="#项目展示文档">项目展示文档</a></h4>
+<pre><code class="language-markdown"># 项目展示
+
+## 项目概述
+- **项目名称**: XXX 系统
+- **开发周期**: 10 天
+- **代码行数**: 5000+
+- **测试覆盖率**: 85%
+
+## 技术亮点
+1. **高性能**: QPS 达到 15000+
+2. **高可用**: 99.9% 可用性
+3. **可扩展**: 支持水平扩展
+4. **安全性**: 完善的认证授权
+
+## 架构设计
+[架构图]
+
+## 核心功能演示
+[功能截图/视频]
+
+## 性能指标
+| 指标 | 数值 |
+|------|------|
+| QPS | 15000+ |
+| P99 延迟 | 45ms |
+| 内存占用 | 50MB |
+| CPU 使用率 | 30% |
+
+## 遇到的挑战
+1. **挑战 1**: 数据库性能瓶颈
+   - **解决方案**: 添加索引、查询优化
+   
+2. **挑战 2**: 并发安全问题
+   - **解决方案**: 使用 Arc&lt;RwLock&gt;
+
+## 未来改进
+- [ ] 添加分布式追踪
+- [ ] 实现服务网格
+- [ ] 支持多租户
+</code></pre>
+<h4 id="技术复盘"><a class="header" href="#技术复盘">技术复盘</a></h4>
+<pre><code class="language-markdown">## 学到的经验
+
+### 做得好的地方
+1. 架构设计清晰
+2. 代码质量高
+3. 测试覆盖完善
+4. 文档详细
+
+### 需要改进的地方
+1. 初期设计不够充分
+2. 某些模块耦合度高
+3. 性能优化不够及时
+
+### 技术收获
+1. 深入理解异步编程
+2. 掌握数据库优化技巧
+3. 学会性能分析方法
+4. 提升系统设计能力
+</code></pre>
+<h3 id="day-100-成为-rustacean-之路"><a class="header" href="#day-100-成为-rustacean-之路">Day 100: 成为 Rustacean 之路</a></h3>
+<h4 id="学习回顾"><a class="header" href="#学习回顾">学习回顾</a></h4>
+<pre><code class="language-markdown"># 100 天 Rust 学习总结
+
+## 第一阶段 (Days 1-15): 基础入门
+- ✅ 变量和类型
+- ✅ 所有权系统
+- ✅ 结构体和枚举
+- ✅ 错误处理
+
+## 第二阶段 (Days 16-30): 进阶特性
+- ✅ 闭包和迭代器
+- ✅ 智能指针
+- ✅ 并发编程
+- ✅ 高级特性
+
+## 第三阶段 (Days 31-45): 实用技能
+- ✅ 文件 I/O
+- ✅ 网络编程
+- ✅ 异步编程
+- ✅ 数据库操作
+
+## 第四阶段 (Days 46-60): 项目实战
+- ✅ Redis 克隆项目
+- ✅ 集群模式
+- ✅ 持久化
+- ✅ CI/CD
+
+## 第五阶段 (Days 61-80): Web 开发
+- ✅ Web 框架
+- ✅ 数据库集成
+- ✅ 认证授权
+- ✅ 博客系统
+
+## 第六阶段 (Days 81-90): 系统编程
+- ✅ 文件系统
+- ✅ 进程管理
+- ✅ 性能优化
+- ✅ 工程化
+
+## 第七阶段 (Days 91-100): 毕业设计
+- ✅ 完整项目
+- ✅ 生产部署
+- ✅ 性能调优
+- ✅ 项目展示
+</code></pre>
+<h4 id="继续学习路径"><a class="header" href="#继续学习路径">继续学习路径</a></h4>
+<pre><code class="language-markdown">## 深入方向
+
+### 1. 系统编程
+- 操作系统开发
+- 嵌入式开发
+- 驱动程序开发
+
+### 2. Web 开发
+- 微服务架构
+- 云原生应用
+- Serverless
+
+### 3. 区块链
+- 智能合约
+- 共识算法
+- 加密货币
+
+### 4. 游戏开发
+- Bevy 引擎
+- 图形编程
+- 物理引擎
+
+### 5. 机器学习
+- Rust ML 库
+- 性能优化
+- 模型部署
+
+## 推荐资源
+
+### 书籍
+- The Rust Programming Language
+- Programming Rust
+- Rust for Rustaceans
+- Zero To Production In Rust
+
+### 社区
+- Rust 官方论坛
+- Reddit r/rust
+- Rust 中文社区
+- Discord Rust 频道
+
+### 项目
+- 参与开源项目
+- 阅读优秀源码
+- 编写自己的库
+- 分享技术文章
+
+## 最后的话
+
+恭喜你完成了 100 天的 Rust 学习之旅！
+
+你已经：
+- ✅ 掌握了 Rust 核心概念
+- ✅ 完成了多个实战项目
+- ✅ 具备了生产级开发能力
+- ✅ 成为了真正的 Rustacean
+
+但这只是开始，Rust 的世界还有更多精彩等待探索。
+
+保持学习，保持编码，保持热情！
+
+🦀 Happy Coding! 🦀
+</code></pre>
+<h2 id="项目评估标准"><a class="header" href="#项目评估标准">项目评估标准</a></h2>
+<h3 id="代码质量-30"><a class="header" href="#代码质量-30">代码质量 (30%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 代码规范统一</li>
+<li><input disabled="" type="checkbox"> 注释清晰完整</li>
+<li><input disabled="" type="checkbox"> 错误处理完善</li>
+<li><input disabled="" type="checkbox"> 无 Clippy 警告</li>
+</ul>
+<h3 id="功能完整性-30"><a class="header" href="#功能完整性-30">功能完整性 (30%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 核心功能实现</li>
+<li><input disabled="" type="checkbox"> 边界情况处理</li>
+<li><input disabled="" type="checkbox"> 用户体验良好</li>
+<li><input disabled="" type="checkbox"> 文档完整</li>
+</ul>
+<h3 id="性能指标-20"><a class="header" href="#性能指标-20">性能指标 (20%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 响应时间达标</li>
+<li><input disabled="" type="checkbox"> 吞吐量达标</li>
+<li><input disabled="" type="checkbox"> 资源占用合理</li>
+<li><input disabled="" type="checkbox"> 可扩展性好</li>
+</ul>
+<h3 id="工程实践-20"><a class="header" href="#工程实践-20">工程实践 (20%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 测试覆盖充分</li>
+<li><input disabled="" type="checkbox"> CI/CD 配置</li>
+<li><input disabled="" type="checkbox"> 容器化部署</li>
+<li><input disabled="" type="checkbox"> 监控告警</li>
+</ul>
+<h2 id="恭喜毕业"><a class="header" href="#恭喜毕业">恭喜毕业！</a></h2>
+<p>完成这 100 天的学习，你已经具备了：</p>
+<ul>
+<li>🎯 扎实的 Rust 基础</li>
+<li>🚀 实战项目经验</li>
+<li>💪 解决问题能力</li>
+<li>🌟 持续学习习惯</li>
+</ul>
+<p>欢迎加入 Rustacean 大家庭！🦀</p>
 
                     </main>
 

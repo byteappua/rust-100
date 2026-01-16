@@ -1,4 +1,4 @@
-use crate::cmd::{get::Get, set::Set, publish::Publish, Command};
+use crate::cmd::{get::Get, set::Set, publish::Publish};
 use crate::{Connection, Frame, Error};
 use bytes::Bytes;
 use tokio::net::TcpStream;

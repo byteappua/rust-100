@@ -1,0 +1,1038 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>阶段概览 - Rust - 100天从新手到大师</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-8da50af6.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-28b84ce8.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust - 100天从新手到大师</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Start-Rust/100-days-of-rust" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="第七阶段毕业设计-days-91-100---完整概览"><a class="header" href="#第七阶段毕业设计-days-91-100---完整概览">第七阶段：毕业设计 (Days 91-100) - 完整概览</a></h1>
+<h2 id="阶段目标"><a class="header" href="#阶段目标">阶段目标</a></h2>
+<p>综合运用前 90 天所学知识，完成一个生产级别的完整项目。</p>
+<h2 id="项目选题建议"><a class="header" href="#项目选题建议">项目选题建议</a></h2>
+<h3 id="选项-1-分布式任务调度系统"><a class="header" href="#选项-1-分布式任务调度系统">选项 1: 分布式任务调度系统</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Tokio 异步运行时</li>
+<li>gRPC 服务间通信</li>
+<li>Redis 任务队列</li>
+<li>PostgreSQL 持久化</li>
+<li>Raft 共识算法</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>任务提交和调度</li>
+<li>分布式执行</li>
+<li>失败重试</li>
+<li>监控和日志</li>
+<li>Web 管理界面</li>
+</ul>
+<h3 id="选项-2-实时聊天系统"><a class="header" href="#选项-2-实时聊天系统">选项 2: 实时聊天系统</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum Web 框架</li>
+<li>WebSocket 实时通信</li>
+<li>Redis Pub/Sub</li>
+<li>PostgreSQL 消息存储</li>
+<li>JWT 认证</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>用户认证</li>
+<li>实时消息</li>
+<li>群组聊天</li>
+<li>文件传输</li>
+<li>消息历史</li>
+</ul>
+<h3 id="选项-3-微服务-api-网关"><a class="header" href="#选项-3-微服务-api-网关">选项 3: 微服务 API 网关</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Axum/Actix-web</li>
+<li>Tower 中间件</li>
+<li>Redis 缓存</li>
+<li>Prometheus 监控</li>
+<li>Jaeger 链路追踪</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>路由转发</li>
+<li>负载均衡</li>
+<li>限流熔断</li>
+<li>认证授权</li>
+<li>监控告警</li>
+</ul>
+<h3 id="选项-4-高性能-kv-存储"><a class="header" href="#选项-4-高性能-kv-存储">选项 4: 高性能 KV 存储</a></h3>
+<p><strong>技术栈：</strong></p>
+<ul>
+<li>Tokio 异步 I/O</li>
+<li>LSM-Tree 存储引擎</li>
+<li>RESP 协议</li>
+<li>Raft 复制</li>
+<li>RocksDB 后端</li>
+</ul>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>基本 KV 操作</li>
+<li>持久化</li>
+<li>主从复制</li>
+<li>集群模式</li>
+<li>性能优化</li>
+</ul>
+<h2 id="详细时间规划"><a class="header" href="#详细时间规划">详细时间规划</a></h2>
+<h3 id="day-91-选题与架构设计"><a class="header" href="#day-91-选题与架构设计">Day 91: 选题与架构设计</a></h3>
+<h4 id="需求分析"><a class="header" href="#需求分析">需求分析</a></h4>
+<pre><code class="language-markdown">## 功能需求
+1. 核心功能列表
+2. 用户角色定义
+3. 使用场景描述
+4. 性能指标要求
+
+## 非功能需求
+1. 可用性：99.9%
+2. 性能：QPS &gt; 10000
+3. 可扩展性：水平扩展
+4. 安全性：认证授权
+</code></pre>
+<h4 id="架构设计"><a class="header" href="#架构设计">架构设计</a></h4>
+<pre><code>┌─────────────┐
+│   客户端     │
+└──────┬──────┘
+       │
+┌──────▼──────────────────────┐
+│      API Gateway            │
+│  (认证/限流/路由)            │
+└──────┬──────────────────────┘
+       │
+┌──────▼──────┬────────┬──────┐
+│   服务 A    │ 服务 B  │ 服务 C│
+└──────┬──────┴────┬───┴──────┘
+       │           │
+┌──────▼───────────▼──────┐
+│    数据层 (DB/Cache)     │
+└─────────────────────────┘
+</code></pre>
+<h4 id="技术选型文档"><a class="header" href="#技术选型文档">技术选型文档</a></h4>
+<pre><code class="language-markdown">## 后端框架
+- **选择**: Axum
+- **理由**: 类型安全、性能优秀、生态完善
+
+## 数据库
+- **选择**: PostgreSQL + Redis
+- **理由**: 可靠性高、功能丰富
+
+## 部署方案
+- **选择**: Docker + Kubernetes
+- **理由**: 容器化、易扩展
+</code></pre>
+<h3 id="day-92-原型验证-poc"><a class="header" href="#day-92-原型验证-poc">Day 92: 原型验证 (PoC)</a></h3>
+<h4 id="核心功能验证"><a class="header" href="#核心功能验证">核心功能验证</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 验证关键技术可行性
+
+// 1. 数据库连接
+async fn test_db_connection() -&gt; Result&lt;()&gt; {
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect("postgres://localhost/testdb")
+        .await?;
+    
+    sqlx::query("SELECT 1").fetch_one(&amp;pool).await?;
+    println!("✓ Database connection works");
+    Ok(())
+}
+
+// 2. 缓存系统
+async fn test_cache() -&gt; Result&lt;()&gt; {
+    let client = redis::Client::open("redis://127.0.0.1/")?;
+    let mut con = client.get_async_connection().await?;
+    
+    redis::cmd("SET")
+        .arg("test_key")
+        .arg("test_value")
+        .query_async(&amp;mut con)
+        .await?;
+    
+    println!("✓ Cache system works");
+    Ok(())
+}
+
+// 3. 消息队列
+async fn test_message_queue() -&gt; Result&lt;()&gt; {
+    let (tx, mut rx) = tokio::sync::mpsc::channel(100);
+    
+    tokio::spawn(async move {
+        while let Some(msg) = rx.recv().await {
+            println!("Received: {}", msg);
+        }
+    });
+    
+    tx.send("test message".to_string()).await?;
+    println!("✓ Message queue works");
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h4 id="性能基准测试"><a class="header" href="#性能基准测试">性能基准测试</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+fn benchmark_core_operations(c: &amp;mut Criterion) {
+    c.bench_function("db_query", |b| {
+        b.iter(|| {
+            // 数据库查询基准
+        });
+    });
+    
+    c.bench_function("cache_get", |b| {
+        b.iter(|| {
+            // 缓存读取基准
+        });
+    });
+}
+
+criterion_group!(benches, benchmark_core_operations);
+criterion_main!(benches);
+<span class="boring">}</span></code></pre>
+<h3 id="day-93-94-核心模块开发"><a class="header" href="#day-93-94-核心模块开发">Day 93-94: 核心模块开发</a></h3>
+<h4 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h4>
+<pre><code>project/
+├── Cargo.toml
+├── src/
+│   ├── main.rs
+│   ├── lib.rs
+│   ├── api/              # API 层
+│   │   ├── mod.rs
+│   │   ├── handlers.rs
+│   │   └── routes.rs
+│   ├── service/          # 业务逻辑层
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   └── task.rs
+│   ├── repository/       # 数据访问层
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   └── task.rs
+│   ├── models/           # 数据模型
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   └── task.rs
+│   ├── middleware/       # 中间件
+│   │   ├── mod.rs
+│   │   ├── auth.rs
+│   │   └── logging.rs
+│   ├── config/           # 配置
+│   │   ├── mod.rs
+│   │   └── settings.rs
+│   └── utils/            # 工具函数
+│       ├── mod.rs
+│       └── error.rs
+├── migrations/           # 数据库迁移
+├── tests/               # 集成测试
+├── benches/             # 性能测试
+└── docker/              # Docker 配置
+</code></pre>
+<h4 id="核心代码示例"><a class="header" href="#核心代码示例">核心代码示例</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/models/user.rs
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct User {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub created_at: chrono::DateTime&lt;chrono::Utc&gt;,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+// src/repository/user.rs
+use sqlx::PgPool;
+use crate::models::user::{User, CreateUser};
+
+pub struct UserRepository {
+    pool: PgPool,
+}
+
+impl UserRepository {
+    pub fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+    
+    pub async fn create(&amp;self, user: CreateUser) -&gt; Result&lt;User&gt; {
+        let user = sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email, created_at
+            "#,
+            user.username,
+            user.email,
+            hash_password(&amp;user.password)?
+        )
+        .fetch_one(&amp;self.pool)
+        .await?;
+        
+        Ok(user)
+    }
+    
+    pub async fn find_by_id(&amp;self, id: i32) -&gt; Result&lt;Option&lt;User&gt;&gt; {
+        let user = sqlx::query_as!(
+            User,
+            "SELECT id, username, email, created_at FROM users WHERE id = $1",
+            id
+        )
+        .fetch_optional(&amp;self.pool)
+        .await?;
+        
+        Ok(user)
+    }
+}
+
+// src/service/user.rs
+use crate::repository::user::UserRepository;
+use crate::models::user::{User, CreateUser};
+
+pub struct UserService {
+    repo: UserRepository,
+}
+
+impl UserService {
+    pub fn new(repo: UserRepository) -&gt; Self {
+        Self { repo }
+    }
+    
+    pub async fn register(&amp;self, user: CreateUser) -&gt; Result&lt;User&gt; {
+        // 业务逻辑验证
+        if user.username.len() &lt; 3 {
+            return Err(Error::InvalidUsername);
+        }
+        
+        // 调用仓储层
+        self.repo.create(user).await
+    }
+    
+    pub async fn get_user(&amp;self, id: i32) -&gt; Result&lt;User&gt; {
+        self.repo
+            .find_by_id(id)
+            .await?
+            .ok_or(Error::UserNotFound)
+    }
+}
+
+// src/api/handlers.rs
+use axum::{extract::{State, Path}, Json};
+use crate::service::user::UserService;
+use crate::models::user::{User, CreateUser};
+
+pub async fn register_user(
+    State(service): State&lt;UserService&gt;,
+    Json(payload): Json&lt;CreateUser&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;&gt; {
+    let user = service.register(payload).await?;
+    Ok(Json(user))
+}
+
+pub async fn get_user(
+    State(service): State&lt;UserService&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;&gt; {
+    let user = service.get_user(id).await?;
+    Ok(Json(user))
+}
+<span class="boring">}</span></code></pre>
+<h3 id="day-95-外围模块与集成"><a class="header" href="#day-95-外围模块与集成">Day 95: 外围模块与集成</a></h3>
+<h4 id="认证中间件"><a class="header" href="#认证中间件">认证中间件</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::Request,
+    middleware::Next,
+    response::Response,
+    http::StatusCode,
+};
+use jsonwebtoken::{decode, DecodingKey, Validation};
+
+pub async fn auth_middleware(
+    mut req: Request,
+    next: Next,
+) -&gt; Result&lt;Response, StatusCode&gt; {
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+    
+    let token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+    
+    let claims = decode::&lt;Claims&gt;(
+        token,
+        &amp;DecodingKey::from_secret("secret".as_ref()),
+        &amp;Validation::default(),
+    )
+    .map_err(|_| StatusCode::UNAUTHORIZED)?;
+    
+    req.extensions_mut().insert(claims.claims);
+    
+    Ok(next.run(req).await)
+}
+<span class="boring">}</span></code></pre>
+<h4 id="日志系统"><a class="header" href="#日志系统">日志系统</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tracing::{info, error, warn};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+pub fn init_logging() {
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+}
+
+// 使用
+info!("Server started on port 8080");
+error!("Database connection failed: {}", err);
+<span class="boring">}</span></code></pre>
+<h4 id="监控指标"><a class="header" href="#监控指标">监控指标</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use prometheus::{Counter, Histogram, Registry};
+
+pub struct Metrics {
+    pub requests_total: Counter,
+    pub request_duration: Histogram,
+}
+
+impl Metrics {
+    pub fn new(registry: &amp;Registry) -&gt; Self {
+        let requests_total = Counter::new(
+            "http_requests_total",
+            "Total HTTP requests"
+        ).unwrap();
+        
+        let request_duration = Histogram::new(
+            "http_request_duration_seconds",
+            "HTTP request duration"
+        ).unwrap();
+        
+        registry.register(Box::new(requests_total.clone())).unwrap();
+        registry.register(Box::new(request_duration.clone())).unwrap();
+        
+        Self {
+            requests_total,
+            request_duration,
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="day-96-性能测试与调优"><a class="header" href="#day-96-性能测试与调优">Day 96: 性能测试与调优</a></h3>
+<h4 id="负载测试"><a class="header" href="#负载测试">负载测试</a></h4>
+<pre><code class="language-bash"># 使用 wrk 进行负载测试
+wrk -t12 -c400 -d30s http://localhost:8080/api/users
+
+# 使用 ab (Apache Bench)
+ab -n 10000 -c 100 http://localhost:8080/api/users
+
+# 使用 hey
+hey -n 10000 -c 100 http://localhost:8080/api/users
+</code></pre>
+<h4 id="性能分析"><a class="header" href="#性能分析">性能分析</a></h4>
+<pre><code class="language-bash"># CPU 分析
+cargo flamegraph --bin myapp
+
+# 内存分析
+valgrind --tool=massif ./target/release/myapp
+
+# 性能基准
+cargo bench
+</code></pre>
+<h4 id="优化清单"><a class="header" href="#优化清单">优化清单</a></h4>
+<pre><code class="language-markdown">- [ ] 数据库查询优化（索引、查询计划）
+- [ ] 连接池配置调优
+- [ ] 缓存策略实施
+- [ ] 异步操作优化
+- [ ] 内存分配优化
+- [ ] 编译优化配置
+- [ ] 负载均衡配置
+</code></pre>
+<h3 id="day-97-文档编写与代码清理"><a class="header" href="#day-97-文档编写与代码清理">Day 97: 文档编写与代码清理</a></h3>
+<h4 id="api-文档"><a class="header" href="#api-文档">API 文档</a></h4>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use utoipa::{OpenApi, ToSchema};
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        api::handlers::register_user,
+        api::handlers::get_user,
+    ),
+    components(
+        schemas(User, CreateUser)
+    ),
+    tags(
+        (name = "users", description = "User management endpoints")
+    )
+)]
+struct ApiDoc;
+
+// 生成 OpenAPI 文档
+let openapi = ApiDoc::openapi();
+<span class="boring">}</span></code></pre>
+<h4 id="readme-文档"><a class="header" href="#readme-文档">README 文档</a></h4>
+<pre><code class="language-markdown"># 项目名称
+
+## 简介
+简要描述项目功能和特点
+
+## 功能特性
+- ✅ 功能 1
+- ✅ 功能 2
+- ✅ 功能 3
+
+## 技术栈
+- Rust 1.75+
+- Axum 0.7
+- PostgreSQL 15
+- Redis 7
+
+## 快速开始
+
+### 环境要求
+- Rust 1.75+
+- Docker &amp; Docker Compose
+
+### 安装步骤
+\`\`\`bash
+# 克隆项目
+git clone https://github.com/username/project.git
+
+# 启动服务
+docker-compose up -d
+
+# 运行迁移
+cargo sqlx migrate run
+
+# 启动应用
+cargo run --release
+\`\`\`
+
+## API 文档
+访问 http://localhost:8080/swagger-ui
+
+## 测试
+\`\`\`bash
+cargo test
+\`\`\`
+
+## 性能指标
+- QPS: 15000+
+- 延迟: P99 &lt; 50ms
+- 可用性: 99.9%
+
+## 许可证
+MIT
+</code></pre>
+<h3 id="day-98-发布准备与版本管理"><a class="header" href="#day-98-发布准备与版本管理">Day 98: 发布准备与版本管理</a></h3>
+<h4 id="版本发布流程"><a class="header" href="#版本发布流程">版本发布流程</a></h4>
+<pre><code class="language-bash"># 1. 更新版本号
+# Cargo.toml
+[package]
+version = "1.0.0"
+
+# 2. 更新 CHANGELOG
+# CHANGELOG.md
+## [1.0.0] - 2024-01-16
+### Added
+- 初始版本发布
+- 用户认证系统
+- 核心 API 功能
+
+### Fixed
+- 修复内存泄漏问题
+
+# 3. 创建 Git 标签
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+
+# 4. 构建发布版本
+cargo build --release
+
+# 5. 创建 Docker 镜像
+docker build -t myapp:1.0.0 .
+docker push myapp:1.0.0
+</code></pre>
+<h4 id="cicd-配置"><a class="header" href="#cicd-配置">CI/CD 配置</a></h4>
+<pre><code class="language-yaml"># .github/workflows/release.yml
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build
+        run: cargo build --release
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/myapp
+            README.md
+            CHANGELOG.md
+</code></pre>
+<h3 id="day-99-项目展示与复盘"><a class="header" href="#day-99-项目展示与复盘">Day 99: 项目展示与复盘</a></h3>
+<h4 id="项目展示文档"><a class="header" href="#项目展示文档">项目展示文档</a></h4>
+<pre><code class="language-markdown"># 项目展示
+
+## 项目概述
+- **项目名称**: XXX 系统
+- **开发周期**: 10 天
+- **代码行数**: 5000+
+- **测试覆盖率**: 85%
+
+## 技术亮点
+1. **高性能**: QPS 达到 15000+
+2. **高可用**: 99.9% 可用性
+3. **可扩展**: 支持水平扩展
+4. **安全性**: 完善的认证授权
+
+## 架构设计
+[架构图]
+
+## 核心功能演示
+[功能截图/视频]
+
+## 性能指标
+| 指标 | 数值 |
+|------|------|
+| QPS | 15000+ |
+| P99 延迟 | 45ms |
+| 内存占用 | 50MB |
+| CPU 使用率 | 30% |
+
+## 遇到的挑战
+1. **挑战 1**: 数据库性能瓶颈
+   - **解决方案**: 添加索引、查询优化
+   
+2. **挑战 2**: 并发安全问题
+   - **解决方案**: 使用 Arc&lt;RwLock&gt;
+
+## 未来改进
+- [ ] 添加分布式追踪
+- [ ] 实现服务网格
+- [ ] 支持多租户
+</code></pre>
+<h4 id="技术复盘"><a class="header" href="#技术复盘">技术复盘</a></h4>
+<pre><code class="language-markdown">## 学到的经验
+
+### 做得好的地方
+1. 架构设计清晰
+2. 代码质量高
+3. 测试覆盖完善
+4. 文档详细
+
+### 需要改进的地方
+1. 初期设计不够充分
+2. 某些模块耦合度高
+3. 性能优化不够及时
+
+### 技术收获
+1. 深入理解异步编程
+2. 掌握数据库优化技巧
+3. 学会性能分析方法
+4. 提升系统设计能力
+</code></pre>
+<h3 id="day-100-成为-rustacean-之路"><a class="header" href="#day-100-成为-rustacean-之路">Day 100: 成为 Rustacean 之路</a></h3>
+<h4 id="学习回顾"><a class="header" href="#学习回顾">学习回顾</a></h4>
+<pre><code class="language-markdown"># 100 天 Rust 学习总结
+
+## 第一阶段 (Days 1-15): 基础入门
+- ✅ 变量和类型
+- ✅ 所有权系统
+- ✅ 结构体和枚举
+- ✅ 错误处理
+
+## 第二阶段 (Days 16-30): 进阶特性
+- ✅ 闭包和迭代器
+- ✅ 智能指针
+- ✅ 并发编程
+- ✅ 高级特性
+
+## 第三阶段 (Days 31-45): 实用技能
+- ✅ 文件 I/O
+- ✅ 网络编程
+- ✅ 异步编程
+- ✅ 数据库操作
+
+## 第四阶段 (Days 46-60): 项目实战
+- ✅ Redis 克隆项目
+- ✅ 集群模式
+- ✅ 持久化
+- ✅ CI/CD
+
+## 第五阶段 (Days 61-80): Web 开发
+- ✅ Web 框架
+- ✅ 数据库集成
+- ✅ 认证授权
+- ✅ 博客系统
+
+## 第六阶段 (Days 81-90): 系统编程
+- ✅ 文件系统
+- ✅ 进程管理
+- ✅ 性能优化
+- ✅ 工程化
+
+## 第七阶段 (Days 91-100): 毕业设计
+- ✅ 完整项目
+- ✅ 生产部署
+- ✅ 性能调优
+- ✅ 项目展示
+</code></pre>
+<h4 id="继续学习路径"><a class="header" href="#继续学习路径">继续学习路径</a></h4>
+<pre><code class="language-markdown">## 深入方向
+
+### 1. 系统编程
+- 操作系统开发
+- 嵌入式开发
+- 驱动程序开发
+
+### 2. Web 开发
+- 微服务架构
+- 云原生应用
+- Serverless
+
+### 3. 区块链
+- 智能合约
+- 共识算法
+- 加密货币
+
+### 4. 游戏开发
+- Bevy 引擎
+- 图形编程
+- 物理引擎
+
+### 5. 机器学习
+- Rust ML 库
+- 性能优化
+- 模型部署
+
+## 推荐资源
+
+### 书籍
+- The Rust Programming Language
+- Programming Rust
+- Rust for Rustaceans
+- Zero To Production In Rust
+
+### 社区
+- Rust 官方论坛
+- Reddit r/rust
+- Rust 中文社区
+- Discord Rust 频道
+
+### 项目
+- 参与开源项目
+- 阅读优秀源码
+- 编写自己的库
+- 分享技术文章
+
+## 最后的话
+
+恭喜你完成了 100 天的 Rust 学习之旅！
+
+你已经：
+- ✅ 掌握了 Rust 核心概念
+- ✅ 完成了多个实战项目
+- ✅ 具备了生产级开发能力
+- ✅ 成为了真正的 Rustacean
+
+但这只是开始，Rust 的世界还有更多精彩等待探索。
+
+保持学习，保持编码，保持热情！
+
+🦀 Happy Coding! 🦀
+</code></pre>
+<h2 id="项目评估标准"><a class="header" href="#项目评估标准">项目评估标准</a></h2>
+<h3 id="代码质量-30"><a class="header" href="#代码质量-30">代码质量 (30%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 代码规范统一</li>
+<li><input disabled="" type="checkbox"> 注释清晰完整</li>
+<li><input disabled="" type="checkbox"> 错误处理完善</li>
+<li><input disabled="" type="checkbox"> 无 Clippy 警告</li>
+</ul>
+<h3 id="功能完整性-30"><a class="header" href="#功能完整性-30">功能完整性 (30%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 核心功能实现</li>
+<li><input disabled="" type="checkbox"> 边界情况处理</li>
+<li><input disabled="" type="checkbox"> 用户体验良好</li>
+<li><input disabled="" type="checkbox"> 文档完整</li>
+</ul>
+<h3 id="性能指标-20"><a class="header" href="#性能指标-20">性能指标 (20%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 响应时间达标</li>
+<li><input disabled="" type="checkbox"> 吞吐量达标</li>
+<li><input disabled="" type="checkbox"> 资源占用合理</li>
+<li><input disabled="" type="checkbox"> 可扩展性好</li>
+</ul>
+<h3 id="工程实践-20"><a class="header" href="#工程实践-20">工程实践 (20%)</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 测试覆盖充分</li>
+<li><input disabled="" type="checkbox"> CI/CD 配置</li>
+<li><input disabled="" type="checkbox"> 容器化部署</li>
+<li><input disabled="" type="checkbox"> 监控告警</li>
+</ul>
+<h2 id="恭喜毕业"><a class="header" href="#恭喜毕业">恭喜毕业！</a></h2>
+<p>完成这 100 天的学习，你已经具备了：</p>
+<ul>
+<li>🎯 扎实的 Rust 基础</li>
+<li>🚀 实战项目经验</li>
+<li>💪 解决问题能力</li>
+<li>🌟 持续学习习惯</li>
+</ul>
+<p>欢迎加入 Rustacean 大家庭！🦀</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../Day81-90/STAGE6_OVERVIEW.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../Day81-90/STAGE6_OVERVIEW.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
