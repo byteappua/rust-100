@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-71fa3fe4.js";
+            window.path_to_searchindex_js = "searchindex-c9c46012.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-ce481b3e.js"></script>
+        <script src="toc-967bfe39.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -3349,6 +3349,497 @@ harness = false
 <pre><code class="language-bash">cargo bench
 </code></pre>
 <p>运行完成后，可以在 <code>target/criterion/report/index.html</code> 查看可视化的报告。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-56-集群模式探索"><a class="header" href="#day-56-集群模式探索">Day 56: 集群模式探索</a></h1>
+<p>随着数据量和并发量的增加，单机 Redis 很难满足需求。为了解决扩展性（Scalability）和高可用性（High Availability）问题，通常会采用**集群（Cluster）**架构。</p>
+<h2 id="1-集群架构概述"><a class="header" href="#1-集群架构概述">1. 集群架构概述</a></h2>
+<p>Redis 集群主要有两种常见的实现方式：</p>
+<ol>
+<li>
+<p><strong>客户端分片 (Client-side Sharding)</strong>:</p>
+<ul>
+<li>客户端通过某种 Hash 算法（如 Consistent Hashing 或简单的 Modulo）决定将 Key 存储在哪个节点。</li>
+<li>优点：实现简单，服务端无状态，无中心组件。</li>
+<li>缺点：扩容缩容（Resharding）麻烦，客户端需要知道所有节点信息。</li>
+</ul>
+</li>
+<li>
+<p><strong>代理分片 (Proxy Sharding)</strong>:</p>
+<ul>
+<li>引入中间件（如 Twemproxy, Codis），客户端只连接 Proxy，Proxy 负责转发。</li>
+<li>优点：客户端透明。</li>
+<li>缺点：多了一跳网络开销，Proxy 成为新的瓶颈或单点。</li>
+</ul>
+</li>
+<li>
+<p><strong>Redis Cluster (服务端分片)</strong>:</p>
+<ul>
+<li>Redis 官方集群方案。节点之间通过 Gossip 协议通信，数据分片存储在 16384 个 Slot 中。</li>
+<li>支持自动故障转移和重分片。</li>
+</ul>
+</li>
+</ol>
+<h2 id="2-本节目标"><a class="header" href="#2-本节目标">2. 本节目标</a></h2>
+<p>在本节中，我们将探索最基础的<strong>客户端分片</strong>模式。我们将改造 <code>Client</code> SDK，使其能够管理多个 Redis 节点，并根据 Key 将请求路由到正确的节点。</p>
+<h2 id="3-实现细节"><a class="header" href="#3-实现细节">3. 实现细节</a></h2>
+<h3 id="clusterclient"><a class="header" href="#clusterclient">ClusterClient</a></h3>
+<p>我们需要一个新的客户端结构体 <code>ClusterClient</code>，它维护一个节点列表：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct ClusterClient {
+    nodes: Vec&lt;String&gt;,
+    clients: HashMap&lt;String, Arc&lt;Mutex&lt;Client&gt;&gt;&gt;,
+}
+<span class="boring">}</span></code></pre>
+<h3 id="路由算法-routing"><a class="header" href="#路由算法-routing">路由算法 (Routing)</a></h3>
+<p>为了演示，我们使用 Rust 标准库的 <code>DefaultHasher</code> 对 Key 进行哈希，然后对节点数量取模：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let index = (hash(key) as usize) % self.nodes.len();
+let target_node = &amp;self.nodes[index];
+<span class="boring">}</span></code></pre>
+<blockquote>
+<p><strong>注意</strong>: 在生产环境中，应该使用一致性哈希（Consistent Hashing）或 Redis Cluster 的 CRC16(key) % 16384 算法，以减少节点变动时的数据迁移量。这里为了演示方便，使用了简单的取模哈希。</p>
+</blockquote>
+<h2 id="4-运行演示"><a class="header" href="#4-运行演示">4. 运行演示</a></h2>
+<p>我们提供了一个示例 <code>examples/cluster_demo.rs</code>，它会：</p>
+<ol>
+<li>启动 3 个 Mini-Redis 服务器实例（端口 9001, 9002, 9003）。</li>
+<li>初始化 <code>ClusterClient</code>。</li>
+<li>向集群写入多个 Key，并打印每个 Key 被路由到了哪个节点。</li>
+<li>读取这些 Key，验证数据的一致性。</li>
+</ol>
+<p>运行命令：</p>
+<pre><code class="language-bash">cargo run --example cluster_demo
+</code></pre>
+<p>你将看到类似以下的输出，显示 Key 被均匀分布到了不同的节点上：</p>
+<pre><code class="language-text">&gt;&gt;&gt; Cluster started with nodes: ["127.0.0.1:9001", "127.0.0.1:9002", "127.0.0.1:9003"]
+
+&gt;&gt;&gt; Writing keys...
+SET apple -&gt; value-apple (Target: 127.0.0.1:9003)
+SET banana -&gt; value-banana (Target: 127.0.0.1:9001)
+SET cherry -&gt; value-cherry (Target: 127.0.0.1:9002)
+...
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-57-哨兵与高可用-sentinel"><a class="header" href="#day-57-哨兵与高可用-sentinel">Day 57: 哨兵与高可用 (Sentinel)</a></h1>
+<p>在分布式系统中，<strong>高可用 (High Availability, HA)</strong> 是核心需求之一。Redis Sentinel 是官方的高可用解决方案，它负责监控、通知和自动故障转移。</p>
+<h2 id="1-sentinel-核心概念"><a class="header" href="#1-sentinel-核心概念">1. Sentinel 核心概念</a></h2>
+<p>Sentinel 主要包含以下三个功能：</p>
+<ol>
+<li><strong>监控 (Monitoring)</strong>: 不断检查 Master 和 Replica 是否正常运行。</li>
+<li><strong>通知 (Notification)</strong>: 当被监控的 Redis 实例出问题时，通过 API 通知管理员或其他应用程序。</li>
+<li><strong>自动故障转移 (Automatic Failover)</strong>: 如果 Master 挂了，Sentinel 会将一个 Replica 提升为新的 Master，并通知其他 Replica 和客户端使用新的 Master。</li>
+</ol>
+<h2 id="2-本节目标-1"><a class="header" href="#2-本节目标-1">2. 本节目标</a></h2>
+<p>在本节中，我们实现了一个简化的 Sentinel 模拟器 (<code>SentinelService</code>)：</p>
+<ul>
+<li>它作为一个独立服务运行。</li>
+<li>它定期向 Master 发送 <code>PING</code> 命令进行健康检查。</li>
+<li>如果 Master 无响应，它会自动更新内部状态，将 Master 指向备用的 Replica 地址（模拟 Failover）。</li>
+</ul>
+<h2 id="3-实现细节-1"><a class="header" href="#3-实现细节-1">3. 实现细节</a></h2>
+<h3 id="ping-命令"><a class="header" href="#ping-命令">PING 命令</a></h3>
+<p>为了支持健康检查，我们首先在 Server 端实现了 <code>PING</code> 命令。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Client side
+pub async fn ping(&amp;mut self, msg: Option&lt;Bytes&gt;) -&gt; Result&lt;Bytes, Error&gt;
+<span class="boring">}</span></code></pre>
+<h3 id="sentinel-服务"><a class="header" href="#sentinel-服务">Sentinel 服务</a></h3>
+<p><code>SentinelService</code> 维护当前 Master 的地址和副本列表。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct SentinelService {
+    master_addr: Arc&lt;Mutex&lt;String&gt;&gt;,
+    replicas: Vec&lt;String&gt;,
+}
+<span class="boring">}</span></code></pre>
+<p>它启动一个循环，每隔一段时间（例如 500ms）连接 Master 并发送 Ping。如果连接失败或 Ping 失败，触发 <code>failover()</code> 逻辑。</p>
+<h3 id="模拟故障转移"><a class="header" href="#模拟故障转移">模拟故障转移</a></h3>
+<p>为了演示，我们的 <code>examples/sentinel_demo.rs</code> 使用 <code>tokio::sync::broadcast</code> 来编程控制 Server 的启动和关闭。</p>
+<ol>
+<li>启动 Master (6379) 和 Replica (6380)。</li>
+<li>Sentinel 开始监控 6379。</li>
+<li>Client 通过咨询 Sentinel 获取 Master 地址（6379），并写入数据。</li>
+<li>Demo 程序发送关闭信号给 Master。</li>
+<li>Sentinel 检测到 6379 不可达，将 Master 切换为 6380。</li>
+<li>Client 再次咨询 Sentinel，获取到新的 Master 地址（6380），并成功连接。</li>
+</ol>
+<h2 id="4-运行演示-1"><a class="header" href="#4-运行演示-1">4. 运行演示</a></h2>
+<pre><code class="language-bash">cargo run --example sentinel_demo
+</code></pre>
+<p>输出示例：</p>
+<pre><code class="language-text">&gt;&gt;&gt; Servers started: Master(6379), Replica(6380)
+&gt;&gt;&gt; Sentinel started monitoring.
+&gt;&gt;&gt; Client querying Sentinel... Current Master: 127.0.0.1:6379
+&gt;&gt;&gt; Client wrote 'status'='ok' to 127.0.0.1:6379
+
+&gt;&gt;&gt; SIMULATING FAILURE: Shutting down Master(6379)...
+&gt;&gt;&gt; Client querying Sentinel... New Master: 127.0.0.1:6380
+&gt;&gt;&gt; SUCCESS: Failover occurred correctly.
+&gt;&gt;&gt; Ping new master: b"PONG"
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-58-安全性-tls"><a class="header" href="#day-58-安全性-tls">Day 58: 安全性 (TLS)</a></h1>
+<p>在生产环境中，数据传输的安全性至关重要。Redis 支持 TLS/SSL 加密，以防止数据在传输过程中被窃听或篡改。</p>
+<h2 id="1-tls-基础"><a class="header" href="#1-tls-基础">1. TLS 基础</a></h2>
+<p><strong>TLS (Transport Layer Security)</strong> 协议位于 TCP 和应用层之间，为应用程序提供加密通信。</p>
+<p>核心组件：</p>
+<ul>
+<li><strong>证书 (Certificate)</strong>: 用于验证服务器（或客户端）的身份。</li>
+<li><strong>私钥 (Private Key)</strong>: 用于解密数据和签名。</li>
+<li><strong>CA (Certificate Authority)</strong>: 证书颁发机构，用于签署证书，建立信任链。</li>
+</ul>
+<h2 id="2-本节目标-2"><a class="header" href="#2-本节目标-2">2. 本节目标</a></h2>
+<p>在本节中，我们为 Mini-Redis 添加 TLS 支持：</p>
+<ol>
+<li><strong>Server 端</strong>: 使用 <code>tokio-rustls</code> 包装 <code>TcpStream</code>，并在握手成功后处理加密流。</li>
+<li><strong>Client 端</strong>: 增加 <code>connect_tls</code> 方法，验证服务器证书并建立加密连接。</li>
+<li><strong>证书生成</strong>: 提供脚本生成自签名的 CA 和服务器证书用于测试。</li>
+</ol>
+<h2 id="3-实现细节-2"><a class="header" href="#3-实现细节-2">3. 实现细节</a></h2>
+<h3 id="依赖"><a class="header" href="#依赖">依赖</a></h3>
+<p>我们需要 <code>tokio-rustls</code> (基于 Rustls 的 Tokio 绑定) 和 <code>rustls-pemfile</code> (用于解析 PEM 格式的证书)。</p>
+<pre><code class="language-toml">[dependencies]
+tokio-rustls = "0.26"
+rustls = "0.23"
+rustls-pemfile = "2.1"
+</code></pre>
+<h3 id="server-实现"><a class="header" href="#server-实现">Server 实现</a></h3>
+<p>我们修改了 <code>server::run</code>，使其接受一个可选的 <code>TlsAcceptor</code>。如果提供了 Acceptor，则对每个连接执行 TLS 握手。</p>
+<p>为了使 <code>process</code> 函数能够同时处理 <code>TcpStream</code> 和 <code>TlsStream&lt;TcpStream&gt;</code>，我们将连接抽象为 generic trait <code>AsyncStream</code> (需满足 <code>AsyncRead + AsyncWrite + Unpin + Send</code>)。</p>
+<h3 id="client-实现"><a class="header" href="#client-实现">Client 实现</a></h3>
+<p>增加了 <code>Client::connect_tls</code> 方法，它需要一个 <code>TlsConnector</code> 和目标域名（用于验证证书上的 CN/SAN）。</p>
+<h2 id="4-运行演示-2"><a class="header" href="#4-运行演示-2">4. 运行演示</a></h2>
+<p>首先，生成测试证书：</p>
+<pre><code class="language-bash">cd Day46-60/58.TLS
+./gen_certs.sh
+</code></pre>
+<p>运行 TLS 演示：</p>
+<pre><code class="language-bash">cargo run --example tls_demo
+</code></pre>
+<p>你将看到客户端成功通过 TLS 连接到服务器，并执行 PING, SET, GET 命令。</p>
+<pre><code class="language-text">Certificates generated in certs/
+&gt;&gt;&gt; TLS Server started on 127.0.0.1:6379
+&gt;&gt;&gt; Client connecting via TLS...
+&gt;&gt;&gt; PING...
+&lt;&lt;&lt; PONG: b"PONG"
+&gt;&gt;&gt; SET hello = world
+&gt;&gt;&gt; GET hello
+&lt;&lt;&lt; GET: Some(b"world")
+&gt;&gt;&gt; TLS Communication Verified!
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-59-完善文档与示例"><a class="header" href="#day-59-完善文档与示例">Day 59: 完善文档与示例</a></h1>
+<p>Rust 社区非常重视文档，良好的文档不仅是代码的一部分，更是生态系统的一等公民。<code>cargo doc</code> 工具使得生成高质量文档变得非常简单。</p>
+<h2 id="1-文档注释"><a class="header" href="#1-文档注释">1. 文档注释</a></h2>
+<p>在 Rust 中，我们使用 <code>///</code> 来编写文档注释（Doc Comments）。这些注释支持 Markdown 格式。</p>
+<ul>
+<li><strong>模块文档</strong>: 使用 <code>//!</code> 在文件的开头编写。</li>
+<li><strong>函数/结构体文档</strong>: 使用 <code>///</code> 在定义上方编写。</li>
+</ul>
+<h3 id="常用章节"><a class="header" href="#常用章节">常用章节</a></h3>
+<ul>
+<li><code># Examples</code>: 示例代码，这是文档中最有价值的部分。<code>cargo test</code> 会自动运行这些示例（Doctests），确保文档与代码保持同步。</li>
+<li><code># Panics</code>: 说明函数在什么情况下会 Panic。</li>
+<li><code># Errors</code>: 说明函数返回 <code>Result</code> 时可能包含的错误类型。</li>
+<li><code># Safety</code>: 如果函数是 <code>unsafe</code> 的，必须说明调用者需要保证的安全条件。</li>
+</ul>
+<h2 id="2-本节目标-3"><a class="header" href="#2-本节目标-3">2. 本节目标</a></h2>
+<p>在本节中，我们对 Mini-Redis 项目进行了文档化增强：</p>
+<ol>
+<li><strong>Library Crate 文档</strong>: 在 <code>src/lib.rs</code> 中添加了 crate 级别的说明。</li>
+<li><strong>Public API 文档</strong>: 为 <code>Client</code> 等核心结构体添加了详细的文档注释。</li>
+<li><strong>Doctests</strong>: 在文档中加入了可运行的代码示例。</li>
+<li><strong>示例程序</strong>: 在 <code>examples/</code> 目录下添加了 <code>basic.rs</code> 和 <code>hello_redis.rs</code>，展示完整用法。</li>
+</ol>
+<h2 id="3-生成文档"><a class="header" href="#3-生成文档">3. 生成文档</a></h2>
+<p>运行以下命令生成并查看文档：</p>
+<pre><code class="language-bash">cargo doc --open
+</code></pre>
+<p>生成的 HTML 文档位于 <code>target/doc/mini_redis_doc/index.html</code>。</p>
+<h2 id="4-运行示例"><a class="header" href="#4-运行示例">4. 运行示例</a></h2>
+<p>我们提供了两个示例程序：</p>
+<p><strong>Basic Usage:</strong></p>
+<pre><code class="language-bash">cargo run --example basic
+</code></pre>
+<p><strong>Walkthrough:</strong></p>
+<pre><code class="language-bash">cargo run --example hello_redis
+</code></pre>
+<blockquote>
+<p>注意：运行示例前请确保已启动 Mini-Redis 服务器（可使用之前章节的 Server，或本目录下 <code>cargo run --bin mini-redis-server</code> 如果有 binary target 的话。本节主要关注 Library 文档，未包含 Server binary 的显式配置，可复用 Day 54/55 的 Server）。</p>
+</blockquote>
+<h2 id="5-小贴士"><a class="header" href="#5-小贴士">5. 小贴士</a></h2>
+<ul>
+<li>使用 <code>cargo test</code> 来运行文档测试，确保示例代码是正确的。</li>
+<li>文档应该简洁明了，重点突出。</li>
+<li>尽量为每个公开的 API 添加文档。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-60-项目发布与-cicd"><a class="header" href="#day-60-项目发布与-cicd">Day 60: 项目发布与 CI/CD</a></h1>
+<p><a href="https://github.com/yourusername/mini-redis-cicd/actions"><img src="https://github.com/yourusername/mini-redis-cicd/workflows/CI/badge.svg" alt="CI"></a>
+<a href="https://codecov.io/gh/yourusername/mini-redis-cicd"><img src="https://codecov.io/gh/yourusername/mini-redis-cicd/branch/main/graph/badge.svg" alt="Coverage"></a>
+<a href="Day46-60/60.CICD/LICENSE-MIT"><img src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg" alt="License: MIT OR Apache-2.0"></a>
+<a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/rust-1.75%2B-orange.svg" alt="Rust Version"></a></p>
+<p>恭喜你完成了 Mini-Redis 项目的开发！在本节中，我们将学习如何将项目发布到 crates.io，并设置持续集成/持续部署 (CI/CD) 流水线。</p>
+<h2 id="1-发布到-cratesio"><a class="header" href="#1-发布到-cratesio">1. 发布到 Crates.io</a></h2>
+<h3 id="11-准备工作"><a class="header" href="#11-准备工作">1.1 准备工作</a></h3>
+<p>在发布之前，确保你的 <code>Cargo.toml</code> 包含必要的元数据：</p>
+<pre><code class="language-toml">[package]
+name = "mini-redis"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name &lt;your.email@example.com&gt;"]
+description = "A minimal Redis implementation in Rust for learning purposes"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yourusername/mini-redis"
+documentation = "https://docs.rs/mini-redis"
+readme = "README.md"
+keywords = ["redis", "database", "async", "tokio"]
+categories = ["database", "network-programming"]
+
+# 排除不需要发布的文件
+exclude = [
+    "tests/*",
+    "benches/*",
+    "examples/*",
+    ".github/*",
+]
+</code></pre>
+<h3 id="12-登录-cratesio"><a class="header" href="#12-登录-cratesio">1.2 登录 Crates.io</a></h3>
+<pre><code class="language-bash"># 首先在 https://crates.io 注册账号并获取 API Token
+cargo login &lt;your-api-token&gt;
+</code></pre>
+<h3 id="13-检查与发布"><a class="header" href="#13-检查与发布">1.3 检查与发布</a></h3>
+<pre><code class="language-bash"># 检查包是否可以发布
+cargo publish --dry-run
+
+# 正式发布
+cargo publish
+</code></pre>
+<h2 id="2-github-actions-cicd"><a class="header" href="#2-github-actions-cicd">2. GitHub Actions CI/CD</a></h2>
+<h3 id="21-基础-ci-配置"><a class="header" href="#21-基础-ci-配置">2.1 基础 CI 配置</a></h3>
+<p>创建 <code>.github/workflows/ci.yml</code>：</p>
+<pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check --all-features
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-features
+
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --all-features -- -D warnings
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: -D warnings
+</code></pre>
+<h3 id="22-跨平台测试"><a class="header" href="#22-跨平台测试">2.2 跨平台测试</a></h3>
+<pre><code class="language-yaml">  cross-platform:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable, beta]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-features
+</code></pre>
+<h3 id="23-自动发布"><a class="header" href="#23-自动发布">2.3 自动发布</a></h3>
+<p>创建 <code>.github/workflows/release.yml</code>：</p>
+<pre><code class="language-yaml">name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+</code></pre>
+<h2 id="3-代码质量工具"><a class="header" href="#3-代码质量工具">3. 代码质量工具</a></h2>
+<h3 id="31-pre-commit-hooks"><a class="header" href="#31-pre-commit-hooks">3.1 Pre-commit Hooks</a></h3>
+<p>安装 <code>cargo-husky</code> 来自动运行检查：</p>
+<pre><code class="language-bash">cargo add cargo-husky --dev
+</code></pre>
+<p>在 <code>Cargo.toml</code> 中配置：</p>
+<pre><code class="language-toml">[dev-dependencies.cargo-husky]
+version = "1"
+default-features = false
+features = ["precommit-hook", "run-cargo-test", "run-cargo-clippy", "run-cargo-fmt"]
+</code></pre>
+<h3 id="32-代码覆盖率"><a class="header" href="#32-代码覆盖率">3.2 代码覆盖率</a></h3>
+<p>使用 <code>cargo-tarpaulin</code> 生成覆盖率报告：</p>
+<pre><code class="language-bash">cargo install cargo-tarpaulin
+cargo tarpaulin --out Html
+</code></pre>
+<p>添加到 CI：</p>
+<pre><code class="language-yaml">  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install tarpaulin
+        run: cargo install cargo-tarpaulin
+      - name: Generate coverage
+        run: cargo tarpaulin --out Xml
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
+</code></pre>
+<h2 id="4-版本管理"><a class="header" href="#4-版本管理">4. 版本管理</a></h2>
+<h3 id="41-语义化版本"><a class="header" href="#41-语义化版本">4.1 语义化版本</a></h3>
+<p>遵循 <a href="https://semver.org/">SemVer</a> 规范：</p>
+<ul>
+<li><strong>MAJOR</strong>: 不兼容的 API 变更</li>
+<li><strong>MINOR</strong>: 向后兼容的功能新增</li>
+<li><strong>PATCH</strong>: 向后兼容的问题修复</li>
+</ul>
+<h3 id="42-changelog"><a class="header" href="#42-changelog">4.2 Changelog</a></h3>
+<p>使用 <code>git-cliff</code> 自动生成 CHANGELOG：</p>
+<pre><code class="language-bash">cargo install git-cliff
+git cliff --init
+git cliff -o CHANGELOG.md
+</code></pre>
+<h3 id="43-发布流程"><a class="header" href="#43-发布流程">4.3 发布流程</a></h3>
+<pre><code class="language-bash"># 1. 更新版本号
+cargo set-version 0.2.0
+
+# 2. 生成 Changelog
+git cliff -o CHANGELOG.md
+
+# 3. 提交并打标签
+git add .
+git commit -m "chore: release v0.2.0"
+git tag v0.2.0
+
+# 4. 推送触发 CI/CD
+git push origin main --tags
+</code></pre>
+<h2 id="5-docker-支持"><a class="header" href="#5-docker-支持">5. Docker 支持</a></h2>
+<p>创建 <code>Dockerfile</code>：</p>
+<pre><code class="language-dockerfile"># Build stage
+FROM rust:1.75-alpine AS builder
+WORKDIR /app
+RUN apk add --no-cache musl-dev
+COPY . .
+RUN cargo build --release
+
+# Runtime stage
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /app/target/release/mini-redis /usr/local/bin/
+EXPOSE 6379
+CMD ["mini-redis"]
+</code></pre>
+<p>构建并运行：</p>
+<pre><code class="language-bash">docker build -t mini-redis .
+docker run -p 6379:6379 mini-redis
+</code></pre>
+<h2 id="6-项目总结"><a class="header" href="#6-项目总结">6. 项目总结</a></h2>
+<p>经过 15 天的开发，我们的 Mini-Redis 项目已经具备：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>功能</th><th>状态</th></tr>
+</thead>
+<tbody>
+<tr><td>RESP 协议解析</td><td>✅</td></tr>
+<tr><td>基础命令 (GET/SET/DEL)</td><td>✅</td></tr>
+<tr><td>过期时间支持</td><td>✅</td></tr>
+<tr><td>异步网络层</td><td>✅</td></tr>
+<tr><td>并发控制</td><td>✅</td></tr>
+<tr><td>AOF 持久化</td><td>✅</td></tr>
+<tr><td>Pub/Sub</td><td>✅</td></tr>
+<tr><td>Client SDK</td><td>✅</td></tr>
+<tr><td>性能基准测试</td><td>✅</td></tr>
+<tr><td>集群模式</td><td>✅</td></tr>
+<tr><td>哨兵高可用</td><td>✅</td></tr>
+<tr><td>TLS 加密</td><td>✅</td></tr>
+<tr><td>完善文档</td><td>✅</td></tr>
+<tr><td>CI/CD</td><td>✅</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
+<p>第四阶段到此结束！在接下来的第五阶段（Day 61-80），我们将进入 <strong>Web 开发实战</strong>，使用 Axum 或 Actix-web 构建完整的 RESTful API 应用。</p>
+<hr>
+<p><strong>恭喜完成 Mini-Redis 项目！</strong> 🎉</p>
 
                     </main>
 

@@ -1,0 +1,19 @@
+[build]
+# Compile with optimizations in dev mode for faster runtime
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+# Enable link-time optimization for smaller binaries
+lto = true
+# Strip symbols for smaller binaries
+strip = true
+# Optimize for size
+opt-level = "z"
+codegen-units = 1
+
+[alias]
+# Useful cargo aliases
+check-all = "check --all-features --all-targets"
+test-all = "test --all-features --all-targets"
+build-release = "build --release"
