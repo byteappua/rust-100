@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
+            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-13fa5e57.js"></script>
+        <script src="../../toc-cec6f113.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,19 +178,34 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-11-错误处理-error-handling"><a class="header" href="#day-11-错误处理-error-handling">Day 11: 错误处理 (Error Handling)</a></h1>
-<p>Rust 将错误组合成两个主要类别：</p>
+<p>Rust 的错误处理机制设计得非常安全，它迫使你在编写代码时就必须处理可能发生的错误。</p>
+<h2 id="1-错误分类"><a class="header" href="#1-错误分类">1. 错误分类</a></h2>
 <ol>
-<li><strong>可恢复错误 (Recoverable errors)</strong>：通常代表向用户报告错误并重试的操作。例如：未找到文件。使用 <code>Result&lt;T, E&gt;</code>。</li>
-<li><strong>不可恢复错误 (Unrecoverable errors)</strong>：是 bug 的症状。例如：尝试访问超过数组结尾的索引。使用 <code>panic!</code>。</li>
+<li><strong>可恢复错误 (Recoverable errors)</strong>:
+<ul>
+<li>例如：文件未找到。</li>
+<li>处理方式：向用户报告错误，重试操作。</li>
+<li>类型：<code>Result&lt;T, E&gt;</code>。</li>
+</ul>
+</li>
+<li><strong>不可恢复错误 (Unrecoverable errors)</strong>:
+<ul>
+<li>例如：数组越界访问。</li>
+<li>这是 Bug 的症状。</li>
+<li>处理方式：立即停止程序 (<code>panic!</code>)。</li>
+</ul>
+</li>
 </ol>
-<h2 id="1-panic-与不可恢复错误"><a class="header" href="#1-panic-与不可恢复错误">1. panic! 与不可恢复错误</a></h2>
-<p>当 <code>panic!</code> 宏执行时，程序会打印一个错误信息，展开并清理栈数据，然后退出。</p>
+<h2 id="2-panic-与不可恢复错误"><a class="header" href="#2-panic-与不可恢复错误">2. panic! 与不可恢复错误</a></h2>
 <pre class="playground"><code class="language-rust">fn main() {
     panic!("crash and burn");
 }</code></pre>
-<p>使用 <code>RUST_BACKTRACE=1</code> 环境变量运行程序可以获取回溯信息。</p>
-<h2 id="2-result-与可恢复错误"><a class="header" href="#2-result-与可恢复错误">2. Result 与可恢复错误</a></h2>
-<p><code>Result</code> 枚举定义如下：</p>
+<ul>
+<li>默认情况下，<code>panic!</code> 会打印错误信息，展开 (unwind) 并清理栈，然后退出。</li>
+<li><strong>Backtrace</strong>: 设置环境变量 <code>RUST_BACKTRACE=1</code> 可以查看 panic 发生时的调用栈。</li>
+</ul>
+<h2 id="3-result-与可恢复错误"><a class="header" href="#3-result-与可恢复错误">3. Result 与可恢复错误</a></h2>
+<p><code>Result</code> 枚举包含两个成员：<code>Ok</code> 表示成功，<code>Err</code> 表示失败。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum Result&lt;T, E&gt; {
@@ -198,35 +213,66 @@
     Err(E),
 }
 <span class="boring">}</span></code></pre>
-<h3 id="处理-result"><a class="header" href="#处理-result">处理 Result</a></h3>
+<h3 id="使用-match-处理-result"><a class="header" href="#使用-match-处理-result">使用 match 处理 Result</a></h3>
 <pre class="playground"><code class="language-rust">use std::fs::File;
-use std::io::ErrorKind;
 
 fn main() {
     let f = File::open("hello.txt");
 
     let f = match f {
         Ok(file) =&gt; file,
-        Err(error) =&gt; match error.kind() {
-            ErrorKind::NotFound =&gt; match File::create("hello.txt") {
-                Ok(fc) =&gt; fc,
-                Err(e) =&gt; panic!("Problem creating the file: {:?}", e),
-            },
-            other_error =&gt; {
-                panic!("Problem opening the file: {:?}", other_error)
-            }
-        },
+        Err(error) =&gt; {
+            panic!("Problem opening the file: {:?}", error);
+        }
     };
 }</code></pre>
-<h3 id="unwrap-和-expect"><a class="header" href="#unwrap-和-expect">unwrap 和 expect</a></h3>
-<p>帮助方法，如果 <code>Result</code> 是 <code>Err</code>，则调用 <code>panic!</code>。</p>
+<h3 id="匹配不同的错误"><a class="header" href="#匹配不同的错误">匹配不同的错误</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let f = File::open("hello.txt").unwrap();
+</span>use std::fs::File;
+use std::io::ErrorKind;
+
+let f = File::open("hello.txt");
+
+let f = match f {
+    Ok(file) =&gt; file,
+    Err(error) =&gt; match error.kind() {
+        ErrorKind::NotFound =&gt; match File::create("hello.txt") {
+            Ok(fc) =&gt; fc,
+            Err(e) =&gt; panic!("Problem creating the file: {:?}", e),
+        },
+        other_error =&gt; {
+            panic!("Problem opening the file: {:?}", other_error)
+        }
+    },
+};
+<span class="boring">}</span></code></pre>
+<h2 id="4-辅助方法-helpers"><a class="header" href="#4-辅助方法-helpers">4. 辅助方法 (Helpers)</a></h2>
+<p><code>match</code> 虽然强大，但有时过于冗长。<code>Result</code> 提供了许多辅助方法。</p>
+<h3 id="失败时-panic-unwrap-和-expect"><a class="header" href="#失败时-panic-unwrap-和-expect">失败时 Panic: unwrap 和 expect</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 如果是 Err，直接 panic
+let f = File::open("hello.txt").unwrap();
+
+// 如果是 Err，panic 并附带自定义信息 (推荐)
 let f = File::open("hello.txt").expect("Failed to open hello.txt");
 <span class="boring">}</span></code></pre>
-<h2 id="3-传播错误"><a class="header" href="#3-传播错误">3. 传播错误</a></h2>
-<p>将错误返回给调用者。</p>
+<h3 id="失败时使用默认值-unwrap_or-和-unwrap_or_else"><a class="header" href="#失败时使用默认值-unwrap_or-和-unwrap_or_else">失败时使用默认值: unwrap_or 和 unwrap_or_else</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 如果失败，返回提供的默认值
+let v = result.unwrap_or(0);
+
+// 如果失败，执行闭包计算默认值 (懒求值)
+let v = result.unwrap_or_else(|err| {
+    println!("Error: {}", err);
+    0
+});
+<span class="boring">}</span></code></pre>
+<h2 id="5-传播错误-propagating-errors"><a class="header" href="#5-传播错误-propagating-errors">5. 传播错误 (Propagating Errors)</a></h2>
+<p>与其在函数内部处理错误，不如将错误返回给调用者，让调用者决定如何处理。</p>
+<h3 id="原始方式"><a class="header" href="#原始方式">原始方式</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use std::fs::File;
@@ -237,7 +283,7 @@ fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
 
     let mut f = match f {
         Ok(file) =&gt; file,
-        Err(e) =&gt; return Err(e),
+        Err(e) =&gt; return Err(e), // 提前返回错误
     };
 
     let mut s = String::new();
@@ -248,20 +294,32 @@ fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
     }
 }
 <span class="boring">}</span></code></pre>
-<h3 id="传播错误的简写-运算符"><a class="header" href="#传播错误的简写-运算符">传播错误的简写：<code>?</code> 运算符</a></h3>
+<h3 id="问号运算符-"><a class="header" href="#问号运算符-">问号运算符 <code>?</code></a></h3>
+<p><code>?</code> 运算符大大简化了错误传播。如果 <code>Result</code> 是 <code>Ok</code>，它返回 <code>Ok</code> 中的值；如果是 <code>Err</code>，它直接从当前函数返回 <code>Err</code>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use std::fs::File;
-use std::io;
-use std::io::Read;
+use std::io::{self, Read};
 
 fn read_username_from_file() -&gt; Result&lt;String, io::Error&gt; {
     let mut s = String::new();
+    // 链式调用
     File::open("hello.txt")?.read_to_string(&amp;mut s)?;
     Ok(s)
 }
 <span class="boring">}</span></code></pre>
-<p>注意：<code>?</code> 运算符只能用于返回 <code>Result</code>、<code>Option</code> 或实现了 <code>FromResidual</code> 的类型的函数中。</p>
+<p>注意：<code>?</code> 只能用于返回类型为 <code>Result</code> (或 <code>Option</code>) 的函数中。</p>
+<h2 id="6-main-函数返回-result"><a class="header" href="#6-main-函数返回-result">6. main 函数返回 Result</a></h2>
+<p><code>main</code> 函数通常返回 <code>()</code>，但它也可以返回 <code>Result</code>。这允许我们在 <code>main</code> 中使用 <code>?</code>。</p>
+<pre class="playground"><code class="language-rust">use std::error::Error;
+use std::fs::File;
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+    let f = File::open("hello.txt")?;
+
+    Ok(())
+}</code></pre>
+<p>这里的 <code>Box&lt;dyn Error&gt;</code> 是一个 Trait 对象，意味着“任何类型的错误”。</p>
 
                     </main>
 

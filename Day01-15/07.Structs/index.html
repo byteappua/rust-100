@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
+            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-13fa5e57.js"></script>
+        <script src="../../toc-cec6f113.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,9 +178,10 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-07-结构体-structs"><a class="header" href="#day-07-结构体-structs">Day 07: 结构体 (Structs)</a></h1>
-<p>结构体（Struct）让你能够将多个相关的值组合成一个有意义的命名组合。</p>
+<p>结构体（Struct）是一种自定义数据类型，让你能够将多个相关的值组合成一个有意义的命名组合。这就好比面向对象语言中的对象的数据属性。</p>
 <h2 id="1-定义与实例化结构体"><a class="header" href="#1-定义与实例化结构体">1. 定义与实例化结构体</a></h2>
 <h3 id="定义结构体"><a class="header" href="#定义结构体">定义结构体</a></h3>
+<p>使用 <code>struct</code> 关键字。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct User {
@@ -191,6 +192,7 @@
 }
 <span class="boring">}</span></code></pre>
 <h3 id="实例化结构体"><a class="header" href="#实例化结构体">实例化结构体</a></h3>
+<p>需要为每个字段赋值。顺序不重要。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let user1 = User {
@@ -200,18 +202,67 @@
     sign_in_count: 1,
 };
 <span class="boring">}</span></code></pre>
+<h3 id="获取结构体字段的值"><a class="header" href="#获取结构体字段的值">获取结构体字段的值</a></h3>
+<p>使用点号 <code>.</code>。如果结构体实例是可变的，我们也可以修改字段的值。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut user1 = User {
+    email: String::from("someone@example.com"),
+    username: String::from("someusername123"),
+    active: true,
+    sign_in_count: 1,
+};
+
+user1.email = String::from("anotheremail@example.com");
+<span class="boring">}</span></code></pre>
+<h3 id="字段初始化简写语法"><a class="header" href="#字段初始化简写语法">字段初始化简写语法</a></h3>
+<p>当变量名与字段名相同时，可以简化写法。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn build_user(email: String, username: String) -&gt; User {
+    User {
+        email,    // 等同于 email: email
+        username, // 等同于 username: username
+        active: true,
+        sign_in_count: 1,
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="结构体更新语法"><a class="header" href="#结构体更新语法">结构体更新语法</a></h3>
+<p>可以使用旧实例的大部分值来创建一个新实例。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let user2 = User {
+    email: String::from("another@example.com"),
+    ..user1
+};
+<span class="boring">}</span></code></pre>
+<p>注意：<code>..user1</code> 必须放在最后。这会发生所有权的转移（对于实现了 Copy 的字段则是复制）。在上面的例子中，如果 <code>user1</code> 的 <code>username</code> 字段（String 类型）被移动到了 <code>user2</code>，那么 <code>user1</code> 在这之后就部分无效了。</p>
 <h2 id="2-元组结构体-tuple-structs"><a class="header" href="#2-元组结构体-tuple-structs">2. 元组结构体 (Tuple Structs)</a></h2>
+<p>元组结构体有着结构体名称提供的含义，但没有具体的字段名，只有字段的类型。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct Color(i32, i32, i32);
 struct Point(i32, i32, i32);
+
+let black = Color(0, 0, 0);
+let origin = Point(0, 0, 0);
 <span class="boring">}</span></code></pre>
+<p>访问元组结构体字段使用索引：<code>black.0</code>。</p>
 <h2 id="3-类单元结构体-unit-like-structs"><a class="header" href="#3-类单元结构体-unit-like-structs">3. 类单元结构体 (Unit-Like Structs)</a></h2>
+<p>没有任何字段的结构体。通常用于在某个类型上实现 Trait，但不需要存储数据。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct AlwaysEqual;
+
+let subject = AlwaysEqual;
 <span class="boring">}</span></code></pre>
-<h2 id="4-方法语法"><a class="header" href="#4-方法语法">4. 方法语法</a></h2>
+<h2 id="4-结构体数据的所有权"><a class="header" href="#4-结构体数据的所有权">4. 结构体数据的所有权</a></h2>
+<p>在上面的 <code>User</code> 结构体定义中，我们使用了 <code>String</code> 类型而不是 <code>&amp;str</code>。这是一个有意为之的选择，因为我们希望结构体拥有它所有的数据。
+如果要存储引用，需要使用<strong>生命周期 (Lifetimes)</strong>，这在后续章节会讨论。</p>
+<h2 id="5-方法语法-method-syntax"><a class="header" href="#5-方法语法-method-syntax">5. 方法语法 (Method Syntax)</a></h2>
+<p>方法与函数类似，但它们是在结构体的上下文中定义的（或者是枚举、Trait 对象）。方法的第一个参数总是 <code>self</code>。</p>
+<h3 id="定义方法"><a class="header" href="#定义方法">定义方法</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>#[derive(Debug)]
@@ -221,10 +272,53 @@ struct Rectangle {
 }
 
 impl Rectangle {
+    // &amp;self 是 self: &amp;Self 的简写
     fn area(&amp;self) -&gt; u32 {
         self.width * self.height
     }
+
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool {
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
+    }
 }
+<span class="boring">}</span></code></pre>
+<h3 id="方法参数-self"><a class="header" href="#方法参数-self">方法参数 <code>self</code></a></h3>
+<ul>
+<li><code>&amp;self</code>: 借用结构体实例，不可变（最常用）。</li>
+<li><code>&amp;mut self</code>: 借用结构体实例，可变（用于修改实例）。</li>
+<li><code>self</code>: 获取结构体实例的所有权（通常用于转换类型，转换后原实例不可用）。</li>
+</ul>
+<h3 id="关联函数-associated-functions"><a class="header" href="#关联函数-associated-functions">关联函数 (Associated Functions)</a></h3>
+<p><code>impl</code> 块中定义的函数不一定非要以 <code>self</code> 作为参数。这种函数被称为关联函数（因为它们与结构体相关联）。最常见的例子是 <code>String::from</code>。
+通常用于构造函数。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Rectangle {
+    fn square(size: u32) -&gt; Rectangle {
+        Rectangle {
+            width: size,
+            height: size,
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>调用关联函数使用 <code>::</code> 语法：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let sq = Rectangle::square(3);
+<span class="boring">}</span></code></pre>
+<h2 id="6-打印结构体"><a class="header" href="#6-打印结构体">6. 打印结构体</a></h2>
+<p>默认情况下，结构体没有实现 <code>Display</code> trait，所以不能直接用 <code>{}</code> 打印。
+但是可以通过 <code>#[derive(Debug)]</code> 为结构体自动派生 <code>Debug</code> trait。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let rect1 = Rectangle {
+    width: 30,
+    height: 50,
+};
+
+println!("rect1 is {:?}", rect1); // 输出单行调试信息
+println!("rect1 is {:#?}", rect1); // 输出格式化（多行）调试信息
 <span class="boring">}</span></code></pre>
 
                     </main>

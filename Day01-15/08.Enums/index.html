@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
+            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-13fa5e57.js"></script>
+        <script src="../../toc-cec6f113.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -180,14 +180,51 @@
                         <h1 id="day-08-枚举-enums-与模式匹配"><a class="header" href="#day-08-枚举-enums-与模式匹配">Day 08: 枚举 (Enums) 与模式匹配</a></h1>
 <p>枚举（Enumerations），通常称为 Enums，允许你通过列举可能的成员（Variants）来定义一个类型。</p>
 <h2 id="1-定义枚举"><a class="header" href="#1-定义枚举">1. 定义枚举</a></h2>
+<h3 id="基本枚举"><a class="header" href="#基本枚举">基本枚举</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum IpAddrKind {
     V4,
     V6,
 }
+
+let four = IpAddrKind::V4;
+let six = IpAddrKind::V6;
+<span class="boring">}</span></code></pre>
+<h3 id="带有数据的枚举"><a class="header" href="#带有数据的枚举">带有数据的枚举</a></h3>
+<p>枚举的成员可以包含不同类型和数量的数据。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum IpAddr {
+    V4(u8, u8, u8, u8), // 像元组结构体
+    V6(String),
+}
+
+let home = IpAddr::V4(127, 0, 0, 1);
+let loopback = IpAddr::V6(String::from("::1"));
+<span class="boring">}</span></code></pre>
+<p>甚至可以包含结构体：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+<span class="boring">}</span></code></pre>
+<h3 id="枚举的方法"><a class="header" href="#枚举的方法">枚举的方法</a></h3>
+<p>也可以像结构体一样，使用 <code>impl</code> 为枚举定义方法。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Message {
+    fn call(&amp;self) {
+        // ...
+    }
+}
 <span class="boring">}</span></code></pre>
 <h2 id="2-option-枚举"><a class="header" href="#2-option-枚举">2. Option 枚举</a></h2>
+<p>Rust 没有 Null 值，但是提供了 <code>Option&lt;T&gt;</code> 枚举来表示一个值可能存在，也可能不存在。它定义在标准库中。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum Option&lt;T&gt; {
@@ -195,23 +232,109 @@
     None,
 }
 <span class="boring">}</span></code></pre>
+<p>使用 <code>Option</code>：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let some_number = Some(5);
+let some_string = Some("a string");
+let absent_number: Option&lt;i32&gt; = None; // 必须指定类型，因为无法从 None 推断 T
+<span class="boring">}</span></code></pre>
+<p>要获取 <code>T</code> 的值，通常需要使用模式匹配。</p>
 <h2 id="3-match-控制流运算符"><a class="header" href="#3-match-控制流运算符">3. match 控制流运算符</a></h2>
+<p><code>match</code> 允许我们将一个值与一系列的模式进行比较，并根据匹配的模式执行相应的代码。</p>
+<h3 id="基本用法"><a class="header" href="#基本用法">基本用法</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>match coin {
-    Coin::Penny =&gt; 1,
-    Coin::Nickel =&gt; 5,
-    Coin::Dime =&gt; 10,
-    Coin::Quarter =&gt; 25,
+</span>enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -&gt; u8 {
+    match coin {
+        Coin::Penny =&gt; 1,
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter =&gt; 25,
+    }
 }
 <span class="boring">}</span></code></pre>
-<h2 id="4-if-let"><a class="header" href="#4-if-let">4. if let</a></h2>
+<h3 id="绑定值的模式"><a class="header" href="#绑定值的模式">绑定值的模式</a></h3>
+<p>如果枚举成员包含数据，<code>match</code> 可以提取它。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>if let Some(3) = some_u8_value {
-    println!("three");
+</span>#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // ...
+}
+
+enum Coin {
+    Penny,
+    Quarter(UsState),
+}
+
+fn value_in_cents(coin: Coin) -&gt; u8 {
+    match coin {
+        Coin::Penny =&gt; 1,
+        Coin::Quarter(state) =&gt; {
+            println!("State quarter from {:?}!", state);
+            25
+        }
+    }
 }
 <span class="boring">}</span></code></pre>
+<h3 id="匹配-option"><a class="header" href="#匹配-option">匹配 Option<t></t></a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn plus_one(x: Option&lt;i32&gt;) -&gt; Option&lt;i32&gt; {
+    match x {
+        None =&gt; None,
+        Some(i) =&gt; Some(i + 1),
+    }
+}
+
+let five = Some(5);
+let six = plus_one(five);
+let none = plus_one(None);
+<span class="boring">}</span></code></pre>
+<h3 id="穷尽性-exhaustiveness"><a class="header" href="#穷尽性-exhaustiveness">穷尽性 (Exhaustiveness)</a></h3>
+<p><code>match</code> 的分支必须覆盖所有可能的情况。如果漏掉一个分支，编译器会报错。</p>
+<h3 id="通配符-_-与-other"><a class="header" href="#通配符-_-与-other">通配符 <code>_</code> 与 <code>other</code></a></h3>
+<p>如果我们只关心部分情况，可以使用 <code>_</code>（下划线）匹配所有其他情况并忽略值，或者使用变量名捕获值。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let dice_roll = 9;
+match dice_roll {
+    3 =&gt; add_fancy_hat(),
+    7 =&gt; remove_fancy_hat(),
+    other =&gt; move_player(other), // 捕获值
+    // _ =&gt; reroll(), // 或者使用 _ 忽略值
+}
+<span class="boring">}</span></code></pre>
+<h2 id="4-if-let-控制流"><a class="header" href="#4-if-let-控制流">4. if let 控制流</a></h2>
+<p><code>if let</code> 语法让我们以一种不那么冗长的方式处理只匹配一个模式的值而忽略其他模式的情况。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let config_max = Some(3u8);
+
+// 使用 match
+match config_max {
+    Some(max) =&gt; println!("The maximum is configured to be {}", max),
+    _ =&gt; (),
+}
+
+// 使用 if let
+if let Some(max) = config_max {
+    println!("The maximum is configured to be {}", max);
+} else {
+    println!("Config max is None");
+}
+<span class="boring">}</span></code></pre>
+<p><code>if let</code> 可以看作是 <code>match</code> 的语法糖，当只需要处理一种模式（或配合 <code>else</code> 处理不匹配的情况）时使用。</p>
 
                     </main>
 

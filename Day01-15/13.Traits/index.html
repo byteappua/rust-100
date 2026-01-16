@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
+            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-13fa5e57.js"></script>
+        <script src="../../toc-cec6f113.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,16 +178,22 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-13-trait-特征"><a class="header" href="#day-13-trait-特征">Day 13: Trait (特征)</a></h1>
-<p>Trait 告诉 Rust 编译器某个特定类型拥有可能与其他类型共享的功能。Trait 类似于其他语言中的接口（Interfaces），但有一些区别。</p>
+<p>Trait (特征) 告诉 Rust 编译器某个特定类型拥有可能与其他类型共享的功能。Trait 类似于其他语言中的接口（Interfaces），但有一些重要区别。</p>
 <h2 id="1-定义-trait"><a class="header" href="#1-定义-trait">1. 定义 Trait</a></h2>
-<p>使用 <code>trait</code> 关键字定义。</p>
+<p>使用 <code>trait</code> 关键字定义一组方法签名。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub trait Summary {
     fn summarize(&amp;self) -&gt; String;
+
+    // 可以有默认实现
+    fn summarize_author(&amp;self) -&gt; String {
+        String::from("(Read more...)")
+    }
 }
 <span class="boring">}</span></code></pre>
 <h2 id="2-为类型实现-trait"><a class="header" href="#2-为类型实现-trait">2. 为类型实现 Trait</a></h2>
+<p>使用 <code>impl TraitName for TypeName</code> 语法。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub struct NewsArticle {
@@ -216,24 +222,19 @@ impl Summary for Tweet {
     }
 }
 <span class="boring">}</span></code></pre>
-<h2 id="3-默认实现"><a class="header" href="#3-默认实现">3. 默认实现</a></h2>
-<p>可以在 Trait 定义中提供默认行为。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub trait Summary {
-    fn summarize(&amp;self) -&gt; String {
-        String::from("(Read more...)")
-    }
-}
-<span class="boring">}</span></code></pre>
-<h2 id="4-trait-作为参数-trait-bounds"><a class="header" href="#4-trait-作为参数-trait-bounds">4. Trait 作为参数 (Trait Bounds)</a></h2>
+<h3 id="孤儿规则-orphan-rule"><a class="header" href="#孤儿规则-orphan-rule">孤儿规则 (Orphan Rule)</a></h3>
+<p>你只能在 trait 或类型至少有一个属于当前 crate 时，才能为该类型实现该 trait。
+例如：你可以为自己的 <code>Tweet</code> 类型实现标准库的 <code>Display</code> trait。
+但你不能为 <code>Vec&lt;T&gt;</code> (标准库) 实现 <code>Display</code> (标准库)，因为它们都不在你的 crate 中。</p>
+<h2 id="3-trait-作为参数-trait-bounds"><a class="header" href="#3-trait-作为参数-trait-bounds">3. Trait 作为参数 (Trait Bounds)</a></h2>
+<h3 id="impl-trait-语法-语法糖"><a class="header" href="#impl-trait-语法-语法糖">impl Trait 语法 (语法糖)</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn notify(item: &amp;impl Summary) {
     println!("Breaking news! {}", item.summarize());
 }
 <span class="boring">}</span></code></pre>
-<p>这实际上是 Trait Bound 语法的语法糖：</p>
+<h3 id="trait-bound-语法-完整形式"><a class="header" href="#trait-bound-语法-完整形式">Trait Bound 语法 (完整形式)</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn notify&lt;T: Summary&gt;(item: &amp;T) {
@@ -241,32 +242,70 @@ impl Summary for Tweet {
 }
 <span class="boring">}</span></code></pre>
 <h3 id="指定多个-trait-bound"><a class="header" href="#指定多个-trait-bound">指定多个 Trait Bound</a></h3>
+<p>使用 <code>+</code> 连接。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn notify(item: &amp;(impl Summary + Display)) {
+</span>pub fn notify(item: &amp;(impl Summary + std::fmt::Display)) { ... }
 <span class="boring">}</span></code></pre>
 <h3 id="where-子句"><a class="header" href="#where-子句">where 子句</a></h3>
-<p>当 Trait Bound 太多时，使用 <code>where</code> 从句可以使代码更清晰。</p>
+<p>当约束太长时，使用 <code>where</code> 使签名更清晰。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn some_function&lt;T, U&gt;(t: &amp;T, u: &amp;U) -&gt; i32
     where T: Display + Clone,
           U: Clone + Debug
-{
+{ ... }
 <span class="boring">}</span></code></pre>
-<h2 id="5-返回实现了-trait-的类型"><a class="header" href="#5-返回实现了-trait-的类型">5. 返回实现了 Trait 的类型</a></h2>
+<h2 id="4-返回实现了-trait-的类型"><a class="header" href="#4-返回实现了-trait-的类型">4. 返回实现了 Trait 的类型</a></h2>
+<p>使用 <code>impl Trait</code> 返回值。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn returns_summarizable() -&gt; impl Summary {
     Tweet {
         username: String::from("horse_ebooks"),
-        content: String::from("of course, as you probably already know, people"),
+        content: String::from("..."),
         reply: false,
         retweet: false,
     }
 }
 <span class="boring">}</span></code></pre>
-<p>注意：这种方式只适用于返回单一类型的情况。</p>
+<p><strong>限制</strong>：只能返回<strong>一种</strong>类型。如果你想根据条件返回 <code>NewsArticle</code> 或 <code>Tweet</code>，这行不通。</p>
+<h3 id="trait-对象-trait-objects"><a class="header" href="#trait-对象-trait-objects">Trait 对象 (Trait Objects)</a></h3>
+<p>如果需要返回多种类型，必须使用 Trait 对象（动态分发）。通常使用 <code>Box&lt;dyn Trait&gt;</code>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn returns_summarizable(switch: bool) -&gt; Box&lt;dyn Summary&gt; {
+    if switch {
+        Box::new(NewsArticle { ... })
+    } else {
+        Box::new(Tweet { ... })
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="5-派生-trait-derive"><a class="header" href="#5-派生-trait-derive">5. 派生 Trait (Derive)</a></h2>
+<p>对于一些常用的 Trait，Rust 提供了宏来自动实现它们。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone, Copy, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="6-父-trait-supertraits"><a class="header" href="#6-父-trait-supertraits">6. 父 Trait (Supertraits)</a></h2>
+<p>有时候你需要一个 Trait 依赖于另一个 Trait。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fmt::Display;
+
+trait OutlinePrint: Display { // 要求实现 OutlinePrint 的类型必须也实现 Display
+    fn outline_print(&amp;self) {
+        let output = self.to_string(); // 因为有 Display，所以可以调用 to_string
+        let len = output.len();
+        println!("{}n{}n{}", "*".repeat(len + 4), format!("* {} *", output), "*".repeat(len + 4));
+    }
+}
+<span class="boring">}</span></code></pre>
 
                     </main>
 

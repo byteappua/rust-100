@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Day 66: 数据库迁移 (Migrations) - Rust - 100天从新手到大师</title>
+        <title>阶段概览 - Rust - 100天从新手到大师</title>
 
 
         <!-- Custom HTML head -->
@@ -12,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../../favicon-de23e50b.svg">
-        <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
-        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../../css/general-2459343d.css">
-        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
-        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../../";
+            const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
+            window.path_to_searchindex_js = "../searchindex-c91f42b1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-cec6f113.js"></script>
+        <script src="../toc-cec6f113.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -105,7 +105,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -140,7 +140,7 @@
                     <h1 class="menu-title">Rust - 100天从新手到大师</h1>
 
                     <div class="right-buttons">
-                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/Start-Rust/100-days-of-rust" title="Git repository" aria-label="Git repository">
@@ -177,454 +177,128 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-66-数据库迁移-migrations"><a class="header" href="#day-66-数据库迁移-migrations">Day 66: 数据库迁移 (Migrations)</a></h1>
-<h2 id="学习目标"><a class="header" href="#学习目标">学习目标</a></h2>
+                        <h1 id="rust-基础-day-01---15"><a class="header" href="#rust-基础-day-01---15">Rust 基础 (Day 01 - 15)</a></h1>
+<p>这个目录涵盖了 Rust 编程语言的基础知识，大致对应《Rust 程序设计语言》的前 10-11 章。通过这 15 天的学习，你将掌握 Rust 的核心语法、所有权系统、类型系统以及基本的项目组织方式。</p>
+<h2 id="目录"><a class="header" href="#目录">目录</a></h2>
 <ul>
-<li>理解数据库迁移概念</li>
-<li>掌握 SQLx 迁移系统</li>
-<li>学习版本控制策略</li>
-<li>实现回滚机制</li>
-</ul>
-<h2 id="数据库迁移概念"><a class="header" href="#数据库迁移概念">数据库迁移概念</a></h2>
-<p>数据库迁移是管理数据库 schema 变更的系统化方法：</p>
+<li><strong><a href="01.Introduction/README.html">Day 01: Introduction (初识 Rust)</a></strong>
 <ul>
-<li>版本控制数据库结构</li>
-<li>团队协作同步</li>
-<li>生产环境安全部署</li>
-<li>支持回滚操作</li>
+<li>环境搭建、安装 Rust</li>
+<li>Hello World</li>
+<li>Cargo 包管理器简介</li>
 </ul>
-<h2 id="sqlx-迁移系统"><a class="header" href="#sqlx-迁移系统">SQLx 迁移系统</a></h2>
-<h3 id="安装-sqlx-cli"><a class="header" href="#安装-sqlx-cli">安装 SQLx CLI</a></h3>
-<pre><code class="language-bash"># 安装 SQLx CLI
-cargo install sqlx-cli --no-default-features --features postgres
-
-# 或者支持多种数据库
-cargo install sqlx-cli
-</code></pre>
-<h3 id="项目配置"><a class="header" href="#项目配置">项目配置</a></h3>
-<pre><code class="language-toml"># Cargo.toml
-[dependencies]
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "migrate"] }
-tokio = { version = "1", features = ["full"] }
-</code></pre>
-<h3 id="创建迁移"><a class="header" href="#创建迁移">创建迁移</a></h3>
-<pre><code class="language-bash"># 创建新迁移
-sqlx migrate add create_users_table
-
-# 这会创建文件：migrations/20240116000000_create_users_table.sql
-</code></pre>
-<h3 id="迁移文件示例"><a class="header" href="#迁移文件示例">迁移文件示例</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000000_create_users_table.sql
--- 创建用户表
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建索引
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_email ON users(email);
-
--- 创建更新时间触发器
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-</code></pre>
-<h3 id="运行迁移"><a class="header" href="#运行迁移">运行迁移</a></h3>
-<pre><code class="language-bash"># 设置数据库 URL
-export DATABASE_URL="postgres://username:password@localhost/dbname"
-
-# 运行所有待执行的迁移
-sqlx migrate run
-
-# 查看迁移状态
-sqlx migrate info
-
-# 回滚最后一次迁移
-sqlx migrate revert
-</code></pre>
-<h2 id="迁移最佳实践"><a class="header" href="#迁移最佳实践">迁移最佳实践</a></h2>
-<h3 id="1-向前兼容的迁移"><a class="header" href="#1-向前兼容的迁移">1. 向前兼容的迁移</a></h3>
-<pre><code class="language-sql">-- ✅ 好：添加可空列
-ALTER TABLE users ADD COLUMN phone VARCHAR(20);
-
--- ❌ 不好：添加非空列（会导致现有数据失败）
-ALTER TABLE users ADD COLUMN phone VARCHAR(20) NOT NULL;
-
--- ✅ 好：分两步添加非空列
--- 第一步：添加可空列
-ALTER TABLE users ADD COLUMN phone VARCHAR(20);
-
--- 第二步：填充数据后设置非空
--- migrations/20240116000002_make_phone_not_null.sql
-UPDATE users SET phone = '' WHERE phone IS NULL;
-ALTER TABLE users ALTER COLUMN phone SET NOT NULL;
-</code></pre>
-<h3 id="2-重命名列"><a class="header" href="#2-重命名列">2. 重命名列</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000003_rename_username_to_user_name.sql
-ALTER TABLE users RENAME COLUMN username TO user_name;
-</code></pre>
-<h3 id="3-修改列类型"><a class="header" href="#3-修改列类型">3. 修改列类型</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000004_change_email_length.sql
-ALTER TABLE users ALTER COLUMN email TYPE VARCHAR(255);
-</code></pre>
-<h3 id="4-添加外键"><a class="header" href="#4-添加外键">4. 添加外键</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000005_create_posts_table.sql
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_posts_user_id ON posts(user_id);
-</code></pre>
-<h2 id="复杂迁移示例"><a class="header" href="#复杂迁移示例">复杂迁移示例</a></h2>
-<h3 id="多对多关系"><a class="header" href="#多对多关系">多对多关系</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000006_create_tags_and_post_tags.sql
--- 标签表
-CREATE TABLE tags (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 文章标签关联表
-CREATE TABLE post_tags (
-    post_id INTEGER NOT NULL,
-    tag_id INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (post_id, tag_id),
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_post_tags_post_id ON post_tags(post_id);
-CREATE INDEX idx_post_tags_tag_id ON post_tags(tag_id);
-</code></pre>
-<h3 id="数据迁移"><a class="header" href="#数据迁移">数据迁移</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000007_migrate_user_data.sql
--- 假设要将旧的 full_name 拆分为 first_name 和 last_name
-
--- 添加新列
-ALTER TABLE users ADD COLUMN first_name VARCHAR(50);
-ALTER TABLE users ADD COLUMN last_name VARCHAR(50);
-
--- 迁移数据
-UPDATE users
-SET 
-    first_name = SPLIT_PART(full_name, ' ', 1),
-    last_name = SPLIT_PART(full_name, ' ', 2)
-WHERE full_name IS NOT NULL;
-
--- 删除旧列（可选，可以在后续迁移中删除）
--- ALTER TABLE users DROP COLUMN full_name;
-</code></pre>
-<h3 id="添加枚举类型"><a class="header" href="#添加枚举类型">添加枚举类型</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000008_add_user_role.sql
--- 创建枚举类型
-CREATE TYPE user_role AS ENUM ('admin', 'editor', 'user');
-
--- 添加角色列
-ALTER TABLE users ADD COLUMN role user_role DEFAULT 'user' NOT NULL;
-
--- 创建索引
-CREATE INDEX idx_users_role ON users(role);
-</code></pre>
-<h2 id="在代码中运行迁移"><a class="header" href="#在代码中运行迁移">在代码中运行迁移</a></h2>
-<h3 id="启动时自动迁移"><a class="header" href="#启动时自动迁移">启动时自动迁移</a></h3>
-<pre class="playground"><code class="language-rust">use sqlx::postgres::PgPoolOptions;
-use sqlx::migrate::MigrateDatabase;
-
-#[tokio::main]
-async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    let database_url = std::env::var("DATABASE_URL")?;
-    
-    // 如果数据库不存在，创建它
-    if !sqlx::Postgres::database_exists(&amp;database_url).await? {
-        println!("Creating database...");
-        sqlx::Postgres::create_database(&amp;database_url).await?;
-    }
-    
-    // 连接数据库
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&amp;database_url)
-        .await?;
-    
-    // 运行迁移
-    println!("Running migrations...");
-    sqlx::migrate!("./migrations")
-        .run(&amp;pool)
-        .await?;
-    
-    println!("Migrations completed successfully!");
-    
-    Ok(())
-}</code></pre>
-<h3 id="条件迁移"><a class="header" href="#条件迁移">条件迁移</a></h3>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>use sqlx::migrate::Migrator;
-
-static MIGRATOR: Migrator = sqlx::migrate!();
-
-async fn run_migrations_if_needed(pool: &amp;PgPool) -&gt; Result&lt;(), sqlx::Error&gt; {
-    // 检查是否需要迁移
-    let version = MIGRATOR.migrations.last().map(|m| m.version).unwrap_or(0);
-    
-    println!("Latest migration version: {}", version);
-    
-    // 运行迁移
-    MIGRATOR.run(pool).await?;
-    
-    Ok(())
-}
-<span class="boring">}</span></code></pre>
-<h2 id="迁移测试"><a class="header" href="#迁移测试">迁移测试</a></h2>
-<h3 id="测试迁移"><a class="header" href="#测试迁移">测试迁移</a></h3>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[cfg(test)]
-mod tests {
-    use super::*;
-    use sqlx::postgres::PgPoolOptions;
-    
-    #[tokio::test]
-    async fn test_migrations() {
-        let database_url = "postgres://localhost/test_db";
-        
-        // 创建测试数据库
-        sqlx::Postgres::create_database(database_url)
-            .await
-            .ok();
-        
-        let pool = PgPoolOptions::new()
-            .connect(database_url)
-            .await
-            .unwrap();
-        
-        // 运行迁移
-        sqlx::migrate!("./migrations")
-            .run(&amp;pool)
-            .await
-            .unwrap();
-        
-        // 验证表存在
-        let result: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'users'"
-        )
-        .fetch_one(&amp;pool)
-        .await
-        .unwrap();
-        
-        assert_eq!(result.0, 1);
-        
-        // 清理
-        sqlx::Postgres::drop_database(database_url)
-            .await
-            .ok();
-    }
-}
-<span class="boring">}</span></code></pre>
-<h2 id="回滚策略"><a class="header" href="#回滚策略">回滚策略</a></h2>
-<h3 id="创建可回滚的迁移"><a class="header" href="#创建可回滚的迁移">创建可回滚的迁移</a></h3>
-<pre><code class="language-sql">-- migrations/20240116000009_add_user_bio.up.sql
-ALTER TABLE users ADD COLUMN bio TEXT;
-
--- migrations/20240116000009_add_user_bio.down.sql
-ALTER TABLE users DROP COLUMN bio;
-</code></pre>
-<h3 id="手动回滚"><a class="header" href="#手动回滚">手动回滚</a></h3>
-<pre><code class="language-bash"># 回滚最后一次迁移
-sqlx migrate revert
-
-# 回滚到特定版本
-sqlx migrate revert --target-version 20240116000005
-</code></pre>
-<h2 id="生产环境迁移"><a class="header" href="#生产环境迁移">生产环境迁移</a></h2>
-<h3 id="迁移脚本"><a class="header" href="#迁移脚本">迁移脚本</a></h3>
-<pre><code class="language-bash">#!/bin/bash
-# deploy-migrations.sh
-
-set -e
-
-echo "Starting database migration..."
-
-# 备份数据库
-pg_dump $DATABASE_URL &gt; backup_$(date +%Y%m%d_%H%M%S).sql
-
-# 运行迁移
-sqlx migrate run
-
-echo "Migration completed successfully!"
-</code></pre>
-<h3 id="零停机迁移"><a class="header" href="#零停机迁移">零停机迁移</a></h3>
-<pre><code class="language-sql">-- 步骤 1: 添加新列（可空）
-ALTER TABLE users ADD COLUMN new_email VARCHAR(255);
-
--- 步骤 2: 双写（应用代码同时写入两列）
--- 在应用代码中实现
-
--- 步骤 3: 数据回填
-UPDATE users SET new_email = email WHERE new_email IS NULL;
-
--- 步骤 4: 设置非空约束
-ALTER TABLE users ALTER COLUMN new_email SET NOT NULL;
-
--- 步骤 5: 添加唯一约束
-ALTER TABLE users ADD CONSTRAINT users_new_email_key UNIQUE (new_email);
-
--- 步骤 6: 删除旧列（在确认无问题后）
-ALTER TABLE users DROP COLUMN email;
-
--- 步骤 7: 重命名新列
-ALTER TABLE users RENAME COLUMN new_email TO email;
-</code></pre>
-<h2 id="完整示例项目"><a class="header" href="#完整示例项目">完整示例项目</a></h2>
-<pre class="playground"><code class="language-rust">// src/main.rs
-use sqlx::postgres::PgPoolOptions;
-use std::env;
-
-mod models;
-mod migrations;
-
-#[tokio::main]
-async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    // 加载环境变量
-    dotenv::dotenv().ok();
-    
-    let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
-    
-    // 创建连接池
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&amp;database_url)
-        .await?;
-    
-    // 运行迁移
-    println!("Running database migrations...");
-    sqlx::migrate!("./migrations")
-        .run(&amp;pool)
-        .await?;
-    println!("Migrations completed!");
-    
-    // 启动应用
-    start_server(pool).await?;
-    
-    Ok(())
-}
-
-async fn start_server(pool: sqlx::PgPool) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    // 应用逻辑
-    Ok(())
-}</code></pre>
-<pre><code class="language-sql">-- migrations/20240116000001_initial_schema.sql
--- 用户表
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) DEFAULT 'user' NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 文章表
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(200) NOT NULL,
-    slug VARCHAR(200) UNIQUE NOT NULL,
-    content TEXT NOT NULL,
-    published BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 评论表
-CREATE TABLE comments (
-    id SERIAL PRIMARY KEY,
-    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX idx_posts_user_id ON posts(user_id);
-CREATE INDEX idx_posts_slug ON posts(slug);
-CREATE INDEX idx_posts_published ON posts(published);
-CREATE INDEX idx_comments_post_id ON comments(post_id);
-CREATE INDEX idx_comments_user_id ON comments(user_id);
-
--- 更新时间触发器
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_posts_updated_at
-    BEFORE UPDATE ON posts
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-</code></pre>
-<h2 id="迁移检查清单"><a class="header" href="#迁移检查清单">迁移检查清单</a></h2>
+</li>
+<li><strong><a href="02.VariablesAndTypes/README.html">Day 02: Variables and Types (变量与数据类型)</a></strong>
 <ul>
-<li><input disabled="" type="checkbox"> 迁移文件命名清晰</li>
-<li><input disabled="" type="checkbox"> 包含向前和向后兼容性</li>
-<li><input disabled="" type="checkbox"> 测试迁移在干净数据库上运行</li>
-<li><input disabled="" type="checkbox"> 测试迁移在现有数据上运行</li>
-<li><input disabled="" type="checkbox"> 准备回滚计划</li>
-<li><input disabled="" type="checkbox"> 在生产前备份数据库</li>
-<li><input disabled="" type="checkbox"> 文档化重要变更</li>
-<li><input disabled="" type="checkbox"> 通知团队成员</li>
+<li>变量与可变性</li>
+<li>标量类型 (整型, 浮点型, 布尔型, 字符)</li>
+<li>复合类型 (元组, 数组)</li>
 </ul>
-<h2 id="练习"><a class="header" href="#练习">练习</a></h2>
-<ol>
-<li>创建完整的博客数据库 schema</li>
-<li>实现用户角色系统的迁移</li>
-<li>添加全文搜索索引</li>
-<li>实现数据归档迁移</li>
-<li>创建迁移测试套件</li>
-</ol>
-<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
-<p>Day 67 将学习 CRUD 操作实战，使用 SQLx 进行数据库操作。</p>
+</li>
+<li><strong><a href="03.FunctionsAndControlFlow/README.html">Day 03: Functions and Control Flow (函数与控制流)</a></strong>
+<ul>
+<li>函数定义、参数与返回值</li>
+<li>if 表达式</li>
+<li>循环 (loop, while, for)</li>
+</ul>
+</li>
+<li><strong><a href="04.Ownership/README.html">Day 04: Ownership (所有权)</a></strong>
+<ul>
+<li>所有权规则</li>
+<li>堆与栈</li>
+<li>移动 (Move)、克隆 (Clone) 与 拷贝 (Copy)</li>
+</ul>
+</li>
+<li><strong><a href="05.ReferencesAndBorrowing/README.html">Day 05: References and Borrowing (引用与借用)</a></strong>
+<ul>
+<li>不可变引用与可变引用</li>
+<li>引用规则</li>
+<li>悬垂引用</li>
+</ul>
+</li>
+<li><strong><a href="06.Slices/README.html">Day 06: Slices (切片)</a></strong>
+<ul>
+<li>字符串切片</li>
+<li>其他类型的切片</li>
+</ul>
+</li>
+<li><strong><a href="07.Structs/README.html">Day 07: Structs (结构体)</a></strong>
+<ul>
+<li>定义与实例化结构体</li>
+<li>方法与关联函数</li>
+</ul>
+</li>
+<li><strong><a href="08.Enums/README.html">Day 08: Enums (枚举)</a></strong>
+<ul>
+<li>定义枚举</li>
+<li><code>Option</code> 枚举</li>
+<li><code>match</code> 控制流运算符</li>
+<li><code>if let</code> 语法</li>
+</ul>
+</li>
+<li><strong><a href="09.Modules/README.html">Day 09: Modules (模块系统)</a></strong>
+<ul>
+<li>包与 Crates</li>
+<li>定义模块</li>
+<li>路径与 <code>use</code> 关键字</li>
+<li>可见性 (<code>pub</code>)</li>
+</ul>
+</li>
+<li><strong><a href="10.CommonCollections/README.html">Day 10: Common Collections (常用集合)</a></strong>
+<ul>
+<li>Vector (<code>Vec&lt;T&gt;</code>)</li>
+<li>String (<code>String</code>)</li>
+<li>HashMap (<code>HashMap&lt;K, V&gt;</code>)</li>
+</ul>
+</li>
+<li><strong><a href="11.ErrorHandling/README.html">Day 11: Error Handling (错误处理)</a></strong>
+<ul>
+<li><code>panic!</code> 与不可恢复错误</li>
+<li><code>Result</code> 与可恢复错误</li>
+<li>错误传播与 <code>?</code> 运算符</li>
+</ul>
+</li>
+<li><strong><a href="12.Generics/README.html">Day 12: Generics (泛型)</a></strong>
+<ul>
+<li>函数、结构体、枚举中的泛型</li>
+<li>单态化</li>
+</ul>
+</li>
+<li><strong><a href="13.Traits/README.html">Day 13: Traits (特征)</a></strong>
+<ul>
+<li>定义与实现 Trait</li>
+<li>Trait Bounds</li>
+<li><code>impl Trait</code></li>
+</ul>
+</li>
+<li><strong><a href="14.Lifetimes/README.html">Day 14: Lifetimes (生命周期)</a></strong>
+<ul>
+<li>生命周期注解语法</li>
+<li>生命周期省略规则</li>
+<li>静态生命周期</li>
+</ul>
+</li>
+<li><strong><a href="15.Testing/README.html">Day 15: Testing (自动化测试)</a></strong>
+<ul>
+<li>编写单元测试</li>
+<li><code>assert!</code> 宏</li>
+<li>运行测试</li>
+<li>集成测试</li>
+</ul>
+</li>
+</ul>
+<h2 id="学习建议"><a class="header" href="#学习建议">学习建议</a></h2>
+<p>建议按照顺序学习，每一天的内容都建立在前一天的基础上。对于每个主题，不仅要阅读文档，还要亲手编写并运行代码。</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Day61-80/65.StateManagement/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../COMPLETION_SUMMARY.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Day61-80/67.CRUD/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../Day01-15/01.Introduction/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -634,11 +308,11 @@ CREATE TRIGGER update_posts_updated_at
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Day61-80/65.StateManagement/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../COMPLETION_SUMMARY.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Day61-80/67.CRUD/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../Day01-15/01.Introduction/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -658,13 +332,13 @@ CREATE TRIGGER update_posts_updated_at
         </script>
 
 
-        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
-        <script src="../../mark-09e88c2c.min.js"></script>
-        <script src="../../searcher-c2a407aa.js"></script>
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
 
-        <script src="../../clipboard-1626706a.min.js"></script>
-        <script src="../../highlight-abc7f01d.js"></script>
-        <script src="../../book-a0b12cfe.js"></script>
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

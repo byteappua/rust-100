@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-5565e9c3.js";
+            window.path_to_searchindex_js = "../../searchindex-c91f42b1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-13fa5e57.js"></script>
+        <script src="../../toc-cec6f113.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,22 +178,47 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-14-生命周期-lifetimes"><a class="header" href="#day-14-生命周期-lifetimes">Day 14: 生命周期 (Lifetimes)</a></h1>
-<p>生命周期是 Rust 中最独特的概念之一。它是引用有效的作用域。</p>
-<h2 id="1-悬垂引用-dangling-references"><a class="header" href="#1-悬垂引用-dangling-references">1. 悬垂引用 (Dangling References)</a></h2>
-<p>Rust 的借用检查器（Borrow Checker）确保所有引用都是有效的。</p>
+<p>生命周期是 Rust 中最独特、也最让初学者困惑的概念之一。简单来说，生命周期就是<strong>引用保持有效的作用域</strong>。Rust 的借用检查器使用生命周期来确保所有的借用都是有效的。</p>
+<h2 id="1-为什么需要生命周期"><a class="header" href="#1-为什么需要生命周期">1. 为什么需要生命周期？</a></h2>
+<p>主要为了避免<strong>悬垂引用</strong>（Dangling References）。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>{
-    let r;
-    {
-        let x = 5;
-        r = &amp;x;
-    } // x 离开作用域被丢弃
-    println!("r: {}", r); // 错误：r 引用了无效的内存
-}
+    let r;                // ---------+-- r 的生命周期 'a
+    {                     //          |
+        let x = 5;        // -+-- x 的生命周期 'b
+        r = &amp;x;           //  |
+    }                     // -+       x 结束，内存被释放
+    println!("r: {}", r); //          r 引用了无效内存！编译错误
+}                         // ---------+
 <span class="boring">}</span></code></pre>
-<h2 id="2-泛型生命周期"><a class="header" href="#2-泛型生命周期">2. 泛型生命周期</a></h2>
-<p>当函数返回一个引用时，Rust 需要知道这个引用的生命周期与参数的生命周期有什么关系。</p>
+<p>Rust 编译器会拒绝这段代码，因为它发现 <code>r</code> 的生命周期 <code>'a</code> 比 <code>x</code> 的生命周期 <code>'b</code> 长。被引用的对象 <code>x</code> 必须活得比引用它的 <code>r</code> 更久。</p>
+<h2 id="2-函数中的泛型生命周期"><a class="header" href="#2-函数中的泛型生命周期">2. 函数中的泛型生命周期</a></h2>
+<p>当函数接收并返回引用时，编译器通常需要帮助来理解引用之间的关系。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 错误代码
+// fn longest(x: &amp;str, y: &amp;str) -&gt; &amp;str {
+//     if x.len() &gt; y.len() {
+//         x
+//     } else {
+//         y
+//     }
+// }
+<span class="boring">}</span></code></pre>
+<p>编译器不知道返回的引用是指向 <code>x</code> 还是 <code>y</code>，因此也就不知道返回值的生命周期应该是多长。</p>
+<h3 id="生命周期注解语法"><a class="header" href="#生命周期注解语法">生命周期注解语法</a></h3>
+<ul>
+<li>以 <code>'</code> 开头，通常使用 <code>'a</code>，<code>'b</code> 等非常短的名字。</li>
+<li>注解放在 <code>&amp;</code> 之后，类型之前。</li>
+</ul>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>&amp;i32        // 引用
+&amp;'a i32     // 带有显式生命周期的引用
+&amp;'a mut i32 // 带有显式生命周期的可变引用
+<span class="boring">}</span></code></pre>
+<h3 id="修正-longest-函数"><a class="header" href="#修正-longest-函数">修正 longest 函数</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
@@ -204,33 +229,84 @@
     }
 }
 <span class="boring">}</span></code></pre>
-<p>这里的 <code>'a</code> 是生命周期注解。它告诉 Rust：</p>
-<ul>
-<li>两个参数 <code>x</code> 和 <code>y</code> 存活的时间至少和 <code>'a</code> 一样长。</li>
-<li>返回值的存活时间也至少和 <code>'a</code> 一样长。</li>
-<li>实际上，返回值的生命周期是 <code>x</code> 和 <code>y</code> 中较短的那个。</li>
-</ul>
+<p>这告诉编译器：</p>
+<ol>
+<li>函数有两个参数 <code>x</code> 和 <code>y</code>，它们的生命周期至少都为 <code>'a</code>。</li>
+<li>返回值的生命周期也至少为 <code>'a</code>。</li>
+<li>实际上，<code>'a</code> 等于 <code>x</code> 和 <code>y</code> 中生命周期<strong>较短</strong>的那个。</li>
+</ol>
+<p><strong>重要理解</strong>：生命周期注解<strong>不会改变</strong>任何值的实际存活时间。它只是为了让借用检查器能验证这些引用是安全的。</p>
 <h2 id="3-结构体定义中的生命周期"><a class="header" href="#3-结构体定义中的生命周期">3. 结构体定义中的生命周期</a></h2>
-<p>如果结构体持有引用，它必须拥有生命周期注解。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>struct ImportantExcerpt&lt;'a&gt; {
+<p>如果结构体持有引用，它必须在定义中包含生命周期注解。</p>
+<pre class="playground"><code class="language-rust">struct ImportantExcerpt&lt;'a&gt; {
     part: &amp;'a str,
 }
+
+fn main() {
+    let novel = String::from("Call me Ishmael. Some years ago...");
+    let first_sentence = novel.split('.').next().expect("Could not find a '.'");
+
+    // i 持有 novel 一部分的引用
+    let i = ImportantExcerpt {
+        part: first_sentence,
+    };
+}</code></pre>
+<p>这就意味着：<code>ImportantExcerpt</code> 的实例 <code>i</code> 不能比它引用的 <code>part</code> (即 <code>novel</code> 的一部分) 活得更久。</p>
+<h2 id="4-方法定义中的生命周期"><a class="header" href="#4-方法定义中的生命周期">4. 方法定义中的生命周期</a></h2>
+<p>为带有生命周期的结构体实现方法时，语法如下：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;'a&gt; ImportantExcerpt&lt;'a&gt; {
+    fn level(&amp;self) -&gt; i32 {
+        3
+    }
+
+    fn announce_and_return_part(&amp;self, announcement: &amp;str) -&gt; &amp;str {
+        println!("Attention please: {}", announcement);
+        self.part
+    }
+}
 <span class="boring">}</span></code></pre>
-<p>这意味着 <code>ImportantExcerpt</code> 的实例不能比其 <code>part</code> 字段引用的字符串存活得更久。</p>
-<h2 id="4-生命周期省略规则-lifetime-elision-rules"><a class="header" href="#4-生命周期省略规则-lifetime-elision-rules">4. 生命周期省略规则 (Lifetime Elision Rules)</a></h2>
-<p>在某些常见情况下，编译器可以推断出生命周期，无需显式标注。</p>
+<p>这里应用了生命周期省略规则（见下文），所以 <code>announce_and_return_part</code> 的返回值生命周期被推断为与 <code>&amp;self</code> 相同。</p>
+<h2 id="5-生命周期省略规则-lifetime-elision-rules"><a class="header" href="#5-生命周期省略规则-lifetime-elision-rules">5. 生命周期省略规则 (Lifetime Elision Rules)</a></h2>
+<p>在 Rust 的早期版本中，每个引用都需要显式标注生命周期。后来，Rust 团队发现许多模式是重复的，于是制定了规则，让编译器在这些特定情况下自动推断生命周期。</p>
+<p><strong>三条规则</strong>：</p>
 <ol>
-<li>每个是引用的参数都有其自己的生命周期参数。</li>
-<li>如果只有一个输入生命周期参数，那么它被赋予所有输出生命周期参数。</li>
+<li>每一个引用参数都有它自己的生命周期参数。（例如 <code>fn foo&lt;'a, 'b&gt;(x: &amp;'a i32, y: &amp;'b i32)</code>）</li>
+<li>如果只有一个输入生命周期参数，那么它被赋予所有输出生命周期参数。（例如 <code>fn foo&lt;'a&gt;(x: &amp;'a i32) -&gt; &amp;'a i32</code>）</li>
 <li>如果有多个输入生命周期参数，但其中一个是 <code>&amp;self</code> 或 <code>&amp;mut self</code>，那么 <code>self</code> 的生命周期被赋予所有输出生命周期参数。</li>
 </ol>
-<h2 id="5-静态生命周期-static"><a class="header" href="#5-静态生命周期-static">5. 静态生命周期 (’static)</a></h2>
-<p><code>'static</code> 生命周期存活于整个程序期间。所有的字符串字面值都拥有 <code>'static</code> 生命周期。</p>
+<h2 id="6-静态生命周期-static"><a class="header" href="#6-静态生命周期-static">6. 静态生命周期 (’static)</a></h2>
+<p><code>'static</code> 是一个特殊的生命周期，表示引用可以在<strong>整个程序期间</strong>存活。</p>
+<ul>
+<li>所有的字符串字面值都拥有 <code>'static</code> 生命周期：
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s: &amp;'static str = "I have a static lifetime.";
+<span class="boring">}</span></code></pre>
+</li>
+<li><code>'static</code> 也可以用于 trait bound，表示类型不包含任何非静态的引用。</li>
+</ul>
+<h2 id="7-结合泛型类型参数trait-bounds-和生命周期"><a class="header" href="#7-结合泛型类型参数trait-bounds-和生命周期">7. 结合泛型类型参数、Trait Bounds 和生命周期</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fmt::Display;
+
+fn longest_with_an_announcement&lt;'a, T&gt;(
+    x: &amp;'a str,
+    y: &amp;'a str,
+    ann: T,
+) -&gt; &amp;'a str
+where
+    T: Display,
+{
+    println!("Announcement: {}", ann);
+    if x.len() &gt; y.len() {
+        x
+    } else {
+        y
+    }
+}
 <span class="boring">}</span></code></pre>
 
                     </main>
