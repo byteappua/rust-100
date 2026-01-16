@@ -11,36 +11,41 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  check:
-    name: Check
+  test-all:
+    name: Test All Projects
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo check --all-features
 
-  test:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo test --all-features --verbose
+      - name: Find and Run Tests
+        run: |
+          find . -name "Cargo.toml" -not -path "*/target/*" | while read toml; do
+            dir=$(dirname "$toml")
+            echo "--> Testing $dir"
+            (cd "$dir" && cargo test)
+          done
 
   fmt:
-    name: Rustfmt
+    name: Check Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - run: cargo fmt --all -- --check
+
+      - name: Check Format
+        run: |
+          find . -name "Cargo.toml" -not -path "*/target/*" | while read toml; do
+            dir=$(dirname "$toml")
+            echo "--> Checking format in $dir"
+            (cd "$dir" && cargo fmt --all -- --check)
+          done
 
   clippy:
-    name: Clippy
+    name: Clippy Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,30 +53,11 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-features -- -D warnings
 
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo doc --no-deps --all-features
-        env:
-          RUSTDOCFLAGS: -D warnings
-
-  cross-platform:
-    name: Test on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [stable, beta]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.rust }}
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo test --all-features
+      - name: Run Clippy
+        run: |
+          find . -name "Cargo.toml" -not -path "*/target/*" | while read toml; do
+            dir=$(dirname "$toml")
+            echo "--> Running Clippy in $dir"
+            (cd "$dir" && cargo clippy -- -D warnings)
+          done

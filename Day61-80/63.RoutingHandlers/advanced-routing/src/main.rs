@@ -88,7 +88,7 @@ async fn create_user(
     Json(payload): Json<CreateUserRequest>,
 ) -> (StatusCode, Json<User>) {
     let mut users = state.users.write().await;
-    let id = users.len() as i32 + 1;
+    let id = users.iter().map(|u| u.id).max().unwrap_or(0) + 1;
 
     let user = User {
         id,
