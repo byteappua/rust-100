@@ -89,9 +89,34 @@ Rust 是一门赋予每个人构建可靠且高效软件能力的系统编程语
 
 建议按照天数顺序学习。每一天的文件夹中包含了当天的学习笔记、代码示例和练习题。
 
-## 资源链接
+## 🎁 额外资源
 
+### 📖 番外篇
+深入探讨 Rust 编程的重要主题:
+- [Rust 之禅 - Rust 编程哲学](extras/rust-zen.md)
+- [那些年我们踩过的坑](extras/common-pitfalls.md)
+- [更多专题文章...](extras/README.md)
+
+### 🏋️ 练习题库
+每个 Day 都配有练习题,帮助巩固知识:
+- [Day 01 练习题](Day01-15/01.Introduction/exercises/README.md)
+- 更多练习题持续更新中...
+
+### 🎨 项目模板
+快速启动各类 Rust 项目:
+- [CLI 应用模板](templates/cli-app/)
+- [Web API 模板](templates/web-api/)
+- [更多模板...](templates/README.md)
+
+## 📚 学习资源
+
+### 官方资源
 - [The Rust Programming Language (Rust Book)](https://doc.rust-lang.org/book/)
 - [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
 - [Rust Standard Library Documentation](https://doc.rust-lang.org/std/)
 - [Crates.io](https://crates.io/)
+
+### 社区资源
+- [Rust 中文社区](https://rustcc.cn/)
+- [Rust 官方论坛](https://users.rust-lang.org/)
+- [Reddit r/rust](https://www.reddit.com/r/rust/)
