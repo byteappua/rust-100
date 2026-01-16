@@ -74,8 +74,8 @@
 # 第四阶段：异步网络项目实战 (Days 46-60)
 
 - [项目启动与基础]()
-    - [Day 46: 项目初始化与配置]()
-    - [Day 47: 协议解析 (Resp)]()
+    - [Day 46: 项目初始化与配置](Day46-60/46.ProjectInit/README.md)
+    - [Day 47: 协议解析 (Resp)](Day46-60/47.RespParsing/README.md)
     - [Day 48: 命令处理架构]()
     - [Day 49: 存储引擎实现]()
     - [Day 50: 异步网络层 (Tokio)]()
