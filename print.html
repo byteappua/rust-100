@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-8da50af6.js";
+            window.path_to_searchindex_js = "searchindex-99a2c815.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-28b84ce8.js"></script>
+        <script src="toc-13fa5e57.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -6637,8 +6637,3007 @@ curl -X POST http://localhost:3000/api/users \
 <h2 id="下一步-2"><a class="header" href="#下一步-2">下一步</a></h2>
 <p>Day 63 将学习高级路由和请求处理技术。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="day-69-用户认证-jwt-1"><a class="header" href="#day-69-用户认证-jwt-1">Day 69: 用户认证 (JWT)</a></h1>
+<h1 id="day-63-路由与请求处理-1"><a class="header" href="#day-63-路由与请求处理-1">Day 63: 路由与请求处理</a></h1>
 <h2 id="学习目标-2"><a class="header" href="#学习目标-2">学习目标</a></h2>
+<ul>
+<li>掌握嵌套路由</li>
+<li>理解路径参数和查询参数</li>
+<li>学习请求体解析</li>
+<li>实现自定义提取器</li>
+</ul>
+<h2 id="嵌套路由"><a class="header" href="#嵌套路由">嵌套路由</a></h2>
+<h3 id="axum-嵌套路由"><a class="header" href="#axum-嵌套路由">Axum 嵌套路由</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    routing::{get, post, put, delete},
+    Router,
+};
+
+// API v1 路由
+fn api_v1_routes() -&gt; Router {
+    Router::new()
+        .route("/users", get(list_users).post(create_user))
+        .route("/users/:id", get(get_user).put(update_user).delete(delete_user))
+        .route("/posts", get(list_posts).post(create_post))
+        .route("/posts/:id", get(get_post))
+}
+
+// API v2 路由
+fn api_v2_routes() -&gt; Router {
+    Router::new()
+        .route("/users", get(list_users_v2))
+        .route("/posts", get(list_posts_v2))
+}
+
+// 主应用
+fn app() -&gt; Router {
+    Router::new()
+        .route("/health", get(health_check))
+        .nest("/api/v1", api_v1_routes())
+        .nest("/api/v2", api_v2_routes())
+        .fallback(not_found)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="路由组"><a class="header" href="#路由组">路由组</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::Router;
+
+// 用户相关路由
+fn user_routes() -&gt; Router {
+    Router::new()
+        .route("/", get(list_users).post(create_user))
+        .route("/:id", get(get_user).put(update_user).delete(delete_user))
+        .route("/:id/posts", get(user_posts))
+        .route("/:id/profile", get(user_profile))
+}
+
+// 文章相关路由
+fn post_routes() -&gt; Router {
+    Router::new()
+        .route("/", get(list_posts).post(create_post))
+        .route("/:id", get(get_post).put(update_post).delete(delete_post))
+        .route("/:id/comments", get(post_comments).post(create_comment))
+}
+
+// 组合路由
+fn app() -&gt; Router {
+    Router::new()
+        .nest("/users", user_routes())
+        .nest("/posts", post_routes())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="路径参数"><a class="header" href="#路径参数">路径参数</a></h2>
+<h3 id="单个参数"><a class="header" href="#单个参数">单个参数</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    extract::Path,
+    Json,
+};
+
+// GET /users/:id
+async fn get_user(Path(id): Path&lt;i32&gt;) -&gt; Json&lt;User&gt; {
+    let user = find_user_by_id(id).await;
+    Json(user)
+}
+
+// GET /posts/:slug
+async fn get_post_by_slug(Path(slug): Path&lt;String&gt;) -&gt; Json&lt;Post&gt; {
+    let post = find_post_by_slug(&amp;slug).await;
+    Json(post)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="多个参数"><a class="header" href="#多个参数">多个参数</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// GET /users/:user_id/posts/:post_id
+async fn get_user_post(
+    Path((user_id, post_id)): Path&lt;(i32, i32)&gt;
+) -&gt; Json&lt;Post&gt; {
+    let post = find_user_post(user_id, post_id).await;
+    Json(post)
+}
+
+// 使用结构体
+#[derive(Deserialize)]
+struct PostPath {
+    user_id: i32,
+    post_id: i32,
+}
+
+async fn get_user_post_v2(
+    Path(params): Path&lt;PostPath&gt;
+) -&gt; Json&lt;Post&gt; {
+    let post = find_user_post(params.user_id, params.post_id).await;
+    Json(post)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="查询参数"><a class="header" href="#查询参数">查询参数</a></h2>
+<h3 id="基本查询参数"><a class="header" href="#基本查询参数">基本查询参数</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::extract::Query;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct Pagination {
+    page: Option&lt;u32&gt;,
+    per_page: Option&lt;u32&gt;,
+}
+
+// GET /users?page=1&amp;per_page=20
+async fn list_users(Query(params): Query&lt;Pagination&gt;) -&gt; Json&lt;Vec&lt;User&gt;&gt; {
+    let page = params.page.unwrap_or(1);
+    let per_page = params.per_page.unwrap_or(10);
+    
+    let users = fetch_users(page, per_page).await;
+    Json(users)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="复杂查询参数"><a class="header" href="#复杂查询参数">复杂查询参数</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct SearchParams {
+    q: Option&lt;String&gt;,
+    category: Option&lt;String&gt;,
+    tags: Option&lt;Vec&lt;String&gt;&gt;,
+    sort: Option&lt;String&gt;,
+    order: Option&lt;String&gt;,
+    #[serde(flatten)]
+    pagination: Pagination,
+}
+
+// GET /posts?q=rust&amp;category=tech&amp;tags=web&amp;tags=async&amp;sort=date&amp;order=desc&amp;page=1
+async fn search_posts(Query(params): Query&lt;SearchParams&gt;) -&gt; Json&lt;Vec&lt;Post&gt;&gt; {
+    let posts = search_posts_with_params(params).await;
+    Json(posts)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="请求体解析"><a class="header" href="#请求体解析">请求体解析</a></h2>
+<h3 id="json-请求体"><a class="header" href="#json-请求体">JSON 请求体</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::Json;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize)]
+struct CreateUserRequest {
+    username: String,
+    email: String,
+    password: String,
+}
+
+#[derive(Serialize)]
+struct UserResponse {
+    id: i32,
+    username: String,
+    email: String,
+}
+
+async fn create_user(
+    Json(payload): Json&lt;CreateUserRequest&gt;
+) -&gt; (StatusCode, Json&lt;UserResponse&gt;) {
+    let user = User::create(payload).await;
+    
+    (
+        StatusCode::CREATED,
+        Json(UserResponse {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+        })
+    )
+}
+<span class="boring">}</span></code></pre>
+<h3 id="表单数据"><a class="header" href="#表单数据">表单数据</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::Form;
+
+#[derive(Deserialize)]
+struct LoginForm {
+    username: String,
+    password: String,
+}
+
+async fn login(Form(form): Form&lt;LoginForm&gt;) -&gt; Result&lt;String, StatusCode&gt; {
+    if verify_credentials(&amp;form.username, &amp;form.password).await {
+        Ok("Login successful".to_string())
+    } else {
+        Err(StatusCode::UNAUTHORIZED)
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="multipart-文件上传"><a class="header" href="#multipart-文件上传">Multipart 文件上传</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::extract::Multipart;
+
+async fn upload_file(mut multipart: Multipart) -&gt; Result&lt;String, StatusCode&gt; {
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let name = field.name().unwrap().to_string();
+        let data = field.bytes().await.unwrap();
+        
+        if name == "file" {
+            // 保存文件
+            tokio::fs::write(format!("uploads/{}", name), data)
+                .await
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        }
+    }
+    
+    Ok("File uploaded successfully".to_string())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="自定义提取器"><a class="header" href="#自定义提取器">自定义提取器</a></h2>
+<h3 id="简单提取器"><a class="header" href="#简单提取器">简单提取器</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    async_trait,
+    extract::{FromRequestParts, rejection::JsonRejection},
+    http::request::Parts,
+};
+
+// 自定义 JSON 提取器，带验证
+struct ValidatedJson&lt;T&gt;(T);
+
+#[async_trait]
+impl&lt;S, T&gt; FromRequestParts&lt;S&gt; for ValidatedJson&lt;T&gt;
+where
+    T: DeserializeOwned + Validate,
+    S: Send + Sync,
+{
+    type Rejection = (StatusCode, String);
+    
+    async fn from_request_parts(
+        parts: &amp;mut Parts,
+        state: &amp;S
+    ) -&gt; Result&lt;Self, Self::Rejection&gt; {
+        let Json(value) = Json::&lt;T&gt;::from_request_parts(parts, state)
+            .await
+            .map_err(|err| {
+                (StatusCode::BAD_REQUEST, format!("Invalid JSON: {}", err))
+            })?;
+        
+        value.validate().map_err(|err| {
+            (StatusCode::BAD_REQUEST, format!("Validation error: {}", err))
+        })?;
+        
+        Ok(ValidatedJson(value))
+    }
+}
+
+// 使用
+async fn create_user(
+    ValidatedJson(user): ValidatedJson&lt;CreateUserRequest&gt;
+) -&gt; Json&lt;UserResponse&gt; {
+    // user 已经通过验证
+    let created = User::create(user).await;
+    Json(created)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="认证提取器"><a class="header" href="#认证提取器">认证提取器</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::http::HeaderMap;
+
+struct AuthUser {
+    id: i32,
+    username: String,
+}
+
+#[async_trait]
+impl&lt;S&gt; FromRequestParts&lt;S&gt; for AuthUser
+where
+    S: Send + Sync,
+{
+    type Rejection = StatusCode;
+    
+    async fn from_request_parts(
+        parts: &amp;mut Parts,
+        _state: &amp;S
+    ) -&gt; Result&lt;Self, Self::Rejection&gt; {
+        let headers = &amp;parts.headers;
+        
+        let token = headers
+            .get("Authorization")
+            .and_then(|h| h.to_str().ok())
+            .and_then(|h| h.strip_prefix("Bearer "))
+            .ok_or(StatusCode::UNAUTHORIZED)?;
+        
+        let claims = verify_jwt(token)
+            .map_err(|_| StatusCode::UNAUTHORIZED)?;
+        
+        Ok(AuthUser {
+            id: claims.user_id,
+            username: claims.username,
+        })
+    }
+}
+
+// 使用
+async fn get_profile(user: AuthUser) -&gt; Json&lt;Profile&gt; {
+    let profile = fetch_profile(user.id).await;
+    Json(profile)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="请求头处理"><a class="header" href="#请求头处理">请求头处理</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::http::{HeaderMap, HeaderValue};
+
+async fn handle_headers(headers: HeaderMap) -&gt; String {
+    let user_agent = headers
+        .get("user-agent")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("unknown");
+    
+    let accept = headers
+        .get("accept")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("*/*");
+    
+    format!("User-Agent: {}, Accept: {}", user_agent, accept)
+}
+
+// 设置响应头
+async fn with_custom_headers() -&gt; (HeaderMap, String) {
+    let mut headers = HeaderMap::new();
+    headers.insert("X-Custom-Header", HeaderValue::from_static("value"));
+    headers.insert("X-Request-Id", HeaderValue::from_static("123"));
+    
+    (headers, "Response with custom headers".to_string())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整示例-2"><a class="header" href="#完整示例-2">完整示例</a></h2>
+<pre class="playground"><code class="language-rust">use axum::{
+    extract::{Path, Query, State, Json},
+    http::StatusCode,
+    routing::{get, post, put, delete},
+    Router,
+};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
+// 数据模型
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct User {
+    id: i32,
+    username: String,
+    email: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct Post {
+    id: i32,
+    user_id: i32,
+    title: String,
+    content: String,
+}
+
+// 请求/响应模型
+#[derive(Deserialize)]
+struct CreateUserRequest {
+    username: String,
+    email: String,
+}
+
+#[derive(Deserialize)]
+struct UpdateUserRequest {
+    username: Option&lt;String&gt;,
+    email: Option&lt;String&gt;,
+}
+
+#[derive(Deserialize)]
+struct ListQuery {
+    page: Option&lt;u32&gt;,
+    per_page: Option&lt;u32&gt;,
+    sort: Option&lt;String&gt;,
+}
+
+// 应用状态
+#[derive(Clone)]
+struct AppState {
+    users: Arc&lt;RwLock&lt;Vec&lt;User&gt;&gt;&gt;,
+    posts: Arc&lt;RwLock&lt;Vec&lt;Post&gt;&gt;&gt;,
+}
+
+// 用户处理器
+async fn list_users(
+    State(state): State&lt;AppState&gt;,
+    Query(params): Query&lt;ListQuery&gt;,
+) -&gt; Json&lt;Vec&lt;User&gt;&gt; {
+    let users = state.users.read().await;
+    let page = params.page.unwrap_or(1);
+    let per_page = params.per_page.unwrap_or(10);
+    
+    let start = ((page - 1) * per_page) as usize;
+    let end = (start + per_page as usize).min(users.len());
+    
+    Json(users[start..end].to_vec())
+}
+
+async fn get_user(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let users = state.users.read().await;
+    users
+        .iter()
+        .find(|u| u.id == id)
+        .cloned()
+        .map(Json)
+        .ok_or(StatusCode::NOT_FOUND)
+}
+
+async fn create_user(
+    State(state): State&lt;AppState&gt;,
+    Json(payload): Json&lt;CreateUserRequest&gt;,
+) -&gt; (StatusCode, Json&lt;User&gt;) {
+    let mut users = state.users.write().await;
+    let id = users.len() as i32 + 1;
+    
+    let user = User {
+        id,
+        username: payload.username,
+        email: payload.email,
+    };
+    
+    users.push(user.clone());
+    (StatusCode::CREATED, Json(user))
+}
+
+async fn update_user(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+    Json(payload): Json&lt;UpdateUserRequest&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let mut users = state.users.write().await;
+    
+    let user = users
+        .iter_mut()
+        .find(|u| u.id == id)
+        .ok_or(StatusCode::NOT_FOUND)?;
+    
+    if let Some(username) = payload.username {
+        user.username = username;
+    }
+    if let Some(email) = payload.email {
+        user.email = email;
+    }
+    
+    Ok(Json(user.clone()))
+}
+
+async fn delete_user(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; StatusCode {
+    let mut users = state.users.write().await;
+    
+    if let Some(pos) = users.iter().position(|u| u.id == id) {
+        users.remove(pos);
+        StatusCode::NO_CONTENT
+    } else {
+        StatusCode::NOT_FOUND
+    }
+}
+
+// 文章处理器
+async fn user_posts(
+    State(state): State&lt;AppState&gt;,
+    Path(user_id): Path&lt;i32&gt;,
+) -&gt; Json&lt;Vec&lt;Post&gt;&gt; {
+    let posts = state.posts.read().await;
+    let user_posts: Vec&lt;Post&gt; = posts
+        .iter()
+        .filter(|p| p.user_id == user_id)
+        .cloned()
+        .collect();
+    
+    Json(user_posts)
+}
+
+// 路由配置
+fn user_routes() -&gt; Router&lt;AppState&gt; {
+    Router::new()
+        .route("/", get(list_users).post(create_user))
+        .route("/:id", get(get_user).put(update_user).delete(delete_user))
+        .route("/:id/posts", get(user_posts))
+}
+
+#[tokio::main]
+async fn main() {
+    let state = AppState {
+        users: Arc::new(RwLock::new(vec![
+            User {
+                id: 1,
+                username: "alice".to_string(),
+                email: "alice@example.com".to_string(),
+            },
+        ])),
+        posts: Arc::new(RwLock::new(vec![])),
+    };
+    
+    let app = Router::new()
+        .nest("/api/users", user_routes())
+        .with_state(state);
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h2 id="测试-api-1"><a class="header" href="#测试-api-1">测试 API</a></h2>
+<pre><code class="language-bash"># 列出用户
+curl http://localhost:3000/api/users
+
+# 分页查询
+curl "http://localhost:3000/api/users?page=1&amp;per_page=5"
+
+# 获取单个用户
+curl http://localhost:3000/api/users/1
+
+# 创建用户
+curl -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"username":"bob","email":"bob@example.com"}'
+
+# 更新用户
+curl -X PUT http://localhost:3000/api/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice_updated"}'
+
+# 删除用户
+curl -X DELETE http://localhost:3000/api/users/1
+
+# 获取用户的文章
+curl http://localhost:3000/api/users/1/posts
+</code></pre>
+<h2 id="练习-1"><a class="header" href="#练习-1">练习</a></h2>
+<ol>
+<li>实现文章的 CRUD 操作</li>
+<li>添加搜索功能（支持多个查询参数）</li>
+<li>实现文件上传功能</li>
+<li>创建自定义提取器进行输入验证</li>
+<li>添加请求日志中间件</li>
+</ol>
+<h2 id="下一步-3"><a class="header" href="#下一步-3">下一步</a></h2>
+<p>Day 64 将学习中间件开发，包括日志、认证、CORS 等。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-64-中间件开发-1"><a class="header" href="#day-64-中间件开发-1">Day 64: 中间件开发</a></h1>
+<h2 id="学习目标-3"><a class="header" href="#学习目标-3">学习目标</a></h2>
+<ul>
+<li>理解中间件概念和工作原理</li>
+<li>掌握 Tower 中间件系统</li>
+<li>实现常用中间件</li>
+<li>创建自定义中间件</li>
+</ul>
+<h2 id="中间件概念"><a class="header" href="#中间件概念">中间件概念</a></h2>
+<p>中间件是在请求到达处理器之前或响应返回客户端之前执行的代码层。</p>
+<pre><code>请求 → 中间件1 → 中间件2 → 处理器 → 中间件2 → 中间件1 → 响应
+</code></pre>
+<h2 id="tower-中间件"><a class="header" href="#tower-中间件">Tower 中间件</a></h2>
+<h3 id="基本使用"><a class="header" href="#基本使用">基本使用</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    Router,
+    middleware,
+};
+use tower::ServiceBuilder;
+use tower_http::{
+    trace::TraceLayer,
+    cors::CorsLayer,
+    compression::CompressionLayer,
+};
+
+let app = Router::new()
+    .route("/api/users", get(list_users))
+    .layer(
+        ServiceBuilder::new()
+            .layer(TraceLayer::new_for_http())
+            .layer(CorsLayer::permissive())
+            .layer(CompressionLayer::new())
+    );
+<span class="boring">}</span></code></pre>
+<h2 id="内置中间件"><a class="header" href="#内置中间件">内置中间件</a></h2>
+<h3 id="1-日志追踪-tracing"><a class="header" href="#1-日志追踪-tracing">1. 日志追踪 (Tracing)</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower_http::trace::{TraceLayer, DefaultMakeSpan, DefaultOnResponse};
+use tracing::Level;
+
+let trace_layer = TraceLayer::new_for_http()
+    .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+    .on_response(DefaultOnResponse::new().level(Level::INFO));
+
+let app = Router::new()
+    .route("/", get(handler))
+    .layer(trace_layer);
+<span class="boring">}</span></code></pre>
+<h3 id="2-cors"><a class="header" href="#2-cors">2. CORS</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower_http::cors::{CorsLayer, Any};
+use http::Method;
+
+let cors = CorsLayer::new()
+    .allow_origin(Any)
+    .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+    .allow_headers(Any);
+
+let app = Router::new()
+    .route("/api/users", get(list_users))
+    .layer(cors);
+<span class="boring">}</span></code></pre>
+<h3 id="3-压缩"><a class="header" href="#3-压缩">3. 压缩</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower_http::compression::CompressionLayer;
+
+let app = Router::new()
+    .route("/", get(handler))
+    .layer(CompressionLayer::new());
+<span class="boring">}</span></code></pre>
+<h3 id="4-超时"><a class="header" href="#4-超时">4. 超时</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower::timeout::TimeoutLayer;
+use std::time::Duration;
+
+let app = Router::new()
+    .route("/", get(handler))
+    .layer(TimeoutLayer::new(Duration::from_secs(10)));
+<span class="boring">}</span></code></pre>
+<h3 id="5-限流"><a class="header" href="#5-限流">5. 限流</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower::limit::RateLimitLayer;
+use std::time::Duration;
+
+let app = Router::new()
+    .route("/api/users", get(list_users))
+    .layer(RateLimitLayer::new(100, Duration::from_secs(60)));
+<span class="boring">}</span></code></pre>
+<h2 id="自定义中间件"><a class="header" href="#自定义中间件">自定义中间件</a></h2>
+<h3 id="方法-1-使用-from_fn"><a class="header" href="#方法-1-使用-from_fn">方法 1: 使用 <code>from_fn</code></a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::{self, Next},
+    extract::Request,
+    response::Response,
+};
+
+async fn my_middleware(
+    request: Request,
+    next: Next,
+) -&gt; Response {
+    // 请求前处理
+    println!("Request: {} {}", request.method(), request.uri());
+    
+    // 调用下一个中间件或处理器
+    let response = next.run(request).await;
+    
+    // 响应后处理
+    println!("Response status: {}", response.status());
+    
+    response
+}
+
+let app = Router::new()
+    .route("/", get(handler))
+    .layer(middleware::from_fn(my_middleware));
+<span class="boring">}</span></code></pre>
+<h3 id="方法-2-实现-layer-trait"><a class="header" href="#方法-2-实现-layer-trait">方法 2: 实现 <code>Layer</code> trait</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower::{Layer, Service};
+use std::task::{Context, Poll};
+use pin_project::pin_project;
+
+#[derive(Clone)]
+struct MyMiddlewareLayer;
+
+impl&lt;S&gt; Layer&lt;S&gt; for MyMiddlewareLayer {
+    type Service = MyMiddleware&lt;S&gt;;
+    
+    fn layer(&amp;self, inner: S) -&gt; Self::Service {
+        MyMiddleware { inner }
+    }
+}
+
+#[derive(Clone)]
+struct MyMiddleware&lt;S&gt; {
+    inner: S,
+}
+
+impl&lt;S&gt; Service&lt;Request&gt; for MyMiddleware&lt;S&gt;
+where
+    S: Service&lt;Request, Response = Response&gt; + Send + 'static,
+    S::Future: Send + 'static,
+{
+    type Response = S::Response;
+    type Error = S::Error;
+    type Future = Pin&lt;Box&lt;dyn Future&lt;Output = Result&lt;Self::Response, Self::Error&gt;&gt; + Send&gt;&gt;;
+    
+    fn poll_ready(&amp;mut self, cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Result&lt;(), Self::Error&gt;&gt; {
+        self.inner.poll_ready(cx)
+    }
+    
+    fn call(&amp;mut self, request: Request) -&gt; Self::Future {
+        let future = self.inner.call(request);
+        
+        Box::pin(async move {
+            let response = future.await?;
+            // 处理响应
+            Ok(response)
+        })
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="实用中间件示例"><a class="header" href="#实用中间件示例">实用中间件示例</a></h2>
+<h3 id="1-请求-id-中间件"><a class="header" href="#1-请求-id-中间件">1. 请求 ID 中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::Next,
+    extract::Request,
+    response::Response,
+    http::HeaderValue,
+};
+use uuid::Uuid;
+
+async fn request_id_middleware(
+    mut request: Request,
+    next: Next,
+) -&gt; Response {
+    let request_id = Uuid::new_v4().to_string();
+    
+    // 添加到请求扩展
+    request.extensions_mut().insert(request_id.clone());
+    
+    let mut response = next.run(request).await;
+    
+    // 添加到响应头
+    response.headers_mut().insert(
+        "X-Request-ID",
+        HeaderValue::from_str(&amp;request_id).unwrap(),
+    );
+    
+    response
+}
+<span class="boring">}</span></code></pre>
+<h3 id="2-认证中间件"><a class="header" href="#2-认证中间件">2. 认证中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::Next,
+    extract::Request,
+    response::{Response, IntoResponse},
+    http::StatusCode,
+};
+
+async fn auth_middleware(
+    request: Request,
+    next: Next,
+) -&gt; Result&lt;Response, StatusCode&gt; {
+    let auth_header = request
+        .headers()
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok());
+    
+    match auth_header {
+        Some(token) if token.starts_with("Bearer ") =&gt; {
+            let token = &amp;token[7..];
+            
+            match verify_token(token).await {
+                Ok(user) =&gt; {
+                    let mut request = request;
+                    request.extensions_mut().insert(user);
+                    Ok(next.run(request).await)
+                }
+                Err(_) =&gt; Err(StatusCode::UNAUTHORIZED),
+            }
+        }
+        _ =&gt; Err(StatusCode::UNAUTHORIZED),
+    }
+}
+
+// 使用
+let protected_routes = Router::new()
+    .route("/profile", get(get_profile))
+    .layer(middleware::from_fn(auth_middleware));
+<span class="boring">}</span></code></pre>
+<h3 id="3-日志中间件"><a class="header" href="#3-日志中间件">3. 日志中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::Next,
+    extract::Request,
+    response::Response,
+};
+use std::time::Instant;
+
+async fn logging_middleware(
+    request: Request,
+    next: Next,
+) -&gt; Response {
+    let method = request.method().clone();
+    let uri = request.uri().clone();
+    let start = Instant::now();
+    
+    let response = next.run(request).await;
+    
+    let duration = start.elapsed();
+    let status = response.status();
+    
+    tracing::info!(
+        method = %method,
+        uri = %uri,
+        status = %status,
+        duration = ?duration,
+        "Request completed"
+    );
+    
+    response
+}
+<span class="boring">}</span></code></pre>
+<h3 id="4-错误处理中间件"><a class="header" href="#4-错误处理中间件">4. 错误处理中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::Next,
+    extract::Request,
+    response::{Response, IntoResponse},
+    http::StatusCode,
+    Json,
+};
+use serde_json::json;
+
+async fn error_handler_middleware(
+    request: Request,
+    next: Next,
+) -&gt; Response {
+    let response = next.run(request).await;
+    
+    if response.status().is_server_error() {
+        let error_response = Json(json!({
+            "error": "Internal server error",
+            "status": 500
+        }));
+        
+        (StatusCode::INTERNAL_SERVER_ERROR, error_response).into_response()
+    } else {
+        response
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="5-限流中间件"><a class="header" href="#5-限流中间件">5. 限流中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::Next,
+    extract::Request,
+    response::Response,
+    http::StatusCode,
+};
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
+
+#[derive(Clone)]
+struct RateLimiter {
+    requests: Arc&lt;Mutex&lt;HashMap&lt;String, Vec&lt;Instant&gt;&gt;&gt;&gt;,
+    max_requests: usize,
+    window: Duration,
+}
+
+impl RateLimiter {
+    fn new(max_requests: usize, window: Duration) -&gt; Self {
+        Self {
+            requests: Arc::new(Mutex::new(HashMap::new())),
+            max_requests,
+            window,
+        }
+    }
+    
+    async fn check(&amp;self, key: &amp;str) -&gt; bool {
+        let mut requests = self.requests.lock().await;
+        let now = Instant::now();
+        
+        let entry = requests.entry(key.to_string()).or_insert_with(Vec::new);
+        
+        // 移除过期的请求
+        entry.retain(|&amp;time| now.duration_since(time) &lt; self.window);
+        
+        if entry.len() &lt; self.max_requests {
+            entry.push(now);
+            true
+        } else {
+            false
+        }
+    }
+}
+
+async fn rate_limit_middleware(
+    request: Request,
+    next: Next,
+    limiter: Arc&lt;RateLimiter&gt;,
+) -&gt; Result&lt;Response, StatusCode&gt; {
+    let ip = request
+        .headers()
+        .get("X-Forwarded-For")
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("unknown");
+    
+    if limiter.check(ip).await {
+        Ok(next.run(request).await)
+    } else {
+        Err(StatusCode::TOO_MANY_REQUESTS)
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="6-缓存中间件"><a class="header" href="#6-缓存中间件">6. 缓存中间件</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    middleware::Next,
+    extract::Request,
+    response::Response,
+    body::Body,
+};
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use std::collections::HashMap;
+
+#[derive(Clone)]
+struct CacheMiddleware {
+    cache: Arc&lt;RwLock&lt;HashMap&lt;String, Vec&lt;u8&gt;&gt;&gt;&gt;,
+}
+
+impl CacheMiddleware {
+    fn new() -&gt; Self {
+        Self {
+            cache: Arc::new(RwLock::new(HashMap::new())),
+        }
+    }
+}
+
+async fn cache_middleware(
+    request: Request,
+    next: Next,
+    cache: Arc&lt;RwLock&lt;HashMap&lt;String, Vec&lt;u8&gt;&gt;&gt;&gt;,
+) -&gt; Response {
+    let key = format!("{} {}", request.method(), request.uri());
+    
+    // 检查缓存
+    if request.method() == "GET" {
+        let cache_read = cache.read().await;
+        if let Some(cached) = cache_read.get(&amp;key) {
+            return Response::builder()
+                .header("X-Cache", "HIT")
+                .body(Body::from(cached.clone()))
+                .unwrap();
+        }
+    }
+    
+    let response = next.run(request).await;
+    
+    // 缓存 GET 请求的成功响应
+    if response.status().is_success() {
+        // 注意：实际实现需要处理响应体
+        // 这里简化了
+    }
+    
+    response
+}
+<span class="boring">}</span></code></pre>
+<h2 id="中间件组合"><a class="header" href="#中间件组合">中间件组合</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use tower::ServiceBuilder;
+use std::time::Duration;
+
+let app = Router::new()
+    .route("/api/users", get(list_users))
+    .layer(
+        ServiceBuilder::new()
+            // 最外层：请求 ID
+            .layer(middleware::from_fn(request_id_middleware))
+            // 日志
+            .layer(TraceLayer::new_for_http())
+            // CORS
+            .layer(CorsLayer::permissive())
+            // 压缩
+            .layer(CompressionLayer::new())
+            // 超时
+            .layer(TimeoutLayer::new(Duration::from_secs(30)))
+            // 限流
+            .layer(middleware::from_fn(rate_limit_middleware))
+    );
+<span class="boring">}</span></code></pre>
+<h2 id="条件中间件"><a class="header" href="#条件中间件">条件中间件</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::Router;
+
+fn app() -&gt; Router {
+    let mut app = Router::new()
+        .route("/api/users", get(list_users));
+    
+    // 仅在生产环境启用某些中间件
+    if cfg!(not(debug_assertions)) {
+        app = app.layer(CompressionLayer::new());
+    }
+    
+    // 根据配置启用认证
+    if std::env::var("ENABLE_AUTH").is_ok() {
+        app = app.layer(middleware::from_fn(auth_middleware));
+    }
+    
+    app
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整示例-3"><a class="header" href="#完整示例-3">完整示例</a></h2>
+<pre class="playground"><code class="language-rust">use axum::{
+    Router,
+    routing::get,
+    middleware::{self, Next},
+    extract::Request,
+    response::{Response, IntoResponse},
+    http::{StatusCode, HeaderValue},
+    Json,
+};
+use tower::ServiceBuilder;
+use tower_http::{
+    trace::TraceLayer,
+    cors::CorsLayer,
+    compression::CompressionLayer,
+};
+use std::time::Instant;
+use uuid::Uuid;
+use serde_json::json;
+
+// 请求 ID 中间件
+async fn request_id_middleware(
+    mut request: Request,
+    next: Next,
+) -&gt; Response {
+    let request_id = Uuid::new_v4().to_string();
+    request.extensions_mut().insert(request_id.clone());
+    
+    let mut response = next.run(request).await;
+    response.headers_mut().insert(
+        "X-Request-ID",
+        HeaderValue::from_str(&amp;request_id).unwrap(),
+    );
+    
+    response
+}
+
+// 日志中间件
+async fn logging_middleware(
+    request: Request,
+    next: Next,
+) -&gt; Response {
+    let method = request.method().clone();
+    let uri = request.uri().clone();
+    let start = Instant::now();
+    
+    let response = next.run(request).await;
+    
+    let duration = start.elapsed();
+    let status = response.status();
+    
+    println!(
+        "{} {} - {} - {:?}",
+        method, uri, status, duration
+    );
+    
+    response
+}
+
+// 错误处理中间件
+async fn error_handler(
+    request: Request,
+    next: Next,
+) -&gt; Response {
+    let response = next.run(request).await;
+    
+    if response.status().is_server_error() {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": "Internal server error"
+            }))
+        ).into_response()
+    } else {
+        response
+    }
+}
+
+// 处理器
+async fn handler() -&gt; &amp;'static str {
+    "Hello, World!"
+}
+
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt::init();
+    
+    let app = Router::new()
+        .route("/", get(handler))
+        .layer(
+            ServiceBuilder::new()
+                .layer(middleware::from_fn(request_id_middleware))
+                .layer(middleware::from_fn(logging_middleware))
+                .layer(middleware::from_fn(error_handler))
+                .layer(TraceLayer::new_for_http())
+                .layer(CorsLayer::permissive())
+                .layer(CompressionLayer::new())
+        );
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h2 id="练习-2"><a class="header" href="#练习-2">练习</a></h2>
+<ol>
+<li>实现 API 密钥认证中间件</li>
+<li>创建请求/响应日志中间件</li>
+<li>实现基于 IP 的限流中间件</li>
+<li>添加请求体大小限制中间件</li>
+<li>创建性能监控中间件</li>
+</ol>
+<h2 id="下一步-4"><a class="header" href="#下一步-4">下一步</a></h2>
+<p>Day 65 将学习请求状态管理，包括应用状态、连接池等。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-65-请求状态管理-1"><a class="header" href="#day-65-请求状态管理-1">Day 65: 请求状态管理</a></h1>
+<h2 id="学习目标-4"><a class="header" href="#学习目标-4">学习目标</a></h2>
+<ul>
+<li>理解应用状态管理</li>
+<li>掌握 Arc + RwLock 模式</li>
+<li>学习连接池管理</li>
+<li>实现状态注入</li>
+</ul>
+<h2 id="应用状态概念"><a class="header" href="#应用状态概念">应用状态概念</a></h2>
+<p>在 Web 应用中，状态管理用于：</p>
+<ul>
+<li>共享数据库连接池</li>
+<li>缓存配置信息</li>
+<li>共享应用级数据</li>
+<li>管理全局资源</li>
+</ul>
+<h2 id="axum-状态管理"><a class="header" href="#axum-状态管理">Axum 状态管理</a></h2>
+<h3 id="基本状态"><a class="header" href="#基本状态">基本状态</a></h3>
+<pre class="playground"><code class="language-rust">use axum::{
+    Router,
+    routing::get,
+    extract::State,
+    Json,
+};
+use std::sync::Arc;
+
+// 简单状态
+#[derive(Clone)]
+struct AppState {
+    app_name: String,
+    version: String,
+}
+
+async fn info(State(state): State&lt;AppState&gt;) -&gt; Json&lt;serde_json::Value&gt; {
+    Json(serde_json::json!({
+        "app": state.app_name,
+        "version": state.version
+    }))
+}
+
+#[tokio::main]
+async fn main() {
+    let state = AppState {
+        app_name: "My App".to_string(),
+        version: "1.0.0".to_string(),
+    };
+    
+    let app = Router::new()
+        .route("/info", get(info))
+        .with_state(state);
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h3 id="共享可变状态"><a class="header" href="#共享可变状态">共享可变状态</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::Arc;
+use tokio::sync::RwLock;
+use std::collections::HashMap;
+
+#[derive(Clone)]
+struct AppState {
+    // 使用 Arc + RwLock 实现共享可变状态
+    cache: Arc&lt;RwLock&lt;HashMap&lt;String, String&gt;&gt;&gt;,
+    counter: Arc&lt;RwLock&lt;u64&gt;&gt;,
+}
+
+// 读取缓存
+async fn get_cache(
+    State(state): State&lt;AppState&gt;,
+    Path(key): Path&lt;String&gt;,
+) -&gt; Result&lt;String, StatusCode&gt; {
+    let cache = state.cache.read().await;
+    cache
+        .get(&amp;key)
+        .cloned()
+        .ok_or(StatusCode::NOT_FOUND)
+}
+
+// 写入缓存
+async fn set_cache(
+    State(state): State&lt;AppState&gt;,
+    Path(key): Path&lt;String&gt;,
+    body: String,
+) -&gt; StatusCode {
+    let mut cache = state.cache.write().await;
+    cache.insert(key, body);
+    StatusCode::CREATED
+}
+
+// 增加计数器
+async fn increment(State(state): State&lt;AppState&gt;) -&gt; String {
+    let mut counter = state.counter.write().await;
+    *counter += 1;
+    format!("Counter: {}", *counter)
+}
+
+fn app() -&gt; Router {
+    let state = AppState {
+        cache: Arc::new(RwLock::new(HashMap::new())),
+        counter: Arc::new(RwLock::new(0)),
+    };
+    
+    Router::new()
+        .route("/cache/:key", get(get_cache).post(set_cache))
+        .route("/counter", get(increment))
+        .with_state(state)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="数据库连接池"><a class="header" href="#数据库连接池">数据库连接池</a></h2>
+<h3 id="sqlx-连接池"><a class="header" href="#sqlx-连接池">SQLx 连接池</a></h3>
+<pre class="playground"><code class="language-rust">use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
+
+#[derive(Clone)]
+struct AppState {
+    db: PgPool,
+}
+
+async fn create_state() -&gt; AppState {
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&amp;database_url)
+        .await
+        .expect("Failed to create pool");
+    
+    AppState { db: pool }
+}
+
+// 使用数据库
+async fn get_users(
+    State(state): State&lt;AppState&gt;,
+) -&gt; Result&lt;Json&lt;Vec&lt;User&gt;&gt;, StatusCode&gt; {
+    let users = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users"
+    )
+    .fetch_all(&amp;state.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(users))
+}
+
+#[tokio::main]
+async fn main() {
+    let state = create_state().await;
+    
+    let app = Router::new()
+        .route("/users", get(get_users))
+        .with_state(state);
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h3 id="redis-连接池"><a class="header" href="#redis-连接池">Redis 连接池</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use redis::{Client, aio::ConnectionManager};
+
+#[derive(Clone)]
+struct AppState {
+    redis: ConnectionManager,
+}
+
+async fn create_redis_state() -&gt; AppState {
+    let client = Client::open("redis://127.0.0.1/")
+        .expect("Failed to create Redis client");
+    
+    let manager = ConnectionManager::new(client)
+        .await
+        .expect("Failed to create connection manager");
+    
+    AppState { redis: manager }
+}
+
+// 使用 Redis
+async fn get_value(
+    State(state): State&lt;AppState&gt;,
+    Path(key): Path&lt;String&gt;,
+) -&gt; Result&lt;String, StatusCode&gt; {
+    let mut conn = state.redis.clone();
+    
+    redis::cmd("GET")
+        .arg(&amp;key)
+        .query_async(&amp;mut conn)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
+async fn set_value(
+    State(state): State&lt;AppState&gt;,
+    Path(key): Path&lt;String&gt;,
+    body: String,
+) -&gt; StatusCode {
+    let mut conn = state.redis.clone();
+    
+    let _: () = redis::cmd("SET")
+        .arg(&amp;key)
+        .arg(&amp;body)
+        .query_async(&amp;mut conn)
+        .await
+        .unwrap();
+    
+    StatusCode::CREATED
+}
+<span class="boring">}</span></code></pre>
+<h2 id="复杂状态管理"><a class="header" href="#复杂状态管理">复杂状态管理</a></h2>
+<h3 id="多层状态结构"><a class="header" href="#多层状态结构">多层状态结构</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::Arc;
+use tokio::sync::RwLock;
+use sqlx::PgPool;
+use redis::aio::ConnectionManager;
+
+// 配置
+#[derive(Clone)]
+struct Config {
+    app_name: String,
+    max_upload_size: usize,
+    jwt_secret: String,
+}
+
+// 缓存层
+#[derive(Clone)]
+struct CacheLayer {
+    redis: ConnectionManager,
+    local_cache: Arc&lt;RwLock&lt;HashMap&lt;String, String&gt;&gt;&gt;,
+}
+
+// 数据库层
+#[derive(Clone)]
+struct DatabaseLayer {
+    pg_pool: PgPool,
+}
+
+// 应用状态
+#[derive(Clone)]
+struct AppState {
+    config: Arc&lt;Config&gt;,
+    cache: CacheLayer,
+    database: DatabaseLayer,
+    metrics: Arc&lt;RwLock&lt;Metrics&gt;&gt;,
+}
+
+#[derive(Default)]
+struct Metrics {
+    request_count: u64,
+    error_count: u64,
+}
+
+impl AppState {
+    async fn new() -&gt; Self {
+        let config = Arc::new(Config {
+            app_name: "My App".to_string(),
+            max_upload_size: 10 * 1024 * 1024, // 10MB
+            jwt_secret: std::env::var("JWT_SECRET").unwrap(),
+        });
+        
+        let redis_client = redis::Client::open("redis://127.0.0.1/").unwrap();
+        let redis = ConnectionManager::new(redis_client).await.unwrap();
+        
+        let cache = CacheLayer {
+            redis,
+            local_cache: Arc::new(RwLock::new(HashMap::new())),
+        };
+        
+        let pg_pool = PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&amp;std::env::var("DATABASE_URL").unwrap())
+            .await
+            .unwrap();
+        
+        let database = DatabaseLayer { pg_pool };
+        
+        Self {
+            config,
+            cache,
+            database,
+            metrics: Arc::new(RwLock::new(Metrics::default())),
+        }
+    }
+    
+    async fn increment_request_count(&amp;self) {
+        let mut metrics = self.metrics.write().await;
+        metrics.request_count += 1;
+    }
+}
+
+// 使用状态
+async fn handler(State(state): State&lt;AppState&gt;) -&gt; String {
+    state.increment_request_count().await;
+    format!("App: {}", state.config.app_name)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="状态初始化"><a class="header" href="#状态初始化">状态初始化</a></h2>
+<h3 id="延迟初始化"><a class="header" href="#延迟初始化">延迟初始化</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::Arc;
+use tokio::sync::OnceCell;
+
+#[derive(Clone)]
+struct AppState {
+    expensive_resource: Arc&lt;OnceCell&lt;ExpensiveResource&gt;&gt;,
+}
+
+struct ExpensiveResource {
+    data: Vec&lt;u8&gt;,
+}
+
+impl ExpensiveResource {
+    async fn new() -&gt; Self {
+        // 模拟耗时初始化
+        tokio::time::sleep(Duration::from_secs(2)).await;
+        Self {
+            data: vec![0; 1024 * 1024], // 1MB
+        }
+    }
+}
+
+async fn use_resource(State(state): State&lt;AppState&gt;) -&gt; String {
+    let resource = state
+        .expensive_resource
+        .get_or_init(|| async {
+            ExpensiveResource::new().await
+        })
+        .await;
+    
+    format!("Resource size: {}", resource.data.len())
+}
+<span class="boring">}</span></code></pre>
+<h3 id="健康检查"><a class="header" href="#健康检查">健康检查</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn health_check(State(state): State&lt;AppState&gt;) -&gt; Result&lt;Json&lt;HealthStatus&gt;, StatusCode&gt; {
+    // 检查数据库连接
+    let db_healthy = sqlx::query("SELECT 1")
+        .fetch_one(&amp;state.database.pg_pool)
+        .await
+        .is_ok();
+    
+    // 检查 Redis 连接
+    let mut redis_conn = state.cache.redis.clone();
+    let redis_healthy = redis::cmd("PING")
+        .query_async::&lt;_, String&gt;(&amp;mut redis_conn)
+        .await
+        .is_ok();
+    
+    let status = HealthStatus {
+        status: if db_healthy &amp;&amp; redis_healthy { "healthy" } else { "unhealthy" },
+        database: db_healthy,
+        redis: redis_healthy,
+    };
+    
+    if db_healthy &amp;&amp; redis_healthy {
+        Ok(Json(status))
+    } else {
+        Err(StatusCode::SERVICE_UNAVAILABLE)
+    }
+}
+
+#[derive(Serialize)]
+struct HealthStatus {
+    status: &amp;'static str,
+    database: bool,
+    redis: bool,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="状态访问模式"><a class="header" href="#状态访问模式">状态访问模式</a></h2>
+<h3 id="服务层模式"><a class="header" href="#服务层模式">服务层模式</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 服务层封装状态访问
+struct UserService {
+    db: PgPool,
+    cache: ConnectionManager,
+}
+
+impl UserService {
+    fn new(state: &amp;AppState) -&gt; Self {
+        Self {
+            db: state.database.pg_pool.clone(),
+            cache: state.cache.redis.clone(),
+        }
+    }
+    
+    async fn get_user(&amp;self, id: i32) -&gt; Result&lt;User, Error&gt; {
+        // 先查缓存
+        let cache_key = format!("user:{}", id);
+        let mut conn = self.cache.clone();
+        
+        if let Ok(cached) = redis::cmd("GET")
+            .arg(&amp;cache_key)
+            .query_async::&lt;_, String&gt;(&amp;mut conn)
+            .await
+        {
+            return Ok(serde_json::from_str(&amp;cached)?);
+        }
+        
+        // 查数据库
+        let user = sqlx::query_as!(
+            User,
+            "SELECT * FROM users WHERE id = $1",
+            id
+        )
+        .fetch_one(&amp;self.db)
+        .await?;
+        
+        // 写入缓存
+        let _: () = redis::cmd("SETEX")
+            .arg(&amp;cache_key)
+            .arg(3600) // 1小时过期
+            .arg(serde_json::to_string(&amp;user)?)
+            .query_async(&amp;mut conn)
+            .await?;
+        
+        Ok(user)
+    }
+}
+
+// 在处理器中使用
+async fn get_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let service = UserService::new(&amp;state);
+    let user = service
+        .get_user(id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(user))
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整示例-4"><a class="header" href="#完整示例-4">完整示例</a></h2>
+<pre class="playground"><code class="language-rust">use axum::{
+    Router,
+    routing::{get, post},
+    extract::{State, Path},
+    Json,
+    http::StatusCode,
+};
+use sqlx::postgres::PgPoolOptions;
+use redis::aio::ConnectionManager;
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use tokio::sync::RwLock;
+use std::collections::HashMap;
+
+// 配置
+#[derive(Clone)]
+struct Config {
+    database_url: String,
+    redis_url: String,
+    jwt_secret: String,
+}
+
+// 应用状态
+#[derive(Clone)]
+struct AppState {
+    config: Arc&lt;Config&gt;,
+    db: sqlx::PgPool,
+    redis: ConnectionManager,
+    cache: Arc&lt;RwLock&lt;HashMap&lt;String, String&gt;&gt;&gt;,
+}
+
+impl AppState {
+    async fn new(config: Config) -&gt; Self {
+        let db = PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&amp;config.database_url)
+            .await
+            .expect("Failed to connect to database");
+        
+        let redis_client = redis::Client::open(config.redis_url.as_str())
+            .expect("Failed to create Redis client");
+        let redis = ConnectionManager::new(redis_client)
+            .await
+            .expect("Failed to create Redis connection");
+        
+        Self {
+            config: Arc::new(config),
+            db,
+            redis,
+            cache: Arc::new(RwLock::new(HashMap::new())),
+        }
+    }
+}
+
+// 数据模型
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+struct User {
+    id: i32,
+    username: String,
+    email: String,
+}
+
+// 处理器
+async fn list_users(
+    State(state): State&lt;AppState&gt;,
+) -&gt; Result&lt;Json&lt;Vec&lt;User&gt;&gt;, StatusCode&gt; {
+    let users = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users"
+    )
+    .fetch_all(&amp;state.db)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(users))
+}
+
+async fn get_user(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users WHERE id = $1",
+        id
+    )
+    .fetch_one(&amp;state.db)
+    .await
+    .map_err(|_| StatusCode::NOT_FOUND)?;
+    
+    Ok(Json(user))
+}
+
+async fn health(State(state): State&lt;AppState&gt;) -&gt; StatusCode {
+    // 检查数据库
+    if sqlx::query("SELECT 1")
+        .fetch_one(&amp;state.db)
+        .await
+        .is_err()
+    {
+        return StatusCode::SERVICE_UNAVAILABLE;
+    }
+    
+    // 检查 Redis
+    let mut conn = state.redis.clone();
+    if redis::cmd("PING")
+        .query_async::&lt;_, String&gt;(&amp;mut conn)
+        .await
+        .is_err()
+    {
+        return StatusCode::SERVICE_UNAVAILABLE;
+    }
+    
+    StatusCode::OK
+}
+
+#[tokio::main]
+async fn main() {
+    let config = Config {
+        database_url: std::env::var("DATABASE_URL")
+            .unwrap_or_else(|_| "postgres://localhost/mydb".to_string()),
+        redis_url: std::env::var("REDIS_URL")
+            .unwrap_or_else(|_| "redis://127.0.0.1/".to_string()),
+        jwt_secret: std::env::var("JWT_SECRET")
+            .unwrap_or_else(|_| "secret".to_string()),
+    };
+    
+    let state = AppState::new(config).await;
+    
+    let app = Router::new()
+        .route("/health", get(health))
+        .route("/users", get(list_users))
+        .route("/users/:id", get(get_user))
+        .with_state(state);
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("🚀 Server running on http://127.0.0.1:3000");
+    
+    axum::serve(listener, app).await.unwrap();
+}</code></pre>
+<h2 id="最佳实践"><a class="header" href="#最佳实践">最佳实践</a></h2>
+<h3 id="1-使用-arc-共享不可变数据"><a class="header" href="#1-使用-arc-共享不可变数据">1. 使用 Arc 共享不可变数据</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+struct AppState {
+    config: Arc&lt;Config&gt;,  // 配置不需要修改
+}
+<span class="boring">}</span></code></pre>
+<h3 id="2-使用-rwlock-共享可变数据"><a class="header" href="#2-使用-rwlock-共享可变数据">2. 使用 RwLock 共享可变数据</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+struct AppState {
+    cache: Arc&lt;RwLock&lt;HashMap&lt;String, String&gt;&gt;&gt;,  // 需要修改的缓存
+}
+<span class="boring">}</span></code></pre>
+<h3 id="3-连接池直接克隆"><a class="header" href="#3-连接池直接克隆">3. 连接池直接克隆</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone)]
+struct AppState {
+    db: PgPool,  // PgPool 内部已经使用 Arc
+}
+<span class="boring">}</span></code></pre>
+<h3 id="4-避免过度锁定"><a class="header" href="#4-避免过度锁定">4. 避免过度锁定</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ❌ 不好：长时间持有锁
+async fn bad_handler(State(state): State&lt;AppState&gt;) {
+    let mut cache = state.cache.write().await;
+    // 执行耗时操作
+    expensive_operation().await;
+    cache.insert(key, value);
+}
+
+// ✅ 好：最小化锁持有时间
+async fn good_handler(State(state): State&lt;AppState&gt;) {
+    let value = expensive_operation().await;
+    let mut cache = state.cache.write().await;
+    cache.insert(key, value);
+}
+<span class="boring">}</span></code></pre>
+<h2 id="练习-3"><a class="header" href="#练习-3">练习</a></h2>
+<ol>
+<li>实现带缓存的用户服务</li>
+<li>添加请求计数器和统计</li>
+<li>实现配置热重载</li>
+<li>创建连接池监控端点</li>
+<li>实现分布式缓存</li>
+</ol>
+<h2 id="下一步-5"><a class="header" href="#下一步-5">下一步</a></h2>
+<p>Day 66 将学习数据库迁移，使用 SQLx 管理数据库schema变更。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-66-数据库迁移-migrations-1"><a class="header" href="#day-66-数据库迁移-migrations-1">Day 66: 数据库迁移 (Migrations)</a></h1>
+<h2 id="学习目标-5"><a class="header" href="#学习目标-5">学习目标</a></h2>
+<ul>
+<li>理解数据库迁移概念</li>
+<li>掌握 SQLx 迁移系统</li>
+<li>学习版本控制策略</li>
+<li>实现回滚机制</li>
+</ul>
+<h2 id="数据库迁移概念"><a class="header" href="#数据库迁移概念">数据库迁移概念</a></h2>
+<p>数据库迁移是管理数据库 schema 变更的系统化方法：</p>
+<ul>
+<li>版本控制数据库结构</li>
+<li>团队协作同步</li>
+<li>生产环境安全部署</li>
+<li>支持回滚操作</li>
+</ul>
+<h2 id="sqlx-迁移系统"><a class="header" href="#sqlx-迁移系统">SQLx 迁移系统</a></h2>
+<h3 id="安装-sqlx-cli"><a class="header" href="#安装-sqlx-cli">安装 SQLx CLI</a></h3>
+<pre><code class="language-bash"># 安装 SQLx CLI
+cargo install sqlx-cli --no-default-features --features postgres
+
+# 或者支持多种数据库
+cargo install sqlx-cli
+</code></pre>
+<h3 id="项目配置"><a class="header" href="#项目配置">项目配置</a></h3>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "migrate"] }
+tokio = { version = "1", features = ["full"] }
+</code></pre>
+<h3 id="创建迁移"><a class="header" href="#创建迁移">创建迁移</a></h3>
+<pre><code class="language-bash"># 创建新迁移
+sqlx migrate add create_users_table
+
+# 这会创建文件：migrations/20240116000000_create_users_table.sql
+</code></pre>
+<h3 id="迁移文件示例"><a class="header" href="#迁移文件示例">迁移文件示例</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000000_create_users_table.sql
+-- 创建用户表
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建索引
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_email ON users(email);
+
+-- 创建更新时间触发器
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+</code></pre>
+<h3 id="运行迁移"><a class="header" href="#运行迁移">运行迁移</a></h3>
+<pre><code class="language-bash"># 设置数据库 URL
+export DATABASE_URL="postgres://username:password@localhost/dbname"
+
+# 运行所有待执行的迁移
+sqlx migrate run
+
+# 查看迁移状态
+sqlx migrate info
+
+# 回滚最后一次迁移
+sqlx migrate revert
+</code></pre>
+<h2 id="迁移最佳实践"><a class="header" href="#迁移最佳实践">迁移最佳实践</a></h2>
+<h3 id="1-向前兼容的迁移"><a class="header" href="#1-向前兼容的迁移">1. 向前兼容的迁移</a></h3>
+<pre><code class="language-sql">-- ✅ 好：添加可空列
+ALTER TABLE users ADD COLUMN phone VARCHAR(20);
+
+-- ❌ 不好：添加非空列（会导致现有数据失败）
+ALTER TABLE users ADD COLUMN phone VARCHAR(20) NOT NULL;
+
+-- ✅ 好：分两步添加非空列
+-- 第一步：添加可空列
+ALTER TABLE users ADD COLUMN phone VARCHAR(20);
+
+-- 第二步：填充数据后设置非空
+-- migrations/20240116000002_make_phone_not_null.sql
+UPDATE users SET phone = '' WHERE phone IS NULL;
+ALTER TABLE users ALTER COLUMN phone SET NOT NULL;
+</code></pre>
+<h3 id="2-重命名列"><a class="header" href="#2-重命名列">2. 重命名列</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000003_rename_username_to_user_name.sql
+ALTER TABLE users RENAME COLUMN username TO user_name;
+</code></pre>
+<h3 id="3-修改列类型"><a class="header" href="#3-修改列类型">3. 修改列类型</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000004_change_email_length.sql
+ALTER TABLE users ALTER COLUMN email TYPE VARCHAR(255);
+</code></pre>
+<h3 id="4-添加外键"><a class="header" href="#4-添加外键">4. 添加外键</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000005_create_posts_table.sql
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_posts_user_id ON posts(user_id);
+</code></pre>
+<h2 id="复杂迁移示例"><a class="header" href="#复杂迁移示例">复杂迁移示例</a></h2>
+<h3 id="多对多关系"><a class="header" href="#多对多关系">多对多关系</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000006_create_tags_and_post_tags.sql
+-- 标签表
+CREATE TABLE tags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 文章标签关联表
+CREATE TABLE post_tags (
+    post_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (post_id, tag_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_post_tags_post_id ON post_tags(post_id);
+CREATE INDEX idx_post_tags_tag_id ON post_tags(tag_id);
+</code></pre>
+<h3 id="数据迁移"><a class="header" href="#数据迁移">数据迁移</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000007_migrate_user_data.sql
+-- 假设要将旧的 full_name 拆分为 first_name 和 last_name
+
+-- 添加新列
+ALTER TABLE users ADD COLUMN first_name VARCHAR(50);
+ALTER TABLE users ADD COLUMN last_name VARCHAR(50);
+
+-- 迁移数据
+UPDATE users
+SET 
+    first_name = SPLIT_PART(full_name, ' ', 1),
+    last_name = SPLIT_PART(full_name, ' ', 2)
+WHERE full_name IS NOT NULL;
+
+-- 删除旧列（可选，可以在后续迁移中删除）
+-- ALTER TABLE users DROP COLUMN full_name;
+</code></pre>
+<h3 id="添加枚举类型"><a class="header" href="#添加枚举类型">添加枚举类型</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000008_add_user_role.sql
+-- 创建枚举类型
+CREATE TYPE user_role AS ENUM ('admin', 'editor', 'user');
+
+-- 添加角色列
+ALTER TABLE users ADD COLUMN role user_role DEFAULT 'user' NOT NULL;
+
+-- 创建索引
+CREATE INDEX idx_users_role ON users(role);
+</code></pre>
+<h2 id="在代码中运行迁移"><a class="header" href="#在代码中运行迁移">在代码中运行迁移</a></h2>
+<h3 id="启动时自动迁移"><a class="header" href="#启动时自动迁移">启动时自动迁移</a></h3>
+<pre class="playground"><code class="language-rust">use sqlx::postgres::PgPoolOptions;
+use sqlx::migrate::MigrateDatabase;
+
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let database_url = std::env::var("DATABASE_URL")?;
+    
+    // 如果数据库不存在，创建它
+    if !sqlx::Postgres::database_exists(&amp;database_url).await? {
+        println!("Creating database...");
+        sqlx::Postgres::create_database(&amp;database_url).await?;
+    }
+    
+    // 连接数据库
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&amp;database_url)
+        .await?;
+    
+    // 运行迁移
+    println!("Running migrations...");
+    sqlx::migrate!("./migrations")
+        .run(&amp;pool)
+        .await?;
+    
+    println!("Migrations completed successfully!");
+    
+    Ok(())
+}</code></pre>
+<h3 id="条件迁移"><a class="header" href="#条件迁移">条件迁移</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::migrate::Migrator;
+
+static MIGRATOR: Migrator = sqlx::migrate!();
+
+async fn run_migrations_if_needed(pool: &amp;PgPool) -&gt; Result&lt;(), sqlx::Error&gt; {
+    // 检查是否需要迁移
+    let version = MIGRATOR.migrations.last().map(|m| m.version).unwrap_or(0);
+    
+    println!("Latest migration version: {}", version);
+    
+    // 运行迁移
+    MIGRATOR.run(pool).await?;
+    
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="迁移测试"><a class="header" href="#迁移测试">迁移测试</a></h2>
+<h3 id="测试迁移"><a class="header" href="#测试迁移">测试迁移</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(test)]
+mod tests {
+    use super::*;
+    use sqlx::postgres::PgPoolOptions;
+    
+    #[tokio::test]
+    async fn test_migrations() {
+        let database_url = "postgres://localhost/test_db";
+        
+        // 创建测试数据库
+        sqlx::Postgres::create_database(database_url)
+            .await
+            .ok();
+        
+        let pool = PgPoolOptions::new()
+            .connect(database_url)
+            .await
+            .unwrap();
+        
+        // 运行迁移
+        sqlx::migrate!("./migrations")
+            .run(&amp;pool)
+            .await
+            .unwrap();
+        
+        // 验证表存在
+        let result: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'users'"
+        )
+        .fetch_one(&amp;pool)
+        .await
+        .unwrap();
+        
+        assert_eq!(result.0, 1);
+        
+        // 清理
+        sqlx::Postgres::drop_database(database_url)
+            .await
+            .ok();
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="回滚策略"><a class="header" href="#回滚策略">回滚策略</a></h2>
+<h3 id="创建可回滚的迁移"><a class="header" href="#创建可回滚的迁移">创建可回滚的迁移</a></h3>
+<pre><code class="language-sql">-- migrations/20240116000009_add_user_bio.up.sql
+ALTER TABLE users ADD COLUMN bio TEXT;
+
+-- migrations/20240116000009_add_user_bio.down.sql
+ALTER TABLE users DROP COLUMN bio;
+</code></pre>
+<h3 id="手动回滚"><a class="header" href="#手动回滚">手动回滚</a></h3>
+<pre><code class="language-bash"># 回滚最后一次迁移
+sqlx migrate revert
+
+# 回滚到特定版本
+sqlx migrate revert --target-version 20240116000005
+</code></pre>
+<h2 id="生产环境迁移"><a class="header" href="#生产环境迁移">生产环境迁移</a></h2>
+<h3 id="迁移脚本"><a class="header" href="#迁移脚本">迁移脚本</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# deploy-migrations.sh
+
+set -e
+
+echo "Starting database migration..."
+
+# 备份数据库
+pg_dump $DATABASE_URL &gt; backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 运行迁移
+sqlx migrate run
+
+echo "Migration completed successfully!"
+</code></pre>
+<h3 id="零停机迁移"><a class="header" href="#零停机迁移">零停机迁移</a></h3>
+<pre><code class="language-sql">-- 步骤 1: 添加新列（可空）
+ALTER TABLE users ADD COLUMN new_email VARCHAR(255);
+
+-- 步骤 2: 双写（应用代码同时写入两列）
+-- 在应用代码中实现
+
+-- 步骤 3: 数据回填
+UPDATE users SET new_email = email WHERE new_email IS NULL;
+
+-- 步骤 4: 设置非空约束
+ALTER TABLE users ALTER COLUMN new_email SET NOT NULL;
+
+-- 步骤 5: 添加唯一约束
+ALTER TABLE users ADD CONSTRAINT users_new_email_key UNIQUE (new_email);
+
+-- 步骤 6: 删除旧列（在确认无问题后）
+ALTER TABLE users DROP COLUMN email;
+
+-- 步骤 7: 重命名新列
+ALTER TABLE users RENAME COLUMN new_email TO email;
+</code></pre>
+<h2 id="完整示例项目"><a class="header" href="#完整示例项目">完整示例项目</a></h2>
+<pre class="playground"><code class="language-rust">// src/main.rs
+use sqlx::postgres::PgPoolOptions;
+use std::env;
+
+mod models;
+mod migrations;
+
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    // 加载环境变量
+    dotenv::dotenv().ok();
+    
+    let database_url = env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    
+    // 创建连接池
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&amp;database_url)
+        .await?;
+    
+    // 运行迁移
+    println!("Running database migrations...");
+    sqlx::migrate!("./migrations")
+        .run(&amp;pool)
+        .await?;
+    println!("Migrations completed!");
+    
+    // 启动应用
+    start_server(pool).await?;
+    
+    Ok(())
+}
+
+async fn start_server(pool: sqlx::PgPool) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    // 应用逻辑
+    Ok(())
+}</code></pre>
+<pre><code class="language-sql">-- migrations/20240116000001_initial_schema.sql
+-- 用户表
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user' NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 文章表
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    slug VARCHAR(200) UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    published BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 评论表
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 索引
+CREATE INDEX idx_posts_user_id ON posts(user_id);
+CREATE INDEX idx_posts_slug ON posts(slug);
+CREATE INDEX idx_posts_published ON posts(published);
+CREATE INDEX idx_comments_post_id ON comments(post_id);
+CREATE INDEX idx_comments_user_id ON comments(user_id);
+
+-- 更新时间触发器
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_posts_updated_at
+    BEFORE UPDATE ON posts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+</code></pre>
+<h2 id="迁移检查清单"><a class="header" href="#迁移检查清单">迁移检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 迁移文件命名清晰</li>
+<li><input disabled="" type="checkbox"> 包含向前和向后兼容性</li>
+<li><input disabled="" type="checkbox"> 测试迁移在干净数据库上运行</li>
+<li><input disabled="" type="checkbox"> 测试迁移在现有数据上运行</li>
+<li><input disabled="" type="checkbox"> 准备回滚计划</li>
+<li><input disabled="" type="checkbox"> 在生产前备份数据库</li>
+<li><input disabled="" type="checkbox"> 文档化重要变更</li>
+<li><input disabled="" type="checkbox"> 通知团队成员</li>
+</ul>
+<h2 id="练习-4"><a class="header" href="#练习-4">练习</a></h2>
+<ol>
+<li>创建完整的博客数据库 schema</li>
+<li>实现用户角色系统的迁移</li>
+<li>添加全文搜索索引</li>
+<li>实现数据归档迁移</li>
+<li>创建迁移测试套件</li>
+</ol>
+<h2 id="下一步-6"><a class="header" href="#下一步-6">下一步</a></h2>
+<p>Day 67 将学习 CRUD 操作实战，使用 SQLx 进行数据库操作。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-67-crud-操作实战-1"><a class="header" href="#day-67-crud-操作实战-1">Day 67: CRUD 操作实战</a></h1>
+<h2 id="学习目标-6"><a class="header" href="#学习目标-6">学习目标</a></h2>
+<ul>
+<li>掌握 SQLx 查询构建</li>
+<li>实现完整的 CRUD 操作</li>
+<li>学习参数化查询</li>
+<li>理解事务处理</li>
+</ul>
+<h2 id="crud-概念"><a class="header" href="#crud-概念">CRUD 概念</a></h2>
+<p>CRUD 代表：</p>
+<ul>
+<li><strong>C</strong>reate - 创建</li>
+<li><strong>R</strong>ead - 读取</li>
+<li><strong>U</strong>pdate - 更新</li>
+<li><strong>D</strong>elete - 删除</li>
+</ul>
+<h2 id="sqlx-基础"><a class="header" href="#sqlx-基础">SQLx 基础</a></h2>
+<h3 id="查询宏"><a class="header" href="#查询宏">查询宏</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::{PgPool, FromRow};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct User {
+    id: i32,
+    username: String,
+    email: String,
+}
+
+// 使用 query! 宏（编译时检查）
+async fn get_user_by_id(pool: &amp;PgPool, id: i32) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users WHERE id = $1",
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+
+// 使用 query_as（运行时检查）
+async fn get_user_by_username(pool: &amp;PgPool, username: &amp;str) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as::&lt;_, User&gt;(
+        "SELECT id, username, email FROM users WHERE username = $1"
+    )
+    .bind(username)
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="create---创建操作"><a class="header" href="#create---创建操作">Create - 创建操作</a></h2>
+<h3 id="插入单条记录"><a class="header" href="#插入单条记录">插入单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct CreateUser {
+    username: String,
+    email: String,
+    password: String,
+}
+
+async fn create_user(pool: &amp;PgPool, user: CreateUser) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let password_hash = hash_password(&amp;user.password);
+    
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        INSERT INTO users (username, email, password_hash)
+        VALUES ($1, $2, $3)
+        RETURNING id, username, email
+        "#,
+        user.username,
+        user.email,
+        password_hash
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="批量插入"><a class="header" href="#批量插入">批量插入</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn create_users_batch(
+    pool: &amp;PgPool,
+    users: Vec&lt;CreateUser&gt;
+) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let mut tx = pool.begin().await?;
+    let mut created_users = Vec::new();
+    
+    for user in users {
+        let password_hash = hash_password(&amp;user.password);
+        
+        let created = sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email
+            "#,
+            user.username,
+            user.email,
+            password_hash
+        )
+        .fetch_one(&amp;mut *tx)
+        .await?;
+        
+        created_users.push(created);
+    }
+    
+    tx.commit().await?;
+    Ok(created_users)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="read---读取操作"><a class="header" href="#read---读取操作">Read - 读取操作</a></h2>
+<h3 id="查询单条记录"><a class="header" href="#查询单条记录">查询单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn get_user(pool: &amp;PgPool, id: i32) -&gt; Result&lt;Option&lt;User&gt;, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users WHERE id = $1",
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="查询多条记录"><a class="header" href="#查询多条记录">查询多条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn list_users(pool: &amp;PgPool) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let users = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users ORDER BY id"
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(users)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="分页查询"><a class="header" href="#分页查询">分页查询</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct Pagination {
+    page: i64,
+    per_page: i64,
+}
+
+async fn list_users_paginated(
+    pool: &amp;PgPool,
+    pagination: Pagination
+) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let offset = (pagination.page - 1) * pagination.per_page;
+    
+    let users = sqlx::query_as!(
+        User,
+        r#"
+        SELECT id, username, email
+        FROM users
+        ORDER BY id
+        LIMIT $1 OFFSET $2
+        "#,
+        pagination.per_page,
+        offset
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(users)
+}
+
+async fn count_users(pool: &amp;PgPool) -&gt; Result&lt;i64, sqlx::Error&gt; {
+    let count = sqlx::query_scalar!("SELECT COUNT(*) FROM users")
+        .fetch_one(pool)
+        .await?;
+    
+    Ok(count.unwrap_or(0))
+}
+<span class="boring">}</span></code></pre>
+<h3 id="条件查询"><a class="header" href="#条件查询">条件查询</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct UserFilter {
+    username: Option&lt;String&gt;,
+    email: Option&lt;String&gt;,
+}
+
+async fn search_users(
+    pool: &amp;PgPool,
+    filter: UserFilter
+) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let mut query = String::from("SELECT id, username, email FROM users WHERE 1=1");
+    let mut bindings = Vec::new();
+    
+    if let Some(username) = &amp;filter.username {
+        query.push_str(&amp;format!(" AND username ILIKE ${}", bindings.len() + 1));
+        bindings.push(format!("%{}%", username));
+    }
+    
+    if let Some(email) = &amp;filter.email {
+        query.push_str(&amp;format!(" AND email ILIKE ${}", bindings.len() + 1));
+        bindings.push(format!("%{}%", email));
+    }
+    
+    let mut query_builder = sqlx::query_as::&lt;_, User&gt;(&amp;query);
+    
+    for binding in bindings {
+        query_builder = query_builder.bind(binding);
+    }
+    
+    let users = query_builder.fetch_all(pool).await?;
+    
+    Ok(users)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="update---更新操作"><a class="header" href="#update---更新操作">Update - 更新操作</a></h2>
+<h3 id="更新单条记录"><a class="header" href="#更新单条记录">更新单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct UpdateUser {
+    username: Option&lt;String&gt;,
+    email: Option&lt;String&gt;,
+}
+
+async fn update_user(
+    pool: &amp;PgPool,
+    id: i32,
+    update: UpdateUser
+) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        UPDATE users
+        SET 
+            username = COALESCE($1, username),
+            email = COALESCE($2, email),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $3
+        RETURNING id, username, email
+        "#,
+        update.username,
+        update.email,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="批量更新"><a class="header" href="#批量更新">批量更新</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn update_users_role(
+    pool: &amp;PgPool,
+    user_ids: Vec&lt;i32&gt;,
+    role: &amp;str
+) -&gt; Result&lt;u64, sqlx::Error&gt; {
+    let result = sqlx::query!(
+        "UPDATE users SET role = $1 WHERE id = ANY($2)",
+        role,
+        &amp;user_ids
+    )
+    .execute(pool)
+    .await?;
+    
+    Ok(result.rows_affected())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="delete---删除操作"><a class="header" href="#delete---删除操作">Delete - 删除操作</a></h2>
+<h3 id="删除单条记录"><a class="header" href="#删除单条记录">删除单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn delete_user(pool: &amp;PgPool, id: i32) -&gt; Result&lt;bool, sqlx::Error&gt; {
+    let result = sqlx::query!("DELETE FROM users WHERE id = $1", id)
+        .execute(pool)
+        .await?;
+    
+    Ok(result.rows_affected() &gt; 0)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="软删除"><a class="header" href="#软删除">软删除</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn soft_delete_user(pool: &amp;PgPool, id: i32) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        UPDATE users
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE id = $1 AND deleted_at IS NULL
+        RETURNING id, username, email
+        "#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整的-repository-模式"><a class="header" href="#完整的-repository-模式">完整的 Repository 模式</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::PgPool;
+use async_trait::async_trait;
+
+#[async_trait]
+trait UserRepository {
+    async fn create(&amp;self, user: CreateUser) -&gt; Result&lt;User, sqlx::Error&gt;;
+    async fn find_by_id(&amp;self, id: i32) -&gt; Result&lt;Option&lt;User&gt;, sqlx::Error&gt;;
+    async fn find_all(&amp;self) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt;;
+    async fn update(&amp;self, id: i32, user: UpdateUser) -&gt; Result&lt;User, sqlx::Error&gt;;
+    async fn delete(&amp;self, id: i32) -&gt; Result&lt;bool, sqlx::Error&gt;;
+}
+
+struct PostgresUserRepository {
+    pool: PgPool,
+}
+
+impl PostgresUserRepository {
+    fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+}
+
+#[async_trait]
+impl UserRepository for PostgresUserRepository {
+    async fn create(&amp;self, user: CreateUser) -&gt; Result&lt;User, sqlx::Error&gt; {
+        let password_hash = hash_password(&amp;user.password);
+        
+        sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email
+            "#,
+            user.username,
+            user.email,
+            password_hash
+        )
+        .fetch_one(&amp;self.pool)
+        .await
+    }
+    
+    async fn find_by_id(&amp;self, id: i32) -&gt; Result&lt;Option&lt;User&gt;, sqlx::Error&gt; {
+        sqlx::query_as!(
+            User,
+            "SELECT id, username, email FROM users WHERE id = $1",
+            id
+        )
+        .fetch_optional(&amp;self.pool)
+        .await
+    }
+    
+    async fn find_all(&amp;self) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+        sqlx::query_as!(
+            User,
+            "SELECT id, username, email FROM users ORDER BY id"
+        )
+        .fetch_all(&amp;self.pool)
+        .await
+    }
+    
+    async fn update(&amp;self, id: i32, user: UpdateUser) -&gt; Result&lt;User, sqlx::Error&gt; {
+        sqlx::query_as!(
+            User,
+            r#"
+            UPDATE users
+            SET 
+                username = COALESCE($1, username),
+                email = COALESCE($2, email)
+            WHERE id = $3
+            RETURNING id, username, email
+            "#,
+            user.username,
+            user.email,
+            id
+        )
+        .fetch_one(&amp;self.pool)
+        .await
+    }
+    
+    async fn delete(&amp;self, id: i32) -&gt; Result&lt;bool, sqlx::Error&gt; {
+        let result = sqlx::query!("DELETE FROM users WHERE id = $1", id)
+            .execute(&amp;self.pool)
+            .await?;
+        
+        Ok(result.rows_affected() &gt; 0)
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="与-axum-集成"><a class="header" href="#与-axum-集成">与 Axum 集成</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    Router,
+    routing::{get, post, put, delete},
+    extract::{State, Path},
+    Json,
+    http::StatusCode,
+};
+
+#[derive(Clone)]
+struct AppState {
+    user_repo: Arc&lt;PostgresUserRepository&gt;,
+}
+
+async fn create_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Json(user): Json&lt;CreateUser&gt;,
+) -&gt; Result&lt;(StatusCode, Json&lt;User&gt;), StatusCode&gt; {
+    let user = state.user_repo
+        .create(user)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok((StatusCode::CREATED, Json(user)))
+}
+
+async fn get_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let user = state.user_repo
+        .find_by_id(id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+    
+    Ok(Json(user))
+}
+
+async fn list_users_handler(
+    State(state): State&lt;AppState&gt;,
+) -&gt; Result&lt;Json&lt;Vec&lt;User&gt;&gt;, StatusCode&gt; {
+    let users = state.user_repo
+        .find_all()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(users))
+}
+
+async fn update_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+    Json(user): Json&lt;UpdateUser&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let user = state.user_repo
+        .update(id, user)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(user))
+}
+
+async fn delete_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; StatusCode {
+    match state.user_repo.delete(id).await {
+        Ok(true) =&gt; StatusCode::NO_CONTENT,
+        Ok(false) =&gt; StatusCode::NOT_FOUND,
+        Err(_) =&gt; StatusCode::INTERNAL_SERVER_ERROR,
+    }
+}
+
+fn app(state: AppState) -&gt; Router {
+    Router::new()
+        .route("/users", get(list_users_handler).post(create_user_handler))
+        .route("/users/:id", 
+            get(get_user_handler)
+            .put(update_user_handler)
+            .delete(delete_user_handler)
+        )
+        .with_state(state)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="练习-5"><a class="header" href="#练习-5">练习</a></h2>
+<ol>
+<li>实现文章的完整 CRUD 操作</li>
+<li>添加复杂的搜索和过滤功能</li>
+<li>实现软删除和恢复功能</li>
+<li>创建审计日志系统</li>
+<li>实现批量操作 API</li>
+</ol>
+<h2 id="下一步-7"><a class="header" href="#下一步-7">下一步</a></h2>
+<p>Day 68 将学习复杂查询与事务，包括 JOIN、聚合和事务管理。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-68-复杂查询与事务-1"><a class="header" href="#day-68-复杂查询与事务-1">Day 68: 复杂查询与事务</a></h1>
+<h2 id="学习目标-7"><a class="header" href="#学习目标-7">学习目标</a></h2>
+<ul>
+<li>掌握 JOIN 查询</li>
+<li>学习聚合函数</li>
+<li>理解事务管理</li>
+<li>实现复杂业务逻辑</li>
+</ul>
+<h2 id="join-查询"><a class="header" href="#join-查询">JOIN 查询</a></h2>
+<h3 id="inner-join"><a class="header" href="#inner-join">INNER JOIN</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Serialize, FromRow)]
+struct PostWithAuthor {
+    post_id: i32,
+    title: String,
+    content: String,
+    author_id: i32,
+    author_name: String,
+    author_email: String,
+}
+
+async fn get_posts_with_authors(pool: &amp;PgPool) -&gt; Result&lt;Vec&lt;PostWithAuthor&gt;, sqlx::Error&gt; {
+    let posts = sqlx::query_as!(
+        PostWithAuthor,
+        r#"
+        SELECT 
+            p.id as post_id,
+            p.title,
+            p.content,
+            u.id as author_id,
+            u.username as author_name,
+            u.email as author_email
+        FROM posts p
+        INNER JOIN users u ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+        "#
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(posts)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="left-join"><a class="header" href="#left-join">LEFT JOIN</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Serialize, FromRow)]
+struct UserWithPostCount {
+    user_id: i32,
+    username: String,
+    post_count: Option&lt;i64&gt;,
+}
+
+async fn get_users_with_post_count(pool: &amp;PgPool) -&gt; Result&lt;Vec&lt;UserWithPostCount&gt;, sqlx::Error&gt; {
+    let users = sqlx::query_as!(
+        UserWithPostCount,
+        r#"
+        SELECT 
+            u.id as user_id,
+            u.username,
+            COUNT(p.id) as "post_count?"
+        FROM users u
+        LEFT JOIN posts p ON u.id = p.user_id
+        GROUP BY u.id, u.username
+        ORDER BY post_count DESC
+        "#
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(users)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="聚合查询"><a class="header" href="#聚合查询">聚合查询</a></h2>
+<h3 id="统计函数"><a class="header" href="#统计函数">统计函数</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Serialize, FromRow)]
+struct PostStatistics {
+    total_posts: i64,
+    published_posts: i64,
+    draft_posts: i64,
+    avg_content_length: f64,
+}
+
+async fn get_post_statistics(pool: &amp;PgPool) -&gt; Result&lt;PostStatistics, sqlx::Error&gt; {
+    let stats = sqlx::query_as!(
+        PostStatistics,
+        r#"
+        SELECT 
+            COUNT(*) as "total_posts!",
+            COUNT(*) FILTER (WHERE published = true) as "published_posts!",
+            COUNT(*) FILTER (WHERE published = false) as "draft_posts!",
+            AVG(LENGTH(content))::float as "avg_content_length!"
+        FROM posts
+        "#
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(stats)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="事务管理"><a class="header" href="#事务管理">事务管理</a></h2>
+<h3 id="基本事务"><a class="header" href="#基本事务">基本事务</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn transfer_points(
+    pool: &amp;PgPool,
+    from_user: i32,
+    to_user: i32,
+    amount: i32
+) -&gt; Result&lt;(), sqlx::Error&gt; {
+    let mut tx = pool.begin().await?;
+    
+    // 扣除发送方积分
+    sqlx::query!(
+        "UPDATE users SET points = points - $1 WHERE id = $2",
+        amount,
+        from_user
+    )
+    .execute(&amp;mut *tx)
+    .await?;
+    
+    // 增加接收方积分
+    sqlx::query!(
+        "UPDATE users SET points = points + $1 WHERE id = $2",
+        amount,
+        to_user
+    )
+    .execute(&amp;mut *tx)
+    .await?;
+    
+    // 记录转账
+    sqlx::query!(
+        "INSERT INTO point_transfers (from_user, to_user, amount) VALUES ($1, $2, $3)",
+        from_user,
+        to_user,
+        amount
+    )
+    .execute(&amp;mut *tx)
+    .await?;
+    
+    tx.commit().await?;
+    
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h3 id="事务回滚"><a class="header" href="#事务回滚">事务回滚</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn create_post_with_tags(
+    pool: &amp;PgPool,
+    post: CreatePost,
+    tag_names: Vec&lt;String&gt;
+) -&gt; Result&lt;Post, sqlx::Error&gt; {
+    let mut tx = pool.begin().await?;
+    
+    // 创建文章
+    let post = sqlx::query_as!(
+        Post,
+        r#"
+        INSERT INTO posts (user_id, title, content)
+        VALUES ($1, $2, $3)
+        RETURNING id, user_id, title, content, created_at
+        "#,
+        post.user_id,
+        post.title,
+        post.content
+    )
+    .fetch_one(&amp;mut *tx)
+    .await?;
+    
+    // 处理标签
+    for tag_name in tag_names {
+        // 获取或创建标签
+        let tag = sqlx::query_as!(
+            Tag,
+            r#"
+            INSERT INTO tags (name)
+            VALUES ($1)
+            ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+            RETURNING id, name
+            "#,
+            tag_name
+        )
+        .fetch_one(&amp;mut *tx)
+        .await?;
+        
+        // 关联文章和标签
+        sqlx::query!(
+            "INSERT INTO post_tags (post_id, tag_id) VALUES ($1, $2)",
+            post.id,
+            tag.id
+        )
+        .execute(&amp;mut *tx)
+        .await?;
+    }
+    
+    tx.commit().await?;
+    
+    Ok(post)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="子查询"><a class="header" href="#子查询">子查询</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn get_popular_posts(pool: &amp;PgPool, limit: i64) -&gt; Result&lt;Vec&lt;Post&gt;, sqlx::Error&gt; {
+    let posts = sqlx::query_as!(
+        Post,
+        r#"
+        SELECT p.*
+        FROM posts p
+        WHERE p.id IN (
+            SELECT post_id
+            FROM comments
+            GROUP BY post_id
+            HAVING COUNT(*) &gt; 10
+        )
+        ORDER BY p.created_at DESC
+        LIMIT $1
+        "#,
+        limit
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(posts)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整示例-5"><a class="header" href="#完整示例-5">完整示例</a></h2>
+<p>详见 Day61-80/STAGE5_OVERVIEW.md 中的复杂查询部分。</p>
+<h2 id="练习-6"><a class="header" href="#练习-6">练习</a></h2>
+<ol>
+<li>实现多表关联查询</li>
+<li>创建复杂的统计报表</li>
+<li>实现事务性的订单系统</li>
+<li>优化慢查询</li>
+<li>实现数据导入导出</li>
+</ol>
+<h2 id="下一步-8"><a class="header" href="#下一步-8">下一步</a></h2>
+<p>Day 69 已完成 - JWT 用户认证系统。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-69-用户认证-jwt-1"><a class="header" href="#day-69-用户认证-jwt-1">Day 69: 用户认证 (JWT)</a></h1>
+<h2 id="学习目标-8"><a class="header" href="#学习目标-8">学习目标</a></h2>
 <ul>
 <li>理解 JWT 工作原理</li>
 <li>实现用户注册和登录</li>
@@ -7049,7 +10048,7 @@ CREATE TABLE users (
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_email ON users(email);
 </code></pre>
-<h2 id="测试-api-1"><a class="header" href="#测试-api-1">测试 API</a></h2>
+<h2 id="测试-api-2"><a class="header" href="#测试-api-2">测试 API</a></h2>
 <h3 id="注册用户"><a class="header" href="#注册用户">注册用户</a></h3>
 <pre><code class="language-bash">curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -7139,7 +10138,7 @@ pub async fn reset_password(
     todo!()
 }
 <span class="boring">}</span></code></pre>
-<h2 id="练习-1"><a class="header" href="#练习-1">练习</a></h2>
+<h2 id="练习-7"><a class="header" href="#练习-7">练习</a></h2>
 <ol>
 <li>实现刷新令牌机制</li>
 <li>添加邮箱验证功能</li>
@@ -7147,11 +10146,11 @@ pub async fn reset_password(
 <li>添加 OAuth2 登录</li>
 <li>实现多因素认证 (MFA)</li>
 </ol>
-<h2 id="下一步-3"><a class="header" href="#下一步-3">下一步</a></h2>
+<h2 id="下一步-9"><a class="header" href="#下一步-9">下一步</a></h2>
 <p>Day 70 将学习基于角色的访问控制 (RBAC)，实现更细粒度的权限管理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-70-权限控制-rbac-1"><a class="header" href="#day-70-权限控制-rbac-1">Day 70: 权限控制 (RBAC)</a></h1>
-<h2 id="学习目标-3"><a class="header" href="#学习目标-3">学习目标</a></h2>
+<h2 id="学习目标-9"><a class="header" href="#学习目标-9">学习目标</a></h2>
 <ul>
 <li>理解 RBAC 概念</li>
 <li>设计权限模型</li>
@@ -7730,7 +10729,7 @@ async fn delete_user(
     Ok(())
 }
 <span class="boring">}</span></code></pre>
-<h2 id="完整示例-2"><a class="header" href="#完整示例-2">完整示例</a></h2>
+<h2 id="完整示例-6"><a class="header" href="#完整示例-6">完整示例</a></h2>
 <pre class="playground"><code class="language-rust">use axum::{
     Router,
     routing::{get, post},
@@ -7794,7 +10793,7 @@ curl -X POST http://localhost:3000/api/posts \
   -H "Content-Type: application/json" \
   -d '{"title":"New Post","content":"Content here"}'
 </code></pre>
-<h2 id="练习-2"><a class="header" href="#练习-2">练习</a></h2>
+<h2 id="练习-8"><a class="header" href="#练习-8">练习</a></h2>
 <ol>
 <li>实现资源级权限（如只能编辑自己的文章）</li>
 <li>添加权限继承机制</li>
@@ -7802,11 +10801,11 @@ curl -X POST http://localhost:3000/api/posts \
 <li>创建权限管理 API</li>
 <li>添加权限缓存机制</li>
 </ol>
-<h2 id="下一步-4"><a class="header" href="#下一步-4">下一步</a></h2>
+<h2 id="下一步-10"><a class="header" href="#下一步-10">下一步</a></h2>
 <p>Day 71 将学习模板引擎，实现服务端渲染。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-71-模板引擎-askamatera-1"><a class="header" href="#day-71-模板引擎-askamatera-1">Day 71: 模板引擎 (Askama/Tera)</a></h1>
-<h2 id="学习目标-4"><a class="header" href="#学习目标-4">学习目标</a></h2>
+<h2 id="学习目标-10"><a class="header" href="#学习目标-10">学习目标</a></h2>
 <ul>
 <li>掌握 Askama 模板引擎</li>
 <li>学习模板语法</li>
@@ -7823,7 +10822,7 @@ tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 </code></pre>
-<h2 id="基本使用"><a class="header" href="#基本使用">基本使用</a></h2>
+<h2 id="基本使用-1"><a class="header" href="#基本使用-1">基本使用</a></h2>
 <h3 id="简单模板与-axum-集成"><a class="header" href="#简单模板与-axum-集成">简单模板与 Axum 集成</a></h3>
 <p>由于 Askama 0.13+ 移除了 <code>askama_axum</code> 集成库，我们需要手动实现 <code>IntoResponse</code> 包装器：</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -7978,7 +10977,7 @@ async fn blog_post(
 }
 <span class="boring">}</span></code></pre>
 <p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md。</p>
-<h2 id="练习-3"><a class="header" href="#练习-3">练习</a></h2>
+<h2 id="练习-9"><a class="header" href="#练习-9">练习</a></h2>
 <ol>
 <li>创建完整的博客模板</li>
 <li>实现用户仪表板</li>
@@ -7986,8 +10985,239 @@ async fn blog_post(
 <li>实现分页组件</li>
 <li>创建可复用的模板片段</li>
 </ol>
-<h2 id="下一步-5"><a class="header" href="#下一步-5">下一步</a></h2>
+<h2 id="下一步-11"><a class="header" href="#下一步-11">下一步</a></h2>
 <p>Day 72 将学习 WebAssembly (WASM) 简介。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-72-webassembly-wasm-简介-1"><a class="header" href="#day-72-webassembly-wasm-简介-1">Day 72: WebAssembly (WASM) 简介</a></h1>
+<h2 id="学习目标-11"><a class="header" href="#学习目标-11">学习目标</a></h2>
+<ul>
+<li>理解 WebAssembly 概念</li>
+<li>掌握 Rust 到 WASM 编译</li>
+<li>学习 wasm-bindgen 使用</li>
+<li>实现简单的 WASM 应用</li>
+</ul>
+<h2 id="webassembly-简介"><a class="header" href="#webassembly-简介">WebAssembly 简介</a></h2>
+<p>WebAssembly (WASM) 是一种可以在现代浏览器中运行的新型代码格式。</p>
+<h3 id="优势"><a class="header" href="#优势">优势</a></h3>
+<ul>
+<li>接近原生的性能</li>
+<li>安全的沙箱执行环境</li>
+<li>跨平台</li>
+<li>与 JavaScript 互操作</li>
+</ul>
+<h2 id="环境准备-1"><a class="header" href="#环境准备-1">环境准备</a></h2>
+<pre><code class="language-bash"># 安装 wasm-pack
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+# 添加 WASM 目标
+rustup target add wasm32-unknown-unknown
+</code></pre>
+<h2 id="创建-wasm-项目"><a class="header" href="#创建-wasm-项目">创建 WASM 项目</a></h2>
+<pre><code class="language-bash">cargo new --lib wasm_demo
+cd wasm_demo
+</code></pre>
+<pre><code class="language-toml"># Cargo.toml
+[package]
+name = "wasm_demo"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+</code></pre>
+<h2 id="基本示例"><a class="header" href="#基本示例">基本示例</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn greet(name: &amp;str) -&gt; String {
+    format!("Hello, {}!", name)
+}
+
+#[wasm_bindgen]
+pub fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+<span class="boring">}</span></code></pre>
+<h3 id="编译"><a class="header" href="#编译">编译</a></h3>
+<pre><code class="language-bash">wasm-pack build --target web
+</code></pre>
+<h3 id="在-html-中使用"><a class="header" href="#在-html-中使用">在 HTML 中使用</a></h3>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;WASM Demo&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;script type="module"&gt;
+        import init, { greet, add } from './pkg/wasm_demo.js';
+        
+        async function run() {
+            await init();
+            
+            console.log(greet('World'));
+            console.log(add(5, 3));
+        }
+        
+        run();
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h2 id="与-javascript-交互"><a class="header" href="#与-javascript-交互">与 JavaScript 交互</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use wasm_bindgen::prelude::*;
+
+// 调用 JavaScript 函数
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &amp;str);
+    
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &amp;str);
+}
+
+#[wasm_bindgen]
+pub fn show_alert() {
+    alert("Hello from Rust!");
+}
+
+#[wasm_bindgen]
+pub fn log_message(msg: &amp;str) {
+    log(msg);
+}
+<span class="boring">}</span></code></pre>
+<h2 id="实用示例"><a class="header" href="#实用示例">实用示例</a></h2>
+<h3 id="图像处理"><a class="header" href="#图像处理">图像处理</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn grayscale(data: &amp;mut [u8]) {
+    for chunk in data.chunks_mut(4) {
+        let avg = (chunk[0] as u32 + chunk[1] as u32 + chunk[2] as u32) / 3;
+        chunk[0] = avg as u8;
+        chunk[1] = avg as u8;
+        chunk[2] = avg as u8;
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md。</p>
+<h2 id="练习-10"><a class="header" href="#练习-10">练习</a></h2>
+<ol>
+<li>创建计算器 WASM 模块</li>
+<li>实现图像滤镜</li>
+<li>构建游戏逻辑</li>
+<li>创建加密工具</li>
+<li>实现数据可视化</li>
+</ol>
+<h2 id="下一步-12"><a class="header" href="#下一步-12">下一步</a></h2>
+<p>Day 73 将学习前端集成实战。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-73-前端集成实战-1"><a class="header" href="#day-73-前端集成实战-1">Day 73: 前端集成实战</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的前端集成部分。</p>
+<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+<ul>
+<li>静态文件服务</li>
+<li>SPA 路由配置</li>
+<li>API 代理</li>
+<li>前后端分离架构</li>
+</ul>
+<h2 id="下一步-13"><a class="header" href="#下一步-13">下一步</a></h2>
+<p>Day 74 将学习 API 文档生成 (OpenAPI)。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-74-api-文档生成-openapi-1"><a class="header" href="#day-74-api-文档生成-openapi-1">Day 74: API 文档生成 (OpenAPI)</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的 API 文档生成部分。</p>
+<h2 id="核心内容-1"><a class="header" href="#核心内容-1">核心内容</a></h2>
+<ul>
+<li>utoipa 库使用</li>
+<li>Swagger UI 集成</li>
+<li>API 文档自动生成</li>
+<li>文档测试</li>
+</ul>
+<h2 id="下一步-14"><a class="header" href="#下一步-14">下一步</a></h2>
+<p>Day 75 将学习容器化部署 (Docker)。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-75-容器化部署-docker-1"><a class="header" href="#day-75-容器化部署-docker-1">Day 75: 容器化部署 (Docker)</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的容器化部署部分。</p>
+<h2 id="核心内容-2"><a class="header" href="#核心内容-2">核心内容</a></h2>
+<ul>
+<li>Dockerfile 编写</li>
+<li>多阶段构建</li>
+<li>Docker Compose</li>
+<li>生产环境配置</li>
+</ul>
+<h2 id="下一步-15"><a class="header" href="#下一步-15">下一步</a></h2>
+<p>Day 76-80 将完成完整的博客系统项目。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-76-博客系统---需求分析与设计"><a class="header" href="#day-76-博客系统---需求分析与设计">Day 76: 博客系统 - 需求分析与设计</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的博客系统设计部分。</p>
+<h2 id="核心内容-3"><a class="header" href="#核心内容-3">核心内容</a></h2>
+<ul>
+<li>功能需求分析</li>
+<li>数据库设计</li>
+<li>架构设计</li>
+<li>技术选型</li>
+</ul>
+<h2 id="下一步-16"><a class="header" href="#下一步-16">下一步</a></h2>
+<p>Day 77 将实现核心业务逻辑。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-77-博客系统---核心业务实现"><a class="header" href="#day-77-博客系统---核心业务实现">Day 77: 博客系统 - 核心业务实现</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的核心业务实现部分。</p>
+<h2 id="核心内容-4"><a class="header" href="#核心内容-4">核心内容</a></h2>
+<ul>
+<li>用户服务实现</li>
+<li>文章服务实现</li>
+<li>评论服务实现</li>
+<li>标签服务实现</li>
+</ul>
+<h2 id="下一步-17"><a class="header" href="#下一步-17">下一步</a></h2>
+<p>Day 78 将开发 API 接口。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-78-博客系统---api-接口开发"><a class="header" href="#day-78-博客系统---api-接口开发">Day 78: 博客系统 - API 接口开发</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的 API 接口开发部分。</p>
+<h2 id="核心内容-5"><a class="header" href="#核心内容-5">核心内容</a></h2>
+<ul>
+<li>RESTful API 设计</li>
+<li>路由配置</li>
+<li>请求验证</li>
+<li>响应格式化</li>
+</ul>
+<h2 id="下一步-18"><a class="header" href="#下一步-18">下一步</a></h2>
+<p>Day 79 将进行测试与优化。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-79-博客系统---测试与优化"><a class="header" href="#day-79-博客系统---测试与优化">Day 79: 博客系统 - 测试与优化</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的测试与优化部分。</p>
+<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
+<ul>
+<li>单元测试</li>
+<li>集成测试</li>
+<li>API 测试</li>
+<li>性能优化</li>
+</ul>
+<h2 id="下一步-19"><a class="header" href="#下一步-19">下一步</a></h2>
+<p>Day 80 将完成项目总结。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-80-博客系统---项目总结与展示"><a class="header" href="#day-80-博客系统---项目总结与展示">Day 80: 博客系统 - 项目总结与展示</a></h1>
+<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的项目总结部分。</p>
+<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
+<ul>
+<li>架构回顾</li>
+<li>技术栈总结</li>
+<li>遇到的问题和解决方案</li>
+<li>性能指标</li>
+<li>未来改进方向</li>
+</ul>
+<h2 id="恭喜完成第五阶段"><a class="header" href="#恭喜完成第五阶段">恭喜完成第五阶段！</a></h2>
+<p>接下来进入第六阶段：系统编程与拓展 (Days 81-90)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="第六阶段系统编程与拓展-days-81-90---完整概览"><a class="header" href="#第六阶段系统编程与拓展-days-81-90---完整概览">第六阶段：系统编程与拓展 (Days 81-90) - 完整概览</a></h1>
 <h2 id="阶段目标-1"><a class="header" href="#阶段目标-1">阶段目标</a></h2>
@@ -8632,6 +11862,649 @@ cargo bench
 <h2 id="下一阶段预告-1"><a class="header" href="#下一阶段预告-1">下一阶段预告</a></h2>
 <p>第七阶段（Days 91-100）是毕业设计阶段，将综合运用所有学到的知识完成一个完整的项目。</p>
 <p>准备好迎接最后的挑战！🚀</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-81-操作系统概念回顾-1"><a class="header" href="#day-81-操作系统概念回顾-1">Day 81: 操作系统概念回顾</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
+<ul>
+<li>进程与线程</li>
+<li>内存管理</li>
+<li>文件系统</li>
+<li>I/O 模型</li>
+<li>系统调用</li>
+</ul>
+<h2 id="下一步-20"><a class="header" href="#下一步-20">下一步</a></h2>
+<p>Day 82 将深入学习文件系统操作。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-82-文件系统操作深入-1"><a class="header" href="#day-82-文件系统操作深入-1">Day 82: 文件系统操作深入</a></h1>
+<h2 id="学习目标-12"><a class="header" href="#学习目标-12">学习目标</a></h2>
+<ul>
+<li>掌握 Rust 中的目录遍历技术</li>
+<li>理解并实现内存映射文件 (Memory Mapped Files)</li>
+<li>学习文件锁机制以处理并发访问</li>
+<li>熟悉文件元数据和权限操作</li>
+</ul>
+<h2 id="核心概念-4"><a class="header" href="#核心概念-4">核心概念</a></h2>
+<h3 id="1-目录遍历"><a class="header" href="#1-目录遍历">1. 目录遍历</a></h3>
+<p>标准库 <code>std::fs</code> 提供了基本的目录操作。递归遍历通常需要手动实现，或者使用 <code>walkdir</code> 等第三方库。本示例展示了如何使用标准库实现简单的递归遍历。</p>
+<h3 id="2-内存映射文件-mmap"><a class="header" href="#2-内存映射文件-mmap">2. 内存映射文件 (mmap)</a></h3>
+<p>内存映射文件允许将文件的一部分或全部直接映射到进程的内存空间。这对于处理大文件或实现高性能 I/O 非常有用。Rust 中常用 <code>memmap2</code> crate 来实现。</p>
+<ul>
+<li><strong>优点</strong>：减少系统调用，像访问内存一样访问文件。</li>
+<li><strong>Unsafe</strong>：创建 mmap 通常是 <code>unsafe</code> 的，因为底层文件可能在映射期间被其他进程修改，导致未定义行为。</li>
+</ul>
+<h3 id="3-文件锁"><a class="header" href="#3-文件锁">3. 文件锁</a></h3>
+<p>当多个进程尝试同时读写同一个文件时，可能会导致数据损坏。文件锁（File Locking）是一种同步机制。</p>
+<ul>
+<li><strong>独占锁 (Exclusive Lock)</strong>：通常用于写操作，一次只有一个进程能持有。</li>
+<li><strong>共享锁 (Shared Lock)</strong>：通常用于读操作，多个进程可以同时持有。
+Rust 中可以使用 <code>fs2</code> crate 来进行跨平台的文件锁定。</li>
+</ul>
+<h2 id="代码示例"><a class="header" href="#代码示例">代码示例</a></h2>
+<p>本节代码演示了上述三个核心概念的用法。</p>
+<h3 id="递归遍历目录"><a class="header" href="#递归遍历目录">递归遍历目录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs;
+use std::path::Path;
+use std::io;
+
+fn walk_dir(path: &amp;Path) -&gt; io::Result&lt;()&gt; {
+    if path.is_dir() {
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            if path.is_dir() {
+                walk_dir(&amp;path)?;
+            } else {
+                println!("File: {:?}", path);
+            }
+        }
+    }
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h3 id="内存映射文件"><a class="header" href="#内存映射文件">内存映射文件</a></h3>
+<p>需要依赖 <code>memmap2</code> crate。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use memmap2::MmapOptions;
+
+fn mmap_file(path: &amp;Path) -&gt; io::Result&lt;()&gt; {
+    let file = File::open(path)?;
+    // unsafe: 调用者必须确保文件不会被外部修改从而导致数据竞争
+    let mmap = unsafe { MmapOptions::new().map(&amp;file)? };
+
+    // 像访问切片一样访问文件内容
+    if !mmap.is_empty() {
+        println!("First byte: {}", mmap[0]);
+    }
+
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h3 id="文件锁"><a class="header" href="#文件锁">文件锁</a></h3>
+<p>需要依赖 <code>fs2</code> crate。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use fs2::FileExt;
+
+fn file_lock_example(path: &amp;str) -&gt; io::Result&lt;()&gt; {
+    let file = File::open(path)?;
+
+    // 获取独占锁，如果已被占用则阻塞直到可用
+    file.lock_exclusive()?;
+    println!("Lock acquired");
+
+    // 执行关键区操作...
+
+    // 解锁
+    file.unlock()?;
+    println!("Lock released");
+
+    Ok(())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="运行示例"><a class="header" href="#运行示例">运行示例</a></h2>
+<p>进入 <code>fs-demo</code> 目录并运行：</p>
+<pre><code class="language-bash">cd fs-demo
+cargo run
+</code></pre>
+<p>你将看到程序遍历源代码目录，创建测试文件进行内存映射读取，并演示文件锁的获取与释放。</p>
+<h2 id="练习-11"><a class="header" href="#练习-11">练习</a></h2>
+<ol>
+<li>修改 <code>walk_dir</code> 函数，计算目录中所有文件的总大小。</li>
+<li>尝试使用 <code>notify</code> crate 监听文件系统的变化（如文件创建、修改）。</li>
+<li>编写一个程序，使用 mmap 实现大文件的高效复制。</li>
+</ol>
+<h2 id="下一步-21"><a class="header" href="#下一步-21">下一步</a></h2>
+<p>Day 83 将深入讲解进程管理与信号处理。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-83-进程管理与信号处理-1"><a class="header" href="#day-83-进程管理与信号处理-1">Day 83: 进程管理与信号处理</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
+<ul>
+<li>进程创建和管理</li>
+<li>进程间通信（IPC）</li>
+<li>信号处理</li>
+<li>守护进程</li>
+</ul>
+<h2 id="下一步-22"><a class="header" href="#下一步-22">下一步</a></h2>
+<p>Day 84 将学习原始套接字编程。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-84-原始套接字-raw-sockets-1"><a class="header" href="#day-84-原始套接字-raw-sockets-1">Day 84: 原始套接字 (Raw Sockets)</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
+<ul>
+<li>TCP/UDP 底层操作</li>
+<li>原始套接字编程</li>
+<li>网络协议实现</li>
+<li>数据包捕获</li>
+</ul>
+<h2 id="下一步-23"><a class="header" href="#下一步-23">下一步</a></h2>
+<p>Day 85 将学习嵌入式 Rust 简介。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-85-嵌入式-rust-简介-1"><a class="header" href="#day-85-嵌入式-rust-简介-1">Day 85: 嵌入式 Rust 简介</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
+<ul>
+<li>no_std 环境</li>
+<li>嵌入式 HAL</li>
+<li>裸机编程</li>
+<li>RTIC 框架</li>
+</ul>
+<h2 id="下一步-24"><a class="header" href="#下一步-24">下一步</a></h2>
+<p>Day 86 将学习性能分析工具 (Flamegraph)。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-86-性能分析工具-flamegraph-1"><a class="header" href="#day-86-性能分析工具-flamegraph-1">Day 86: 性能分析工具 (Flamegraph)</a></h1>
+<h2 id="学习目标-13"><a class="header" href="#学习目标-13">学习目标</a></h2>
+<ul>
+<li>掌握性能分析工具</li>
+<li>学习火焰图分析</li>
+<li>理解性能瓶颈识别</li>
+<li>掌握基准测试方法</li>
+</ul>
+<h2 id="性能分析工具概览"><a class="header" href="#性能分析工具概览">性能分析工具概览</a></h2>
+<h3 id="工具列表"><a class="header" href="#工具列表">工具列表</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>工具</th><th>用途</th><th>平台</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>cargo-flamegraph</strong></td><td>CPU 火焰图</td><td>Linux, macOS</td></tr>
+<tr><td><strong>perf</strong></td><td>Linux 性能分析</td><td>Linux</td></tr>
+<tr><td><strong>Instruments</strong></td><td>macOS 性能分析</td><td>macOS</td></tr>
+<tr><td><strong>valgrind</strong></td><td>内存分析</td><td>Linux, macOS</td></tr>
+<tr><td><strong>heaptrack</strong></td><td>堆内存分析</td><td>Linux</td></tr>
+<tr><td><strong>criterion</strong></td><td>基准测试</td><td>All</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="flamegraph-安装和使用"><a class="header" href="#flamegraph-安装和使用">Flamegraph 安装和使用</a></h2>
+<h3 id="安装-1"><a class="header" href="#安装-1">安装</a></h3>
+<pre><code class="language-bash"># 安装 cargo-flamegraph
+cargo install flamegraph
+
+# Linux 需要安装 perf
+sudo apt-get install linux-tools-common linux-tools-generic
+
+# macOS 使用 DTrace (已内置)
+</code></pre>
+<h3 id="基本使用-2"><a class="header" href="#基本使用-2">基本使用</a></h3>
+<pre><code class="language-bash"># 生成火焰图
+cargo flamegraph --bin myapp
+
+# 指定输出文件
+cargo flamegraph --bin myapp -o my-flamegraph.svg
+
+# 分析特定功能
+cargo flamegraph --bin myapp -- --bench
+
+# 使用 release 模式
+cargo flamegraph --release --bin myapp
+</code></pre>
+<h3 id="示例程序"><a class="header" href="#示例程序">示例程序</a></h3>
+<pre class="playground"><code class="language-rust">// src/main.rs
+use std::time::Duration;
+use std::thread;
+
+fn expensive_computation() {
+    let mut sum = 0u64;
+    for i in 0..10_000_000 {
+        sum = sum.wrapping_add(i);
+    }
+}
+
+fn io_operation() {
+    thread::sleep(Duration::from_millis(100));
+}
+
+fn process_data() {
+    for _ in 0..10 {
+        expensive_computation();
+    }
+}
+
+fn main() {
+    println!("Starting performance test...");
+    
+    for _ in 0..5 {
+        process_data();
+        io_operation();
+    }
+    
+    println!("Performance test completed");
+}</code></pre>
+<h2 id="火焰图解读"><a class="header" href="#火焰图解读">火焰图解读</a></h2>
+<h3 id="火焰图结构"><a class="header" href="#火焰图结构">火焰图结构</a></h3>
+<pre><code>┌─────────────────────────────────────┐
+│         main (100%)                 │  ← 最顶层：程序入口
+├─────────────┬───────────────────────┤
+│ process_data│    io_operation       │  ← 第二层：主要函数
+│   (70%)     │       (30%)           │
+├─────────────┤                       │
+│ expensive_  │                       │  ← 第三层：具体实现
+│ computation │                       │
+│   (70%)     │                       │
+└─────────────┴───────────────────────┘
+</code></pre>
+<h3 id="关键指标"><a class="header" href="#关键指标">关键指标</a></h3>
+<ul>
+<li><strong>宽度</strong>: 函数占用 CPU 时间比例</li>
+<li><strong>颜色</strong>: 通常随机，用于区分不同函数</li>
+<li><strong>高度</strong>: 调用栈深度</li>
+</ul>
+<h3 id="分析要点"><a class="header" href="#分析要点">分析要点</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 热点函数识别
+// 1. 宽度最大的函数 = CPU 时间最多
+// 2. 平顶 = 该函数本身耗时
+// 3. 尖顶 = 调用其他函数耗时
+
+// 优化目标
+// - 减少宽函数的执行时间
+// - 减少函数调用次数
+// - 优化算法复杂度
+<span class="boring">}</span></code></pre>
+<h2 id="perf-工具使用"><a class="header" href="#perf-工具使用">perf 工具使用</a></h2>
+<h3 id="基本命令"><a class="header" href="#基本命令">基本命令</a></h3>
+<pre><code class="language-bash"># 记录性能数据
+perf record -g ./target/release/myapp
+
+# 查看报告
+perf report
+
+# 实时监控
+perf top
+
+# 统计信息
+perf stat ./target/release/myapp
+</code></pre>
+<h3 id="高级用法"><a class="header" href="#高级用法">高级用法</a></h3>
+<pre><code class="language-bash"># 记录特定事件
+perf record -e cycles,instructions -g ./target/release/myapp
+
+# 记录特定 CPU
+perf record -C 0 -g ./target/release/myapp
+
+# 记录特定进程
+perf record -p &lt;PID&gt; -g
+
+# 生成火焰图
+perf script | stackcollapse-perf.pl | flamegraph.pl &gt; perf.svg
+</code></pre>
+<h2 id="criterion-基准测试"><a class="header" href="#criterion-基准测试">Criterion 基准测试</a></h2>
+<h3 id="安装和配置"><a class="header" href="#安装和配置">安装和配置</a></h3>
+<pre><code class="language-toml">[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "my_benchmark"
+harness = false
+</code></pre>
+<h3 id="基本示例-1"><a class="header" href="#基本示例-1">基本示例</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// benches/my_benchmark.rs
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+fn fibonacci(n: u64) -&gt; u64 {
+    match n {
+        0 =&gt; 0,
+        1 =&gt; 1,
+        n =&gt; fibonacci(n - 1) + fibonacci(n - 2),
+    }
+}
+
+fn fibonacci_iterative(n: u64) -&gt; u64 {
+    let mut a = 0;
+    let mut b = 1;
+    for _ in 0..n {
+        let temp = a;
+        a = b;
+        b = temp + b;
+    }
+    a
+}
+
+fn criterion_benchmark(c: &amp;mut Criterion) {
+    c.bench_function("fib 20", |b| {
+        b.iter(|| fibonacci(black_box(20)))
+    });
+    
+    c.bench_function("fib_iter 20", |b| {
+        b.iter(|| fibonacci_iterative(black_box(20)))
+    });
+}
+
+criterion_group!(benches, criterion_benchmark);
+criterion_main!(benches);
+<span class="boring">}</span></code></pre>
+<h3 id="运行基准测试"><a class="header" href="#运行基准测试">运行基准测试</a></h3>
+<pre><code class="language-bash"># 运行所有基准测试
+cargo bench
+
+# 运行特定基准测试
+cargo bench --bench my_benchmark
+
+# 保存基线
+cargo bench -- --save-baseline my-baseline
+
+# 与基线比较
+cargo bench -- --baseline my-baseline
+</code></pre>
+<h3 id="高级基准测试"><a class="header" href="#高级基准测试">高级基准测试</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use criterion::{BenchmarkId, Criterion, Throughput};
+
+fn bench_with_input(c: &amp;mut Criterion) {
+    let mut group = c.benchmark_group("sorting");
+    
+    for size in [100, 1000, 10000].iter() {
+        group.throughput(Throughput::Elements(*size as u64));
+        
+        group.bench_with_input(
+            BenchmarkId::from_parameter(size),
+            size,
+            |b, &amp;size| {
+                let mut data: Vec&lt;i32&gt; = (0..size).collect();
+                b.iter(|| {
+                    data.sort();
+                });
+            },
+        );
+    }
+    
+    group.finish();
+}
+<span class="boring">}</span></code></pre>
+<h2 id="内存分析"><a class="header" href="#内存分析">内存分析</a></h2>
+<h3 id="valgrind"><a class="header" href="#valgrind">Valgrind</a></h3>
+<pre><code class="language-bash"># 内存泄漏检测
+valgrind --leak-check=full ./target/release/myapp
+
+# 缓存分析
+valgrind --tool=cachegrind ./target/release/myapp
+
+# 调用图分析
+valgrind --tool=callgrind ./target/release/myapp
+</code></pre>
+<h3 id="heaptrack"><a class="header" href="#heaptrack">Heaptrack</a></h3>
+<pre><code class="language-bash"># 安装
+sudo apt-get install heaptrack
+
+# 运行分析
+heaptrack ./target/release/myapp
+
+# 查看结果
+heaptrack_gui heaptrack.myapp.*.gz
+</code></pre>
+<h2 id="实战示例"><a class="header" href="#实战示例">实战示例</a></h2>
+<h3 id="1-字符串处理优化"><a class="header" href="#1-字符串处理优化">1. 字符串处理优化</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+// 未优化版本
+fn concat_strings_v1(strings: &amp;[&amp;str]) -&gt; String {
+    let mut result = String::new();
+    for s in strings {
+        result = result + s;  // 每次都重新分配
+    }
+    result
+}
+
+// 优化版本 1: 使用 push_str
+fn concat_strings_v2(strings: &amp;[&amp;str]) -&gt; String {
+    let mut result = String::new();
+    for s in strings {
+        result.push_str(s);
+    }
+    result
+}
+
+// 优化版本 2: 预分配容量
+fn concat_strings_v3(strings: &amp;[&amp;str]) -&gt; String {
+    let total_len: usize = strings.iter().map(|s| s.len()).sum();
+    let mut result = String::with_capacity(total_len);
+    for s in strings {
+        result.push_str(s);
+    }
+    result
+}
+
+// 优化版本 3: 使用 join
+fn concat_strings_v4(strings: &amp;[&amp;str]) -&gt; String {
+    strings.join("")
+}
+
+fn benchmark_concat(c: &amp;mut Criterion) {
+    let strings: Vec&lt;&amp;str&gt; = vec!["hello"; 1000];
+    
+    c.bench_function("concat_v1", |b| {
+        b.iter(|| concat_strings_v1(black_box(&amp;strings)))
+    });
+    
+    c.bench_function("concat_v2", |b| {
+        b.iter(|| concat_strings_v2(black_box(&amp;strings)))
+    });
+    
+    c.bench_function("concat_v3", |b| {
+        b.iter(|| concat_strings_v3(black_box(&amp;strings)))
+    });
+    
+    c.bench_function("concat_v4", |b| {
+        b.iter(|| concat_strings_v4(black_box(&amp;strings)))
+    });
+}
+
+criterion_group!(benches, benchmark_concat);
+criterion_main!(benches);
+<span class="boring">}</span></code></pre>
+<h3 id="2-集合操作优化"><a class="header" href="#2-集合操作优化">2. 集合操作优化</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::collections::{HashMap, HashSet};
+
+// 查找重复元素 - 未优化
+fn find_duplicates_v1(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt; {
+    let mut duplicates = Vec::new();
+    for i in 0..numbers.len() {
+        for j in (i + 1)..numbers.len() {
+            if numbers[i] == numbers[j] &amp;&amp; !duplicates.contains(&amp;numbers[i]) {
+                duplicates.push(numbers[i]);
+            }
+        }
+    }
+    duplicates
+}
+
+// 查找重复元素 - 优化版本
+fn find_duplicates_v2(numbers: &amp;[i32]) -&gt; Vec&lt;i32&gt; {
+    let mut seen = HashSet::new();
+    let mut duplicates = HashSet::new();
+    
+    for &amp;num in numbers {
+        if !seen.insert(num) {
+            duplicates.insert(num);
+        }
+    }
+    
+    duplicates.into_iter().collect()
+}
+
+fn benchmark_duplicates(c: &amp;mut Criterion) {
+    let numbers: Vec&lt;i32&gt; = (0..1000).cycle().take(10000).collect();
+    
+    c.bench_function("duplicates_v1", |b| {
+        b.iter(|| find_duplicates_v1(black_box(&amp;numbers)))
+    });
+    
+    c.bench_function("duplicates_v2", |b| {
+        b.iter(|| find_duplicates_v2(black_box(&amp;numbers)))
+    });
+}
+<span class="boring">}</span></code></pre>
+<h3 id="3-并行处理优化"><a class="header" href="#3-并行处理优化">3. 并行处理优化</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use rayon::prelude::*;
+
+// 串行处理
+fn process_serial(data: &amp;[i32]) -&gt; Vec&lt;i32&gt; {
+    data.iter()
+        .map(|&amp;x| x * x)
+        .filter(|&amp;x| x % 2 == 0)
+        .collect()
+}
+
+// 并行处理
+fn process_parallel(data: &amp;[i32]) -&gt; Vec&lt;i32&gt; {
+    data.par_iter()
+        .map(|&amp;x| x * x)
+        .filter(|&amp;x| x % 2 == 0)
+        .collect()
+}
+
+fn benchmark_parallel(c: &amp;mut Criterion) {
+    let data: Vec&lt;i32&gt; = (0..1_000_000).collect();
+    
+    c.bench_function("serial", |b| {
+        b.iter(|| process_serial(black_box(&amp;data)))
+    });
+    
+    c.bench_function("parallel", |b| {
+        b.iter(|| process_parallel(black_box(&amp;data)))
+    });
+}
+<span class="boring">}</span></code></pre>
+<h2 id="性能分析流程"><a class="header" href="#性能分析流程">性能分析流程</a></h2>
+<h3 id="1-识别瓶颈"><a class="header" href="#1-识别瓶颈">1. 识别瓶颈</a></h3>
+<pre><code class="language-bash"># 生成火焰图
+cargo flamegraph --release --bin myapp
+
+# 查看 CPU 使用情况
+perf stat cargo run --release
+</code></pre>
+<h3 id="2-基准测试"><a class="header" href="#2-基准测试">2. 基准测试</a></h3>
+<pre><code class="language-bash"># 建立基线
+cargo bench -- --save-baseline before
+
+# 优化代码后测试
+cargo bench -- --baseline before
+</code></pre>
+<h3 id="3-验证改进"><a class="header" href="#3-验证改进">3. 验证改进</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 使用 criterion 比较
+use criterion::Criterion;
+
+fn compare_implementations(c: &amp;mut Criterion) {
+    let mut group = c.benchmark_group("comparison");
+    
+    group.bench_function("old", |b| b.iter(|| old_implementation()));
+    group.bench_function("new", |b| b.iter(|| new_implementation()));
+    
+    group.finish();
+}
+<span class="boring">}</span></code></pre>
+<h2 id="性能优化检查清单-1"><a class="header" href="#性能优化检查清单-1">性能优化检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 使用 release 模式编译</li>
+<li><input disabled="" type="checkbox"> 启用 LTO (Link Time Optimization)</li>
+<li><input disabled="" type="checkbox"> 分析火焰图找出热点</li>
+<li><input disabled="" type="checkbox"> 减少不必要的分配</li>
+<li><input disabled="" type="checkbox"> 使用合适的数据结构</li>
+<li><input disabled="" type="checkbox"> 考虑并行处理</li>
+<li><input disabled="" type="checkbox"> 缓存重复计算</li>
+<li><input disabled="" type="checkbox"> 避免不必要的克隆</li>
+<li><input disabled="" type="checkbox"> 使用迭代器而非循环</li>
+<li><input disabled="" type="checkbox"> 预分配容量</li>
+</ul>
+<h2 id="练习-12"><a class="header" href="#练习-12">练习</a></h2>
+<ol>
+<li>分析一个实际项目的性能瓶颈</li>
+<li>优化字符串处理函数</li>
+<li>比较不同排序算法的性能</li>
+<li>实现并行版本的数据处理</li>
+<li>创建完整的基准测试套件</li>
+</ol>
+<h2 id="下一步-25"><a class="header" href="#下一步-25">下一步</a></h2>
+<p>Day 87 将学习内存优化技巧，包括零拷贝、内存池等。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-87-内存优化技巧-1"><a class="header" href="#day-87-内存优化技巧-1">Day 87: 内存优化技巧</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
+<ul>
+<li>内存布局优化</li>
+<li>零拷贝技术</li>
+<li>内存池</li>
+<li>自定义分配器</li>
+</ul>
+<h2 id="下一步-26"><a class="header" href="#下一步-26">下一步</a></h2>
+<p>Day 88 将学习 SIMD 与底层优化。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-88-simd-与底层优化-1"><a class="header" href="#day-88-simd-与底层优化-1">Day 88: SIMD 与底层优化</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
+<ul>
+<li>SIMD 指令集</li>
+<li>向量化计算</li>
+<li>编译器优化</li>
+<li>内联汇编</li>
+</ul>
+<h2 id="下一步-27"><a class="header" href="#下一步-27">下一步</a></h2>
+<p>Day 89 将学习持续集成流水线。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-89-持续集成流水线-1"><a class="header" href="#day-89-持续集成流水线-1">Day 89: 持续集成流水线</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
+<ul>
+<li>GitHub Actions 配置</li>
+<li>自动化测试</li>
+<li>代码覆盖率</li>
+<li>自动发布</li>
+</ul>
+<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
+<p>Day 90 将学习 Rust 编译优化与配置。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-90-rust-编译优化与配置-1"><a class="header" href="#day-90-rust-编译优化与配置-1">Day 90: Rust 编译优化与配置</a></h1>
+<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
+<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
+<ul>
+<li>Cargo.toml 优化配置</li>
+<li>编译时间优化</li>
+<li>二进制大小优化</li>
+<li>交叉编译</li>
+</ul>
+<h2 id="恭喜完成第六阶段"><a class="header" href="#恭喜完成第六阶段">恭喜完成第六阶段！</a></h2>
+<p>接下来进入第七阶段：毕业设计 (Days 91-100)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="第七阶段毕业设计-days-91-100---完整概览"><a class="header" href="#第七阶段毕业设计-days-91-100---完整概览">第七阶段：毕业设计 (Days 91-100) - 完整概览</a></h1>
 <h2 id="阶段目标-2"><a class="header" href="#阶段目标-2">阶段目标</a></h2>
@@ -9440,6 +13313,150 @@ jobs:
 <li>🌟 持续学习习惯</li>
 </ul>
 <p>欢迎加入 Rustacean 大家庭！🦀</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-91-选题与架构设计-1"><a class="header" href="#day-91-选题与架构设计-1">Day 91: 选题与架构设计</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
+<ul>
+<li>需求分析</li>
+<li>架构设计</li>
+<li>技术选型文档</li>
+</ul>
+<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
+<p>Day 92 将进行原型验证 (PoC)。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-92-原型验证-poc-1"><a class="header" href="#day-92-原型验证-poc-1">Day 92: 原型验证 (PoC)</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
+<ul>
+<li>核心功能验证</li>
+<li>性能基准测试</li>
+<li>技术可行性验证</li>
+</ul>
+<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
+<p>Day 93-94 将进行核心模块开发。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-93-核心模块开发-一"><a class="header" href="#day-93-核心模块开发-一">Day 93: 核心模块开发 (一)</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-18"><a class="header" href="#核心内容-18">核心内容</a></h2>
+<ul>
+<li>项目结构搭建</li>
+<li>数据模型定义</li>
+<li>核心业务逻辑实现</li>
+</ul>
+<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
+<p>Day 94 将继续核心模块开发。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-19"><a class="header" href="#核心内容-19">核心内容</a></h2>
+<ul>
+<li>继续核心功能开发</li>
+<li>模块间集成</li>
+<li>单元测试编写</li>
+</ul>
+<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
+<p>Day 95 将进行外围模块与集成。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-20"><a class="header" href="#核心内容-20">核心内容</a></h2>
+<ul>
+<li>认证中间件</li>
+<li>日志系统</li>
+<li>监控指标</li>
+<li>模块集成</li>
+</ul>
+<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
+<p>Day 96 将进行性能测试与调优。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-21"><a class="header" href="#核心内容-21">核心内容</a></h2>
+<ul>
+<li>负载测试</li>
+<li>性能分析</li>
+<li>优化实施</li>
+<li>性能验证</li>
+</ul>
+<h2 id="下一步-34"><a class="header" href="#下一步-34">下一步</a></h2>
+<p>Day 97 将进行文档编写与代码清理。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-97-文档编写与代码清理-1"><a class="header" href="#day-97-文档编写与代码清理-1">Day 97: 文档编写与代码清理</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-22"><a class="header" href="#核心内容-22">核心内容</a></h2>
+<ul>
+<li>API 文档生成</li>
+<li>README 编写</li>
+<li>代码注释完善</li>
+<li>代码清理</li>
+</ul>
+<h2 id="下一步-35"><a class="header" href="#下一步-35">下一步</a></h2>
+<p>Day 98 将进行发布准备与版本管理。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-23"><a class="header" href="#核心内容-23">核心内容</a></h2>
+<ul>
+<li>版本发布流程</li>
+<li>CI/CD 配置</li>
+<li>Docker 镜像构建</li>
+<li>发布检查清单</li>
+</ul>
+<h2 id="下一步-36"><a class="header" href="#下一步-36">下一步</a></h2>
+<p>Day 99 将进行项目展示与复盘。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="核心内容-24"><a class="header" href="#核心内容-24">核心内容</a></h2>
+<ul>
+<li>项目展示文档</li>
+<li>技术复盘</li>
+<li>经验总结</li>
+<li>改进建议</li>
+</ul>
+<h2 id="下一步-37"><a class="header" href="#下一步-37">下一步</a></h2>
+<p>Day 100 - 成为 Rustacean 之路！</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-100-成为-rustacean-之路-1"><a class="header" href="#day-100-成为-rustacean-之路-1">Day 100: 成为 Rustacean 之路</a></h1>
+<p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
+<h2 id="-恭喜你完成了-100-天的-rust-学习之旅"><a class="header" href="#-恭喜你完成了-100-天的-rust-学习之旅">🎉 恭喜你完成了 100 天的 Rust 学习之旅！</a></h2>
+<h2 id="学习回顾-1"><a class="header" href="#学习回顾-1">学习回顾</a></h2>
+<p>你已经掌握了：</p>
+<ul>
+<li>✅ Rust 核心概念和语法</li>
+<li>✅ 所有权系统和生命周期</li>
+<li>✅ 并发和异步编程</li>
+<li>✅ Web 开发全栈技能</li>
+<li>✅ 系统编程和性能优化</li>
+<li>✅ 完整项目开发能力</li>
+</ul>
+<h2 id="继续学习路径-1"><a class="header" href="#继续学习路径-1">继续学习路径</a></h2>
+<h3 id="深入方向"><a class="header" href="#深入方向">深入方向</a></h3>
+<ol>
+<li><strong>系统编程</strong> - 操作系统开发、嵌入式开发</li>
+<li><strong>Web 开发</strong> - 微服务架构、云原生应用</li>
+<li><strong>区块链</strong> - 智能合约、共识算法</li>
+<li><strong>游戏开发</strong> - Bevy 引擎、图形编程</li>
+<li><strong>机器学习</strong> - Rust ML 库、模型部署</li>
+</ol>
+<h3 id="推荐资源"><a class="header" href="#推荐资源">推荐资源</a></h3>
+<ul>
+<li>The Rust Programming Language</li>
+<li>Programming Rust</li>
+<li>Rust for Rustaceans</li>
+<li>Zero To Production In Rust</li>
+</ul>
+<h3 id="社区参与"><a class="header" href="#社区参与">社区参与</a></h3>
+<ul>
+<li>参与开源项目</li>
+<li>阅读优秀源码</li>
+<li>编写技术博客</li>
+<li>加入 Rust 社区</li>
+</ul>
+<h2 id="-你现在是一名-rustacean"><a class="header" href="#-你现在是一名-rustacean">🦀 你现在是一名 Rustacean！</a></h2>
+<p>继续保持学习，保持编码，保持热情！</p>
+<p><strong>Happy Coding! 🚀</strong></p>
 
                     </main>
 

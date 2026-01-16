@@ -1,0 +1,740 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Day 67: CRUD 操作实战 - Rust - 100天从新手到大师</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../../searchindex-99a2c815.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc-13fa5e57.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust - 100天从新手到大师</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/Start-Rust/100-days-of-rust" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="day-67-crud-操作实战"><a class="header" href="#day-67-crud-操作实战">Day 67: CRUD 操作实战</a></h1>
+<h2 id="学习目标"><a class="header" href="#学习目标">学习目标</a></h2>
+<ul>
+<li>掌握 SQLx 查询构建</li>
+<li>实现完整的 CRUD 操作</li>
+<li>学习参数化查询</li>
+<li>理解事务处理</li>
+</ul>
+<h2 id="crud-概念"><a class="header" href="#crud-概念">CRUD 概念</a></h2>
+<p>CRUD 代表：</p>
+<ul>
+<li><strong>C</strong>reate - 创建</li>
+<li><strong>R</strong>ead - 读取</li>
+<li><strong>U</strong>pdate - 更新</li>
+<li><strong>D</strong>elete - 删除</li>
+</ul>
+<h2 id="sqlx-基础"><a class="header" href="#sqlx-基础">SQLx 基础</a></h2>
+<h3 id="查询宏"><a class="header" href="#查询宏">查询宏</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::{PgPool, FromRow};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct User {
+    id: i32,
+    username: String,
+    email: String,
+}
+
+// 使用 query! 宏（编译时检查）
+async fn get_user_by_id(pool: &amp;PgPool, id: i32) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users WHERE id = $1",
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+
+// 使用 query_as（运行时检查）
+async fn get_user_by_username(pool: &amp;PgPool, username: &amp;str) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as::&lt;_, User&gt;(
+        "SELECT id, username, email FROM users WHERE username = $1"
+    )
+    .bind(username)
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="create---创建操作"><a class="header" href="#create---创建操作">Create - 创建操作</a></h2>
+<h3 id="插入单条记录"><a class="header" href="#插入单条记录">插入单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct CreateUser {
+    username: String,
+    email: String,
+    password: String,
+}
+
+async fn create_user(pool: &amp;PgPool, user: CreateUser) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let password_hash = hash_password(&amp;user.password);
+    
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        INSERT INTO users (username, email, password_hash)
+        VALUES ($1, $2, $3)
+        RETURNING id, username, email
+        "#,
+        user.username,
+        user.email,
+        password_hash
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="批量插入"><a class="header" href="#批量插入">批量插入</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn create_users_batch(
+    pool: &amp;PgPool,
+    users: Vec&lt;CreateUser&gt;
+) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let mut tx = pool.begin().await?;
+    let mut created_users = Vec::new();
+    
+    for user in users {
+        let password_hash = hash_password(&amp;user.password);
+        
+        let created = sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email
+            "#,
+            user.username,
+            user.email,
+            password_hash
+        )
+        .fetch_one(&amp;mut *tx)
+        .await?;
+        
+        created_users.push(created);
+    }
+    
+    tx.commit().await?;
+    Ok(created_users)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="read---读取操作"><a class="header" href="#read---读取操作">Read - 读取操作</a></h2>
+<h3 id="查询单条记录"><a class="header" href="#查询单条记录">查询单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn get_user(pool: &amp;PgPool, id: i32) -&gt; Result&lt;Option&lt;User&gt;, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users WHERE id = $1",
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="查询多条记录"><a class="header" href="#查询多条记录">查询多条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn list_users(pool: &amp;PgPool) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let users = sqlx::query_as!(
+        User,
+        "SELECT id, username, email FROM users ORDER BY id"
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(users)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="分页查询"><a class="header" href="#分页查询">分页查询</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct Pagination {
+    page: i64,
+    per_page: i64,
+}
+
+async fn list_users_paginated(
+    pool: &amp;PgPool,
+    pagination: Pagination
+) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let offset = (pagination.page - 1) * pagination.per_page;
+    
+    let users = sqlx::query_as!(
+        User,
+        r#"
+        SELECT id, username, email
+        FROM users
+        ORDER BY id
+        LIMIT $1 OFFSET $2
+        "#,
+        pagination.per_page,
+        offset
+    )
+    .fetch_all(pool)
+    .await?;
+    
+    Ok(users)
+}
+
+async fn count_users(pool: &amp;PgPool) -&gt; Result&lt;i64, sqlx::Error&gt; {
+    let count = sqlx::query_scalar!("SELECT COUNT(*) FROM users")
+        .fetch_one(pool)
+        .await?;
+    
+    Ok(count.unwrap_or(0))
+}
+<span class="boring">}</span></code></pre>
+<h3 id="条件查询"><a class="header" href="#条件查询">条件查询</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct UserFilter {
+    username: Option&lt;String&gt;,
+    email: Option&lt;String&gt;,
+}
+
+async fn search_users(
+    pool: &amp;PgPool,
+    filter: UserFilter
+) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+    let mut query = String::from("SELECT id, username, email FROM users WHERE 1=1");
+    let mut bindings = Vec::new();
+    
+    if let Some(username) = &amp;filter.username {
+        query.push_str(&amp;format!(" AND username ILIKE ${}", bindings.len() + 1));
+        bindings.push(format!("%{}%", username));
+    }
+    
+    if let Some(email) = &amp;filter.email {
+        query.push_str(&amp;format!(" AND email ILIKE ${}", bindings.len() + 1));
+        bindings.push(format!("%{}%", email));
+    }
+    
+    let mut query_builder = sqlx::query_as::&lt;_, User&gt;(&amp;query);
+    
+    for binding in bindings {
+        query_builder = query_builder.bind(binding);
+    }
+    
+    let users = query_builder.fetch_all(pool).await?;
+    
+    Ok(users)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="update---更新操作"><a class="header" href="#update---更新操作">Update - 更新操作</a></h2>
+<h3 id="更新单条记录"><a class="header" href="#更新单条记录">更新单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Deserialize)]
+struct UpdateUser {
+    username: Option&lt;String&gt;,
+    email: Option&lt;String&gt;,
+}
+
+async fn update_user(
+    pool: &amp;PgPool,
+    id: i32,
+    update: UpdateUser
+) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        UPDATE users
+        SET 
+            username = COALESCE($1, username),
+            email = COALESCE($2, email),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $3
+        RETURNING id, username, email
+        "#,
+        update.username,
+        update.email,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="批量更新"><a class="header" href="#批量更新">批量更新</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn update_users_role(
+    pool: &amp;PgPool,
+    user_ids: Vec&lt;i32&gt;,
+    role: &amp;str
+) -&gt; Result&lt;u64, sqlx::Error&gt; {
+    let result = sqlx::query!(
+        "UPDATE users SET role = $1 WHERE id = ANY($2)",
+        role,
+        &amp;user_ids
+    )
+    .execute(pool)
+    .await?;
+    
+    Ok(result.rows_affected())
+}
+<span class="boring">}</span></code></pre>
+<h2 id="delete---删除操作"><a class="header" href="#delete---删除操作">Delete - 删除操作</a></h2>
+<h3 id="删除单条记录"><a class="header" href="#删除单条记录">删除单条记录</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn delete_user(pool: &amp;PgPool, id: i32) -&gt; Result&lt;bool, sqlx::Error&gt; {
+    let result = sqlx::query!("DELETE FROM users WHERE id = $1", id)
+        .execute(pool)
+        .await?;
+    
+    Ok(result.rows_affected() &gt; 0)
+}
+<span class="boring">}</span></code></pre>
+<h3 id="软删除"><a class="header" href="#软删除">软删除</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>async fn soft_delete_user(pool: &amp;PgPool, id: i32) -&gt; Result&lt;User, sqlx::Error&gt; {
+    let user = sqlx::query_as!(
+        User,
+        r#"
+        UPDATE users
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE id = $1 AND deleted_at IS NULL
+        RETURNING id, username, email
+        "#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(user)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="完整的-repository-模式"><a class="header" href="#完整的-repository-模式">完整的 Repository 模式</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sqlx::PgPool;
+use async_trait::async_trait;
+
+#[async_trait]
+trait UserRepository {
+    async fn create(&amp;self, user: CreateUser) -&gt; Result&lt;User, sqlx::Error&gt;;
+    async fn find_by_id(&amp;self, id: i32) -&gt; Result&lt;Option&lt;User&gt;, sqlx::Error&gt;;
+    async fn find_all(&amp;self) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt;;
+    async fn update(&amp;self, id: i32, user: UpdateUser) -&gt; Result&lt;User, sqlx::Error&gt;;
+    async fn delete(&amp;self, id: i32) -&gt; Result&lt;bool, sqlx::Error&gt;;
+}
+
+struct PostgresUserRepository {
+    pool: PgPool,
+}
+
+impl PostgresUserRepository {
+    fn new(pool: PgPool) -&gt; Self {
+        Self { pool }
+    }
+}
+
+#[async_trait]
+impl UserRepository for PostgresUserRepository {
+    async fn create(&amp;self, user: CreateUser) -&gt; Result&lt;User, sqlx::Error&gt; {
+        let password_hash = hash_password(&amp;user.password);
+        
+        sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (username, email, password_hash)
+            VALUES ($1, $2, $3)
+            RETURNING id, username, email
+            "#,
+            user.username,
+            user.email,
+            password_hash
+        )
+        .fetch_one(&amp;self.pool)
+        .await
+    }
+    
+    async fn find_by_id(&amp;self, id: i32) -&gt; Result&lt;Option&lt;User&gt;, sqlx::Error&gt; {
+        sqlx::query_as!(
+            User,
+            "SELECT id, username, email FROM users WHERE id = $1",
+            id
+        )
+        .fetch_optional(&amp;self.pool)
+        .await
+    }
+    
+    async fn find_all(&amp;self) -&gt; Result&lt;Vec&lt;User&gt;, sqlx::Error&gt; {
+        sqlx::query_as!(
+            User,
+            "SELECT id, username, email FROM users ORDER BY id"
+        )
+        .fetch_all(&amp;self.pool)
+        .await
+    }
+    
+    async fn update(&amp;self, id: i32, user: UpdateUser) -&gt; Result&lt;User, sqlx::Error&gt; {
+        sqlx::query_as!(
+            User,
+            r#"
+            UPDATE users
+            SET 
+                username = COALESCE($1, username),
+                email = COALESCE($2, email)
+            WHERE id = $3
+            RETURNING id, username, email
+            "#,
+            user.username,
+            user.email,
+            id
+        )
+        .fetch_one(&amp;self.pool)
+        .await
+    }
+    
+    async fn delete(&amp;self, id: i32) -&gt; Result&lt;bool, sqlx::Error&gt; {
+        let result = sqlx::query!("DELETE FROM users WHERE id = $1", id)
+            .execute(&amp;self.pool)
+            .await?;
+        
+        Ok(result.rows_affected() &gt; 0)
+    }
+}
+<span class="boring">}</span></code></pre>
+<h2 id="与-axum-集成"><a class="header" href="#与-axum-集成">与 Axum 集成</a></h2>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use axum::{
+    Router,
+    routing::{get, post, put, delete},
+    extract::{State, Path},
+    Json,
+    http::StatusCode,
+};
+
+#[derive(Clone)]
+struct AppState {
+    user_repo: Arc&lt;PostgresUserRepository&gt;,
+}
+
+async fn create_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Json(user): Json&lt;CreateUser&gt;,
+) -&gt; Result&lt;(StatusCode, Json&lt;User&gt;), StatusCode&gt; {
+    let user = state.user_repo
+        .create(user)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok((StatusCode::CREATED, Json(user)))
+}
+
+async fn get_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let user = state.user_repo
+        .find_by_id(id)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .ok_or(StatusCode::NOT_FOUND)?;
+    
+    Ok(Json(user))
+}
+
+async fn list_users_handler(
+    State(state): State&lt;AppState&gt;,
+) -&gt; Result&lt;Json&lt;Vec&lt;User&gt;&gt;, StatusCode&gt; {
+    let users = state.user_repo
+        .find_all()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(users))
+}
+
+async fn update_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+    Json(user): Json&lt;UpdateUser&gt;,
+) -&gt; Result&lt;Json&lt;User&gt;, StatusCode&gt; {
+    let user = state.user_repo
+        .update(id, user)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    
+    Ok(Json(user))
+}
+
+async fn delete_user_handler(
+    State(state): State&lt;AppState&gt;,
+    Path(id): Path&lt;i32&gt;,
+) -&gt; StatusCode {
+    match state.user_repo.delete(id).await {
+        Ok(true) =&gt; StatusCode::NO_CONTENT,
+        Ok(false) =&gt; StatusCode::NOT_FOUND,
+        Err(_) =&gt; StatusCode::INTERNAL_SERVER_ERROR,
+    }
+}
+
+fn app(state: AppState) -&gt; Router {
+    Router::new()
+        .route("/users", get(list_users_handler).post(create_user_handler))
+        .route("/users/:id", 
+            get(get_user_handler)
+            .put(update_user_handler)
+            .delete(delete_user_handler)
+        )
+        .with_state(state)
+}
+<span class="boring">}</span></code></pre>
+<h2 id="练习"><a class="header" href="#练习">练习</a></h2>
+<ol>
+<li>实现文章的完整 CRUD 操作</li>
+<li>添加复杂的搜索和过滤功能</li>
+<li>实现软删除和恢复功能</li>
+<li>创建审计日志系统</li>
+<li>实现批量操作 API</li>
+</ol>
+<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
+<p>Day 68 将学习复杂查询与事务，包括 JOIN、聚合和事务管理。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../Day61-80/66.Migrations/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../../Day61-80/68.ComplexQueries/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../Day61-80/66.Migrations/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../../Day61-80/68.ComplexQueries/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
+
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-abc7f01d.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
