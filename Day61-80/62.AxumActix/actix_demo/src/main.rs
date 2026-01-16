@@ -46,7 +46,14 @@ async fn list_users(
     let start = ((page - 1) * limit) as usize;
     let end = (start + limit as usize).min(users.len());
     
-    Ok(web::Json(&users[start..end]))
+    // Bounds check
+    if start >= users.len() {
+         return Ok(web::Json(vec![]));
+    }
+
+    // Must clone to return owned data in Json since we hold a lock
+    let slice = users[start..end].to_vec();
+    Ok(web::Json(slice))
 }
 
 #[get("/api/users/{id}")]
@@ -57,11 +64,12 @@ async fn get_user(
     let users = data.users.lock().unwrap();
     let id = path.into_inner();
     
-    users
-        .iter()
-        .find(|u| u.id == id)
-        .map(|u| HttpResponse::Ok().json(u))
-        .ok_or_else(|| actix_web::error::ErrorNotFound("User not found"))
+    let user = users.iter().find(|u| u.id == id).cloned();
+
+    match user {
+        Some(u) => Ok(HttpResponse::Ok().json(u)),
+        None => Err(actix_web::error::ErrorNotFound("User not found")),
+    }
 }
 
 #[post("/api/users")]

@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, Query, State, Json},
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::{get, post},
+    routing::{get},
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -51,6 +51,11 @@ async fn list_users(
     let start = ((page - 1) * limit) as usize;
     let end = (start + limit as usize).min(users.len());
     
+    // Check bounds
+    if start >= users.len() {
+        return Json(vec![]);
+    }
+
     Json(users[start..end].to_vec())
 }
 
@@ -87,6 +92,7 @@ async fn create_user(
 // 错误处理
 enum AppError {
     NotFound,
+    #[allow(dead_code)]
     InternalError,
 }
 
