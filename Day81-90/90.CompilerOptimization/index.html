@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-241d8fdc.js";
+            window.path_to_searchindex_js = "../../searchindex-f9866866.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -177,17 +177,43 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-90-rust-编译优化与配置"><a class="header" href="#day-90-rust-编译优化与配置">Day 90: Rust 编译优化与配置</a></h1>
-<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+                        <h1 id="day-90-rust-编译优化与配置-compiler-optimization"><a class="header" href="#day-90-rust-编译优化与配置-compiler-optimization">Day 90: Rust 编译优化与配置 (Compiler Optimization)</a></h1>
+<h2 id="简介"><a class="header" href="#简介">简介</a></h2>
+<p>本项目演示了如何通过配置 <code>Cargo.toml</code> 中的 Profile 来优化 Rust 二进制文件的大小和性能。</p>
+<h2 id="配置说明"><a class="header" href="#配置说明">配置说明</a></h2>
+<p>我们定义了两个 Profile：</p>
+<ol>
+<li><strong>release</strong> (默认): 关注性能，平衡编译时间。</li>
+<li><strong>min-size</strong>: 关注二进制文件大小。</li>
+</ol>
+<pre><code class="language-toml">[profile.min-size]
+inherits = "release"
+opt-level = "z"     # 优化大小 (Optimize for size)
+lto = true          # 链接时优化 (Link Time Optimization)
+codegen-units = 1   # 减少并行代码生成单元 (Reduce parallelism for better optimization)
+panic = "abort"     # Panic 时直接终止 (Abort on panic, removes unwinding symbols)
+strip = true        # 剥离符号 (Strip symbols)
+</code></pre>
+<h2 id="实验结果"><a class="header" href="#实验结果">实验结果</a></h2>
+<p>在本项目中 (包含 <code>serde</code> 和 <code>serde_json</code>)，对比结果如下（示例）：</p>
+<pre><code class="language-bash"># 构建 Release 版本
+cargo build --release
+
+# 构建 Min-Size 版本
+cargo build --profile min-size
+</code></pre>
+<p>文件大小对比 (approx):</p>
 <ul>
-<li>Cargo.toml 优化配置</li>
-<li>编译时间优化</li>
-<li>二进制大小优化</li>
-<li>交叉编译</li>
+<li><code>target/release/optimization-demo</code>: ~560K</li>
+<li><code>target/min-size/optimization-demo</code>: ~350K</li>
 </ul>
-<h2 id="恭喜完成第六阶段"><a class="header" href="#恭喜完成第六阶段">恭喜完成第六阶段！</a></h2>
-<p>接下来进入第七阶段：毕业设计 (Days 91-100)。</p>
+<p><strong>减少了约 37% 的体积！</strong></p>
+<p>注意：</p>
+<ul>
+<li><code>strip = true</code> 会移除调试符号，使得调试变得困难。</li>
+<li><code>panic = "abort"</code> 会导致 panic 时无法捕获 (catch_unwind)，程序会直接退出。</li>
+<li><code>lto = true</code> 会显著增加编译时间。</li>
+</ul>
 
                     </main>
 

@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-241d8fdc.js";
+            window.path_to_searchindex_js = "searchindex-f9866866.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-13fa5e57.js"></script>
@@ -12331,17 +12331,37 @@ cargo run
 <h2 id="下一步-23"><a class="header" href="#下一步-23">下一步</a></h2>
 <p>Day 85 将学习嵌入式 Rust 简介。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="day-85-嵌入式-rust-简介-1"><a class="header" href="#day-85-嵌入式-rust-简介-1">Day 85: 嵌入式 Rust 简介</a></h1>
-<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
+<h1 id="day-85-嵌入式-rust-简介-embedded-rust-introduction"><a class="header" href="#day-85-嵌入式-rust-简介-embedded-rust-introduction">Day 85: 嵌入式 Rust 简介 (Embedded Rust Introduction)</a></h1>
+<h2 id="简介"><a class="header" href="#简介">简介</a></h2>
+<p>嵌入式 Rust 开发允许我们在没有操作系统（<code>no_std</code>）的环境下直接控制硬件。Rust 的所有权模型和类型系统在嵌入式领域提供了极高的安全性和便利性。</p>
+<h2 id="核心概念-8"><a class="header" href="#核心概念-8">核心概念</a></h2>
+<ol>
+<li><strong>no_std</strong>: 嵌入式环境通常没有完整的标准库支持（如堆分配、文件系统、线程），因此需要使用 <code>#![no_std]</code> 属性禁用标准库，仅使用 <code>core</code> 库。</li>
+<li><strong>embedded-hal</strong>: 这是一个硬件抽象层（Hardware Abstraction Layer）的 Trait 集合。驱动程序编写者只需针对 <code>embedded-hal</code> 编写代码，即可在任何实现了该 HAL 的芯片上运行。</li>
+<li><strong>PAC (Peripheral Access Crate)</strong>: 提供对芯片寄存器的底层访问。</li>
+<li><strong>Board Support Crate (BSP)</strong>: 针对特定开发板的封装。</li>
+</ol>
+<h2 id="本日项目-embedded-demo"><a class="header" href="#本日项目-embedded-demo">本日项目: <code>embedded-demo</code></a></h2>
+<p>由于在通用计算机（Host）上无法直接运行针对特定微控制器（如 STM32, ESP32）的代码，本项目展示了如何编写<strong>平台无关</strong>的驱动程序，并在 Host 上进行模拟运行。</p>
+<h3 id="项目结构-1"><a class="header" href="#项目结构-1">项目结构</a></h3>
 <ul>
-<li>no_std 环境</li>
-<li>嵌入式 HAL</li>
-<li>裸机编程</li>
-<li>RTIC 框架</li>
+<li><code>src/lib.rs</code>: 包含一个通用的 <code>Blinky</code> 驱动。它依赖于 <code>embedded-hal</code>，不依赖于具体硬件，也不依赖 <code>std</code>。这意味着这段代码可以直接编译并运行在真正的微控制器上。</li>
+<li><code>src/main.rs</code>: 这是一个在 Host (Windows/Linux/macOS) 上运行的程序。它实现了 <code>embedded-hal</code> 定义的 Traits (<code>OutputPin</code>, <code>DelayNs</code>) 的模拟版本（Mock），并使用 <code>Blinky</code> 驱动来控制这个“虚拟硬件”。</li>
 </ul>
-<h2 id="下一步-24"><a class="header" href="#下一步-24">下一步</a></h2>
-<p>Day 86 将学习性能分析工具 (Flamegraph)。</p>
+<h3 id="运行方式"><a class="header" href="#运行方式">运行方式</a></h3>
+<p>在 <code>embedded-demo</code> 目录下运行：</p>
+<pre><code class="language-bash">cargo run
+</code></pre>
+<p>你将看到终端输出模拟的 LED 开关状态，这证明了我们的驱动逻辑是正确的。</p>
+<h3 id="如何迁移到真实硬件"><a class="header" href="#如何迁移到真实硬件">如何迁移到真实硬件？</a></h3>
+<p>要在真实硬件（例如 STM32F103）上运行 <code>Blinky</code>，你需要：</p>
+<ol>
+<li>创建一个新的 Binary Target (通常在 <code>examples/</code> 下)。</li>
+<li>引入芯片的 HAL 库（如 <code>stm32f1xx-hal</code>）。</li>
+<li>在 <code>main</code> 函数中初始化硬件，获取真正的 GPIO 引脚和延时器。</li>
+<li>将这些真正的硬件对象传递给 <code>Blinky::new()</code>。</li>
+<li>使用 <code>cargo build --target thumbv7m-none-eabihf</code> 编译。</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-86-性能分析工具-flamegraph-1"><a class="header" href="#day-86-性能分析工具-flamegraph-1">Day 86: 性能分析工具 (Flamegraph)</a></h1>
 <h2 id="学习目标-16"><a class="header" href="#学习目标-16">学习目标</a></h2>
@@ -12779,56 +12799,82 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <li>实现并行版本的数据处理</li>
 <li>创建完整的基准测试套件</li>
 </ol>
-<h2 id="下一步-25"><a class="header" href="#下一步-25">下一步</a></h2>
+<h2 id="下一步-24"><a class="header" href="#下一步-24">下一步</a></h2>
 <p>Day 87 将学习内存优化技巧，包括零拷贝、内存池等。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-87-内存优化技巧-1"><a class="header" href="#day-87-内存优化技巧-1">Day 87: 内存优化技巧</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
+<h2 id="核心内容-6"><a class="header" href="#核心内容-6">核心内容</a></h2>
 <ul>
 <li>内存布局优化</li>
 <li>零拷贝技术</li>
 <li>内存池</li>
 <li>自定义分配器</li>
 </ul>
-<h2 id="下一步-26"><a class="header" href="#下一步-26">下一步</a></h2>
+<h2 id="下一步-25"><a class="header" href="#下一步-25">下一步</a></h2>
 <p>Day 88 将学习 SIMD 与底层优化。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-88-simd-与底层优化-1"><a class="header" href="#day-88-simd-与底层优化-1">Day 88: SIMD 与底层优化</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
+<h2 id="核心内容-7"><a class="header" href="#核心内容-7">核心内容</a></h2>
 <ul>
 <li>SIMD 指令集</li>
 <li>向量化计算</li>
 <li>编译器优化</li>
 <li>内联汇编</li>
 </ul>
-<h2 id="下一步-27"><a class="header" href="#下一步-27">下一步</a></h2>
+<h2 id="下一步-26"><a class="header" href="#下一步-26">下一步</a></h2>
 <p>Day 89 将学习持续集成流水线。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-89-持续集成流水线-1"><a class="header" href="#day-89-持续集成流水线-1">Day 89: 持续集成流水线</a></h1>
 <p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
+<h2 id="核心内容-8"><a class="header" href="#核心内容-8">核心内容</a></h2>
 <ul>
 <li>GitHub Actions 配置</li>
 <li>自动化测试</li>
 <li>代码覆盖率</li>
 <li>自动发布</li>
 </ul>
-<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
+<h2 id="下一步-27"><a class="header" href="#下一步-27">下一步</a></h2>
 <p>Day 90 将学习 Rust 编译优化与配置。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="day-90-rust-编译优化与配置-1"><a class="header" href="#day-90-rust-编译优化与配置-1">Day 90: Rust 编译优化与配置</a></h1>
-<p>详细内容请参考 Day81-90/STAGE6_OVERVIEW.md。</p>
-<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
+<h1 id="day-90-rust-编译优化与配置-compiler-optimization"><a class="header" href="#day-90-rust-编译优化与配置-compiler-optimization">Day 90: Rust 编译优化与配置 (Compiler Optimization)</a></h1>
+<h2 id="简介-1"><a class="header" href="#简介-1">简介</a></h2>
+<p>本项目演示了如何通过配置 <code>Cargo.toml</code> 中的 Profile 来优化 Rust 二进制文件的大小和性能。</p>
+<h2 id="配置说明"><a class="header" href="#配置说明">配置说明</a></h2>
+<p>我们定义了两个 Profile：</p>
+<ol>
+<li><strong>release</strong> (默认): 关注性能，平衡编译时间。</li>
+<li><strong>min-size</strong>: 关注二进制文件大小。</li>
+</ol>
+<pre><code class="language-toml">[profile.min-size]
+inherits = "release"
+opt-level = "z"     # 优化大小 (Optimize for size)
+lto = true          # 链接时优化 (Link Time Optimization)
+codegen-units = 1   # 减少并行代码生成单元 (Reduce parallelism for better optimization)
+panic = "abort"     # Panic 时直接终止 (Abort on panic, removes unwinding symbols)
+strip = true        # 剥离符号 (Strip symbols)
+</code></pre>
+<h2 id="实验结果"><a class="header" href="#实验结果">实验结果</a></h2>
+<p>在本项目中 (包含 <code>serde</code> 和 <code>serde_json</code>)，对比结果如下（示例）：</p>
+<pre><code class="language-bash"># 构建 Release 版本
+cargo build --release
+
+# 构建 Min-Size 版本
+cargo build --profile min-size
+</code></pre>
+<p>文件大小对比 (approx):</p>
 <ul>
-<li>Cargo.toml 优化配置</li>
-<li>编译时间优化</li>
-<li>二进制大小优化</li>
-<li>交叉编译</li>
+<li><code>target/release/optimization-demo</code>: ~560K</li>
+<li><code>target/min-size/optimization-demo</code>: ~350K</li>
 </ul>
-<h2 id="恭喜完成第六阶段"><a class="header" href="#恭喜完成第六阶段">恭喜完成第六阶段！</a></h2>
-<p>接下来进入第七阶段：毕业设计 (Days 91-100)。</p>
+<p><strong>减少了约 37% 的体积！</strong></p>
+<p>注意：</p>
+<ul>
+<li><code>strip = true</code> 会移除调试符号，使得调试变得困难。</li>
+<li><code>panic = "abort"</code> 会导致 panic 时无法捕获 (catch_unwind)，程序会直接退出。</li>
+<li><code>lto = true</code> 会显著增加编译时间。</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="第七阶段毕业设计-days-91-100---完整概览"><a class="header" href="#第七阶段毕业设计-days-91-100---完整概览">第七阶段：毕业设计 (Days 91-100) - 完整概览</a></h1>
 <h2 id="阶段目标-2"><a class="header" href="#阶段目标-2">阶段目标</a></h2>
@@ -13019,7 +13065,7 @@ criterion_group!(benches, benchmark_core_operations);
 criterion_main!(benches);
 <span class="boring">}</span></code></pre>
 <h3 id="day-93-94-核心模块开发"><a class="header" href="#day-93-94-核心模块开发">Day 93-94: 核心模块开发</a></h3>
-<h4 id="项目结构-1"><a class="header" href="#项目结构-1">项目结构</a></h4>
+<h4 id="项目结构-2"><a class="header" href="#项目结构-2">项目结构</a></h4>
 <pre><code>project/
 ├── Cargo.toml
 ├── src/
@@ -13640,106 +13686,106 @@ jobs:
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-91-选题与架构设计-1"><a class="header" href="#day-91-选题与架构设计-1">Day 91: 选题与架构设计</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
+<h2 id="核心内容-9"><a class="header" href="#核心内容-9">核心内容</a></h2>
 <ul>
 <li>需求分析</li>
 <li>架构设计</li>
 <li>技术选型文档</li>
 </ul>
-<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
+<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
 <p>Day 92 将进行原型验证 (PoC)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-92-原型验证-poc-1"><a class="header" href="#day-92-原型验证-poc-1">Day 92: 原型验证 (PoC)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
+<h2 id="核心内容-10"><a class="header" href="#核心内容-10">核心内容</a></h2>
 <ul>
 <li>核心功能验证</li>
 <li>性能基准测试</li>
 <li>技术可行性验证</li>
 </ul>
-<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
+<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
 <p>Day 93-94 将进行核心模块开发。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-93-核心模块开发-一"><a class="header" href="#day-93-核心模块开发-一">Day 93: 核心模块开发 (一)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
+<h2 id="核心内容-11"><a class="header" href="#核心内容-11">核心内容</a></h2>
 <ul>
 <li>项目结构搭建</li>
 <li>数据模型定义</li>
 <li>核心业务逻辑实现</li>
 </ul>
-<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
+<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
 <p>Day 94 将继续核心模块开发。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
+<h2 id="核心内容-12"><a class="header" href="#核心内容-12">核心内容</a></h2>
 <ul>
 <li>继续核心功能开发</li>
 <li>模块间集成</li>
 <li>单元测试编写</li>
 </ul>
-<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
+<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
 <p>Day 95 将进行外围模块与集成。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
+<h2 id="核心内容-13"><a class="header" href="#核心内容-13">核心内容</a></h2>
 <ul>
 <li>认证中间件</li>
 <li>日志系统</li>
 <li>监控指标</li>
 <li>模块集成</li>
 </ul>
-<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
+<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
 <p>Day 96 将进行性能测试与调优。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
+<h2 id="核心内容-14"><a class="header" href="#核心内容-14">核心内容</a></h2>
 <ul>
 <li>负载测试</li>
 <li>性能分析</li>
 <li>优化实施</li>
 <li>性能验证</li>
 </ul>
-<h2 id="下一步-34"><a class="header" href="#下一步-34">下一步</a></h2>
+<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
 <p>Day 97 将进行文档编写与代码清理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-97-文档编写与代码清理-1"><a class="header" href="#day-97-文档编写与代码清理-1">Day 97: 文档编写与代码清理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
+<h2 id="核心内容-15"><a class="header" href="#核心内容-15">核心内容</a></h2>
 <ul>
 <li>API 文档生成</li>
 <li>README 编写</li>
 <li>代码注释完善</li>
 <li>代码清理</li>
 </ul>
-<h2 id="下一步-35"><a class="header" href="#下一步-35">下一步</a></h2>
+<h2 id="下一步-34"><a class="header" href="#下一步-34">下一步</a></h2>
 <p>Day 98 将进行发布准备与版本管理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-18"><a class="header" href="#核心内容-18">核心内容</a></h2>
+<h2 id="核心内容-16"><a class="header" href="#核心内容-16">核心内容</a></h2>
 <ul>
 <li>版本发布流程</li>
 <li>CI/CD 配置</li>
 <li>Docker 镜像构建</li>
 <li>发布检查清单</li>
 </ul>
-<h2 id="下一步-36"><a class="header" href="#下一步-36">下一步</a></h2>
+<h2 id="下一步-35"><a class="header" href="#下一步-35">下一步</a></h2>
 <p>Day 99 将进行项目展示与复盘。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
 <p>详细内容请参考 Day91-100/STAGE7_OVERVIEW.md。</p>
-<h2 id="核心内容-19"><a class="header" href="#核心内容-19">核心内容</a></h2>
+<h2 id="核心内容-17"><a class="header" href="#核心内容-17">核心内容</a></h2>
 <ul>
 <li>项目展示文档</li>
 <li>技术复盘</li>
 <li>经验总结</li>
 <li>改进建议</li>
 </ul>
-<h2 id="下一步-37"><a class="header" href="#下一步-37">下一步</a></h2>
+<h2 id="下一步-36"><a class="header" href="#下一步-36">下一步</a></h2>
 <p>Day 100 - 成为 Rustacean 之路！</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-100-成为-rustacean-之路-1"><a class="header" href="#day-100-成为-rustacean-之路-1">Day 100: 成为 Rustacean 之路</a></h1>
