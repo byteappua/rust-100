@@ -5,4 +5,4 @@ src = "."
 title = "Rust - 100天从新手到大师"
 
 [output.html]
-git-repository-url = "https://github.com/Start-Rust/100-days-of-rust"
+git-repository-url = "https://github.com/byteappua/rust-100"
