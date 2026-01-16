@@ -1,0 +1,10 @@
+[package]
+name = "embedded-demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+embedded-hal = "1.0"
+
+[dev-dependencies]
+# We might use this for testing if needed, but manual mock is fine too.
