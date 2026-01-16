@@ -1,15 +1,14 @@
 use std::time::Duration;
 use std::thread;
+use std::hint::black_box;
 
 fn expensive_computation() {
     let mut sum = 0u64;
     for i in 0..10_000_000 {
         sum = sum.wrapping_add(i);
     }
-    // Prevent compiler from optimizing away the loop
-    if sum == 0 {
-        println!("Sum is zero");
-    }
+    // Prevent compiler from optimizing away the loop using black_box
+    black_box(sum);
 }
 
 fn io_operation() {
