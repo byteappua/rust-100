@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package dtask;
+
+service Scheduler {
+  rpc SubmitTask (SubmitTaskRequest) returns (SubmitTaskResponse);
+}
+
+message Task {
+  string id = 1;
+  string payload = 2;
+  int64 created_at = 3;
+  // Status: 0 = Pending, 1 = Running, 2 = Completed, 3 = Failed
+  int32 status = 4;
+}
+
+message SubmitTaskRequest {
+  string payload = 1;
+}
+
+message SubmitTaskResponse {
+  string id = 1;
+  bool success = 2;
+  string message = 3;
+}
