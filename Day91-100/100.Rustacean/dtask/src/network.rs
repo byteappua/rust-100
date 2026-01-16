@@ -7,6 +7,12 @@ use reqwest::Client;
 
 pub struct DTaskNetwork {}
 
+impl Default for DTaskNetwork {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DTaskNetwork {
     pub fn new() -> Self {
         Self {}
@@ -44,7 +50,7 @@ impl DTaskNetworkConnection {
 
         if !resp.status().is_success() {
              let err_msg = format!("Error response: {}", resp.status());
-             let io_err = std::io::Error::new(std::io::ErrorKind::Other, err_msg);
+             let io_err = std::io::Error::other(err_msg);
              return Err(RPCError::Network(NetworkError::new(&io_err)));
         }
 
