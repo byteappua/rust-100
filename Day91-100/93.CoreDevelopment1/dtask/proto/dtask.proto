@@ -1,0 +1,30 @@
+syntax = "proto3";
+package dtask;
+
+service DTaskService {
+  // Raft communication
+  rpc AppendEntries (RaftRequest) returns (RaftResponse);
+  rpc InstallSnapshot (RaftRequest) returns (RaftResponse);
+  rpc Vote (RaftRequest) returns (RaftResponse);
+
+  // Client API
+  rpc SubmitTask (SubmitTaskRequest) returns (SubmitTaskResponse);
+}
+
+message RaftRequest {
+  bytes data = 1;
+}
+
+message RaftResponse {
+  bytes data = 1;
+}
+
+message SubmitTaskRequest {
+  string name = 1;
+  bytes payload = 2;
+}
+
+message SubmitTaskResponse {
+  string id = 1;
+  bool success = 2;
+}
