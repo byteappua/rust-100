@@ -1,32 +1,36 @@
-# Day 96: Performance Testing and Tuning
+# Day 96: 性能测试与调优
 
-This directory contains the performance-optimized version of the `dtask` project.
+本目录包含经过性能优化的 `dtask` 项目版本。
 
-## Changes
-- **Database**: Migrated from in-memory `Vec<Task>` to `SQLite` using `sqlx`.
-- **Schema**: Added `tasks` table and an index on `status` for optimization.
-- **Connection Pool**: Configured `SqlitePool` with max connections.
-- **Build Profile**: Added `release` profile with `LTO` and `strip` enabled.
+## 变更内容
 
-## How to Run
+1.  **数据库迁移**: 从内存中的 `Vec<Task>` 迁移到 `SQLite`，使用 `sqlx` 进行异步访问。
+2.  **Schema 优化**: 添加了 `tasks` 表，并在 `status` 字段上创建了索引以优化查询。
+3.  **连接池**: 配置了 `SqlitePool`，并调优了最大连接数。
+4.  **构建配置**: 在 `Cargo.toml` 中添加了 `release` 配置，启用了 `LTO` (链接时优化) 和 `strip`。
 
-1. **Start the Server**:
-   ```bash
-   cd dtask
-   cargo run --release
-   ```
+## 运行方式
 
-2. **Run Load Test**:
-   ```bash
-   cd dtask
-   cargo run --example load_test --release
-   ```
+1.  **启动服务器**:
+    ```bash
+    cd Day91-100/96.Performance/dtask
+    cargo run --release
+    ```
 
-## Optimization Checklist
-- [x] Database Query Optimization (Index on `status` added in migration `20240101000001_add_index.sql`)
-- [x] Connection Pool Tuning (`max_connections(50)`)
-- [x] Compile Optimization (`lto = true`, `strip = true`)
-- [x] Async I/O (Using `tokio` and `sqlx` async pool)
+2.  **运行负载测试**:
+    ```bash
+    # 在另一个终端
+    cd Day91-100/96.Performance/dtask
+    cargo run --example load_test --release
+    ```
 
-## Benchmarking Results
-(Run the load test to see QPS)
+## 优化清单
+
+-   [x] **数据库查询优化**: 在 `status` 字段添加索引 (见 migration `20240101000001_add_index.sql`)。
+-   [x] **连接池调优**: 设置 `max_connections(50)`。
+-   [x] **编译优化**: 启用 `lto = true`, `strip = true`, `opt-level = 3`。
+-   [x] **异步 I/O**: 全面使用 `tokio` 和 `sqlx` 的异步能力。
+
+## 基准测试结果
+
+(运行 load_test 示例可查看当前环境下的 QPS)
