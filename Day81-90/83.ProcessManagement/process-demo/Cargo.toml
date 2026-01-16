@@ -1,0 +1,8 @@
+[package]
+name = "process-demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+signal-hook = "0.3"
+daemonize = "0.5"
