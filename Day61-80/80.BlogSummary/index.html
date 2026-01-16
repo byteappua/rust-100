@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-361327c2.js";
+            window.path_to_searchindex_js = "../../searchindex-c7f88b6d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-13fa5e57.js"></script>
@@ -177,18 +177,66 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-80-博客系统---项目总结与展示"><a class="header" href="#day-80-博客系统---项目总结与展示">Day 80: 博客系统 - 项目总结与展示</a></h1>
-<p>详细内容请参考 Day61-80/STAGE5_OVERVIEW.md 中的项目总结部分。</p>
-<h2 id="核心内容"><a class="header" href="#核心内容">核心内容</a></h2>
+                        <h1 id="day-80-博客系统完整版"><a class="header" href="#day-80-博客系统完整版">Day 80: 博客系统完整版</a></h1>
+<h2 id="项目简介"><a class="header" href="#项目简介">项目简介</a></h2>
+<p>这是一个基于 Rust 的现代化博客 API 系统，采用了 Rust Web 开发的最佳实践。</p>
+<h2 id="技术栈"><a class="header" href="#技术栈">技术栈</a></h2>
 <ul>
-<li>架构回顾</li>
-<li>技术栈总结</li>
-<li>遇到的问题和解决方案</li>
-<li>性能指标</li>
-<li>未来改进方向</li>
+<li><strong>Web 框架</strong>: Axum 0.7</li>
+<li><strong>数据库</strong>: SQLx (SQLite)</li>
+<li><strong>认证</strong>: JWT (Json Web Token) + Argon2 (密码哈希)</li>
+<li><strong>异步运行时</strong>: Tokio</li>
+<li><strong>序列化</strong>: Serde</li>
+<li><strong>日志</strong>: Tracing</li>
+<li><strong>错误处理</strong>: Anyhow + Thiserror</li>
+<li><strong>测试</strong>: Tower + Tokio Test</li>
 </ul>
-<h2 id="恭喜完成第五阶段"><a class="header" href="#恭喜完成第五阶段">恭喜完成第五阶段！</a></h2>
-<p>接下来进入第六阶段：系统编程与拓展 (Days 81-90)。</p>
+<h2 id="功能特性"><a class="header" href="#功能特性">功能特性</a></h2>
+<ul>
+<li>用户注册与登录</li>
+<li>JWT 认证保护</li>
+<li>文章 CRUD 操作</li>
+<li>密码加密存储</li>
+<li>数据库迁移</li>
+<li>集成测试覆盖</li>
+</ul>
+<h2 id="运行指南"><a class="header" href="#运行指南">运行指南</a></h2>
+<h3 id="1-准备环境"><a class="header" href="#1-准备环境">1. 准备环境</a></h3>
+<p>确保安装了 Rust 工具链。</p>
+<h3 id="2-运行项目"><a class="header" href="#2-运行项目">2. 运行项目</a></h3>
+<pre><code class="language-bash">cd blog-api
+cargo run
+</code></pre>
+<p>服务将在 <code>http://localhost:3000</code> 启动。</p>
+<h3 id="3-运行测试"><a class="header" href="#3-运行测试">3. 运行测试</a></h3>
+<pre><code class="language-bash">cargo test
+</code></pre>
+<h2 id="api-接口"><a class="header" href="#api-接口">API 接口</a></h2>
+<h3 id="认证"><a class="header" href="#认证">认证</a></h3>
+<ul>
+<li><code>POST /api/auth/register</code> - 注册</li>
+<li><code>POST /api/auth/login</code> - 登录</li>
+</ul>
+<h3 id="文章"><a class="header" href="#文章">文章</a></h3>
+<ul>
+<li><code>GET /api/posts</code> - 获取文章列表</li>
+<li><code>GET /api/posts/:id</code> - 获取文章详情</li>
+<li><code>POST /api/posts</code> - 创建文章 (需认证)</li>
+<li><code>PUT /api/posts/:id</code> - 更新文章 (需认证)</li>
+<li><code>DELETE /api/posts/:id</code> - 删除文章 (需认证)</li>
+</ul>
+<h2 id="目录结构"><a class="header" href="#目录结构">目录结构</a></h2>
+<ul>
+<li><code>src/api</code>: API 路由处理函数</li>
+<li><code>src/models</code>: 数据库模型</li>
+<li><code>src/repository</code>: 数据访问层</li>
+<li><code>src/utils</code>: 工具函数 (JWT, Password)</li>
+<li><code>src/middleware</code>: 中间件</li>
+<li><code>tests</code>: 集成测试</li>
+<li><code>migrations</code>: SQL 迁移文件</li>
+</ul>
+<h2 id="总结"><a class="header" href="#总结">总结</a></h2>
+<p>本项目展示了如何构建一个结构清晰、可测试、功能完整的 Rust Web 应用。</p>
 
                     </main>
 
