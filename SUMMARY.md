@@ -68,8 +68,8 @@
     - [Day 41: 数据库交互 (SQLx/Diesel)](Day31-45/41.Database_SQLx/README.md)
     - [Day 42: 日志与监控 (Tracing)](Day31-45/42.Tracing/README.md)
     - [Day 43: 错误处理最佳实践](Day31-45/43.ErrorHandling/README.md)
-    - [Day 44: 命令行参数解析 (Clap)]()
-    - [Day 45: HTTP 客户端 (Reqwest)]()
+    - [Day 44: 命令行参数解析 (Clap)](Day31-45/44.Clap/README.md)
+    - [Day 45: HTTP 客户端 (Reqwest)](Day31-45/45.Reqwest/README.md)
 
 # 第四阶段：异步网络项目实战 (Days 46-60)
 
