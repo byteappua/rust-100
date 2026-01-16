@@ -1,5 +1,5 @@
-use crate::cmd::{Get, Set, Unknown, Publish, Subscribe, Command};
-use crate::{Frame, Error};
+use crate::cmd::{Get, Set, Unknown, Command};
+use crate::Frame;
 use bytes::Bytes;
 
 impl Command {
