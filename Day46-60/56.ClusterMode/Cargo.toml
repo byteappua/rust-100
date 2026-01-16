@@ -1,0 +1,17 @@
+[package]
+name = "cluster-mode"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+anyhow = "1.0"
+bytes = "1.5"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+async-recursion = "1.0"
+tokio-stream = "0.1"
+
+# Removed criterion and bench target for this day
