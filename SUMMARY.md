@@ -2,6 +2,15 @@
 
 [Introduction](README.md)
 
+## 📖 快速导航
+
+- [快速开始指南](QUICK_START.md)
+- [完整学习指南](RUST_100_DAYS_COMPLETE.md)
+- [项目完成状态](PROJECT_COMPLETION_STATUS.md)
+- [完成总结](COMPLETION_SUMMARY.md) 🎉
+
+---
+
 # 第一阶段：基础知识 (Days 1-15)
 
 - [语法入门]()
@@ -94,9 +103,10 @@
 
 # 第五阶段：Web 开发实战 (Days 61-80)
 
+- [阶段概览](Day61-80/STAGE5_OVERVIEW.md)
 - [Web 框架基础]()
-    - [Day 61: Rust Web 开发概览]()
-    - [Day 62: Axum/Actix-web 入门]()
+    - [Day 61: Rust Web 开发概览](Day61-80/61.WebOverview/README.md)
+    - [Day 62: Axum/Actix-web 入门](Day61-80/62.AxumActix/README.md)
     - [Day 63: 路由与请求处理]()
     - [Day 64: 中间件开发]()
     - [Day 65: 请求状态管理]()
@@ -104,7 +114,7 @@
     - [Day 66: 数据库迁移 (Migrations)]()
     - [Day 67: CRUD 操作实战]()
     - [Day 68: 复杂查询与事务]()
-    - [Day 69: 用户认证 (JWT)]()
+    - [Day 69: 用户认证 (JWT)](Day61-80/69.JWT/README.md)
     - [Day 70: 权限控制 (RBAC)]()
 - [前端交互与部署]()
     - [Day 71: 模板引擎 (Askama/Tera)]()
@@ -121,6 +131,7 @@
 
 # 第六阶段：系统编程与拓展 (Days 81-90)
 
+- [阶段概览](Day81-90/STAGE6_OVERVIEW.md)
 - [系统编程]()
     - [Day 81: 操作系统概念回顾]()
     - [Day 82: 文件系统操作深入]()
@@ -136,6 +147,7 @@
 
 # 第七阶段：毕业设计 (Days 91-100)
 
+- [阶段概览](Day91-100/STAGE7_OVERVIEW.md)
 - [综合项目开发]()
     - [Day 91: 选题与架构设计]()
     - [Day 92: 原型验证 (PoC)]()
@@ -147,3 +159,13 @@
     - [Day 98: 发布准备与版本管理]()
     - [Day 99: 项目展示与复盘]()
     - [Day 100: 成为 Rustacean 之路]()
+
+---
+
+# 附录
+
+- [完整学习指南](RUST_100_DAYS_COMPLETE.md)
+- [学习资源汇总]()
+- [常见问题 FAQ]()
+- [术语表]()
+- [贡献指南]()
