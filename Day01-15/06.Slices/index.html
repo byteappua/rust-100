@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-faf8864b.js";
+            window.path_to_searchindex_js = "../../searchindex-6dab09ab.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,9 +178,26 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-06-切片-slices"><a class="header" href="#day-06-切片-slices">Day 06: 切片 (Slices)</a></h1>
-<p>切片 (Slice) 允许你引用集合中一段连续的元素序列，而不需要引用整个集合。切片是一种引用，所以它没有所有权。</p>
-<h2 id="1-字符串切片-string-slices"><a class="header" href="#1-字符串切片-string-slices">1. 字符串切片 (String Slices)</a></h2>
-<p>字符串切片是指向 <code>String</code> 中一部分内容的引用。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>理解什么是切片 (Slice) 以及它为什么重要</li>
+<li>掌握字符串切片 (<code>&amp;str</code>) 的创建和使用</li>
+<li>掌握数组切片的用法</li>
+<li>理解切片与所有权的关系（借用，无所有权）</li>
+</ul>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<p>切片是 Rust 中处理集合数据的核心工具之一。</p>
+<ul>
+<li><strong>高效</strong>：切片只是对现有数据的引用，不需要复制数据，因此非常轻量高效。</li>
+<li><strong>安全</strong>：切片确保你访问的数据范围是有效的，编译器会帮你检查越界（运行时 panic，但编译期借用检查能防止数据失效）。</li>
+<li><strong>通用</strong>：编写接收切片 (<code>&amp;str</code>, <code>&amp;[T]</code>) 而不是具体类型 (<code>String</code>, <code>Vec&lt;T&gt;</code>) 的函数，可以增加代码的复用性。</li>
+</ul>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-什么是切片"><a class="header" href="#1-什么是切片">1. 什么是切片？</a></h3>
+<p>切片 (Slice) 允许你引用集合中一段连续的元素序列，而不需要引用整个集合。
+切片是一种 <strong>引用</strong>，所以它 <strong>没有所有权</strong>。</p>
+<h3 id="2-字符串切片-string-slices"><a class="header" href="#2-字符串切片-string-slices">2. 字符串切片 (String Slices)</a></h3>
+<p>字符串切片是指向 <code>String</code> 中一部分内容的引用。类型标记为 <code>&amp;str</code>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s = String::from("hello world");
@@ -188,58 +205,107 @@
 let hello = &amp;s[0..5];
 let world = &amp;s[6..11];
 <span class="boring">}</span></code></pre>
-<p><code>[starting_index..ending_index]</code> 语法：</p>
+<p>内部结构：切片存储了一个指向起始位置的指针和一个长度。</p>
+<h4 id="range-语法"><a class="header" href="#range-语法">Range 语法</a></h4>
+<p>使用 <code>[starting_index..ending_index]</code>：</p>
 <ul>
 <li>从 <code>starting_index</code> 开始（包含）。</li>
 <li>到 <code>ending_index</code> 结束（不包含）。</li>
 </ul>
-<h3 id="简写"><a class="header" href="#简写">简写</a></h3>
+<p><strong>简写形式</strong>：</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s = String::from("hello");
-
 let len = s.len();
 
 let slice = &amp;s[0..2];
-let slice = &amp;s[..2]; // 等价
+let slice = &amp;s[..2]; // 省略开头，默认为 0
 
 let slice = &amp;s[3..len];
-let slice = &amp;s[3..]; // 等价
+let slice = &amp;s[3..]; // 省略结尾，默认为 len
 
 let slice = &amp;s[0..len];
-let slice = &amp;s[..]; // 等价
+let slice = &amp;s[..]; // 引用整个字符串
 <span class="boring">}</span></code></pre>
-<h2 id="2-字符串字面值就是切片"><a class="header" href="#2-字符串字面值就是切片">2. 字符串字面值就是切片</a></h2>
-<p>我们之前见过的：</p>
+<h3 id="3-字符串字面值就是切片"><a class="header" href="#3-字符串字面值就是切片">3. 字符串字面值就是切片</a></h3>
+<p>我们经常使用的字符串字面值：</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s = "Hello, world!";
 <span class="boring">}</span></code></pre>
-<p>这里的 <code>s</code> 的类型是 <code>&amp;str</code>：它是一个指向二进制程序特定位置的切片。这也是为什么字符串字面值是不可变的。</p>
-<h2 id="3-其他类型的切片"><a class="header" href="#3-其他类型的切片">3. 其他类型的切片</a></h2>
-<p>数组也可以有切片。</p>
+<p>这里的 <code>s</code> 的类型其实就是 <code>&amp;str</code>。它是一个指向二进制程序特定位置的切片。这也是为什么字符串字面值是不可变的。</p>
+<h3 id="4-数组切片"><a class="header" href="#4-数组切片">4. 数组切片</a></h3>
+<p>不仅仅是字符串，数组也可以有切片。类型标记为 <code>&amp;[T]</code>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let a = [1, 2, 3, 4, 5];
-let slice = &amp;a[1..3];
+let slice = &amp;a[1..3]; // 类型是 &amp;[i32]
 assert_eq!(slice, &amp;[2, 3]);
 <span class="boring">}</span></code></pre>
-<h2 id="4-练习"><a class="header" href="#4-练习">4. 练习</a></h2>
-<p>编写一个函数，接收一个字符串，返回它的第一个单词。如果字符串中没有空格，返回整个字符串。</p>
+<h3 id="5-切片作为函数参数"><a class="header" href="#5-切片作为函数参数">5. 切片作为函数参数</a></h3>
+<p><strong>最佳实践</strong>：如果你的函数只需要读取数据而不需要拥有它，尽量使用切片作为参数。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ❌ 不推荐：只能接收 String
+fn first_word(s: &amp;String) -&gt; &amp;str { ... }
+
+// ✅ 推荐：可以接收 String 的切片，也可以接收字符串字面值
+fn first_word(s: &amp;str) -&gt; &amp;str { ... }
+<span class="boring">}</span></code></pre>
+<p>这样，<code>first_word</code>既可以接受 <code>String</code> (通过 <code>&amp;String</code> 或 <code>&amp;s[..]</code>)，也可以接受 <code>&amp;str</code>。</p>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-获取第一个单词"><a class="header" href="#示例-获取第一个单词">示例: 获取第一个单词</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn first_word(s: &amp;str) -&gt; &amp;str {
-    let bytes = s.as_bytes();
+    let bytes = s.as_bytes(); // 转换为字节数组以遍历
 
     for (i, &amp;item) in bytes.iter().enumerate() {
         if item == b' ' {
-            return &amp;s[0..i];
+            return &amp;s[0..i]; // 找到空格，返回之前的切片
         }
     }
 
-    &amp;s[..]
+    &amp;s[..] // 没有空格，返回整个字符串
 }
 <span class="boring">}</span></code></pre>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>我们为你准备了关于切片操作的练习题。</p>
+<ul>
+<li><strong>练习 1</strong>: 字符串切片基础</li>
+<li><strong>练习 2</strong>: 数组切片</li>
+<li><strong>练习 3</strong>: 实现 <code>first_word</code></li>
+</ul>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
+<h3 id="q1-切片会导致所有权转移吗"><a class="header" href="#q1-切片会导致所有权转移吗">Q1: 切片会导致所有权转移吗？</a></h3>
+<p>A: 不会。切片是引用，它借用了原本的数据。原数据的所有者必须在切片使用期间保持有效。</p>
+<h3 id="q2-为什么-s01-处理中文会报错"><a class="header" href="#q2-为什么-s01-处理中文会报错">Q2: 为什么 <code>s[0..1]</code> 处理中文会报错？</a></h3>
+<p>A: Rust 的 <code>String</code> 是 UTF-8 编码的。一个中文字符通常占 3 个字节。<code>s[0..1]</code> 试图切取第 1 个字节，但这只是中文字符的一部分，不是合法的字符边界。Rust 为了防止产生无效字符串，会直接 panic。
+<strong>解决</strong>：使用 <code>chars()</code> 迭代器，或者确保切片索引在字符边界上（如 <code>0..3</code>）。</p>
+<h3 id="q3-string-和-str-有什么区别"><a class="header" href="#q3-string-和-str-有什么区别">Q3: <code>&amp;String</code> 和 <code>&amp;str</code> 有什么区别？</a></h3>
+<p>A: <code>&amp;String</code> 是对 <code>String</code> 类型的引用。<code>&amp;str</code> 是字符串切片。
+由于 <code>String</code> 实现了 <code>Deref</code> trait，你可以把 <code>&amp;String</code> 传给需要 <code>&amp;str</code> 的函数，Rust 会自动转换（强制解引用）。但反过来不行。所以参数定义为 <code>&amp;str</code> 更通用。</p>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ul>
+<li><strong>函数参数优先使用切片</strong>：使用 <code>&amp;str</code> 而不是 <code>&amp;String</code>，使用 <code>&amp;[T]</code> 而不是 <code>&amp;Vec&lt;T&gt;</code>。</li>
+<li><strong>小心 UTF-8</strong>：对包含非 ASCII 字符的字符串做索引切片时要格外小心。</li>
+</ul>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch04-03-slices.html">Rust 程序设计语言 - 切片</a></li>
+</ul>
+<h2 id="-本节要点回顾"><a class="header" href="#-本节要点回顾">📚 本节要点回顾</a></h2>
+<ul>
+<li>切片是对集合中连续元素的引用。</li>
+<li><code>&amp;str</code> 是字符串切片，字面值也是 <code>&amp;str</code>。</li>
+<li><code>&amp;[T]</code> 是数组/Vec 切片。</li>
+<li>Range 语法 <code>..</code> 用于指定范围。</li>
+<li>切片没有所有权。</li>
+</ul>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>有了切片，我们可以高效地操作数据了。接下来我们将学习 Rust 中最重要的数据组织方式——结构体。</p>
+<p>下一节: <a href="../07.Structs/README.html">Day 07: 结构体</a></p>
 
                     </main>
 
