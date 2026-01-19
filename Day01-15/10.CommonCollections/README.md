@@ -1,177 +1,135 @@
 # Day 10: 常用集合 (Common Collections)
 
-Rust 标准库中包含了一系列被称为集合的数据结构。与数组和元组不同，这些集合指向的数据是存储在堆上的，这意味着数据的大小不需要在编译时确定，并且可以根据需要增长或缩小。
+## 📝 学习目标
+- 掌握 **Vector (`Vec<T>`)** 的增删改查操作
+- 理解 **String** 的编码机制与操作限制
+- 熟练使用 **HashMap (`HashMap<K, V>`)** 进行键值存储
+- 理解这些集合在内存中的布局（堆内存）
 
-## 1. Vector (Vec<T>)
+## 🎯 为什么要学这个
+Rust 的标准库提供了许多强大的数据结构，称为"集合"。与内置的数组和元组不同：
+- 它们的数据存储在 **堆 (Heap)** 上。
+- 它们的大小是 **动态** 的（运行时可变）。
+- 它们是处理不定长数据的基石。
 
-`Vec<T>` 也被称为 vector，允许我们在一个单独的数据结构中存储多个相同类型的值。
+## 📖 核心概念
 
-### 创建 Vector
+### 1. Vector (向量)
+`Vec<T>` 是一个可增长的数组。它在内存中是连续存储的。
 
-```rust
-let v: Vec<i32> = Vec::new(); // 创建空的 vector
-let v = vec![1, 2, 3]; // 使用 vec! 宏创建
-```
-
-### 更新 Vector
-
-```rust
-let mut v = Vec::new();
-v.push(5);
-v.push(6);
-v.push(7);
-v.push(8);
-```
-
-### 读取元素
-
-有两种方式引用 vector 中的值：
-
-1.  **索引语法**: 使用 `&v[index]`。如果索引越界，程序会 panic。
-2.  **get 方法**: 使用 `v.get(index)`，返回 `Option<&T>`。如果索引越界，返回 `None`。
+- **创建**: `Vec::new()` 或 `vec![1, 2, 3]`。
+- **访问**: 下标索引 `&v[i]` (越界 Panic) 或 `v.get(i)` (返回 `Option`)。
+- **遍历**: `for x in &v`。
 
 ```rust
-let v = vec![1, 2, 3, 4, 5];
-
-let third: &i32 = &v[2];
-println!("The third element is {}", third);
-
-match v.get(2) {
-    Some(third) => println!("The third element is {}", third),
-    None => println!("There is no third element."),
-}
+let mut v = vec![1, 2, 3];
+v.push(4);      // 添加
+v.pop();        // 删除最后一个并返回 Option<T>
 ```
 
-### 遍历 Vector
+### 2. String (字符串)
+Rust 的 `String` 是 UTF-8 编码的字节序列。
+
+- **本质**: `String` 是 `Vec<u8>` 的封装。
+- **不支持索引**: `s[0]` 是非法的，因为一个 UTF-8 字符可能占用 1-4 个字节，简单的字节索引无法准确对应字符。
+- **操作**: `push_str`, `+` (拼接), `format!`。
+- **遍历**:
+    - `s.chars()`: 遍历 Unicode 标量值 (char)。
+    - `s.bytes()`: 遍历原始字节。
 
 ```rust
-let v = vec![100, 32, 57];
-for i in &v {
-    println!("{}", i);
-}
-
-// 遍历并修改
-let mut v = vec![100, 32, 57];
-for i in &mut v {
-    *i += 50; // 使用解引用运算符 (*) 修改值
-}
+let s = String::from("你好");
+// s.len() 是 6 (每个汉字 3 字节)
+// s.chars().count() 是 2
 ```
 
-### 使用枚举存储多种类型
+### 3. HashMap (哈希表)
+`HashMap<K, V>` 存储键值对映射。
 
-```rust
-enum SpreadsheetCell {
-    Int(i32),
-    Float(f64),
-    Text(String),
-}
-
-let row = vec![
-    SpreadsheetCell::Int(3),
-    SpreadsheetCell::Text(String::from("blue")),
-    SpreadsheetCell::Float(10.12),
-];
-```
-
-## 2. String (字符串)
-
-Rust 的核心语言层面只有一种字符串类型：字符串切片 `str` (通常以 `&str` 出现)。`String` 类型是由标准库提供的，它是可增长的、可变的、有所有权的、UTF-8 编码的字符串类型。
-
-### 创建 String
-
-```rust
-let mut s = String::new();
-let s = "initial contents".to_string();
-let s = String::from("initial contents");
-```
-
-### 更新 String
-
-```rust
-let mut s = String::from("foo");
-s.push_str("bar"); // 附加字符串切片
-s.push('l'); // 附加单个字符
-```
-
-### 拼接 String
-
-```rust
-let s1 = String::from("Hello, ");
-let s2 = String::from("world!");
-let s3 = s1 + &s2; // 注意 s1 被移动了，不能再被使用
-
-// 使用 format! 宏 (不会获取所有权)
-let s1 = String::from("tic");
-let s2 = String::from("tac");
-let s3 = String::from("toe");
-let s = format!("{}-{}-{}", s1, s2, s3);
-```
-
-### 索引 String
-
-**Rust 不支持字符串索引**。例如 `s[0]` 是非法的。
-因为 String 是 UTF-8 编码的 wrapper，索引操作（O(1)）无法保证总是返回一个有效的字符（某些字符可能占用多个字节），且遍历 UTF-8 字符串以寻找第 N 个字符的代价是 O(N)。
-
-### 切片 String
-
-可以使用切片获取特定范围的字节，但必须谨慎，如果切片位置不在字符边界，程序会 panic。
-
-```rust
-let hello = "Здравствуйте";
-let s = &hello[0..4]; // "Зд"
-```
-
-## 3. HashMap (哈希映射)
-
-`HashMap<K, V>` 存储了类型为 `K` 的键和类型为 `V` 的值之间的映射关系。
-
-### 创建 HashMap
+- **所有权**:
+    - 对于实现了 `Copy` 的类型 (如 `i32`)，值会被拷贝。
+    - 对于 `String` 等类型，值的所有权会被移动进 HashMap。
+- **更新**: `insert` (覆盖), `entry(...).or_insert(...)` (不存在则插入)。
 
 ```rust
 use std::collections::HashMap;
 
 let mut scores = HashMap::new();
 scores.insert(String::from("Blue"), 10);
-scores.insert(String::from("Yellow"), 50);
 ```
 
-### 访问值
+## 💻 代码示例
+
+### 示例 1: Vector 操作与枚举
+Vector 只能存储同一种类型。如果需要存储不同类型，可以使用枚举。
 
 ```rust
-let team_name = String::from("Blue");
-let score = scores.get(&team_name); // 返回 Option<&i32>
-```
+#[derive(Debug)]
+enum SpreadsheetCell {
+    Int(i32),
+    Float(f64),
+    Text(String),
+}
 
-### 遍历 HashMap
+fn main() {
+    let row = vec![
+        SpreadsheetCell::Int(3),
+        SpreadsheetCell::Text(String::from("blue")),
+        SpreadsheetCell::Float(10.12),
+    ];
 
-```rust
-for (key, value) in &scores {
-    println!("{}: {}", key, value);
+    for cell in &row {
+        println!("{:?}", cell);
+    }
 }
 ```
 
-### 更新 HashMap
-
-1.  **覆盖值**: 再次调用 `insert`。
-2.  **只在键没有对应值时插入**: 使用 `entry`。
-
+### 示例 2: HashMap 统计词频
 ```rust
-scores.entry(String::from("Blue")).or_insert(50);
-scores.entry(String::from("Yellow")).or_insert(50);
-```
+use std::collections::HashMap;
 
-3.  **根据旧值更新新值**:
+fn main() {
+    let text = "hello world wonderful world";
+    let mut map = HashMap::new();
 
-```rust
-let text = "hello world wonderful world";
-let mut map = HashMap::new();
+    for word in text.split_whitespace() {
+        let count = map.entry(word).or_insert(0);
+        *count += 1;
+    }
 
-for word in text.split_whitespace() {
-    let count = map.entry(word).or_insert(0);
-    *count += 1;
+    println!("{:?}", map);
 }
 ```
 
-### 哈希函数
+## 🏋️ 练习题
 
-默认情况下，HashMap 使用 SipHash，这可以抵抗哈希表拒绝服务 (DoS) 攻击。如果需要更快的速度，可以指定其他的 hasher。
+我们准备了练习题来帮助你掌握这三种集合的使用。
+
+- **练习 1**: 使用 Vector 进行统计（平均数、中位数、众数）
+- **练习 2**: Pig Latin (猪拉丁语) 转换工具
+- **练习 3**: 员工部门管理系统 (HashMap 综合应用)
+
+👉 **[点击这里查看练习题](./exercises/README.md)**
+
+## 🤔 常见问题 (FAQ)
+
+### Q1: `&String` 和 `&str` 有什么区别？
+A: `String` 是堆上分配的、可变的字符串对象。`&str` 是字符串切片（通常是对 String 或字面量的引用），是不可变的视图。函数参数通常建议写 `&str` 以兼容两种类型（`&String` 会自动强转为 `&str`）。
+
+### Q2: 为什么 `s1 + &s2` 中 `s1` 必须被移动？
+A: `+` 运算符调用的是 `add` 方法：`fn add(self, s: &str) -> String`。第一个参数是 `self`，意味着它获取了 `s1` 的所有权。为了效率，它直接在 `s1` 的缓冲区上追加 `s2` 的内容，并返回修改后的 `s1`，避免了重新分配新内存。
+
+### Q3: 什么时候用数组 `[T; N]`，什么时候用 `Vec<T>`？
+A: 如果数据数量固定且较小，用数组（栈分配，更快）。如果数量不确定或很大，用 Vector。
+
+## 💡 最佳实践
+- **预分配容量**: 如果知道大概要存多少元素，使用 `Vec::with_capacity(n)` 或 `HashMap::with_capacity(n)` 可以减少内存重新分配的次数，提高性能。
+- **Entry API**: 修改 HashMap 时优先使用 `entry` API，代码更简洁且效率更高（只计算一次哈希值）。
+
+## 🔗 扩展阅读
+- [Rust 程序设计语言 - 常见集合](https://doc.rust-lang.org/book/ch08-00-common-collections.html)
+
+## ⏭️ 下一步
+现在我们已经掌握了基础语法和常用数据结构。但在编程中，错误是不可避免的。Rust 有一套独特且安全的错误处理机制。
+
+下一节: [Day 11: 错误处理](../11.ErrorHandling/README.md)
