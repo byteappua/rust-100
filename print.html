@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-dcae11b0.js";
+            window.path_to_searchindex_js = "searchindex-b78ef5eb.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-cec6f113.js"></script>
+        <script src="toc-355d1505.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -2520,6 +2520,203 @@ cargo run
 <p>一旦你的环境准备就绪，我们就可以开始真正的编程了。下一章我们将学习 Rust 最基础的构建块。</p>
 <p><a href="Day01-15/02.VariablesAndTypes/README.html"><strong>Day 02: 变量与数据类型 (Variables &amp; Types)</strong></a></p>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-01-练习题---初识-rust"><a class="header" href="#day-01-练习题---初识-rust">Day 01 练习题 - 初识 Rust</a></h1>
+<h2 id="-练习目标"><a class="header" href="#-练习目标">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>熟悉 Rust 的基本语法</li>
+<li>掌握 Cargo 的使用</li>
+<li>学会编写简单的 Rust 程序</li>
+</ul>
+<h2 id="-练习列表"><a class="header" href="#-练习列表">📝 练习列表</a></h2>
+<h3 id="练习-1-hello-rust-基础"><a class="header" href="#练习-1-hello-rust-基础">练习 1: Hello, Rust! (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+创建一个 Rust 程序,输出 “Hello, Rust! Welcome to the world of systems programming!”</p>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用 <code>cargo new</code> 创建项目</li>
+<li>在 <code>main.rs</code> 中实现</li>
+<li>使用 <code>cargo run</code> 运行</li>
+</ul>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>使用 <code>println!</code> 宏输出文本</li>
+<li>注意 Rust 的字符串使用双引号</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/01.Introduction/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-个人信息卡片-基础"><a class="header" href="#练习-2-个人信息卡片-基础">练习 2: 个人信息卡片 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+编写一个程序,输出你的个人信息卡片,包括姓名、年龄、城市和职业。</p>
+<p><strong>示例输出</strong>:</p>
+<pre><code>=========================
+    Personal Info Card
+=========================
+Name:       Alice
+Age:        25
+City:       Beijing
+Occupation: Software Engineer
+=========================
+</code></pre>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用多个 <code>println!</code> 语句</li>
+<li>注意格式对齐</li>
+<li>使用 ASCII 字符绘制边框</li>
+</ul>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>可以使用 <code>println!</code> 的格式化功能</li>
+<li>使用 <code>=</code> 和空格来对齐</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/01.Introduction/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-简单计算器-进阶"><a class="header" href="#练习-3-简单计算器-进阶">练习 3: 简单计算器 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+创建一个简单的计算器程序,计算并输出以下表达式的结果:</p>
+<ul>
+<li>10 + 20</li>
+<li>50 - 15</li>
+<li>6 * 7</li>
+<li>100 / 4</li>
+<li>17 % 5</li>
+</ul>
+<p><strong>示例输出</strong>:</p>
+<pre><code>Simple Calculator
+=================
+10 + 20 = 30
+50 - 15 = 35
+6 * 7 = 42
+100 / 4 = 25
+17 % 5 = 2
+</code></pre>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用变量存储数字</li>
+<li>使用 Rust 的算术运算符</li>
+<li>格式化输出结果</li>
+</ul>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>使用 <code>let</code> 声明变量</li>
+<li>使用 <code>{}</code> 在 <code>println!</code> 中插入变量值</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/01.Introduction/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-4-ascii-艺术-挑战"><a class="header" href="#练习-4-ascii-艺术-挑战">练习 4: ASCII 艺术 (挑战)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐⭐</p>
+<p><strong>题目</strong>:
+使用 ASCII 字符绘制一个 Rust 的 logo 或者你喜欢的图案。</p>
+<p><strong>示例输出</strong>:</p>
+<pre><code>    _____           _   
+   |  __ \         | |  
+   | |__) |   _ ___| |_ 
+   |  _  / | | / __| __|
+   | | \ \ |_| \__ \ |_ 
+   |_|  \_\__,_|___/\__|
+</code></pre>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>至少 5 行高度</li>
+<li>使用多种 ASCII 字符</li>
+<li>保持良好的对齐</li>
+</ul>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>使用 <code>\</code> 需要转义为 <code>\\</code></li>
+<li>可以使用在线 ASCII 艺术生成器辅助</li>
+<li>注意字符串中的空格</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/01.Introduction/exercises/solutions/exercise4.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-5-cargo-项目结构-实践"><a class="header" href="#练习-5-cargo-项目结构-实践">练习 5: Cargo 项目结构 (实践)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+创建一个完整的 Cargo 项目,包含:</p>
+<ol>
+<li>自定义的项目名称</li>
+<li>修改 <code>Cargo.toml</code> 添加作者信息</li>
+<li>在 <code>main.rs</code> 中输出项目信息</li>
+</ol>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用 <code>cargo new my_first_project</code> 创建项目</li>
+<li>在 <code>Cargo.toml</code> 中添加 <code>authors</code> 字段</li>
+<li>程序输出项目名称和作者信息</li>
+</ul>
+<p><strong>提示</strong>:</p>
+<ul>
+<li><code>Cargo.toml</code> 是 TOML 格式的配置文件</li>
+<li>可以使用 <code>env!("CARGO_PKG_NAME")</code> 获取包名</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/01.Introduction/exercises/solutions/exercise5">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务"><a class="header" href="#-挑战任务">🏆 挑战任务</a></h2>
+<p>完成以上所有练习后,尝试这个综合挑战:</p>
+<h3 id="综合挑战-欢迎程序"><a class="header" href="#综合挑战-欢迎程序">综合挑战: 欢迎程序</a></h3>
+<p>创建一个欢迎程序,包含:</p>
+<ol>
+<li>ASCII 艺术的标题</li>
+<li>欢迎信息</li>
+<li>简单的数学计算展示</li>
+<li>项目信息输出</li>
+</ol>
+<p><strong>示例输出</strong>:</p>
+<pre><code>╔════════════════════════════════╗
+║   Welcome to Rust World!       ║
+╚════════════════════════════════╝
+
+Hello, Future Rustacean!
+
+Let me show you some calculations:
+  2 + 2 = 4
+  10 * 5 = 50
+  100 / 4 = 25
+
+Project: my_first_project
+Author: Your Name
+Version: 0.1.0
+
+Happy coding! 🦀
+</code></pre>
+<h2 id="-学习资源-3"><a class="header" href="#-学习资源-3">📚 学习资源</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch01-00-getting-started.html">The Rust Programming Language - Chapter 1</a></li>
+<li><a href="https://doc.rust-lang.org/cargo/">Cargo Book</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/hello.html">Rust by Example - Hello World</a></li>
+</ul>
+<h2 id="-提示"><a class="header" href="#-提示">💡 提示</a></h2>
+<ol>
+<li><strong>遇到编译错误?</strong> 仔细阅读错误信息,Rust 的编译器会给出很有帮助的提示</li>
+<li><strong>不知道如何开始?</strong> 先看参考答案,理解后自己重新实现</li>
+<li><strong>想要更多挑战?</strong> 尝试组合多个练习,创建更复杂的程序</li>
+</ol>
+<h2 id="-完成检查清单"><a class="header" href="#-完成检查清单">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 完成练习 4</li>
+<li><input disabled="" type="checkbox"> 完成练习 5</li>
+<li><input disabled="" type="checkbox"> 完成综合挑战</li>
+<li><input disabled="" type="checkbox"> 理解所有代码的含义</li>
+<li><input disabled="" type="checkbox"> 能够独立编写类似程序</li>
+</ul>
+<h2 id="-下一步-1"><a class="header" href="#-下一步-1">🎓 下一步</a></h2>
+<p>完成这些练习后,你应该:</p>
+<ul>
+<li>熟悉 Rust 的基本语法</li>
+<li>掌握 Cargo 的基本使用</li>
+<li>能够编写简单的 Rust 程序</li>
+</ul>
+<p>准备好了吗?让我们继续 <a href="Day01-15/02.VariablesAndTypes/README.html">Day 02: 变量与数据类型</a>!</p>
+<hr>
+<p><strong>创建日期</strong>: 2026-01-16
+<strong>最后更新</strong>: 2026-01-16</p>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-02-变量与数据类型-variables--types"><a class="header" href="#day-02-变量与数据类型-variables--types">Day 02: 变量与数据类型 (Variables &amp; Types)</a></h1>
 <p>欢迎来到 <strong>Rust 100 Days</strong> 的第二天！今天我们将探讨 Rust 的“法律与秩序“：<strong>严格的类型系统</strong>与<strong>所有权规则的雏形</strong>。</p>
 <p>在 Rust 中，变量不仅仅是存储数据的容器，它们还承载着关于“可变性“和“生命周期“的契约。</p>
@@ -2793,9 +2990,117 @@ let s = format!("{}-{}-{}", s1, s2, s3);
 </ol>
 <p>👉 <strong><a href="Day01-15/02.VariablesAndTypes/exercises/README.html">点击这里访问详细练习题目录</a></strong></p>
 <hr>
-<h2 id="-下一步-1"><a class="header" href="#-下一步-1">⏭️ 下一步</a></h2>
+<h2 id="-下一步-2"><a class="header" href="#-下一步-2">⏭️ 下一步</a></h2>
 <p>掌握了数据的形态，接下来我们要让数据“动“起来。下一章，我们将学习如何组织代码流程。</p>
 <p><a href="Day01-15/03.FunctionsAndControlFlow/README.html"><strong>Day 03: 函数与控制流 (Functions &amp; Control Flow)</strong></a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-02-练习题---变量与数据类型"><a class="header" href="#day-02-练习题---变量与数据类型">Day 02 练习题 - 变量与数据类型</a></h1>
+<h2 id="-练习目标-1"><a class="header" href="#-练习目标-1">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>熟练掌握 <code>let</code> 和 <code>mut</code> 的使用</li>
+<li>理解并应用变量隐藏 (Shadowing)</li>
+<li>熟悉 Rust 的基本数据类型操作</li>
+</ul>
+<h2 id="-练习列表-1"><a class="header" href="#-练习列表-1">📝 练习列表</a></h2>
+<h3 id="练习-1-修复编译器错误-基础"><a class="header" href="#练习-1-修复编译器错误-基础">练习 1: 修复编译器错误 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+下面的代码无法编译通过。请找出原因并修复它，使程序能正确输出 <code>x = 6</code>。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let x = 5;
+    println!("The value of x is: {}", x);
+    x = 6;
+    println!("The value of x is: {}", x);
+}</code></pre>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>修改 <code>x</code> 的声明</li>
+<li>确保两次 <code>println!</code> 都能执行</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/02.VariablesAndTypes/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-数据类型大杂烩-基础"><a class="header" href="#练习-2-数据类型大杂烩-基础">练习 2: 数据类型大杂烩 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+声明不同类型的变量来完成以下任务，并打印它们：</p>
+<ol>
+<li>一个有符号整数 <code>age</code>，值为 30。</li>
+<li>一个浮点数 <code>price</code>，值为 19.99。</li>
+<li>一个布尔值 <code>is_active</code>，值为 true。</li>
+<li>一个字符 <code>initial</code>，值为 ‘R’。</li>
+</ol>
+<p><strong>示例输出</strong>:</p>
+<pre><code>Age: 30
+Price: 19.99
+Is Active: true
+Initial: R
+</code></pre>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>显式标注变量类型（尽管 Rust 可以推断，但为了练习请标注）</li>
+<li>格式化打印结果</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/02.VariablesAndTypes/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-shadowing-魔法-进阶"><a class="header" href="#练习-3-shadowing-魔法-进阶">练习 3: Shadowing 魔法 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+利用 Shadowing 机制，不使用 <code>mut</code> 关键字，完成以下变量转换：</p>
+<ol>
+<li>start: 定义变量 <code>x</code> 为字符串 “5”。</li>
+<li>step 1: 将 <code>x</code> 转换为整数 5 (解析字符串)。</li>
+<li>step 2: 将 <code>x</code> 加 1 变为 6。</li>
+<li>step 3: 将 <code>x</code> 乘 3 变为 18。</li>
+</ol>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>字符串转整数可以用 <code>x.parse().expect("Not a number")</code></li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/02.VariablesAndTypes/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-4-元组与解构-进阶"><a class="header" href="#练习-4-元组与解构-进阶">练习 4: 元组与解构 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+创建一个包含你的 <code>(姓名, 年龄, 身高)</code> 的元组。</p>
+<ol>
+<li>打印整个元组。</li>
+<li>使用解构 (<code>destructuring</code>) 将元组拆分为三个变量。</li>
+<li>单独打印解构后的变量。</li>
+</ol>
+<p><strong>示例输出</strong>:</p>
+<pre><code>Tuple: ("Alice", 30, 1.75)
+Name: Alice, Age: 30, Height: 1.75
+</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/02.VariablesAndTypes/exercises/solutions/exercise4.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-1"><a class="header" href="#-挑战任务-1">🏆 挑战任务</a></h2>
+<h3 id="综合挑战-数组统计"><a class="header" href="#综合挑战-数组统计">综合挑战: 数组统计</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐⭐</p>
+<p><strong>题目</strong>:
+给定一个包含 5 个整数的数组 <code>let numbers = [10, 20, 30, 40, 50];</code>
+请编写程序计算：</p>
+<ol>
+<li>数组的第一个元素</li>
+<li>数组的最后一个元素</li>
+<li>数组所有元素的和</li>
+</ol>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用索引访问元素</li>
+<li>尝试使用循环来计算和（如果你还不会循环，可以手动相加）</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/02.VariablesAndTypes/exercises/solutions/challenge.rs">查看答案</a></p>
+<h2 id="-完成检查清单-1"><a class="header" href="#-完成检查清单-1">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 完成练习 4</li>
+<li><input disabled="" type="checkbox"> 完成挑战任务</li>
+</ul>
+<h2 id="-下一步-3"><a class="header" href="#-下一步-3">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/03.FunctionsAndControlFlow/README.html">Day 03: 函数与控制流</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-03-函数与控制流-functions--control-flow"><a class="header" href="#day-03-函数与控制流-functions--control-flow">Day 03: 函数与控制流 (Functions &amp; Control Flow)</a></h1>
 <p>欢迎来到 <strong>Rust 100 Days</strong> 的第三天！今天我们将构建程序的骨架与肌肉。</p>
@@ -2956,9 +3261,104 @@ let result = loop {
 </ol>
 <p>👉 <strong><a href="Day01-15/03.FunctionsAndControlFlow/exercises/README.html">点击这里访问详细练习题目录</a></strong></p>
 <hr>
-<h2 id="-下一步-2"><a class="header" href="#-下一步-2">⏭️ 下一步</a></h2>
+<h2 id="-下一步-4"><a class="header" href="#-下一步-4">⏭️ 下一步</a></h2>
 <p>你现在已经掌握了 Rust 的语法基础。但要真正理解 Rust 的精髓，我们需要挑战 Boss 级的概念。下一章，我们将面对 Rust 最核心、最独特的特性。</p>
 <p><a href="Day01-15/04.Ownership/README.html"><strong>Day 04: 所有权 (Ownership)</strong></a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-03-练习题---函数与控制流"><a class="header" href="#day-03-练习题---函数与控制流">Day 03 练习题 - 函数与控制流</a></h1>
+<h2 id="-练习目标-2"><a class="header" href="#-练习目标-2">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>熟练编写带有参数和返回值的函数</li>
+<li>掌握 <code>if</code> 表达式作为赋值语句的用法</li>
+<li>熟练运用 <code>loop</code>, <code>while</code>, <code>for</code> 循环</li>
+</ul>
+<h2 id="-练习列表-2"><a class="header" href="#-练习列表-2">📝 练习列表</a></h2>
+<h3 id="练习-1-数学函数-基础"><a class="header" href="#练习-1-数学函数-基础">练习 1: 数学函数 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+编写一个函数 <code>is_even(n: i32) -&gt; bool</code>，如果 <code>n</code> 是偶数返回 <code>true</code>，否则返回 <code>false</code>。
+在 <code>main</code> 函数中调用它并打印结果。</p>
+<p><strong>示例输出</strong>:</p>
+<pre><code>Is 10 even? true
+Is 7 even? false
+</code></pre>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>必须使用函数</li>
+<li>函数必须有返回值</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/03.FunctionsAndControlFlow/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-这个数大吗-基础"><a class="header" href="#练习-2-这个数大吗-基础">练习 2: 这个数大吗? (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+使用 <code>if</code> 表达式（注意不是语句）来实现一个功能：
+给定一个数字，如果大于 100，返回 “Big”，否则返回 “Small”。
+将结果绑定到一个变量 <code>result</code> 并打印。</p>
+<p><strong>示例代码结构</strong>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let n = 50;
+let result = if ... { ... } else { ... };
+println!("The number is {}", result);
+<span class="boring">}</span></code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/03.FunctionsAndControlFlow/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-1-到-n-求和-进阶"><a class="header" href="#练习-3-1-到-n-求和-进阶">练习 3: 1 到 N 求和 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+编写一个函数 <code>sum_1_to_n(n: i32) -&gt; i32</code>，计算从 1 加到 n 的总和。
+请尝试分别使用 <code>while</code> 循环和 <code>for</code> 循环实现两个版本。</p>
+<p><strong>示例输出</strong>:</p>
+<pre><code>Sum 1 to 5 = 15
+Sum 1 to 100 = 5050
+</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/03.FunctionsAndControlFlow/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-4-温度转换器-进阶"><a class="header" href="#练习-4-温度转换器-进阶">练习 4: 温度转换器 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+编写两个函数：</p>
+<ol>
+<li><code>celsius_to_fahrenheit(c: f64) -&gt; f64</code>：将摄氏度转换为华氏度。公式：<code>F = C * 1.8 + 32</code></li>
+<li><code>fahrenheit_to_celsius(f: f64) -&gt; f64</code>：将华氏度转换为摄氏度。公式：<code>C = (F - 32) / 1.8</code></li>
+</ol>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用 <code>f64</code> 类型</li>
+<li>在 <code>main</code> 中测试几个值</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/03.FunctionsAndControlFlow/exercises/solutions/exercise4.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-2"><a class="header" href="#-挑战任务-2">🏆 挑战任务</a></h2>
+<h3 id="综合挑战-斐波那契数列生成器"><a class="header" href="#综合挑战-斐波那契数列生成器">综合挑战: 斐波那契数列生成器</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐⭐</p>
+<p><strong>题目</strong>:
+斐波那契数列是这样的：0, 1, 1, 2, 3, 5, 8, 13, 21…
+第 0 项是 0，第 1 项是 1，之后的每一项都是前两项之和。</p>
+<p>编写一个函数 <code>fib(n: u32) -&gt; u32</code>，返回第 n 项斐波那契数。
+提示：可以使用递归，也可以使用循环（循环效率更高）。</p>
+<p><strong>挑战</strong>:
+尝试打印前 10 个斐波那契数。</p>
+<p><strong>示例输出</strong>:</p>
+<pre><code>Fib(0) = 0
+Fib(1) = 1
+Fib(2) = 1
+...
+Fib(10) = 55
+</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/03.FunctionsAndControlFlow/exercises/solutions/challenge.rs">查看答案</a></p>
+<h2 id="-完成检查清单-2"><a class="header" href="#-完成检查清单-2">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 完成练习 4</li>
+<li><input disabled="" type="checkbox"> 完成综合挑战</li>
+</ul>
+<h2 id="-下一步-5"><a class="header" href="#-下一步-5">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/04.Ownership/README.html">Day 04: 所有权</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-04-所有权-ownership"><a class="header" href="#day-04-所有权-ownership">Day 04: 所有权 (Ownership)</a></h1>
 <h2 id="-学习目标-1"><a class="header" href="#-学习目标-1">📝 学习目标</a></h2>
@@ -3197,10 +3597,112 @@ println!("{}", user1.active);      // ✅ 正确：active 是 Copy 类型 (bool)
 <li><strong>Drop 顺序</strong>：观察变量离开作用域时的清理顺序。</li>
 </ol>
 <hr>
-<h2 id="-下一步-3"><a class="header" href="#-下一步-3">⏭️ 下一步</a></h2>
+<h2 id="-下一步-6"><a class="header" href="#-下一步-6">⏭️ 下一步</a></h2>
 <p>如果每次函数调用都要把所有权“借出去”再“还回来”太麻烦了。有没有办法访问数据但不获取所有权？
 答案是有的。</p>
 <p>下一节: <a href="Day01-15/05.ReferencesAndBorrowing/README.html">Day 05: 引用与借用 (References &amp; Borrowing)</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-04-练习题---所有权"><a class="header" href="#day-04-练习题---所有权">Day 04 练习题 - 所有权</a></h1>
+<h2 id="-练习目标-3"><a class="header" href="#-练习目标-3">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>深刻理解所有权的 <strong>Move</strong> 语义</li>
+<li>学会使用 <code>.clone()</code> 解决所有权转移问题</li>
+<li>区分 <strong>Copy</strong> 类型和非 Copy 类型</li>
+</ul>
+<h2 id="-练习列表-3"><a class="header" href="#-练习列表-3">📝 练习列表</a></h2>
+<h3 id="练习-1-被移动的字符串-基础"><a class="header" href="#练习-1-被移动的字符串-基础">练习 1: 被移动的字符串 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+下面的代码无法编译。请解释原因，并修复它，使得 <code>s1</code> 在赋值给 <code>s2</code> 后仍然可以使用。
+（有两种修复方法：Clone 或者使用引用。这里请使用 Clone）。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1;
+
+    println!("s1 = {}, s2 = {}", s1, s2);
+}</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/04.Ownership/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-函数所有权陷阱-基础"><a class="header" href="#练习-2-函数所有权陷阱-基础">练习 2: 函数所有权陷阱 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+下面的代码中，<code>s</code> 在传递给 <code>takes_ownership</code> 后就不能用了。
+请修改代码，让 <code>main</code> 函数在调用 <code>takes_ownership</code> 后还能打印 <code>s</code>。
+<strong>限制</strong>: 你不能修改 <code>takes_ownership</code> 的签名（不能改为接收引用）。你只能修改 <code>main</code> 函数。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let s = String::from("Rust");
+    takes_ownership(s);
+    println!("I still have: {}", s); // 这里报错
+}
+
+fn takes_ownership(some_string: String) {
+    println!("I took: {}", some_string);
+}</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/04.Ownership/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-归还所有权-进阶"><a class="header" href="#练习-3-归还所有权-进阶">练习 3: 归还所有权 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+有时候我们需要把所有权拿回来。
+编写一个函数 <code>take_and_return(s: String) -&gt; String</code>。
+它接收一个字符串，在原来字符串后面追加 “ World“，然后返回新的字符串（归还所有权）。</p>
+<p><strong>示例</strong>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s1 = String::from("Hello");
+let s2 = take_and_return(s1);
+println!("{}", s2); // 输出 "Hello World"
+// println!("{}", s1); // s1 应该无效
+<span class="boring">}</span></code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/04.Ownership/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-4-copy-vs-move-进阶"><a class="header" href="#练习-4-copy-vs-move-进阶">练习 4: Copy vs Move (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+下面的元组 <code>t</code> 包含一个 <code>i32</code> 和一个 <code>String</code>。
+当我们把 <code>t</code> 赋值给 <code>t2</code> 时，发生了什么？
+尝试分别打印 <code>t.0</code> 和 <code>t.1</code>，看看哪些部分还能访问，哪些不能。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let t = (1, String::from("hello"));
+    let t2 = t;
+
+    // 尝试取消注释下面这行
+    // println!("{:?}", t);
+}</code></pre>
+<p><strong>挑战</strong>: 如果元组是 <code>(i32, i32)</code> 呢？尝试验证它是否实现了 Copy。</p>
+<p><strong>参考答案</strong>: <a href="Day01-15/04.Ownership/exercises/solutions/exercise4.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-3"><a class="header" href="#-挑战任务-3">🏆 挑战任务</a></h2>
+<h3 id="综合挑战-堆内存模拟"><a class="header" href="#综合挑战-堆内存模拟">综合挑战: 堆内存模拟</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐⭐</p>
+<p><strong>题目</strong>:
+为了加深对 Stack 和 Heap 的理解，请编写程序打印出不同变量的内存地址（指针地址）。</p>
+<ol>
+<li>创建一个字符串 <code>s = String::from("hello")</code>。</li>
+<li>打印 <code>s</code> 在栈上的地址 (<code>&amp;s</code>)。</li>
+<li>打印 <code>s</code> 指向的堆上的数据的地址 (<code>s.as_ptr()</code>)。</li>
+<li>创建 <code>let s2 = s</code>。</li>
+<li>打印 <code>s2</code> 在栈上的地址。</li>
+<li>打印 <code>s2</code> 指向的堆上的数据的地址。</li>
+</ol>
+<p><strong>观察</strong>:</p>
+<ul>
+<li><code>s</code> 和 <code>s2</code> 的栈地址一样吗？</li>
+<li><code>s</code> 和 <code>s2</code> 指向的堆地址一样吗？</li>
+</ul>
+<p>这能直观地证明 Move 只是拷贝了栈上的指针，而没有拷贝堆数据。</p>
+<p><strong>参考答案</strong>: <a href="Day01-15/04.Ownership/exercises/solutions/challenge.rs">查看答案</a></p>
+<h2 id="-完成检查清单-3"><a class="header" href="#-完成检查清单-3">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 完成练习 4</li>
+<li><input disabled="" type="checkbox"> 完成挑战任务</li>
+</ul>
+<h2 id="-下一步-7"><a class="header" href="#-下一步-7">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/05.ReferencesAndBorrowing/README.html">Day 05: 引用与借用</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-05-引用与借用-references-and-borrowing"><a class="header" href="#day-05-引用与借用-references-and-borrowing">Day 05: 引用与借用 (References and Borrowing)</a></h1>
 <h2 id="-学习目标-2"><a class="header" href="#-学习目标-2">📝 学习目标</a></h2>
@@ -3389,10 +3891,119 @@ let r = &amp;mut x;
 <li><strong>解引用操作</strong>：练习使用 <code>*</code> 读写数据。</li>
 </ol>
 <hr>
-<h2 id="-下一步-4"><a class="header" href="#-下一步-4">⏭️ 下一步</a></h2>
+<h2 id="-下一步-8"><a class="header" href="#-下一步-8">⏭️ 下一步</a></h2>
 <p>如果我们只想引用字符串的一部分（比如 “hello world” 中的 “hello”）怎么办？创建一个新的 String 太浪费了。
 Rust 提供了 <strong>切片 (Slice)</strong> 来解决这个问题。</p>
 <p>下一节: <a href="Day01-15/06.Slices/README.html">Day 06: 切片类型 (Slices)</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-05-练习题---引用与借用"><a class="header" href="#day-05-练习题---引用与借用">Day 05 练习题 - 引用与借用</a></h1>
+<h2 id="-练习目标-4"><a class="header" href="#-练习目标-4">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>熟练区分和使用不可变引用 <code>&amp;</code> 与可变引用 <code>&amp;mut</code></li>
+<li>亲身体验 Rust 的借用检查器 (Borrow Checker) 规则</li>
+<li>解决常见的数据竞争编译错误</li>
+</ul>
+<h2 id="-练习列表-4"><a class="header" href="#-练习列表-4">📝 练习列表</a></h2>
+<h3 id="练习-1-借用检查器的愤怒-基础"><a class="header" href="#练习-1-借用检查器的愤怒-基础">练习 1: 借用检查器的愤怒 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+下面的代码违反了借用规则。
+请在<strong>不删除</strong>任何代码逻辑的前提下（不能直接删掉 <code>r1</code> 或 <code>r2</code>），通过调整代码顺序或作用域，使其编译通过。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &amp;s;
+    let r2 = &amp;s;
+    println!("{}, {}", r1, r2);
+
+    let r3 = &amp;mut s;
+    r3.push_str(", world");
+    println!("{}", r3);
+}</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/05.ReferencesAndBorrowing/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-引用计数-基础"><a class="header" href="#练习-2-引用计数-基础">练习 2: 引用计数 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+编写一个函数 <code>word_count(s: &amp;String) -&gt; usize</code>。
+它接收一个字符串的<strong>不可变引用</strong>，返回字符串中单词的数量（假设单词以空格分隔）。
+在 <code>main</code> 中调用它。</p>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>使用 <code>s.split_whitespace()</code> 方法。</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/05.ReferencesAndBorrowing/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-修改内容-进阶"><a class="header" href="#练习-3-修改内容-进阶">练习 3: 修改内容 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+编写一个函数 <code>add_brackets(s: &amp;mut String)</code>。
+它接收一个字符串的<strong>可变引用</strong>，在字符串的首尾分别添加 <code>[</code> 和 <code>]</code>。</p>
+<p><strong>示例</strong>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut s = String::from("Rust");
+add_brackets(&amp;mut s);
+println!("{}", s); // 输出 "[Rust]"
+<span class="boring">}</span></code></pre>
+<p><strong>提示</strong>:</p>
+<ul>
+<li><code>s.insert_str(0, "[")</code></li>
+<li><code>s.push_str("]")</code></li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/05.ReferencesAndBorrowing/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-4-解引用-进阶"><a class="header" href="#练习-4-解引用-进阶">练习 4: 解引用 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐</p>
+<p><strong>题目</strong>:
+引用是指针。要修改引用指向的值（如果是简单类型如整数），通常需要 <strong>解引用 (Dereference)</strong>。
+补全下面的函数，使其能正确将引用指向的整数加 1。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let mut x = 10;
+    increment(&amp;mut x);
+    println!("x is now {}", x); // 应该是 11
+}
+
+fn increment(n: &amp;mut i32) {
+    // 这里填什么？
+}</code></pre>
+<p><strong>参考答案</strong>: <a href="Day01-15/05.ReferencesAndBorrowing/exercises/solutions/exercise4.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-4"><a class="header" href="#-挑战任务-4">🏆 挑战任务</a></h2>
+<h3 id="综合挑战-悬垂引用的救赎"><a class="header" href="#综合挑战-悬垂引用的救赎">综合挑战: 悬垂引用的救赎</a></h3>
+<p><strong>难度</strong>: ⭐⭐⭐⭐</p>
+<p><strong>题目</strong>:
+下面的代码试图从函数返回一个引用，但是失败了（悬垂引用）。
+请修复它。
+修复的方法有两种：</p>
+<ol>
+<li>返回所有权 (String)。</li>
+<li>传入一个可变引用作为参数来修改外部变量。</li>
+</ol>
+<p>请尝试<strong>实现方法 2</strong>。</p>
+<pre class="playground"><code class="language-rust">// 错误代码
+// fn main() {
+//     let reference_to_nothing = dangle();
+// }
+//
+// fn dangle() -&gt; &amp;String {
+//     let s = String::from("hello");
+//     &amp;s
+// }</code></pre>
+<p><strong>要求</strong>:
+修改 <code>dangle</code> 函数签名和实现，使其不返回引用，而是修改传入的参数。</p>
+<p><strong>参考答案</strong>: <a href="Day01-15/05.ReferencesAndBorrowing/exercises/solutions/challenge.rs">查看答案</a></p>
+<h2 id="-完成检查清单-4"><a class="header" href="#-完成检查清单-4">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 完成练习 4</li>
+<li><input disabled="" type="checkbox"> 完成挑战任务</li>
+</ul>
+<h2 id="-下一步-9"><a class="header" href="#-下一步-9">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/06.Slices/README.html">Day 06: 切片类型</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-06-切片-slices"><a class="header" href="#day-06-切片-slices">Day 06: 切片 (Slices)</a></h1>
 <h2 id="-学习目标-3"><a class="header" href="#-学习目标-3">📝 学习目标</a></h2>
@@ -3753,11 +4364,89 @@ fn main() {
 <li><strong>数组切片</strong>：尝试对整数数组进行切片操作。</li>
 </ol>
 <hr>
-<h2 id="-下一步-5"><a class="header" href="#-下一步-5">⏭️ 下一步</a></h2>
+<h2 id="-下一步-10"><a class="header" href="#-下一步-10">⏭️ 下一步</a></h2>
 <p>有了切片，我们能高效查看数据了。但如果是不同类型的数据组合呢？
 比如一个用户，有名字(String)、年龄(u8)、邮箱(String)…
 我们需要 <strong>结构体 (Structs)</strong>。</p>
 <p>下一节: <a href="Day01-15/07.Structs/README.html">Day 07: 结构体 (Structs)</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-06-练习题---切片-slices"><a class="header" href="#day-06-练习题---切片-slices">Day 06 练习题 - 切片 (Slices)</a></h1>
+<h2 id="-练习目标-5"><a class="header" href="#-练习目标-5">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>理解切片 (<code>Slice</code>) 的概念：引用集合中一段连续的元素序列。</li>
+<li>掌握字符串切片 (<code>&amp;str</code>) 的用法。</li>
+<li>掌握数组切片的用法。</li>
+<li>理解切片如何解决所有权问题（不持有所有权）。</li>
+</ul>
+<h2 id="-练习列表-5"><a class="header" href="#-练习列表-5">📝 练习列表</a></h2>
+<h3 id="练习-1-字符串切片基础-基础"><a class="header" href="#练习-1-字符串切片基础-基础">练习 1: 字符串切片基础 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+给定字符串 <code>let s = String::from("Hello World");</code>
+请创建两个切片：</p>
+<ol>
+<li><code>hello</code> 包含 “Hello”</li>
+<li><code>world</code> 包含 “World”</li>
+</ol>
+<p>并打印它们。</p>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>使用 <code>[start..end]</code> 语法。</li>
+<li>也可以尝试使用简写 <code>[..end]</code> 或 <code>[start..]</code>。</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/06.Slices/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-数组切片-基础"><a class="header" href="#练习-2-数组切片-基础">练习 2: 数组切片 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+给定数组 <code>let arr = [1, 2, 3, 4, 5];</code>
+创建一个切片 <code>slice</code>，使其包含 <code>[2, 3]</code>。</p>
+<p><strong>要求</strong>:</p>
+<ul>
+<li>注意索引是从 0 开始的。</li>
+<li>验证切片内容是否正确。</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/06.Slices/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-编写-first_word-函数-进阶"><a class="header" href="#练习-3-编写-first_word-函数-进阶">练习 3: 编写 <code>first_word</code> 函数 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+编写一个函数 <code>first_word</code>，它接收一个字符串切片 <code>&amp;str</code> 作为参数，并返回该字符串中的第一个单词（也是 <code>&amp;str</code>）。
+如果字符串中没有空格，则返回整个字符串。</p>
+<p><strong>提示</strong>:</p>
+<ul>
+<li>需要将字符串转换为字节数组 <code>as_bytes()</code> 来遍历。</li>
+<li>使用 <code>iter().enumerate()</code> 来获取索引和元素。</li>
+<li>判断空格字符 <code>b' '</code>。</li>
+</ul>
+<p><strong>测试用例</strong>:</p>
+<ul>
+<li>输入 <code>"Hello World"</code> -&gt; 输出 <code>"Hello"</code></li>
+<li>输入 <code>"Rust"</code> -&gt; 输出 <code>"Rust"</code></li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/06.Slices/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-5"><a class="header" href="#-挑战任务-5">🏆 挑战任务</a></h2>
+<h3 id="思考题-中文切片"><a class="header" href="#思考题-中文切片">思考题: 中文切片</a></h3>
+<p>尝试运行以下代码，看看会发生什么？</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let s = "你好";
+    let s1 = &amp;s[0..1];
+    println!("{}", s1);
+}</code></pre>
+<p><strong>原因</strong>: Rust 的字符串是 UTF-8 编码的。中文字符通常占用 3 个字节。尝试切片中间位置会导致 panic。
+<strong>修正</strong>: 尝试修改索引为 <code>0..3</code> 看看能否正确打印 “你”。</p>
+<hr>
+<h2 id="-完成检查清单-5"><a class="header" href="#-完成检查清单-5">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 理解中文切片的潜在问题</li>
+</ul>
+<h2 id="-下一步-11"><a class="header" href="#-下一步-11">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/07.Structs/README.html">Day 07: 结构体</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-07-结构体-structs"><a class="header" href="#day-07-结构体-structs">Day 07: 结构体 (Structs)</a></h1>
 <h2 id="-学习目标-4"><a class="header" href="#-学习目标-4">📝 学习目标</a></h2>
@@ -3927,9 +4616,94 @@ fn main() {
 <li><code>.</code> 运算符访问字段和调用方法。</li>
 <li><code>#[derive(Debug)]</code> 用于调试打印。</li>
 </ul>
-<h2 id="-下一步-6"><a class="header" href="#-下一步-6">⏭️ 下一步</a></h2>
+<h2 id="-下一步-12"><a class="header" href="#-下一步-12">⏭️ 下一步</a></h2>
 <p>有了结构体，我们还可以通过另一种强大的方式来定义数据：枚举。</p>
 <p>下一节: <a href="Day01-15/08.Enums/README.html">Day 08: 枚举与模式匹配</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-07-练习题---结构体-structs"><a class="header" href="#day-07-练习题---结构体-structs">Day 07 练习题 - 结构体 (Structs)</a></h1>
+<h2 id="-练习目标-6"><a class="header" href="#-练习目标-6">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>掌握结构体的定义与实例化。</li>
+<li>掌握结构体更新语法 (<code>Struct Update Syntax</code>)。</li>
+<li>掌握方法的定义与调用 (<code>impl</code> 块)。</li>
+<li>理解结构体字段的所有权。</li>
+</ul>
+<h2 id="-练习列表-6"><a class="header" href="#-练习列表-6">📝 练习列表</a></h2>
+<h3 id="练习-1-定义你的书库-基础"><a class="header" href="#练习-1-定义你的书库-基础">练习 1: 定义你的书库 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:</p>
+<ol>
+<li>定义一个名为 <code>Book</code> 的结构体，包含 <code>title</code> (String), <code>author</code> (String), <code>pages</code> (u32)。</li>
+<li>在 <code>main</code> 函数中实例化一本具体的书。</li>
+<li>打印出这本书的各个字段。</li>
+</ol>
+<p><strong>参考答案</strong>: <a href="Day01-15/07.Structs/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-用户系统更新-基础"><a class="header" href="#练习-2-用户系统更新-基础">练习 2: 用户系统更新 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+给定一个现有的 <code>User</code> 实例：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+let user1 = User {
+    email: String::from("someone@example.com"),
+    username: String::from("someusername123"),
+    active: true,
+    sign_in_count: 1,
+};
+<span class="boring">}</span></code></pre>
+<p>请使用 <strong>结构体更新语法</strong> 创建一个新的 <code>user2</code>：</p>
+<ul>
+<li><code>email</code> 改为 “another@example.com”</li>
+<li>其他字段与 <code>user1</code> 相同</li>
+</ul>
+<p><strong>注意</strong>: 思考一下，创建 <code>user2</code> 后，<code>user1</code> 还能使用吗？为什么？</p>
+<p><strong>参考答案</strong>: <a href="Day01-15/07.Structs/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-矩形计算-进阶"><a class="header" href="#练习-3-矩形计算-进阶">练习 3: 矩形计算 (进阶)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:</p>
+<ol>
+<li>定义 <code>Rectangle</code> 结构体（宽、高）。</li>
+<li>为它实现两个方法：
+<ul>
+<li><code>area(&amp;self) -&gt; u32</code>: 计算面积。</li>
+<li><code>can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool</code>: 判断当前矩形是否能包含另一个矩形（宽和高都更大）。</li>
+</ul>
+</li>
+<li>编写测试代码验证你的方法。</li>
+</ol>
+<p><strong>参考答案</strong>: <a href="Day01-15/07.Structs/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-6"><a class="header" href="#-挑战任务-6">🏆 挑战任务</a></h2>
+<h3 id="思考题-为什么结构体中通常用-string-而不是-str"><a class="header" href="#思考题-为什么结构体中通常用-string-而不是-str">思考题: 为什么结构体中通常用 String 而不是 &amp;str?</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct User {
+    username: &amp;str, // 编译报错
+    // ...
+}
+<span class="boring">}</span></code></pre>
+<p><strong>原因</strong>: 结构体实例通常需要拥有其数据。如果使用引用 <code>&amp;str</code>，结构体实例的生命周期就不能超过引用的数据的生命周期。这需要引入 <strong>生命周期标注 (Lifetime Annotations)</strong> (Day 14 会讲)。
+<strong>目前建议</strong>: 在结构体中尽量使用 <code>String</code>，除非你明确知道你在做什么。</p>
+<hr>
+<h2 id="-完成检查清单-6"><a class="header" href="#-完成检查清单-6">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 理解为什么 user1 可能部分失效</li>
+</ul>
+<h2 id="-下一步-13"><a class="header" href="#-下一步-13">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/08.Enums/README.html">Day 08: 枚举与模式匹配</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-08-枚举与模式匹配"><a class="header" href="#day-08-枚举与模式匹配">Day 08: 枚举与模式匹配</a></h1>
 <h2 id="-学习目标-5"><a class="header" href="#-学习目标-5">📝 学习目标</a></h2>
@@ -4086,9 +4860,86 @@ let none = plus_one(None);
 <li><code>_</code> 通配符匹配其余情况。</li>
 <li><code>if let</code> 处理只关心一种情况的场景。</li>
 </ul>
-<h2 id="-下一步-7"><a class="header" href="#-下一步-7">⏭️ 下一步</a></h2>
+<h2 id="-下一步-14"><a class="header" href="#-下一步-14">⏭️ 下一步</a></h2>
 <p>现在我们已经掌握了变量、结构体和枚举。随着代码量的增加，我们需要更好的组织代码。</p>
 <p>下一节: <a href="Day01-15/09.Modules/README.html">Day 09: 模块系统</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-08-练习题---枚举与模式匹配"><a class="header" href="#day-08-练习题---枚举与模式匹配">Day 08 练习题 - 枚举与模式匹配</a></h1>
+<h2 id="-练习目标-7"><a class="header" href="#-练习目标-7">🎯 练习目标</a></h2>
+<p>通过这些练习,你将:</p>
+<ul>
+<li>掌握枚举 (<code>Enum</code>) 的定义和使用。</li>
+<li>掌握 <code>Option&lt;T&gt;</code> 枚举处理空值。</li>
+<li>掌握 <code>match</code> 控制流运算符。</li>
+<li>理解 <code>match</code> 的穷尽性检查。</li>
+</ul>
+<h2 id="-练习列表-7"><a class="header" href="#-练习列表-7">📝 练习列表</a></h2>
+<h3 id="练习-1-定义消息枚举-基础"><a class="header" href="#练习-1-定义消息枚举-基础">练习 1: 定义消息枚举 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐</p>
+<p><strong>题目</strong>:
+定义一个名为 <code>Message</code> 的枚举，包含以下变体：</p>
+<ul>
+<li><code>Quit</code> (无数据)</li>
+<li><code>Move</code> (包含匿名结构体 <code>{ x: i32, y: i32 }</code>)</li>
+<li><code>Write</code> (包含 <code>String</code>)</li>
+<li><code>ChangeColor</code> (包含三个 <code>i32</code>)</li>
+</ul>
+<p>在 <code>main</code> 函数中创建这些变体的实例，并打印它们（提示：加上 <code>#[derive(Debug)]</code>）。</p>
+<p><strong>参考答案</strong>: <a href="Day01-15/08.Enums/exercises/solutions/exercise1.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-2-option-的加法-基础"><a class="header" href="#练习-2-option-的加法-基础">练习 2: Option 的加法 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+编写一个函数 <code>plus_one</code>，它接收一个 <code>Option&lt;i32&gt;</code>。</p>
+<ul>
+<li>如果输入是 <code>Some(i)</code>，返回 <code>Some(i + 1)</code>。</li>
+<li>如果输入是 <code>None</code>，返回 <code>None</code>。</li>
+</ul>
+<p><strong>核心考点</strong>: <code>match</code> 表达式的使用。</p>
+<p><strong>参考答案</strong>: <a href="Day01-15/08.Enums/exercises/solutions/exercise2.rs">查看答案</a></p>
+<hr>
+<h3 id="练习-3-硬币分类器-基础"><a class="header" href="#练习-3-硬币分类器-基础">练习 3: 硬币分类器 (基础)</a></h3>
+<p><strong>难度</strong>: ⭐⭐</p>
+<p><strong>题目</strong>:
+定义一个枚举 <code>Coin</code> (Penny, Nickel, Dime, Quarter)。
+编写一个函数 <code>value_in_cents</code>，接收 <code>Coin</code> 并返回其面值（整数）。</p>
+<ul>
+<li>Penny: 1</li>
+<li>Nickel: 5</li>
+<li>Dime: 10</li>
+<li>Quarter: 25</li>
+</ul>
+<p><strong>参考答案</strong>: <a href="Day01-15/08.Enums/exercises/solutions/exercise3.rs">查看答案</a></p>
+<hr>
+<h2 id="-挑战任务-7"><a class="header" href="#-挑战任务-7">🏆 挑战任务</a></h2>
+<h3 id="思考题-if-let-语法"><a class="header" href="#思考题-if-let-语法">思考题: if let 语法</a></h3>
+<p>当你只关心一种情况而忽略其他所有情况时，<code>match</code> 会显得很冗长：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let config_max = Some(3u8);
+match config_max {
+    Some(max) =&gt; println!("The maximum is configured to be {}", max),
+    _ =&gt; (),
+}
+<span class="boring">}</span></code></pre>
+<p>请尝试使用 <code>if let</code> 重写上面的代码。</p>
+<p><strong>提示</strong>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if let Some(max) = config_max {
+    // ...
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-完成检查清单-7"><a class="header" href="#-完成检查清单-7">✅ 完成检查清单</a></h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完成练习 1</li>
+<li><input disabled="" type="checkbox"> 完成练习 2</li>
+<li><input disabled="" type="checkbox"> 完成练习 3</li>
+<li><input disabled="" type="checkbox"> 掌握 if let 写法</li>
+</ul>
+<h2 id="-下一步-15"><a class="header" href="#-下一步-15">🎓 下一步</a></h2>
+<p>准备好了吗?让我们继续 <a href="Day01-15/09.Modules/README.html">Day 09: 模块系统</a>!</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-09-模块系统-modules"><a class="header" href="#day-09-模块系统-modules">Day 09: 模块系统 (Modules)</a></h1>
 <h2 id="-学习目标-6"><a class="header" href="#-学习目标-6">📝 学习目标</a></h2>
@@ -4242,9 +5093,29 @@ pub use crate::front_of_house::hosting; // 重导出，方便外部使用
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html">Rust 程序设计语言 - 模块系统</a></li>
 </ul>
-<h2 id="-下一步-8"><a class="header" href="#-下一步-8">⏭️ 下一步</a></h2>
+<h2 id="-下一步-16"><a class="header" href="#-下一步-16">⏭️ 下一步</a></h2>
 <p>掌握了代码组织方式后，我们来看看 Rust 标准库中提供的常用数据结构。</p>
 <p>下一节: <a href="Day01-15/10.CommonCollections/README.html">Day 10: 常用集合</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-09-练习题"><a class="header" href="#day-09-练习题">Day 09 练习题</a></h1>
+<p>这些练习将帮助你巩固对 Rust 模块系统的理解。</p>
+<h2 id="练习-1-可见性挑战-visibility"><a class="header" href="#练习-1-可见性挑战-visibility">练习 1: 可见性挑战 (Visibility)</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<p>这个程序无法编译，因为通过私有模块访问了项目。修复它，使代码可以通过编译。
+你需要添加 <code>pub</code> 关键字在正确的地方。</p>
+<h2 id="练习-2-使用-use-简化路径"><a class="header" href="#练习-2-使用-use-简化路径">练习 2: 使用 <code>use</code> 简化路径</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>代码中使用了冗长的绝对路径。请使用 <code>use</code> 关键字引入必要的模块或函数，使 <code>main</code> 函数中的调用更加简洁。</p>
+<h2 id="练习-3-相对路径与-super"><a class="header" href="#练习-3-相对路径与-super">练习 3: 相对路径与 super</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>在 <code>back_of_house</code> 模块中，我们需要调用父模块的 <code>server_order</code> 函数。请修复代码中的路径问题。</p>
+<h2 id="-验证你的答案"><a class="header" href="#-验证你的答案">✅ 验证你的答案</a></h2>
+<p>你可以使用 rustc 编译每个练习文件来验证你的答案：</p>
+<pre><code class="language-bash">rustc src/exercise1.rs &amp;&amp; ./exercise1
+rustc src/exercise2.rs &amp;&amp; ./exercise2
+rustc src/exercise3.rs &amp;&amp; ./exercise3
+</code></pre>
+<p>或者查看 <code>../solutions</code> 目录下的参考答案。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-10-常用集合-common-collections"><a class="header" href="#day-10-常用集合-common-collections">Day 10: 常用集合 (Common Collections)</a></h1>
 <h2 id="-学习目标-7"><a class="header" href="#-学习目标-7">📝 学习目标</a></h2>
@@ -4371,9 +5242,41 @@ fn main() {
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch08-00-common-collections.html">Rust 程序设计语言 - 常见集合</a></li>
 </ul>
-<h2 id="-下一步-9"><a class="header" href="#-下一步-9">⏭️ 下一步</a></h2>
+<h2 id="-下一步-17"><a class="header" href="#-下一步-17">⏭️ 下一步</a></h2>
 <p>现在我们已经掌握了基础语法和常用数据结构。但在编程中，错误是不可避免的。Rust 有一套独特且安全的错误处理机制。</p>
 <p>下一节: <a href="Day01-15/11.ErrorHandling/README.html">Day 11: 错误处理</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-10-练习题"><a class="header" href="#day-10-练习题">Day 10 练习题</a></h1>
+<h2 id="练习-1-统计分析工具"><a class="header" href="#练习-1-统计分析工具">练习 1: 统计分析工具</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<p>给定一个整数列表（Vector），请编写函数分别计算：</p>
+<ol>
+<li><strong>平均数 (Mean)</strong>: 所有数字的总和除以数量。</li>
+<li><strong>中位数 (Median)</strong>: 排序后位于中间的数字。</li>
+<li><strong>众数 (Mode)</strong>: 出现次数最多的数字（使用 HashMap 辅助）。</li>
+</ol>
+<h2 id="练习-2-猪拉丁语-pig-latin"><a class="header" href="#练习-2-猪拉丁语-pig-latin">练习 2: 猪拉丁语 (Pig Latin)</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>编写一个将字符串转换为“猪拉丁语“的程序。规则如下：</p>
+<ol>
+<li>如果单词以<strong>元音</strong>开头（a, e, i, o, u），在词尾添加 “-hay”。例如 “apple” -&gt; “apple-hay”。</li>
+<li>如果单词以<strong>辅音</strong>开头，将第一个辅音字母移到词尾，并添加 “-ay”。例如 “first” -&gt; “irst-fay”。</li>
+</ol>
+<p>输入字符串包含多个单词，以空格分隔。</p>
+<h2 id="练习-3-员工管理系统"><a class="header" href="#练习-3-员工管理系统">练习 3: 员工管理系统</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>使用 <code>HashMap</code> 和 <code>Vec</code> 创建一个简单的文本交互界面，允许用户：</p>
+<ol>
+<li>添加员工到部门（例如 “Add Sally to Engineering”）。</li>
+<li>列出某个部门的所有员工（例如 “List Engineering”）。</li>
+<li>列出公司所有部门的员工（按部门排序）。</li>
+</ol>
+<p>注意：为了简化测试，我们可以将交互界面改为通过代码调用函数来模拟。</p>
+<h2 id="-验证你的答案-1"><a class="header" href="#-验证你的答案-1">✅ 验证你的答案</a></h2>
+<pre><code class="language-bash">rustc src/exercise1.rs &amp;&amp; ./exercise1
+rustc src/exercise2.rs &amp;&amp; ./exercise2
+rustc src/exercise3.rs &amp;&amp; ./exercise3
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-11-错误处理-error-handling"><a class="header" href="#day-11-错误处理-error-handling">Day 11: 错误处理 (Error Handling)</a></h1>
 <h2 id="-学习目标-8"><a class="header" href="#-学习目标-8">📝 学习目标</a></h2>
@@ -4492,9 +5395,42 @@ fn main() {
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch09-00-error-handling.html">Rust 程序设计语言 - 错误处理</a></li>
 </ul>
-<h2 id="-下一步-10"><a class="header" href="#-下一步-10">⏭️ 下一步</a></h2>
+<h2 id="-下一步-18"><a class="header" href="#-下一步-18">⏭️ 下一步</a></h2>
 <p>有了错误处理的基础，我们可以编写更健壮的程序。接下来我们将学习如何编写更通用、更灵活的代码。</p>
 <p>下一节: <a href="Day01-15/12.Generics/README.html">Day 12: 泛型</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-11-练习题"><a class="header" href="#day-11-练习题">Day 11 练习题</a></h1>
+<h2 id="练习-1-安全的数学运算"><a class="header" href="#练习-1-安全的数学运算">练习 1: 安全的数学运算</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<p>编写一个除法函数 <code>checked_div</code> 和一个平方根函数 <code>checked_sqrt</code>。</p>
+<ul>
+<li>如果除数为 0，返回 <code>None</code>。</li>
+<li>如果对负数求平方根，返回 <code>None</code>。</li>
+<li>使用 <code>match</code> 或 <code>if let</code> 组合这两个函数：计算 <code>x / y</code> 的平方根。</li>
+</ul>
+<h2 id="练习-2-错误传播"><a class="header" href="#练习-2-错误传播">练习 2: 错误传播</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>编写一个函数 <code>read_and_append</code>，它接收两个文件路径。</p>
+<ol>
+<li>读取第一个文件的内容。</li>
+<li>将内容追加到第二个文件中。</li>
+<li>使用 <code>?</code> 运算符处理所有 I/O 错误。</li>
+</ol>
+<p>注意：为了简化练习，你可以使用 <code>MockFile</code> 结构体模拟文件操作，或者直接使用 <code>std::fs</code> 但需要确保文件存在（我们会在 <code>main</code> 中创建临时文件）。</p>
+<h2 id="练习-3-数据解析与自定义错误"><a class="header" href="#练习-3-数据解析与自定义错误">练习 3: 数据解析与自定义错误</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>给定一个字符串列表，每个字符串包含 “Name,Age”。
+编写一个函数解析这些字符串为 <code>Person</code> 结构体。</p>
+<ul>
+<li>如果格式不正确（没有逗号），返回自定义错误。</li>
+<li>如果年龄不是数字，返回自定义错误。</li>
+<li>使用 <code>Result</code> 收集所有解析成功的人员，或者在遇到第一个错误时返回。</li>
+</ul>
+<h2 id="-验证你的答案-2"><a class="header" href="#-验证你的答案-2">✅ 验证你的答案</a></h2>
+<pre><code class="language-bash">rustc src/exercise1.rs &amp;&amp; ./exercise1
+rustc src/exercise2.rs &amp;&amp; ./exercise2
+rustc src/exercise3.rs &amp;&amp; ./exercise3
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-12-泛型-generics"><a class="header" href="#day-12-泛型-generics">Day 12: 泛型 (Generics)</a></h1>
 <h2 id="-学习目标-9"><a class="header" href="#-学习目标-9">📝 学习目标</a></h2>
@@ -4588,9 +5524,36 @@ impl Point&lt;f32&gt; {
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch10-01-syntax.html">Rust 程序设计语言 - 泛型</a></li>
 </ul>
-<h2 id="-下一步-11"><a class="header" href="#-下一步-11">⏭️ 下一步</a></h2>
+<h2 id="-下一步-19"><a class="header" href="#-下一步-19">⏭️ 下一步</a></h2>
 <p>泛型让我们定义了“某种类型”，但如果我们想限制这种类型必须具有“某些行为”（比如能被打印、能被比较）怎么办？这就是 Trait 的作用。</p>
 <p>下一节: <a href="Day01-15/13.Traits/README.html">Day 13: Trait</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-12-练习题"><a class="header" href="#day-12-练习题">Day 12 练习题</a></h1>
+<h2 id="练习-1-泛型容器"><a class="header" href="#练习-1-泛型容器">练习 1: 泛型容器</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<p>定义一个泛型结构体 <code>Container&lt;T&gt;</code>，它持有一个值 <code>value: T</code>。
+为它实现 <code>new</code> 方法和 <code>get_value</code> 方法。</p>
+<h2 id="练习-2-泛型交换函数"><a class="header" href="#练习-2-泛型交换函数">练习 2: 泛型交换函数</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>编写一个泛型函数 <code>swap_values</code>，它接受两个相同类型的参数，并返回交换后的元组。
+虽然 <code>std::mem::swap</code> 可以原地交换，但这里我们练习通过返回值交换：<code>fn swap_values&lt;T&gt;(a: T, b: T) -&gt; (T, T)</code>。</p>
+<h2 id="练习-3-混合泛型"><a class="header" href="#练习-3-混合泛型">练习 3: 混合泛型</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>定义 <code>Point&lt;X1, Y1&gt;</code> 和 <code>Point&lt;X2, Y2&gt;</code>。
+实现一个方法 <code>mixup</code>，它接受另一个 <code>Point</code>，并返回一个新的 <code>Point</code>，其 x 来自 <code>self</code>，y 来自 <code>other</code>。
+注意：新 Point 的类型可能与前两个都不同！</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let p1 = Point { x: 5, y: 10.4 };
+let p2 = Point { x: "Hello", y: 'c' };
+let p3 = p1.mixup(p2);
+// p3.x should be 5, p3.y should be 'c'
+<span class="boring">}</span></code></pre>
+<h2 id="-验证你的答案-3"><a class="header" href="#-验证你的答案-3">✅ 验证你的答案</a></h2>
+<pre><code class="language-bash">rustc src/exercise1.rs &amp;&amp; ./exercise1
+rustc src/exercise2.rs &amp;&amp; ./exercise2
+rustc src/exercise3.rs &amp;&amp; ./exercise3
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-13-trait-特征"><a class="header" href="#day-13-trait-特征">Day 13: Trait (特征)</a></h1>
 <h2 id="-学习目标-10"><a class="header" href="#-学习目标-10">📝 学习目标</a></h2>
@@ -4734,9 +5697,43 @@ fn main() {
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch10-02-traits.html">Rust 程序设计语言 - Traits</a></li>
 </ul>
-<h2 id="-下一步-12"><a class="header" href="#-下一步-12">⏭️ 下一步</a></h2>
+<h2 id="-下一步-20"><a class="header" href="#-下一步-20">⏭️ 下一步</a></h2>
 <p>现在我们理解了泛型和 Trait。但还有一个棘手的问题：引用在什么时候是有效的？如果引用的数据被释放了怎么办？这就是生命周期要解决的问题。</p>
 <p>下一节: <a href="Day01-15/14.Lifetimes/README.html">Day 14: 生命周期</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-13-练习题"><a class="header" href="#day-13-练习题">Day 13 练习题</a></h1>
+<h2 id="练习-1-定义与实现"><a class="header" href="#练习-1-定义与实现">练习 1: 定义与实现</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<ol>
+<li>定义一个 trait <code>AppendBar</code>，包含一个方法 <code>append_bar(self) -&gt; Self</code>。</li>
+<li>为 <code>String</code> 实现 <code>AppendBar</code>，在字符串末尾追加 “Bar”。</li>
+<li>为 <code>Vec&lt;String&gt;</code> 实现 <code>AppendBar</code>，向向量中 push 一个 “Bar” 字符串。</li>
+</ol>
+<h2 id="练习-2-trait-bound"><a class="header" href="#练习-2-trait-bound">练习 2: Trait Bound</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>编写一个泛型函数 <code>compare_prints</code>，它接受两个引用。这两个参数必须都实现了 <code>Display</code> 和 <code>PartialOrd</code> trait。
+函数应该打印较大的那个值。
+提示：使用 <code>use std::fmt::Display;</code>。</p>
+<h2 id="练习-3-默认实现"><a class="header" href="#练习-3-默认实现">练习 3: 默认实现</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>定义 <code>Licensed</code> trait。</p>
+<ul>
+<li>方法 <code>licensing_info(&amp;self) -&gt; String</code>: 提供默认实现返回 “Some default license”。</li>
+<li>结构体 <code>Car</code> 和 <code>Book</code>。</li>
+<li>为 <code>Car</code> 实现 <code>Licensed</code> 并使用默认实现。</li>
+<li>为 <code>Book</code> 实现 <code>Licensed</code> 并重写方法返回 “Copyright 2023”。</li>
+</ul>
+<h2 id="练习-4-实现-display-trait"><a class="header" href="#练习-4-实现-display-trait">练习 4: 实现 Display Trait</a></h2>
+<p>文件: <code>src/exercise4.rs</code></p>
+<p>定义一个结构体 <code>Point { x: i32, y: i32 }</code>。
+为它实现 <code>std::fmt::Display</code> trait，使其打印格式为 <code>(x, y)</code>。
+然后在 <code>main</code> 中使用 <code>println!("{}", p)</code> 打印它。</p>
+<h2 id="-验证你的答案-4"><a class="header" href="#-验证你的答案-4">✅ 验证你的答案</a></h2>
+<pre><code class="language-bash">rustc src/exercise1.rs &amp;&amp; ./exercise1
+rustc src/exercise2.rs &amp;&amp; ./exercise2
+rustc src/exercise3.rs &amp;&amp; ./exercise3
+rustc src/exercise4.rs &amp;&amp; ./exercise4
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-14-生命周期-lifetimes"><a class="header" href="#day-14-生命周期-lifetimes">Day 14: 生命周期 (Lifetimes)</a></h1>
 <h2 id="-学习目标-11"><a class="header" href="#-学习目标-11">📝 学习目标</a></h2>
@@ -4848,9 +5845,29 @@ fn main() {
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html">Rust 程序设计语言 - 生命周期</a></li>
 </ul>
-<h2 id="-下一步-13"><a class="header" href="#-下一步-13">⏭️ 下一步</a></h2>
+<h2 id="-下一步-21"><a class="header" href="#-下一步-21">⏭️ 下一步</a></h2>
 <p>恭喜！你已经完成了 Rust 基础部分最难啃的骨头。为了保证代码质量，我们需要学会编写测试。</p>
 <p>下一节: <a href="Day01-15/15.Testing/README.html">Day 15: 自动化测试</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-14-练习题"><a class="header" href="#day-14-练习题">Day 14 练习题</a></h1>
+<h2 id="练习-1-修复生命周期问题"><a class="header" href="#练习-1-修复生命周期问题">练习 1: 修复生命周期问题</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<p>代码试图在外部作用域使用内部作用域创建的变量的引用。
+请修复它（提示：可能需要移动变量定义的位置，或者改变数据的所有权）。</p>
+<h2 id="练习-2-带生命周期的函数"><a class="header" href="#练习-2-带生命周期的函数">练习 2: 带生命周期的函数</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>完成 <code>longest</code> 函数的签名和实现。它接受两个字符串切片，返回较长的那个。
+你需要添加正确的生命周期注解。</p>
+<h2 id="练习-3-结构体中的生命周期"><a class="header" href="#练习-3-结构体中的生命周期">练习 3: 结构体中的生命周期</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>定义一个结构体 <code>Excerpt</code>，它持有一个字符串切片字段 <code>part</code>。
+在 <code>main</code> 函数中，创建一个 <code>String</code>，然后创建一个持有该 String 一部分的 <code>Excerpt</code> 实例。
+确保添加必要的生命周期注解。</p>
+<h2 id="-验证你的答案-5"><a class="header" href="#-验证你的答案-5">✅ 验证你的答案</a></h2>
+<pre><code class="language-bash">rustc src/exercise1.rs &amp;&amp; ./exercise1
+rustc src/exercise2.rs &amp;&amp; ./exercise2
+rustc src/exercise3.rs &amp;&amp; ./exercise3
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-15-自动化测试-automated-testing"><a class="header" href="#day-15-自动化测试-automated-testing">Day 15: 自动化测试 (Automated Testing)</a></h1>
 <h2 id="-学习目标-12"><a class="header" href="#-学习目标-12">📝 学习目标</a></h2>
@@ -4970,10 +5987,33 @@ fn it_works() -&gt; Result&lt;(), String&gt; {
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch11-00-testing.html">Rust 程序设计语言 - 测试</a></li>
 </ul>
-<h2 id="-下一步-14"><a class="header" href="#-下一步-14">⏭️ 下一步</a></h2>
+<h2 id="-下一步-22"><a class="header" href="#-下一步-22">⏭️ 下一步</a></h2>
 <p>恭喜你完成了第一阶段（基础知识）的所有内容！你已经掌握了 Rust 的变量、所有权、类型系统、泛型、Trait、生命周期和测试。</p>
 <p>接下来，我们将进入第二阶段：<strong>进阶概念</strong>。我们将探索函数式编程特性。</p>
 <p>下一节: <a href="Day01-15/Day16-30/16.Closures/README.html">Day 16: 闭包</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="day-15-练习题"><a class="header" href="#day-15-练习题">Day 15 练习题</a></h1>
+<p>这些练习题包含了内置的测试模块。
+你需要运行 <code>rustc --test src/exerciseX.rs &amp;&amp; ./exerciseX</code> 来运行测试，或者直接使用 <code>cargo test</code> 如果你是在 Cargo 项目中。
+由于我们是单文件练习，推荐使用 <code>rustc --test</code>。</p>
+<h2 id="练习-1-基础断言"><a class="header" href="#练习-1-基础断言">练习 1: 基础断言</a></h2>
+<p>文件: <code>src/exercise1.rs</code></p>
+<p>我们实现了一个简单的计算器 <code>Calculator</code>。
+请在 <code>tests</code> 模块中补充测试用例，验证 <code>add</code> 和 <code>subtract</code> 方法的正确性。</p>
+<h2 id="练习-2-逻辑测试"><a class="header" href="#练习-2-逻辑测试">练习 2: 逻辑测试</a></h2>
+<p>文件: <code>src/exercise2.rs</code></p>
+<p>有一个 <code>Rectangle</code> 结构体和 <code>can_hold</code> 方法。
+编写测试用例 <code>larger_can_hold_smaller</code> 和 <code>smaller_cannot_hold_larger</code> 来验证逻辑。</p>
+<h2 id="练习-3-panic-测试"><a class="header" href="#练习-3-panic-测试">练习 3: Panic 测试</a></h2>
+<p>文件: <code>src/exercise3.rs</code></p>
+<p>函数 <code>verify_percentage</code> 应该在输入值小于 0.0 或大于 1.0 时 panic。
+编写一个测试用例，使用 <code>#[should_panic]</code> 属性来验证它确实会 panic。</p>
+<h2 id="-验证你的答案-6"><a class="header" href="#-验证你的答案-6">✅ 验证你的答案</a></h2>
+<p>注意命令不同，因为我们要运行测试 harness：</p>
+<pre><code class="language-bash">rustc --test src/exercise1.rs &amp;&amp; ./exercise1
+rustc --test src/exercise2.rs &amp;&amp; ./exercise2
+rustc --test src/exercise3.rs &amp;&amp; ./exercise3
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-16-闭包-closures"><a class="header" href="#day-16-闭包-closures">Day 16: 闭包 (Closures)</a></h1>
 <h2 id="-学习目标-13"><a class="header" href="#-学习目标-13">📝 学习目标</a></h2>
@@ -5720,7 +6760,7 @@ fn main() {
 <li><a href="https://doc.rust-lang.org/std/thread/">std::thread 文档</a></li>
 </ul>
 <hr>
-<h2 id="-下一步-15"><a class="header" href="#-下一步-15">⏭️ 下一步</a></h2>
+<h2 id="-下一步-23"><a class="header" href="#-下一步-23">⏭️ 下一步</a></h2>
 <p><strong>下一节</strong>: <a href="Day16-30/23.MessagePassing/README.html">Day 23: 消息传递 (Message Passing)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-23-并发编程---消息传递-message-passing"><a class="header" href="#day-23-并发编程---消息传递-message-passing">Day 23: 并发编程 - 消息传递 (Message Passing)</a></h1>
@@ -16302,6 +17342,81 @@ cargo run
 <h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
 <p>Day 98 将进行发布准备，包括版本管理、Docker 镜像构建和发布清单检查。</p>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="dtask---distributed-task-scheduling-system"><a class="header" href="#dtask---distributed-task-scheduling-system">DTask - Distributed Task Scheduling System</a></h1>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>DTask is a distributed task scheduling system built with Rust, designed for high performance, reliability, and scalability. It leverages the actor model for concurrency, Raft for consensus, and gRPC for communication.</p>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<ul>
+<li><strong>Distributed Scheduling</strong>: Tasks are distributed across nodes using a scheduler.</li>
+<li><strong>High Availability</strong>: Uses Raft for consensus to ensure system resilience.</li>
+<li><strong>RESTful API</strong>: Manage tasks and view metrics via a Web API.</li>
+<li><strong>gRPC Interface</strong>: Efficient service-to-service communication.</li>
+<li><strong>Authentication</strong>: JWT-based authentication for secure access.</li>
+<li><strong>Metrics</strong>: Prometheus integration for monitoring.</li>
+<li><strong>Interactive Documentation</strong>: Swagger UI for API exploration.</li>
+</ul>
+<h2 id="tech-stack"><a class="header" href="#tech-stack">Tech Stack</a></h2>
+<ul>
+<li><strong>Language</strong>: Rust</li>
+<li><strong>Web Framework</strong>: Axum</li>
+<li><strong>RPC</strong>: Tonic (gRPC)</li>
+<li><strong>Database</strong>: SQLite (SQLx)</li>
+<li><strong>Consensus</strong>: OpenRaft</li>
+<li><strong>Runtime</strong>: Tokio</li>
+</ul>
+<h2 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h2>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<ul>
+<li>Rust 1.75+</li>
+<li>Protobuf Compiler (<code>protoc</code>) (Optional, handled by build script in most cases)</li>
+</ul>
+<h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
+<ol>
+<li>
+<p>Navigate to the project directory:</p>
+<pre><code class="language-bash">cd Day91-100/97.Documentation/dtask
+</code></pre>
+</li>
+<li>
+<p>Run the project:</p>
+<pre><code class="language-bash">cargo run
+</code></pre>
+</li>
+</ol>
+<h3 id="api-usage"><a class="header" href="#api-usage">API Usage</a></h3>
+<p>The server starts on <code>127.0.0.1:3000</code> by default.</p>
+<h4 id="swagger-ui"><a class="header" href="#swagger-ui">Swagger UI</a></h4>
+<p>Visit <code>http://127.0.0.1:3000/swagger-ui</code> to explore the API.</p>
+<h4 id="authentication"><a class="header" href="#authentication">Authentication</a></h4>
+<p>Login to get a JWT token (Default credentials: admin/password):</p>
+<pre><code class="language-bash">curl -X POST http://127.0.0.1:3000/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password"}'
+</code></pre>
+<h4 id="submit-a-task"><a class="header" href="#submit-a-task">Submit a Task</a></h4>
+<pre><code class="language-bash">curl -X POST http://127.0.0.1:3000/api/tasks \
+  -H "Authorization: Bearer &lt;YOUR_TOKEN&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"payload": "Do something"}'
+</code></pre>
+<h4 id="get-task-status"><a class="header" href="#get-task-status">Get Task Status</a></h4>
+<pre><code class="language-bash">curl -X GET http://127.0.0.1:3000/api/tasks/&lt;TASK_ID&gt; \
+  -H "Authorization: Bearer &lt;YOUR_TOKEN&gt;"
+</code></pre>
+<h4 id="metrics"><a class="header" href="#metrics">Metrics</a></h4>
+<pre><code class="language-bash">curl http://127.0.0.1:3000/metrics
+</code></pre>
+<h2 id="documentation"><a class="header" href="#documentation">Documentation</a></h2>
+<p>Generate and view internal code documentation:</p>
+<pre><code class="language-bash">cargo doc --open
+</code></pre>
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<p>Run unit and integration tests:</p>
+<pre><code class="language-bash">cargo test
+</code></pre>
+<h2 id="license"><a class="header" href="#license">License</a></h2>
+<p>MIT</p>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
 <p>本项目 (<strong>DTask</strong>) 的发布准备阶段。</p>
 <h2 id="开发目标-4"><a class="header" href="#开发目标-4">开发目标</a></h2>
@@ -16341,6 +17456,40 @@ docker build -t dtask:1.0.0 .
 </code></pre>
 <h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
 <p>Day 99 将对整个项目进行复盘和展示。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="distributed-task-scheduler-dtask"><a class="header" href="#distributed-task-scheduler-dtask">Distributed Task Scheduler (DTask)</a></h1>
+<p>DTask is a distributed task scheduling system built with Rust, Tokio, gRPC, and OpenRaft.</p>
+<h2 id="features-1"><a class="header" href="#features-1">Features</a></h2>
+<ul>
+<li><strong>Distributed Scheduling</strong>: Tasks are distributed across nodes.</li>
+<li><strong>gRPC API</strong>: High-performance communication for task submission.</li>
+<li><strong>REST API</strong>: Web interface for management (Axum).</li>
+<li><strong>Persistence</strong>: SQLite storage with potential for Raft consensus.</li>
+<li><strong>Observability</strong>: Prometheus metrics and Tracing.</li>
+</ul>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h2>
+<h3 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h3>
+<ul>
+<li>Rust 1.75+</li>
+<li>Docker (optional)</li>
+</ul>
+<h3 id="running-locally"><a class="header" href="#running-locally">Running Locally</a></h3>
+<pre><code class="language-bash"># Start the server
+cargo run --release
+</code></pre>
+<p>The gRPC server listens on <code>0.0.0.0:50051</code>.
+The Web API listens on <code>0.0.0.0:3000</code>.</p>
+<h3 id="running-with-docker"><a class="header" href="#running-with-docker">Running with Docker</a></h3>
+<pre><code class="language-bash">docker build -t dtask .
+docker run -p 3000:3000 -p 50051:50051 dtask
+</code></pre>
+<h2 id="api"><a class="header" href="#api">API</a></h2>
+<ul>
+<li><strong>POST /api/tasks</strong>: Submit a task.</li>
+<li><strong>GET /api/tasks/:id</strong>: Get task status.</li>
+</ul>
+<h2 id="license-1"><a class="header" href="#license-1">License</a></h2>
+<p>MIT</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
 <p>本项目 (<strong>DTask</strong>) 的总结、展示与复盘阶段。</p>
