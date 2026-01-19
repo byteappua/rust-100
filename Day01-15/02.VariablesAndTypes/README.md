@@ -192,11 +192,11 @@ Rust 的字符串处理与 C++ 或 Java 不同，它非常关注内存安全和�
 graph TD
     subgraph Stack
         S1[s1: String] --> |ptr| H1
-        S1 --> |len: 5| L1[ ]
-        S1 --> |cap: 5| C1[ ]
+        S1 --> |len| L1[5]
+        S1 --> |cap| C1[5]
         
         S2[s2: &str] --> |ptr| H_Part
-        S2 --> |len: 3| L2[ ]
+        S2 --> |len| L2[3]
     end
     
     subgraph Heap
