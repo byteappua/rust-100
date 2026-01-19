@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-47b37952.js";
+            window.path_to_searchindex_js = "../../searchindex-6a6a6780.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -329,6 +329,102 @@ let a = [3; 5]; // [3, 3, 3, 3, 3]
 <span class="boring">}</span></code></pre>
 <blockquote>
 <p><strong>🤔 什么时候用数组？</strong>: 当你知道元素个数确定不变时（如一年 12 个月）。如果你需要动态增删元素，请使用 <strong>Vector</strong> (<code>Vec&lt;T&gt;</code>)（后续章节介绍）。</p>
+</blockquote>
+<h3 id="3-文本类型-text-types---深入解析"><a class="header" href="#3-文本类型-text-types---深入解析">3. 文本类型 (Text Types) - 深入解析</a></h3>
+<p>Rust 的字符串处理与 C++ 或 Java 不同，它非常关注内存安全和编码。最常见的两种类型是 <code>String</code> 和 <code>str</code> (通常以 <code>&amp;str</code> 形式出现)。</p>
+<h4 id="31-核心区别所有权与内存布局"><a class="header" href="#31-核心区别所有权与内存布局">3.1 核心区别：所有权与内存布局</a></h4>
+<ul>
+<li>
+<p><strong>String (字符串对象)</strong>:</p>
+<ul>
+<li><strong>本质</strong>: 被封装的 <code>Vec&lt;u8&gt;</code>。</li>
+<li><strong>特点</strong>: 拥有所有权、可变 (<code>mut</code>)、堆上分配、可动态增长。</li>
+<li><strong>结构</strong>: 栈上存储 3 个字长：<code>ptr</code> (指针), <code>len</code> (长度), <code>capacity</code> (容量)。</li>
+</ul>
+</li>
+<li>
+<p><strong>&amp;str (字符串切片/引用)</strong>:</p>
+<ul>
+<li><strong>本质</strong>: 对一段 UTF-8 数据的引用/视图。</li>
+<li><strong>特点</strong>: 借用 (无所有权)、不可变、大小固定。</li>
+<li><strong>结构</strong>: 栈上存储 2 个字长：<code>ptr</code> (指针), <code>len</code> (长度)。也被称为“胖指针“ (Fat Pointer)。</li>
+</ul>
+</li>
+</ul>
+<pre class="mermaid">graph TD
+    subgraph Stack
+        S1[s1: String] --&gt; |ptr| H1
+        S1 --&gt; |len| L1[5]
+        S1 --&gt; |cap| C1[5]
+        
+        S2[s2: &amp;str] --&gt; |ptr| H_Part
+        S2 --&gt; |len| L2[3]
+    end
+    
+    subgraph Heap
+        H1[H, e, l, l, o]
+        H_Part[H, e, l] -.-&gt; H1
+    end
+    
+    style S1 fill:#f9f,stroke:#333
+    style S2 fill:#ccf,stroke:#333
+</pre>
+
+<h4 id="32-什么时候用哪个"><a class="header" href="#32-什么时候用哪个">3.2 什么时候用哪个？</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">String</th><th style="text-align: left">&amp;str</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>内存位置</strong></td><td style="text-align: left">堆 (Heap) (内容)</td><td style="text-align: left">任意 (堆, 栈, 静态区)</td></tr>
+<tr><td style="text-align: left"><strong>所有权</strong></td><td style="text-align: left">拥有数据</td><td style="text-align: left">借用数据</td></tr>
+<tr><td style="text-align: left"><strong>可变性</strong></td><td style="text-align: left">可变 (需 <code>mut</code>)</td><td style="text-align: left">不可变</td></tr>
+<tr><td style="text-align: left"><strong>开销</strong></td><td style="text-align: left">分配内存 (慢)</td><td style="text-align: left">零拷贝 (快)</td></tr>
+<tr><td style="text-align: left"><strong>典型场景</strong></td><td style="text-align: left">存储数据, 结构体成员, 返回值</td><td style="text-align: left">函数参数, 临时视图</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="33-常用操作"><a class="header" href="#33-常用操作">3.3 常用操作</a></h4>
+<p><strong>1. 创建与转换</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 创建 String
+let s1 = String::from("Hello");
+let s2 = "World".to_string();
+let s3 = String::new(); // 空字符串
+
+// String -&gt; &amp;str (借用)
+let slice = &amp;s1;       // 自动解引用
+let slice2 = s1.as_str();
+
+// &amp;str -&gt; String (复制/分配)
+let clone = slice.to_string();
+<span class="boring">}</span></code></pre>
+<p><strong>2. 修改 (需要 String + mut)</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut s = String::from("Hello");
+s.push(' ');       // 追加字符
+s.push_str("Rust"); // 追加字符串切片
+// s 现在是 "Hello Rust"
+<span class="boring">}</span></code></pre>
+<p><strong>3. 格式化拼接</strong></p>
+<p>使用 <code>format!</code> 宏不仅清晰，而且不会像 <code>+</code> 运算符那样涉及复杂的所有权转移。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s1 = String::from("Tic");
+let s2 = String::from("Tac");
+let s3 = String::from("Toe");
+
+let s = format!("{}-{}-{}", s1, s2, s3); 
+// s -&gt; "Tic-Tac-Toe"
+// s1, s2, s3 依然有效
+<span class="boring">}</span></code></pre>
+<blockquote>
+<p><strong>⚠️ UTF-8 警告</strong>: Rust 的字符串总是合法的 <strong>UTF-8</strong> 序列。
+这意味着在 Rust 中，<code>"你好".len()</code> 是 <strong>6</strong> (每个汉字 3 字节)，而不是 2。
+<strong>千万不要</strong>直接用索引访问字符串 (如 <code>s[0]</code>)，因为这可能会切断一个宽字符导致报错。如果要遍历字符，请使用 <code>.chars()</code> 方法。</p>
 </blockquote>
 <hr>
 <h2 id="-专业编码习惯-professional-habits"><a class="header" href="#-专业编码习惯-professional-habits">🧢 专业编码习惯 (Professional Habits)</a></h2>

@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-47b37952.js";
+            window.path_to_searchindex_js = "../../searchindex-6a6a6780.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -230,19 +230,19 @@
 <li><strong>借用 (Borrowing)</strong>: 类似现实中的“借东西“。你可以借用数据（引用），但必须遵守规则（要么一个可变引用，要么多个不可变引用）。</li>
 </ul>
 <pre class="mermaid">graph LR
-    subgraph GC [垃圾回收语言 (Java/Go)]
+    subgraph GC ["垃圾回收语言 (Java/Go)"]
         Alloc1[申请内存] --&gt; Run1[运行时扫描] --&gt; Free1[GC回收]
         style GC fill:#f9f,stroke:#333,stroke-dasharray: 5 5
     end
     
-    subgraph Manual [手动管理 (C/C++)]
+    subgraph Manual ["手动管理 (C/C++)"]
         Alloc2[malloc] --&gt; Use[使用] --&gt; Free2[free?]
         Free2 --忘记?--&gt; Leak[内存泄漏]
         Free2 --太早?--&gt; Dangling[悬空指针]
         style Manual fill:#fcc,stroke:#333,stroke-dasharray: 5 5
     end
     
-    subgraph Rust [Rust 模型]
+    subgraph Rust ["Rust 模型"]
         Alloc3[绑定变量] --&gt; Scope[作用域结束] --&gt; AutoFree[编译器插入 Drop]
         style Rust fill:#cfc,stroke:#333
     end
@@ -255,9 +255,9 @@
     class Rustup {
         +install()
         +update()
-        +target add()
-        +component add()
-        管理版本 (Stable/Nightly)
+        +target_add()
+        +component_add()
+        +管理版本(Stable/Nightly)
     }
     class Cargo {
         +new()
