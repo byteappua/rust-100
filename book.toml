@@ -6,3 +6,7 @@ title = "Rust - 100天从新手到大师"
 
 [output.html]
 git-repository-url = "https://github.com/byteappua/rust-100"
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
