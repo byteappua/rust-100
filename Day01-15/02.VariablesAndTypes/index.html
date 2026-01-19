@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-507a4bb0.js";
+            window.path_to_searchindex_js = "../../searchindex-83b4c1b2.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -177,180 +177,186 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-02-变量与数据类型"><a class="header" href="#day-02-变量与数据类型">Day 02: 变量与数据类型</a></h1>
-<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
-<ul>
-<li>理解 Rust 中的变量不可变性 (Immutability)</li>
-<li>掌握如何定义可变变量 (<code>mut</code>)</li>
-<li>了解常量 (<code>const</code>) 与变量的区别</li>
-<li>理解变量隐藏 (Shadowing) 的机制</li>
-<li>熟悉 Rust 的基本数据类型 (标量类型和复合类型)</li>
-</ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<p>变量和数据类型是任何编程语言的基石。在 Rust 中，这些概念尤为特殊：</p>
-<ul>
-<li><strong>默认不可变</strong>：这是 Rust 内存安全和并发安全设计的核心，强迫你思考数据的变化。</li>
-<li><strong>静态强类型</strong>：Rust 编译器在编译期就能捕获大量类型错误，避免运行时的崩溃。</li>
-<li><strong>隐藏 (Shadowing)</strong>：提供了一种优雅的方式来处理变量转换，而无需创建临时变量名。</li>
-</ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-变量与可变性"><a class="header" href="#1-变量与可变性">1. 变量与可变性</a></h3>
-<p>在 Rust 中，变量默认是<strong>不可变</strong>的。一旦值被绑定到一个变量名，你就不能改变它。</p>
-<h4 id="不可变变量"><a class="header" href="#不可变变量">不可变变量</a></h4>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let x = 5;
-// x = 6; // 编译错误！不能修改不可变变量
-<span class="boring">}</span></code></pre>
-<h4 id="可变变量"><a class="header" href="#可变变量">可变变量</a></h4>
-<p>如果你需要修改变量的值，必须使用 <code>mut</code> 关键字。</p>
+                        <h1 id="day-02-变量与数据类型-variables--types"><a class="header" href="#day-02-变量与数据类型-variables--types">Day 02: 变量与数据类型 (Variables &amp; Types)</a></h1>
+<p>欢迎来到 <strong>Rust 100 Days</strong> 的第二天！今天我们将探讨 Rust 的“法律与秩序“：<strong>严格的类型系统</strong>与<strong>所有权规则的雏形</strong>。</p>
+<p>在 Rust 中，变量不仅仅是存储数据的容器，它们还承载着关于“可变性“和“生命周期“的契约。</p>
+<hr>
+<h2 id="-目录-table-of-contents"><a class="header" href="#-目录-table-of-contents">📋 目录 (Table of Contents)</a></h2>
+<ol>
+<li><a href="#-核心哲学默认不可变-immutability">核心哲学：默认不可变 (Immutability)</a></li>
+<li><a href="#-变量的艺术可变性与隐藏-mutability--shadowing">变量的艺术：可变性与隐藏 (Mutability &amp; Shadowing)</a></li>
+<li><a href="#-rust-类型系统全景图-type-system">Rust 类型系统全景图 (Type System)</a></li>
+<li><a href="#-基础类型详解-primitives">基础类型详解 (Primitives)</a></li>
+<li><a href="#-复合类型详解-compound-types">复合类型详解 (Compound Types)</a></li>
+<li><a href="#-专业编码习惯-professional-habits">专业编码习惯 (Professional Habits)</a></li>
+<li><a href="#-练习与扩展-exercises">练习与扩展</a></li>
+</ol>
+<hr>
+<h2 id="-核心哲学默认不可变-immutability"><a class="header" href="#-核心哲学默认不可变-immutability">�️ 核心哲学：默认不可变 (Immutability)</a></h2>
+<p>在其他语言中，变量往往默认是可变的（如 JS 的 <code>var/let</code>, Python, C++）。但在 Rust 中，变量<strong>默认不可变</strong>。</p>
+<h3 id="为什么这样设计"><a class="header" href="#为什么这样设计">为什么这样设计？</a></h3>
+<ol>
+<li><strong>安全性 (Safety)</strong>: 如果一个值不可变，你就永远不用担心它在你不注意的时候被修改了。</li>
+<li><strong>并发 (Concurrency)</strong>: 多线程同时读取不可变数据是绝对安全的，不需要加锁。</li>
+<li><strong>编译器优化</strong>: 编译器可以对不可变数据做更多优化。</li>
+</ol>
+<pre class="mermaid">graph TD
+    Start([开始定义变量]) --&gt; IsChange{需要修改值吗?}
+    IsChange -- No --&gt; Let[使用 let x = 5&lt;br&gt;(推荐, 默认安全)]
+    IsChange -- Yes --&gt; Mut[使用 let mut x = 5&lt;br&gt;(显式声明意图)]
+    
+    style Let fill:#cfc,stroke:#333
+    style Mut fill:#fcc,stroke:#333
+</pre>
+
+<hr>
+<h2 id="-变量的艺术可变性与隐藏-mutability--shadowing"><a class="header" href="#-变量的艺术可变性与隐藏-mutability--shadowing">🎨 变量的艺术：可变性与隐藏 (Mutability &amp; Shadowing)</a></h2>
+<h3 id="1-可变变量-mut"><a class="header" href="#1-可变变量-mut">1. 可变变量 (<code>mut</code>)</a></h3>
+<p>当你必须修改变量时，使用 <code>mut</code> 关键字。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let mut x = 5;
 println!("The value of x is: {}", x);
-x = 6;
+x = 6; // ✅ 合法
 println!("The value of x is: {}", x);
 <span class="boring">}</span></code></pre>
-<h3 id="2-常量-constants"><a class="header" href="#2-常量-constants">2. 常量 (Constants)</a></h3>
-<p>常量使用 <code>const</code> 关键字声明，必须注明类型。它们不仅不可变，而且总是不可变。</p>
+<h3 id="2-常量-const"><a class="header" href="#2-常量-const">2. 常量 (<code>const</code>)</a></h3>
+<p>常量是<strong>总是不可变</strong>的。这与 <code>let</code> 不可变变量不同：</p>
 <ul>
-<li>可以在任何作用域声明，包括全局作用域。</li>
-<li>只能被设置为常量表达式，不能是函数调用的结果。</li>
+<li>必须标注类型。</li>
+<li>只能设置为常量表达式，不能是函数调用的结果。</li>
+<li>在编译期直接替换到用到它的地方。</li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>const MAX_POINTS: u32 = 100_000;
 <span class="boring">}</span></code></pre>
-<h3 id="3-隐藏-shadowing"><a class="header" href="#3-隐藏-shadowing">3. 隐藏 (Shadowing)</a></h3>
-<p>你可以声明和前面变量同名的新变量，新变量会“隐藏“旧变量。</p>
+<h3 id="3-隐藏-shadowing---rust-的忍术"><a class="header" href="#3-隐藏-shadowing---rust-的忍术">3. 隐藏 (Shadowing) - Rust 的“忍术“</a></h3>
+<p>这是 Rust 特有的强大特性。你可以使用 <code>let</code> 再次声明同名变量。这<strong>不是</strong>修改旧变量，而是<strong>创建了一个新变量</strong>，并“遮盖“了旧的。</p>
+<pre class="mermaid">sequenceDiagram
+    participant Scope as 作用域
+    participant Mem as 内存栈
+    
+    Note over Scope: let x = 5;
+    Scope-&gt;&gt;Mem: 压入 x (i32: 5)
+    
+    Note over Scope: let x = x + 1;
+    Scope-&gt;&gt;Mem: 读取旧 x, 计算 6&lt;br&gt;压入新 x (i32: 6)&lt;br&gt;旧 x 变为不可见
+    
+    Note over Scope: let x = "spaces";
+    Scope-&gt;&gt;Mem: 压入新 x (&amp;str: "spaces")&lt;br&gt;允许改变类型!
+</pre>
+
+<p><strong>Shadowing vs Mutability</strong></p>
 <ul>
-<li>使用 <code>let</code> 关键字再次声明。</li>
-<li>可以改变变量的类型。</li>
-<li>原变量在隐藏后不可访问，但在作用域结束后如果新变量销毁，原变量不会恢复（因为是覆盖绑定）。</li>
+<li><strong>Shadowing (Let x … Let x)</strong>: 创建新变量，<strong>可以改变类型</strong>。</li>
+<li><strong>Mutability (Let mut x … x = )</strong>: 修改同一变量，<strong>不能改变类型</strong>。</li>
 </ul>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let x = 5;
-let x = x + 1; // x 现在是 6
-let x = "spaces"; // x 现在是字符串类型
-<span class="boring">}</span></code></pre>
-<h3 id="4-数据类型"><a class="header" href="#4-数据类型">4. 数据类型</a></h3>
-<p>Rust 是静态类型语言，必须在编译期知道所有变量的类型。编译器通常可以根据值推断类型。</p>
-<h4 id="标量类型-scalar-types"><a class="header" href="#标量类型-scalar-types">标量类型 (Scalar Types)</a></h4>
-<p>代表一个单独的值。</p>
+<hr>
+<h2 id="-rust-类型系统全景图-type-system"><a class="header" href="#-rust-类型系统全景图-type-system">🌳 Rust 类型系统全景图 (Type System)</a></h2>
+<p>Rust 是<strong>静态强类型</strong>语言。也就是在编译期必须知道所有变量的类型。</p>
+<pre class="mermaid">classDiagram
+    class Type {
+        &lt;&lt;Rust Types&gt;&gt;
+    }
+    class Scalar["标量类型 (Scalar)"] {
+        代表单一值
+    }
+    class Compound["复合类型 (Compound)"] {
+        组合多个值
+    }
+    
+    Type &lt;|-- Scalar
+    Type &lt;|-- Compound
+    
+    Scalar &lt;|-- Integer["整数 (i32, u8...)"]
+    Scalar &lt;|-- Float["浮点 (f64, f32)"]
+    Scalar &lt;|-- Boolean["布尔 (bool)"]
+    Scalar &lt;|-- Char["字符 (char)"]
+    
+    Compound &lt;|-- Tuple["元组 (Tuple)"]
+    Compound &lt;|-- Array["数组 (Array)"]
+</pre>
+
+<hr>
+<h2 id="-基础类型详解-primitives"><a class="header" href="#-基础类型详解-primitives">🧱 基础类型详解 (Primitives)</a></h2>
+<h3 id="1-整数-integer"><a class="header" href="#1-整数-integer">1. 整数 (Integer)</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">长度</th><th style="text-align: left">有符号 (Signed)</th><th style="text-align: left">无符号 (Unsigned)</th><th style="text-align: left">场景</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left">8-bit</td><td style="text-align: left"><code>i8</code></td><td style="text-align: left"><code>u8</code></td><td style="text-align: left">字节流, 文件 IO</td></tr>
+<tr><td style="text-align: left">32-bit</td><td style="text-align: left"><code>i32</code> (<strong>默认</strong>)</td><td style="text-align: left"><code>u32</code></td><td style="text-align: left">一般数字</td></tr>
+<tr><td style="text-align: left">64-bit</td><td style="text-align: left"><code>i64</code></td><td style="text-align: left"><code>u64</code></td><td style="text-align: left">大数</td></tr>
+<tr><td style="text-align: left">Arch</td><td style="text-align: left"><code>isize</code></td><td style="text-align: left"><code>usize</code></td><td style="text-align: left">索引, 指针大小</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>⚠️ 关于溢出</strong>: 在 Debug 模式下，整数溢出会导致程序 Panic (崩溃)。在 Release 模式下，Rust 会执行二进制补码环绕 (Wrapping) 而不是 Panic。</p>
+</blockquote>
+<h3 id="2-浮点数-floating-point"><a class="header" href="#2-浮点数-floating-point">2. 浮点数 (Floating-Point)</a></h3>
 <ul>
-<li><strong>整型</strong>: <code>i8</code> - <code>i128</code>, <code>u8</code> - <code>u128</code>, <code>isize</code>, <code>usize</code> (基于架构)。默认为 <code>i32</code>。</li>
-<li><strong>浮点型</strong>: <code>f32</code>, <code>f64</code>. 默认为 <code>f64</code>。</li>
-<li><strong>布尔型</strong>: <code>bool</code> (<code>true</code>, <code>false</code>).</li>
-<li><strong>字符型</strong>: <code>char</code>. 代表 Unicode 标量值 (4字节)。例如 <code>'a'</code>, <code>'ℤ'</code>, <code>'😻'</code>.</li>
+<li><code>f64</code> (<strong>默认</strong>): 双精度，速度与 f32 几乎一样，但在现代 CPU 上精度更高。</li>
+<li><code>f32</code>: 单精度，用于极度节省内存或特定图形计算。</li>
 </ul>
-<h4 id="复合类型-compound-types"><a class="header" href="#复合类型-compound-types">复合类型 (Compound Types)</a></h4>
-<p>可以将多个值组合成一个类型。</p>
+<h3 id="3-布尔与字符"><a class="header" href="#3-布尔与字符">3. 布尔与字符</a></h3>
 <ul>
-<li>
-<p><strong>元组 (Tuple)</strong>:</p>
-<ul>
-<li>长度固定。</li>
-<li>可以包含不同类型。</li>
+<li><code>bool</code>: <code>true</code> 或 <code>false</code>. (1 字节)</li>
+<li><code>char</code>: 代表一个 <strong>Unicode 标量值</strong>。它是 4 字节的！这意味着它可以存储中文、Emoji (<code>😻</code>) 等。<strong>注意使用单引号</strong> <code>' '</code>。</li>
 </ul>
+<hr>
+<h2 id="-复合类型详解-compound-types"><a class="header" href="#-复合类型详解-compound-types">📦 复合类型详解 (Compound Types)</a></h2>
+<h3 id="1-元组-tuple"><a class="header" href="#1-元组-tuple">1. 元组 (Tuple)</a></h3>
+<p>将多个<strong>不同类型</strong>的值组合在一起。长度固定。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let tup: (i32, f64, u8) = (500, 6.4, 1);
-let (x, y, z) = tup; // 解构
-let five_hundred = tup.0; // 点号访问
+let (x, y, z) = tup; // 解构 (Destructuring)
+let five_hundred = tup.0; // 点号索引
 <span class="boring">}</span></code></pre>
-</li>
-<li>
-<p><strong>数组 (Array)</strong>:</p>
-<ul>
-<li>长度固定。</li>
-<li>必须包含相同类型。</li>
-<li>数据存储在栈 (stack) 上。</li>
-</ul>
+<h3 id="2-数组-array"><a class="header" href="#2-数组-array">2. 数组 (Array)</a></h3>
+<p>将多个<strong>相同类型</strong>的值组合在一起。<strong>长度固定</strong>，分配在<strong>栈 (Stack)</strong> 上。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let a = [1, 2, 3, 4, 5];
-let first = a[0];
-let months = ["January", "February", "March"];
+</span>// 类型: [i32; 5] -&gt; [类型; 本数]
+let a = [1, 2, 3, 4, 5]; 
+
+// 初始化语法：5 个 3
+let a = [3; 5]; // [3, 3, 3, 3, 3]
 <span class="boring">}</span></code></pre>
-</li>
-</ul>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-变量与可变性"><a class="header" href="#示例-1-变量与可变性">示例 1: 变量与可变性</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    let x = 5;
-    println!("x = {}", x);
-    // x = 6; // 错误
-
-    let mut y = 10;
-    println!("y = {}", y);
-    y = 20;
-    println!("y updated = {}", y);
-}</code></pre>
-<h3 id="示例-2-变量隐藏"><a class="header" href="#示例-2-变量隐藏">示例 2: 变量隐藏</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    let spaces = "   "; // 字符串类型
-    let spaces = spaces.len(); // usize 类型
-    println!("Spaces length: {}", spaces);
-}</code></pre>
-<h3 id="示例-3-数学运算"><a class="header" href="#示例-3-数学运算">示例 3: 数学运算</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    // 加法
-    let sum = 5 + 10;
-    // 减法
-    let difference = 95.5 - 4.3;
-    // 乘法
-    let product = 4 * 30;
-    // 除法
-    let quotient = 56.7 / 32.2;
-    let floored = 2 / 3; // 结果为 0
-    // 取余
-    let remainder = 43 % 5;
-
-    println!("Sum: {}", sum);
-}</code></pre>
-<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们为你准备了专门的练习题来巩固这些概念。</p>
-<ul>
-<li><strong>练习 1</strong>: 变量绑定与可变性</li>
-<li><strong>练习 2</strong>: 基本数据类型的使用</li>
-<li><strong>练习 3</strong>: 元组和数组的操作</li>
-</ul>
-<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-为什么-rust-默认变量是不可变的"><a class="header" href="#q1-为什么-rust-默认变量是不可变的">Q1: 为什么 Rust 默认变量是不可变的？</a></h3>
-<p>A: 这是一个权衡。不可变性使得代码更易于推理（尤其是在并发环境下），消除了“数据竞争“的一大来源。当你明确需要修改数据时，<code>mut</code> 关键字作为一个显式的标记，提醒读者注意这里的状态变化。</p>
-<h3 id="q2-let-隐藏-shadowing-和-mut-有什么区别"><a class="header" href="#q2-let-隐藏-shadowing-和-mut-有什么区别">Q2: <code>let</code> 隐藏 (Shadowing) 和 <code>mut</code> 有什么区别？</a></h3>
-<p>A:</p>
+<blockquote>
+<p><strong>🤔 什么时候用数组？</strong>: 当你知道元素个数确定不变时（如一年 12 个月）。如果你需要动态增删元素，请使用 <strong>Vector</strong> (<code>Vec&lt;T&gt;</code>)（后续章节介绍）。</p>
+</blockquote>
+<hr>
+<h2 id="-专业编码习惯-professional-habits"><a class="header" href="#-专业编码习惯-professional-habits">🧢 专业编码习惯 (Professional Habits)</a></h2>
 <ol>
-<li><code>mut</code> 允许你改变同一个变量绑定的<strong>值</strong>，但不能改变<strong>类型</strong>。</li>
-<li>Shadowing 是使用 <code>let</code> 声明了一个<strong>全新</strong>的变量，只是名字相同。它可以改变<strong>类型</strong>，也可以改变<strong>可变性</strong>（例如从可变变为不可变）。</li>
+<li><strong>命名规范</strong>:
+<ul>
+<li>变量、函数: <code>snake_case</code> (如 <code>user_id</code>, <code>calculate_sum</code>)</li>
+<li>常量: <code>SCREAMING_SNAKE_CASE</code> (如 <code>MAX_RETRY</code>)</li>
+<li>类型: <code>UpperCamelCase</code> (如 <code>String</code>, <code>TcpStream</code>)</li>
+</ul>
+</li>
+<li><strong>类型注解</strong>: 虽然编译器很聪明，但在定义稍微复杂的类型时，手动写上类型注解有助于可读性。</li>
+<li><strong>未使用变量</strong>: 如果你声明了一个变量但还没想好怎么用，Rust 编译器会给警告。在变量名前加 <code>_</code> (如 <code>_x</code>) 可以消除警告。</li>
+<li><strong>数字字面量</strong>: 使用下划线增加可读性。<code>1_000_000</code> 比 <code>1000000</code> 清晰得多。</li>
 </ol>
-<h3 id="q3-什么时候应该用数组什么时候用-vector"><a class="header" href="#q3-什么时候应该用数组什么时候用-vector">Q3: 什么时候应该用数组，什么时候用 Vector？</a></h3>
-<p>A: 数组长度是固定的，分配在栈上，速度快。如果你知道元素的数量不会改变（比如月份、一周的天数），用数组。如果你需要动态增删元素，使用标准库提供的 <code>Vec&lt;T&gt;</code>（向量）。</p>
-<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
-<ul>
-<li><strong>优先不可变</strong>：除非你确定需要修改它，否则不要加 <code>mut</code>。</li>
-<li><strong>显式类型标注</strong>：虽然编译器能推断类型，但在定义复杂类型或公共 API 时，显式标注类型能提高代码可读性。</li>
-<li><strong>使用下划线</strong>：在数字字面量中使用 <code>_</code> 提高可读性，如 <code>1_000_000</code>。</li>
-<li><strong>未使用的变量</strong>：如果声明了变量但未被使用，编译器会警告。如果你是有意为之，给变量名加下划线前缀 <code>_x</code>。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html">Rust 程序设计语言 - 变量和可变性</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch03-02-data-types.html">Rust 程序设计语言 - 数据类型</a></li>
-</ul>
-<h2 id="-本节要点回顾"><a class="header" href="#-本节要点回顾">📚 本节要点回顾</a></h2>
-<ul>
-<li>变量默认不可变，需用 <code>mut</code> 声明可变。</li>
-<li>常量 <code>const</code> 始终不可变且需标注类型。</li>
-<li>Shadowing 允许重用变量名并改变类型。</li>
-<li>标量类型包括整数、浮点数、布尔值和字符。</li>
-<li>复合类型包括元组（异构、定长）和数组（同构、定长）。</li>
-</ul>
+<hr>
+<h2 id="-练习与扩展-exercises"><a class="header" href="#-练习与扩展-exercises">🏋️ 练习与扩展 (Exercises)</a></h2>
+<p>动手时间！</p>
+<ol>
+<li><strong>类型转换</strong>: 尝试将 <code>i32</code> 转换为 <code>i64</code>？(提示: 使用 <code>as</code> 关键字)</li>
+<li><strong>数组越界</strong>: 创建一个长度为 5 的数组，尝试访问索引 10，观察编译期和运行时的行为。</li>
+<li><strong>Shadowing 魔法</strong>: 利用 Shadowing 将一个字符串类型的数字 (<code>"42"</code>) 转换为整数类型 (<code>42</code>)。</li>
+</ol>
+<p>👉 <strong><a href="./exercises/README.html">点击这里访问详细练习题目录</a></strong></p>
+<hr>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>熟悉了数据的存储方式，接下来我们将学习如何控制程序的执行流程。</p>
-<p>下一节: <a href="../03.FunctionsAndControlFlow/README.html">Day 03: 函数与控制流</a></p>
+<p>掌握了数据的形态，接下来我们要让数据“动“起来。下一章，我们将学习如何组织代码流程。</p>
+<p><a href="../03.FunctionsAndControlFlow/README.html"><strong>Day 03: 函数与控制流 (Functions &amp; Control Flow)</strong></a></p>
 
                     </main>
 
