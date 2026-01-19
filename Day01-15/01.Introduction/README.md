@@ -63,19 +63,19 @@ Rust 的核心在于**所有权 (Ownership)**。这是 Rust 无需垃圾回收�
 
 ```mermaid
 graph LR
-    subgraph GC [垃圾回收语言 (Java/Go)]
+    subgraph GC ["垃圾回收语言 (Java/Go)"]
         Alloc1[申请内存] --> Run1[运行时扫描] --> Free1[GC回收]
         style GC fill:#f9f,stroke:#333,stroke-dasharray: 5 5
     end
     
-    subgraph Manual [手动管理 (C/C++)]
+    subgraph Manual ["手动管理 (C/C++)"]
         Alloc2[malloc] --> Use[使用] --> Free2[free?]
         Free2 --忘记?--> Leak[内存泄漏]
         Free2 --太早?--> Dangling[悬空指针]
         style Manual fill:#fcc,stroke:#333,stroke-dasharray: 5 5
     end
     
-    subgraph Rust [Rust 模型]
+    subgraph Rust ["Rust 模型"]
         Alloc3[绑定变量] --> Scope[作用域结束] --> AutoFree[编译器插入 Drop]
         style Rust fill:#cfc,stroke:#333
     end
@@ -92,9 +92,9 @@ classDiagram
     class Rustup {
         +install()
         +update()
-        +target add()
-        +component add()
-        管理版本 (Stable/Nightly)
+        +target_add()
+        +component_add()
+        +管理版本(Stable/Nightly)
     }
     class Cargo {
         +new()

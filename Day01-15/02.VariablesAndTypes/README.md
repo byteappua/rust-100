@@ -172,6 +172,97 @@ let a = [3; 5]; // [3, 3, 3, 3, 3]
 
 > **🤔 什么时候用数组？**: 当你知道元素个数确定不变时（如一年 12 个月）。如果你需要动态增删元素，请使用 **Vector** (`Vec<T>`)（后续章节介绍）。
 
+### 3. 文本类型 (Text Types) - 深入解析
+
+Rust 的字符串处理与 C++ 或 Java 不同，它非常关注内存安全和编码。最常见的两种类型是 `String` 和 `str` (通常以 `&str` 形式出现)。
+
+#### 3.1 核心区别：所有权与内存布局
+
+* **String (字符串对象)**:
+  * **本质**: 被封装的 `Vec<u8>`。
+  * **特点**: 拥有所有权、可变 (`mut`)、堆上分配、可动态增长。
+  * **结构**: 栈上存储 3 个字长：`ptr` (指针), `len` (长度), `capacity` (容量)。
+
+* **&str (字符串切片/引用)**:
+  * **本质**: 对一段 UTF-8 数据的引用/视图。
+  * **特点**: 借用 (无所有权)、不可变、大小固定。
+  * **结构**: 栈上存储 2 个字长：`ptr` (指针), `len` (长度)。也被称为"胖指针" (Fat Pointer)。
+
+```mermaid
+graph TD
+    subgraph Stack
+        S1[s1: String] --> |ptr| H1
+        S1 --> |len: 5| L1[ ]
+        S1 --> |cap: 5| C1[ ]
+        
+        S2[s2: &str] --> |ptr| H_Part
+        S2 --> |len: 3| L2[ ]
+    end
+    
+    subgraph Heap
+        H1[H, e, l, l, o]
+        H_Part[H, e, l] -.-> H1
+    end
+    
+    style S1 fill:#f9f,stroke:#333
+    style S2 fill:#ccf,stroke:#333
+```
+
+#### 3.2 什么时候用哪个？
+
+| 特性 | String | &str |
+| :--- | :--- | :--- |
+| **内存位置** | 堆 (Heap) (内容) | 任意 (堆, 栈, 静态区) |
+| **所有权** | 拥有数据 | 借用数据 |
+| **可变性** | 可变 (需 `mut`) | 不可变 |
+| **开销** | 分配内存 (慢) | 零拷贝 (快) |
+| **典型场景** | 存储数据, 结构体成员, 返回值 | 函数参数, 临时视图 |
+
+#### 3.3 常用操作
+
+**1. 创建与转换**
+
+```rust
+// 创建 String
+let s1 = String::from("Hello");
+let s2 = "World".to_string();
+let s3 = String::new(); // 空字符串
+
+// String -> &str (借用)
+let slice = &s1;       // 自动解引用
+let slice2 = s1.as_str();
+
+// &str -> String (复制/分配)
+let clone = slice.to_string();
+```
+
+**2. 修改 (需要 String + mut)**
+
+```rust
+let mut s = String::from("Hello");
+s.push(' ');       // 追加字符
+s.push_str("Rust"); // 追加字符串切片
+// s 现在是 "Hello Rust"
+```
+
+**3. 格式化拼接**
+
+使用 `format!` 宏不仅清晰，而且不会像 `+` 运算符那样涉及复杂的所有权转移。
+
+```rust
+let s1 = String::from("Tic");
+let s2 = String::from("Tac");
+let s3 = String::from("Toe");
+
+let s = format!("{}-{}-{}", s1, s2, s3); 
+// s -> "Tic-Tac-Toe"
+// s1, s2, s3 依然有效
+```
+
+> **⚠️ UTF-8 警告**: Rust 的字符串总是合法的 **UTF-8** 序列。
+> 这意味着在 Rust 中，`"你好".len()` 是 **6** (每个汉字 3 字节)，而不是 2。
+> **千万不要**直接用索引访问字符串 (如 `s[0]`)，因为这可能会切断一个宽字符导致报错。如果要遍历字符，请使用 `.chars()` 方法。
+
 ---
 
 ## 🧢 专业编码习惯 (Professional Habits)
