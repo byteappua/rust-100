@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-db38cd84.js";
+            window.path_to_searchindex_js = "searchindex-dcae11b0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-cec6f113.js"></script>
@@ -1939,7 +1939,124 @@ cargo run
 <p><strong>版本：1.0.0</strong></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rust-基础-day-01---15"><a class="header" href="#rust-基础-day-01---15">Rust 基础 (Day 01 - 15)</a></h1>
+<p align="center">
+  <img src="https://img.shields.io/badge/Days-15-blue?style=flat-square" alt="15 Days">
+  <img src="https://img.shields.io/badge/Topics-15-green?style=flat-square" alt="15 Topics">
+  <img src="https://img.shields.io/badge/Exercises-75+-orange?style=flat-square" alt="Exercises">
+  <img src="https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&amp;style=flat-square" alt="Rust Version">
+</p>
+
 <p>这个目录涵盖了 Rust 编程语言的基础知识，大致对应《Rust 程序设计语言》的前 10-11 章。通过这 15 天的学习，你将掌握 Rust 的核心语法、所有权系统、类型系统以及基本的项目组织方式。</p>
+<hr>
+<h2 id="-学习路线图-1"><a class="header" href="#-学习路线图-1">📚 学习路线图</a></h2>
+<pre class="mermaid">graph LR
+    subgraph 第一周["🌱 第一周：基础语法"]
+        D01[Day 01&lt;br/&gt;初识 Rust]
+        D02[Day 02&lt;br/&gt;变量与类型]
+        D03[Day 03&lt;br/&gt;函数与控制流]
+        D04[Day 04&lt;br/&gt;所有权]
+        D05[Day 05&lt;br/&gt;引用与借用]
+        D06[Day 06&lt;br/&gt;切片]
+        D07[Day 07&lt;br/&gt;结构体]
+    end
+    
+    subgraph 第二周["🚀 第二周：进阶特性"]
+        D08[Day 08&lt;br/&gt;枚举]
+        D09[Day 09&lt;br/&gt;模块系统]
+        D10[Day 10&lt;br/&gt;常用集合]
+        D11[Day 11&lt;br/&gt;错误处理]
+        D12[Day 12&lt;br/&gt;泛型]
+        D13[Day 13&lt;br/&gt;特征]
+        D14[Day 14&lt;br/&gt;生命周期]
+        D15[Day 15&lt;br/&gt;测试]
+    end
+    
+    D01 --&gt; D02 --&gt; D03
+    D03 --&gt; D04 --&gt; D05 --&gt; D06
+    D06 --&gt; D07 --&gt; D08
+    D08 --&gt; D09 --&gt; D10 --&gt; D11
+    D11 --&gt; D12 --&gt; D13 --&gt; D14 --&gt; D15
+    
+    style D04 fill:#ffcccc,stroke:#ff0000,stroke-width:3px
+    style D05 fill:#ffcccc,stroke:#ff0000,stroke-width:3px
+    style D06 fill:#ffcccc,stroke:#ff0000,stroke-width:3px
+    style D14 fill:#ffcccc,stroke:#ff0000,stroke-width:3px
+</pre>
+
+<blockquote>
+<p><strong>🔴 核心难点</strong>（红色标记）：所有权、引用与借用、切片、生命周期是 Rust 最独特且最重要的概念，建议重点学习。</p>
+</blockquote>
+<hr>
+<h2 id="-知识点依赖关系"><a class="header" href="#-知识点依赖关系">🎯 知识点依赖关系</a></h2>
+<pre class="mermaid">graph TD
+    A[环境搭建] --&gt; B[变量与类型]
+    B --&gt; C[函数与控制流]
+    C --&gt; D[所有权系统]
+    
+    D --&gt; E[引用与借用]
+    E --&gt; F[切片]
+    
+    B --&gt; G[结构体]
+    C --&gt; G
+    F --&gt; G
+    
+    G --&gt; H[枚举与模式匹配]
+    H --&gt; I[错误处理]
+    
+    C --&gt; J[模块系统]
+    
+    B --&gt; K[集合类型]
+    F --&gt; K
+    
+    G --&gt; L[泛型]
+    H --&gt; L
+    
+    L --&gt; M[Traits]
+    E --&gt; N[生命周期]
+    F --&gt; N
+    M --&gt; N
+    
+    C --&gt; O[测试]
+    I --&gt; O
+    
+    style D fill:#ff9999,stroke:#333,stroke-width:4px
+    style E fill:#ff9999,stroke:#333,stroke-width:4px
+    style F fill:#ff9999,stroke:#333,stroke-width:4px
+    style N fill:#ff9999,stroke:#333,stroke-width:4px
+    
+    style M fill:#99ccff,stroke:#333,stroke-width:2px
+    style I fill:#99ccff,stroke:#333,stroke-width:2px
+    style L fill:#99ccff,stroke:#333,stroke-width:2px
+</pre>
+
+<hr>
+<h2 id="-学习时间指南"><a class="header" href="#-学习时间指南">⏱️ 学习时间指南</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: center">难度</th><th style="text-align: center">天数</th><th style="text-align: left">主题</th><th style="text-align: left">建议学习时间</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: center">⭐</td><td style="text-align: center">Day 01</td><td style="text-align: left">初识 Rust</td><td style="text-align: left">2-3 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐</td><td style="text-align: center">Day 02</td><td style="text-align: left">变量与数据类型</td><td style="text-align: left">3-4 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐</td><td style="text-align: center">Day 03</td><td style="text-align: left">函数与控制流</td><td style="text-align: left">3-4 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐⭐⭐</td><td style="text-align: center"><strong>Day 04</strong></td><td style="text-align: left"><strong>所有权</strong></td><td style="text-align: left"><strong>5-6 小时</strong></td></tr>
+<tr><td style="text-align: center">⭐⭐⭐⭐</td><td style="text-align: center"><strong>Day 05</strong></td><td style="text-align: left"><strong>引用与借用</strong></td><td style="text-align: left"><strong>5-6 小时</strong></td></tr>
+<tr><td style="text-align: center">⭐⭐⭐</td><td style="text-align: center">Day 06</td><td style="text-align: left">切片</td><td style="text-align: left">3-4 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐</td><td style="text-align: center">Day 07</td><td style="text-align: left">结构体</td><td style="text-align: left">3-4 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐⭐</td><td style="text-align: center">Day 08</td><td style="text-align: left">枚举</td><td style="text-align: left">4-5 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐</td><td style="text-align: center">Day 09</td><td style="text-align: left">模块系统</td><td style="text-align: left">3-4 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐⭐</td><td style="text-align: center">Day 10</td><td style="text-align: left">常用集合</td><td style="text-align: left">4-5 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐⭐</td><td style="text-align: center">Day 11</td><td style="text-align: left">错误处理</td><td style="text-align: left">4-5 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐⭐</td><td style="text-align: center">Day 12</td><td style="text-align: left">泛型</td><td style="text-align: left">4-5 小时</td></tr>
+<tr><td style="text-align: center">⭐⭐⭐⭐</td><td style="text-align: center"><strong>Day 13</strong></td><td style="text-align: left"><strong>特征</strong></td><td style="text-align: left"><strong>5-6 小时</strong></td></tr>
+<tr><td style="text-align: center">⭐⭐⭐⭐⭐</td><td style="text-align: center"><strong>Day 14</strong></td><td style="text-align: left"><strong>生命周期</strong></td><td style="text-align: left"><strong>6-8 小时</strong></td></tr>
+<tr><td style="text-align: center">⭐⭐</td><td style="text-align: center">Day 15</td><td style="text-align: left">测试</td><td style="text-align: left">3-4 小时</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>总计</strong>：约 <strong>60-75 小时</strong>（建议分 2-3 周完成）</p>
+<hr>
 <h2 id="目录-1"><a class="header" href="#目录-1">目录</a></h2>
 <ul>
 <li><strong><a href="Day01-15/01.Introduction/README.html">Day 01: Introduction (初识 Rust)</a></strong>
@@ -2049,7 +2166,103 @@ cargo run
 </li>
 </ul>
 <h2 id="学习建议"><a class="header" href="#学习建议">学习建议</a></h2>
-<p>建议按照顺序学习，每一天的内容都建立在前一天的基础上。对于每个主题，不仅要阅读文档，还要亲手编写并运行代码。</p>
+<h3 id="-学习策略"><a class="header" href="#-学习策略">📖 学习策略</a></h3>
+<ol>
+<li><strong>顺序学习</strong>：建议按照顺序学习，每一天的内容都建立在前一天的基础上</li>
+<li><strong>动手实践</strong>：不仅要阅读文档，还要亲手编写并运行代码</li>
+<li><strong>完成练习</strong>：每个主题都包含配套练习，完成练习才能真正掌握</li>
+<li><strong>重点关注</strong>：Day 04-06 和 Day 14 是 Rust 的核心和难点，需要反复学习和实践</li>
+</ol>
+<h3 id="-学习技巧-1"><a class="header" href="#-学习技巧-1">💡 学习技巧</a></h3>
+<pre class="mermaid">graph LR
+    A[读文档] --&gt; B[看示例代码]
+    B --&gt; C[自己敲一遍]
+    C --&gt; D[改动代码实验]
+    D --&gt; E[完成练习]
+    E --&gt; F{理解了吗?}
+    F -- 是 --&gt; G[下一个主题]
+    F -- 否 --&gt; H[重读文档]
+    H --&gt; B
+    
+    style F fill:#ffcccc
+    style G fill:#ccffcc
+</pre>
+
+<h3 id="-常见问题-1"><a class="header" href="#-常见问题-1">⚠️ 常见问题</a></h3>
+<ol>
+<li>
+<p><strong>编译错误太多怎么办？</strong></p>
+<ul>
+<li>Rust 编译器的错误信息非常详细，仔细阅读提示</li>
+<li>使用 <code>cargo check</code> 快速检查语法错误</li>
+<li>遇到所有权错误时，画出内存图帮助理解</li>
+</ul>
+</li>
+<li>
+<p><strong>所有权系统太难理解？</strong></p>
+<ul>
+<li>这是正常的，Rust 最独特的部分需要时间消化</li>
+<li>建议多做练习，直到形成肌肉记忆</li>
+<li>对比其他语言的内存管理方式来理解</li>
+</ul>
+</li>
+<li>
+<p><strong>什么时候可以开始做项目？</strong></p>
+<ul>
+<li>完成 Day 1-8 后可以尝试小项目</li>
+<li>完成全部 15 天后可以开始中型项目</li>
+<li>推荐从 CLI 工具开始</li>
+</ul>
+</li>
+</ol>
+<h3 id="-额外学习资源"><a class="header" href="#-额外学习资源">📚 额外学习资源</a></h3>
+<ul>
+<li><strong><a href="https://doc.rust-lang.org/book/">The Rust Book</a></strong>: 官方教材（英文）</li>
+<li><strong><a href="https://kaisery.github.io/trpl-zh-cn/">Rust 程序设计语言</a></strong>: 官方教材中文版</li>
+<li><strong><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></strong>: 通过示例学习</li>
+<li><strong><a href="https://github.com/rust-lang/rustlings">Rustlings</a></strong>: 交互式练习</li>
+<li><strong><a href="https://doc.rust-lang.org/std/">Rust 标准库文档</a></strong>: 必备参考</li>
+</ul>
+<hr>
+<h2 id="-学习进度追踪-1"><a class="header" href="#-学习进度追踪-1">📊 学习进度追踪</a></h2>
+<p>建议在学习过程中使用以下检查清单：</p>
+<ul>
+<li><input disabled="" type="checkbox"> Day 01: 环境搭建完成，能成功运行 Hello World</li>
+<li><input disabled="" type="checkbox"> Day 02: 理解变量、类型和 Shadowing</li>
+<li><input disabled="" type="checkbox"> Day 03: 掌握函数和控制流语法</li>
+<li><input disabled="" type="checkbox"> Day 04: <strong>核心</strong> 理解所有权规则</li>
+<li><input disabled="" type="checkbox"> Day 05: <strong>核心</strong> 理解引用和借用规则</li>
+<li><input disabled="" type="checkbox"> Day 06: <strong>核心</strong> 掌握切片的使用</li>
+<li><input disabled="" type="checkbox"> Day 07: 能够定义和使用结构体</li>
+<li><input disabled="" type="checkbox"> Day 08: 掌握枚举和模式匹配</li>
+<li><input disabled="" type="checkbox"> Day 09: 理解模块系统</li>
+<li><input disabled="" type="checkbox"> Day 10: 熟练使用 Vec、String、HashMap</li>
+<li><input disabled="" type="checkbox"> Day 11: 掌握错误处理最佳实践</li>
+<li><input disabled="" type="checkbox"> Day 12: 理解泛型的使用</li>
+<li><input disabled="" type="checkbox"> Day 13: 能够定义和实现 Trait</li>
+<li><input disabled="" type="checkbox"> Day 14: <strong>核心</strong> 理解生命周期注解</li>
+<li><input disabled="" type="checkbox"> Day 15: 能够编写和运行测试</li>
+</ul>
+<hr>
+<h2 id="-完成后你将掌握"><a class="header" href="#-完成后你将掌握">🎓 完成后你将掌握</a></h2>
+<ul>
+<li>✅ Rust 的核心语法和类型系统</li>
+<li>✅ 所有权、借用和生命周期的深刻理解</li>
+<li>✅ 能够编写内存安全且高效的 Rust 代码</li>
+<li>✅ 使用 Cargo 管理项目和依赖</li>
+<li>✅ 编写单元测试和集成测试</li>
+<li>✅ 阅读和理解 Rust 官方文档</li>
+<li>✅ 为学习更高级的 Rust 主题打下坚实基础</li>
+</ul>
+<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
+<p>完成这 15 天的学习后，建议继续学习：</p>
+<ul>
+<li><strong>Day 16-30</strong>: 智能指针、并发编程、异步编程</li>
+<li><strong>Day 31-50</strong>: Web 开发、系统编程、嵌入式开发</li>
+<li><strong>实战项目</strong>: CLI 工具、Web 服务器、游戏开发</li>
+</ul>
+<hr>
+<p><strong>创建日期</strong>: 2026-01-19<br><strong>最后更新</strong>: 2026-01-19</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-01-初识-rust-hello-rust"><a class="header" href="#day-01-初识-rust-hello-rust">Day 01: 初识 Rust (Hello Rust)</a></h1>
 <p align="center">
@@ -3331,9 +3544,7 @@ fn main() {
 因为 <code>String</code> 实现了 <code>Deref&lt;Target=str&gt;</code>，所以 Rust 可以自动把 <code>&amp;String</code> 当作 <code>&amp;str</code> 用。反之则不行。</p>
 <hr>
 <h2 id="-代码示例实现-first_word"><a class="header" href="#-代码示例实现-first_word">💻 代码示例：实现 first_word</a></h2>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>fn first_word(s: &amp;str) -&gt; &amp;str {
+<pre class="playground"><code class="language-rust">fn first_word(s: &amp;str) -&gt; &amp;str {
     let bytes = s.as_bytes(); // 转换为字节数组以便逐个字节检查
 
     for (i, &amp;item) in bytes.iter().enumerate() {
@@ -3345,7 +3556,194 @@ fn main() {
 
     &amp;s[..] // 没找到空格，意味着整个字符串就是一个单词
 }
+
+fn main() {
+    let my_string = String::from("hello world");
+    
+    // 对 String 取切片
+    let word = first_word(&amp;my_string[..]);
+    println!("第一个单词: {}", word); // "hello"
+    
+    // 对字符串字面值直接使用
+    let word = first_word("rust programming");
+    println!("第一个单词: {}", word); // "rust"
+}</code></pre>
+<hr>
+<h2 id="-实战应用"><a class="header" href="#-实战应用">🚀 实战应用</a></h2>
+<h3 id="场景1解析命令行参数"><a class="header" href="#场景1解析命令行参数">场景1：解析命令行参数</a></h3>
+<p>切片常用于处理命令行参数：</p>
+<pre class="playground"><code class="language-rust">fn parse_command(input: &amp;str) -&gt; (&amp;str, &amp;str) {
+    let bytes = input.as_bytes();
+    
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return (&amp;input[..i], &amp;input[i+1..]); // 返回命令和参数
+        }
+    }
+    
+    (input, "") // 没有参数
+}
+
+fn main() {
+    let (cmd, args) = parse_command("run --verbose");
+    println!("命令: {}, 参数: {}", cmd, args);
+    // 输出: 命令: run, 参数: --verbose
+}</code></pre>
+<h3 id="场景2数据窗口处理"><a class="header" href="#场景2数据窗口处理">场景2：数据窗口处理</a></h3>
+<p>使用切片高效处理大数组的一部分：</p>
+<pre class="playground"><code class="language-rust">fn process_chunk(data: &amp;[i32]) -&gt; i32 {
+    data.iter().sum() // 计算和
+}
+
+fn main() {
+    let large_array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    // 处理前5个元素
+    let sum1 = process_chunk(&amp;large_array[..5]);
+    println!("前5个元素的和: {}", sum1); // 15
+    
+    // 处理后5个元素
+    let sum2 = process_chunk(&amp;large_array[5..]);
+    println!("后5个元素的和: {}", sum2); // 40
+}</code></pre>
+<h3 id="场景3字符串分割"><a class="header" href="#场景3字符串分割">场景3：字符串分割</a></h3>
+<pre class="playground"><code class="language-rust">fn split_by_char(s: &amp;str, delimiter: char) -&gt; Vec&lt;&amp;str&gt; {
+    let mut result = Vec::new();
+    let mut start = 0;
+    
+    for (i, c) in s.char_indices() {
+        if c == delimiter {
+            result.push(&amp;s[start..i]);
+            start = i + delimiter.len_utf8(); // UTF-8字符可能占多个字节
+        }
+    }
+    
+    // 添加最后一部分
+    result.push(&amp;s[start..]);
+    result
+}
+
+fn main() {
+    let parts = split_by_char("Rust,Go,Python", ',');
+    println!("{:?}", parts); // ["Rust", "Go", "Python"]
+}</code></pre>
+<hr>
+<h2 id="-深入理解切片-vs-所有权"><a class="header" href="#-深入理解切片-vs-所有权">🔍 深入理解：切片 vs 所有权</a></h2>
+<pre class="mermaid">sequenceDiagram
+    participant Main as main函数
+    participant S as String (s)
+    participant Slice as 切片 (word)
+    
+    Main-&gt;&gt;S: let s = String::from("hello")
+    Note over S: 拥有堆数据
+    
+    Main-&gt;&gt;Slice: let word = &amp;s[0..5]
+    Note over Slice: 借用部分数据&lt;br/&gt;不拥有所有权
+    
+    Note over Main,Slice: ❌ 不能修改 s&lt;br/&gt;因为 word 还在借用
+    
+    Main-&gt;&gt;Slice: 使用 word
+    Note over Slice: word 作用域结束
+    
+    Main-&gt;&gt;S: 现在可以修改 s
+    Note over S: 借用已结束
+</pre>
+
+<p><strong>关键点</strong>：</p>
+<ul>
+<li>切片持有借用期间，原数据不能被修改</li>
+<li>这确保了切片始终有效</li>
+<li>借用检查器会在编译期验证这一点</li>
+</ul>
+<hr>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">❓ 常见问题 FAQ</a></h2>
+<h3 id="q1-为什么-01-对中文字符串会崩溃"><a class="header" href="#q1-为什么-01-对中文字符串会崩溃">Q1: 为什么 <code>[0..1]</code> 对中文字符串会崩溃？</a></h3>
+<p><strong>A</strong>: Rust 的字符串是 UTF-8 编码的。一个中文字符可能占 3 个字节。切片必须在字符边界上：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = "你好";
+// let slice = &amp;s[0..1]; // ❌ Panic! 切在字符中间
+
+// 正确做法1：按字符迭代
+for (i, c) in s.char_indices() {
+    println!("{}: {}", i, c); // 0: 你, 3: 好
+}
+
+// 正确做法2：使用完整字节范围
+let first_char = &amp;s[0..3]; // ✅ "你"
 <span class="boring">}</span></code></pre>
+<h3 id="q2-切片和引用有什么区别"><a class="header" href="#q2-切片和引用有什么区别">Q2: 切片和引用有什么区别？</a></h3>
+<p><strong>A</strong>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">引用 <code>&amp;T</code></th><th style="text-align: left">切片 <code>&amp;[T]</code> / <code>&amp;str</code></th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left">内容</td><td style="text-align: left">指向单个值</td><td style="text-align: left">指向连续序列</td></tr>
+<tr><td style="text-align: left">大小</td><td style="text-align: left">固定（指针大小）</td><td style="text-align: left">胖指针（ptr + len）</td></tr>
+<tr><td style="text-align: left">示例</td><td style="text-align: left"><code>&amp;String</code>, <code>&amp;i32</code></td><td style="text-align: left"><code>&amp;[i32]</code>, <code>&amp;str</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="q3-什么时候用-to_string-vs-to_owned"><a class="header" href="#q3-什么时候用-to_string-vs-to_owned">Q3: 什么时候用 <code>to_string()</code> vs <code>to_owned()</code>？</a></h3>
+<p><strong>A</strong>: 两者都可以把 <code>&amp;str</code> 转换为 <code>String</code>：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s: &amp;str = "hello";
+
+let s1 = s.to_string();  // 语义清晰：转为字符串
+let s2 = s.to_owned();   // 语义：获取所有权的副本
+
+// 性能相同，推荐 to_string() 因为更明确
+<span class="boring">}</span></code></pre>
+<h3 id="q4-为什么函数参数推荐用-str-而不是-string"><a class="header" href="#q4-为什么函数参数推荐用-str-而不是-string">Q4: 为什么函数参数推荐用 <code>&amp;str</code> 而不是 <code>&amp;String</code>？</a></h3>
+<p><strong>A</strong>:</p>
+<pre class="playground"><code class="language-rust">// ❌ 限制性强
+fn process(s: &amp;String) {
+    println!("{}", s);
+}
+
+// ✅ 通用性强
+fn process(s: &amp;str) {
+    println!("{}", s);
+}
+
+fn main() {
+    let owned = String::from("hello");
+    let literal = "world";
+    
+    // process(&amp;owned);  // ❌ 第一个版本：需要 &amp;String
+    // process(literal); // ❌ 第一个版本：不接受 &amp;str
+    
+    process(&amp;owned);  // ✅ 第二个版本：自动解引用
+    process(literal); // ✅ 第二个版本：直接接受
+}</code></pre>
+<hr>
+<h2 id="-最佳实践总结"><a class="header" href="#-最佳实践总结">💡 最佳实践总结</a></h2>
+<ol>
+<li><strong>函数参数</strong>: 优先使用 <code>&amp;str</code> 和 <code>&amp;[T]</code> 而非 <code>&amp;String</code> 和 <code>&amp;Vec&lt;T&gt;</code></li>
+<li><strong>UTF-8 安全</strong>: 使用 <code>.char_indices()</code> 而不是直接索引</li>
+<li><strong>Range 简写</strong>: <code>..n</code> 代替 <code>0..n</code>，<code>n..</code> 代替 <code>n..len</code></li>
+<li><strong>全切片</strong>: 需要传递整个集合时使用 <code>&amp;s[..]</code> 或直接 <code>&amp;s</code></li>
+<li><strong>性能</strong>: 切片是零成本抽象，不涉及内存复制</li>
+</ol>
+<hr>
+<h2 id="-知识点速记"><a class="header" href="#-知识点速记">🎯 知识点速记</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">概念</th><th style="text-align: left">说明</th><th style="text-align: left">示例</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>切片类型</strong></td><td style="text-align: left"><code>&amp;[T]</code> (数组切片), <code>&amp;str</code> (字符串切片)</td><td style="text-align: left"><code>&amp;[1,2,3]</code>, <code>&amp;"hello"</code></td></tr>
+<tr><td style="text-align: left"><strong>胖指针</strong></td><td style="text-align: left">ptr + len 两部分</td><td style="text-align: left">占 2 个字长</td></tr>
+<tr><td style="text-align: left"><strong>Range</strong></td><td style="text-align: left"><code>a..b</code> 不含b, <code>a..=b</code> 含b</td><td style="text-align: left"><code>0..5</code>, <code>0..=4</code></td></tr>
+<tr><td style="text-align: left"><strong>UTF-8</strong></td><td style="text-align: left">必须在字符边界切片</td><td style="text-align: left">用 <code>.char_indices()</code></td></tr>
+<tr><td style="text-align: left"><strong>借用规则</strong></td><td style="text-align: left">切片持续期间不能修改原数据</td><td style="text-align: left">编译期检查</td></tr>
+</tbody>
+</table>
+</div>
 <hr>
 <h2 id="-练习题-2"><a class="header" href="#-练习题-2">🏋️ 练习题</a></h2>
 <p>👉 <strong><a href="Day01-15/06.Slices/exercises/README.html">点击这里查看练习题</a></strong></p>
@@ -3503,7 +3901,7 @@ fn main() {
 <li><strong>练习 3</strong>: 矩形计算方法</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/07.Structs/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-1"><a class="header" href="#-常见问题-faq-1">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-self-mut-self-self-有什么区别"><a class="header" href="#q1-self-mut-self-self-有什么区别">Q1: <code>&amp;self</code>, <code>&amp;mut self</code>, <code>self</code> 有什么区别？</a></h3>
 <ul>
 <li><code>&amp;self</code>: <strong>不可变借用</strong>。最常用，只读取数据。</li>
@@ -3663,7 +4061,7 @@ let none = plus_one(None);
 <li><strong>练习 3</strong>: 硬币分类器</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/08.Enums/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-1"><a class="header" href="#-常见问题-faq-1">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-2"><a class="header" href="#-常见问题-faq-2">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-什么时候用-struct什么时候用-enum"><a class="header" href="#q1-什么时候用-struct什么时候用-enum">Q1: 什么时候用 struct，什么时候用 enum？</a></h3>
 <p>A: 如果你的数据是“并且“的关系（既有名字又有年龄），用 struct。如果你的数据是“或者“的关系（要是 IPv4 要么是 IPv6），用 enum。</p>
 <h3 id="q2-为什么-optionsome5-可以直接写成-some5"><a class="header" href="#q2-为什么-optionsome5-可以直接写成-some5">Q2: 为什么 <code>Option::Some(5)</code> 可以直接写成 <code>Some(5)</code>？</a></h3>
@@ -3827,7 +4225,7 @@ pub use crate::front_of_house::hosting; // 重导出，方便外部使用
 <li><strong>练习 3</strong>: 将单文件模块重构为多文件结构</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/09.Modules/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-2"><a class="header" href="#-常见问题-faq-2">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-3"><a class="header" href="#-常见问题-faq-3">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-modrs-和-文件名rs-有什么区别"><a class="header" href="#q1-modrs-和-文件名rs-有什么区别">Q1: <code>mod.rs</code> 和 <code>文件名.rs</code> 有什么区别？</a></h3>
 <p>A: 它们在功能上是一样的。<code>mod.rs</code> 是 Rust 2015 的风格，类似于 <code>index.html</code>。<code>文件名.rs</code> 是 Rust 2018 引入的风格，更简洁，避免了编辑器中打开很多个 <code>mod.rs</code> 导致混淆。现在推荐使用后者。</p>
 <h3 id="q2-什么时候该用-pub-use"><a class="header" href="#q2-什么时候该用-pub-use">Q2: 什么时候该用 <code>pub use</code>？</a></h3>
@@ -3957,7 +4355,7 @@ fn main() {
 <li><strong>练习 3</strong>: 员工部门管理系统 (HashMap 综合应用)</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/10.CommonCollections/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-3"><a class="header" href="#-常见问题-faq-3">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-4"><a class="header" href="#-常见问题-faq-4">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-string-和-str-有什么区别"><a class="header" href="#q1-string-和-str-有什么区别">Q1: <code>&amp;String</code> 和 <code>&amp;str</code> 有什么区别？</a></h3>
 <p>A: <code>String</code> 是堆上分配的、可变的字符串对象。<code>&amp;str</code> 是字符串切片（通常是对 String 或字面量的引用），是不可变的视图。函数参数通常建议写 <code>&amp;str</code> 以兼容两种类型（<code>&amp;String</code> 会自动强转为 <code>&amp;str</code>）。</p>
 <h3 id="q2-为什么-s1--s2-中-s1-必须被移动"><a class="header" href="#q2-为什么-s1--s2-中-s1-必须被移动">Q2: 为什么 <code>s1 + &amp;s2</code> 中 <code>s1</code> 必须被移动？</a></h3>
@@ -4071,7 +4469,7 @@ fn main() {
 <li><strong>练习 3</strong>: 解析 CSV 数据</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/11.ErrorHandling/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-4"><a class="header" href="#-常见问题-faq-4">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-5"><a class="header" href="#-常见问题-faq-5">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-什么时候用-panic-什么时候用-result"><a class="header" href="#q1-什么时候用-panic-什么时候用-result">Q1: 什么时候用 panic! 什么时候用 Result？</a></h3>
 <p>A:</p>
 <ul>
@@ -4176,7 +4574,7 @@ impl Point&lt;f32&gt; {
 <li><strong>练习 3</strong>: 混合泛型结构体操作</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/12.Generics/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-5"><a class="header" href="#-常见问题-faq-5">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-6"><a class="header" href="#-常见问题-faq-6">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-impl-pointt-和-implt-pointt-有什么区别"><a class="header" href="#q1-impl-pointt-和-implt-pointt-有什么区别">Q1: <code>impl Point&lt;T&gt;</code> 和 <code>impl&lt;T&gt; Point&lt;T&gt;</code> 有什么区别？</a></h3>
 <p>A: <code>impl&lt;T&gt; Point&lt;T&gt;</code> 读作“为任意类型 T 实现 Point<t>”。第一个 <code>&lt;T&gt;</code> 声明了 T 是一个泛型参数，而不是一个具体的类型名称。如果没有第一个 <code>&lt;T&gt;</code>，编译器会以为 <code>T</code> 是某个具体的 struct 或 enum 的名字。</t></p>
 <h3 id="q2-泛型会拖慢编译速度吗"><a class="header" href="#q2-泛型会拖慢编译速度吗">Q2: 泛型会拖慢编译速度吗？</a></h3>
@@ -4321,7 +4719,7 @@ fn main() {
 <li><strong>练习 4</strong>: 实现标准库 Trait (<code>Display</code>)</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/13.Traits/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-6"><a class="header" href="#-常见问题-faq-6">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-7"><a class="header" href="#-常见问题-faq-7">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-trait-和-javac-的-interface-有什么区别"><a class="header" href="#q1-trait-和-javac-的-interface-有什么区别">Q1: Trait 和 Java/C# 的 Interface 有什么区别？</a></h3>
 <p>A: 非常相似，但 Trait 可以包含默认实现（Java 8+ 接口也可以）。最大的区别在于 Trait 可以作为泛型约束 (Bounds)，不仅用于动态分发，更多用于静态单态化。此外，Trait 不支持字段（数据），只定义行为。</p>
 <h3 id="q2-什么是关联类型-associated-types"><a class="header" href="#q2-什么是关联类型-associated-types">Q2: 什么是关联类型 (Associated Types)？</a></h3>
@@ -4436,7 +4834,7 @@ fn main() {
 <li><strong>练习 3</strong>: 结构体引用</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/14.Lifetimes/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-7"><a class="header" href="#-常见问题-faq-7">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-8"><a class="header" href="#-常见问题-faq-8">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-为什么编译器不能自己分析出来非要我写注解"><a class="header" href="#q1-为什么编译器不能自己分析出来非要我写注解">Q1: 为什么编译器不能自己分析出来，非要我写注解？</a></h3>
 <p>A: 在函数边界上，Rust 选择要求显式签名。这意味着编译器只需要分析函数的签名就能检查调用者和被调用者的代码，而不需要深入函数体内部。如果依赖函数体推断，修改函数内部实现可能会意外破坏外部调用者的代码（打破向后兼容性）。</p>
 <h3 id="q2-标注了-a-就能让变量活得更久吗"><a class="header" href="#q2-标注了-a-就能让变量活得更久吗">Q2: 标注了 <code>'a</code> 就能让变量活得更久吗？</a></h3>
@@ -4557,7 +4955,7 @@ fn it_works() -&gt; Result&lt;(), String&gt; {
 <li><strong>练习 3</strong>: 编写文档测试（模拟）</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/15.Testing/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-8"><a class="header" href="#-常见问题-faq-8">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-9"><a class="header" href="#-常见问题-faq-9">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-cargo-test-默认是并行运行的吗"><a class="header" href="#q1-cargo-test-默认是并行运行的吗">Q1: <code>cargo test</code> 默认是并行运行的吗？</a></h3>
 <p>A: 是的。如果你的测试相互依赖（例如都操作同一个文件或数据库），这可能会导致问题。可以使用 <code>cargo test -- --test-threads=1</code> 来串行运行测试。</p>
 <h3 id="q2-既然可以测试私有函数那还需要集成测试吗"><a class="header" href="#q2-既然可以测试私有函数那还需要集成测试吗">Q2: 既然可以测试私有函数，那还需要集成测试吗？</a></h3>
@@ -4653,7 +5051,7 @@ where
 <h3 id="练习-3-泛型-cacher"><a class="header" href="#练习-3-泛型-cacher">练习 3: 泛型 Cacher</a></h3>
 <p>实现一个可以处理不同类型参数和返回值的泛型 <code>Cacher</code> 结构体。它应该在第一次调用 <code>value</code> 方法时执行闭包并缓存结果，后续调用直接返回缓存。
 <a href="Day16-30/16.Closures/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-1"><a class="header" href="#-常见问题-1">🤔 常见问题</a></h2>
+<h2 id="-常见问题-2"><a class="header" href="#-常见问题-2">🤔 常见问题</a></h2>
 <h3 id="q1-什么时候该用-move"><a class="header" href="#q1-什么时候该用-move">Q1: 什么时候该用 <code>move</code>？</a></h3>
 <p>A: 当你需要将闭包传递给新线程，或者希望闭包完全拥有它捕获的数据（例如为了防止外部修改，或者为了返回闭包）时。</p>
 <h3 id="q2-为什么不能直接返回闭包"><a class="header" href="#q2-为什么不能直接返回闭包">Q2: 为什么不能直接返回闭包？</a></h3>
@@ -4743,7 +5141,7 @@ where
 <h3 id="练习-3-复杂链式操作"><a class="header" href="#练习-3-复杂链式操作">练习 3: 复杂链式操作</a></h3>
 <p>给定一个字符串向量，过滤出长度大于 3 的字符串，将其转换为大写，并用逗号连接成一个单一的字符串。
 <a href="Day16-30/17.Iterators/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-2"><a class="header" href="#-常见问题-2">🤔 常见问题</a></h2>
+<h2 id="-常见问题-3"><a class="header" href="#-常见问题-3">🤔 常见问题</a></h2>
 <h3 id="q1-什么时候用-iter-vs-into_iter"><a class="header" href="#q1-什么时候用-iter-vs-into_iter">Q1: 什么时候用 <code>iter()</code> vs <code>into_iter()</code>?</a></h3>
 <p>A:</p>
 <ul>
@@ -4846,7 +5244,7 @@ mod tests {
 <h3 id="练习-3-workspace-模拟"><a class="header" href="#练习-3-workspace-模拟">练习 3: Workspace 模拟</a></h3>
 <p>创建一个模拟 Workspace 结构的说明。这不仅是一个代码练习，而是一个架构设计练习。
 <a href="Day16-30/18.CargoAndCrates/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-3"><a class="header" href="#-常见问题-3">🤔 常见问题</a></h2>
+<h2 id="-常见问题-4"><a class="header" href="#-常见问题-4">🤔 常见问题</a></h2>
 <h3 id="q1-cargolock-应该提交到-git-吗"><a class="header" href="#q1-cargolock-应该提交到-git-吗">Q1: <code>Cargo.lock</code> 应该提交到 Git 吗？</a></h3>
 <p>A:</p>
 <ul>
@@ -4940,7 +5338,7 @@ fn main() {
 <h3 id="练习-3-自定义智能指针"><a class="header" href="#练习-3-自定义智能指针">练习 3: 自定义智能指针</a></h3>
 <p>实现一个 <code>MyBox&lt;T&gt;</code> 结构体，并实现 <code>Deref</code> trait，使其可以被解引用。
 <a href="Day16-30/19.SmartPointers_Box/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-4"><a class="header" href="#-常见问题-4">🤔 常见问题</a></h2>
+<h2 id="-常见问题-5"><a class="header" href="#-常见问题-5">🤔 常见问题</a></h2>
 <h3 id="q1-boxnew-会发生拷贝吗"><a class="header" href="#q1-boxnew-会发生拷贝吗">Q1: <code>Box::new</code> 会发生拷贝吗？</a></h3>
 <p>A: 在优化构建 (<code>--release</code>) 中，编译器通常会优化掉中间的栈拷贝，直接在堆上构建对象。但在 Debug 模式下，可能会先在栈上创建再移动到堆上。</p>
 <h3 id="q2-既然-rust-有-gc-吗"><a class="header" href="#q2-既然-rust-有-gc-吗">Q2: 既然 Rust 有 GC 吗？</a></h3>
@@ -5039,7 +5437,7 @@ fn main() {
 <h3 id="练习-3-共享可变树节点"><a class="header" href="#练习-3-共享可变树节点">练习 3: 共享可变树节点</a></h3>
 <p>定义一个树节点结构体，每个节点包含一个值和子节点列表。使用 <code>Rc&lt;RefCell&lt;Node&gt;&gt;</code> 使得父节点和子节点可以互相引用（或者简单的多所有权修改测试），并修改某个子节点的值，验证父节点也能看到修改。
 <a href="Day16-30/20.SmartPointers_RcRefCell/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-5"><a class="header" href="#-常见问题-5">🤔 常见问题</a></h2>
+<h2 id="-常见问题-6"><a class="header" href="#-常见问题-6">🤔 常见问题</a></h2>
 <h3 id="q1-cellt-和-refcellt-有什么区别"><a class="header" href="#q1-cellt-和-refcellt-有什么区别">Q1: <code>Cell&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 有什么区别？</a></h3>
 <p>A:</p>
 <ul>
@@ -5145,51 +5543,185 @@ fn main() {
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-22-并发编程---线程-threads"><a class="header" href="#day-22-并发编程---线程-threads">Day 22: 并发编程 - 线程 (Threads)</a></h1>
-<p>Rust 中的并发编程非常安全，因为 Rust 的所有权和类型系统会在编译时捕获许多并发错误（如数据竞争）。</p>
-<h2 id="1-创建线程"><a class="header" href="#1-创建线程">1. 创建线程</a></h2>
-<p>使用 <code>std::thread::spawn</code> 创建新线程。</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Difficulty-⭐⭐⭐⭐-orange?style=flat-square" alt="Difficulty">
+  <img src="https://img.shields.io/badge/Topic-Concurrency-blue?style=flat-square" alt="Topic">
+  <img src="https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&amp;style=flat-square" alt="Rust">
+</p>
+
+<p>Rust 中的并发编程非常安全，因为 Rust 的所有权和类型系统会在<strong>编译时</strong>捕获许多并发错误（如数据竞争）。这让 Rust 成为编写高性能并发程序的理想语言。</p>
+<hr>
+<h2 id="-学习目标-18"><a class="header" href="#-学习目标-18">📝 学习目标</a></h2>
+<ul>
+<li>理解线程的基本概念和工作原理</li>
+<li>掌握使用 <code>std::thread::spawn</code> 创建和管理线程</li>
+<li>学会使用 <code>Join Handle</code> 等待线程完成</li>
+<li>理解 <code>move</code> 闭包在多线程中的作用</li>
+<li>掌握线程安全的数据传递方式</li>
+<li>了解线程的性能开销和使用场景</li>
+</ul>
+<hr>
+<h2 id="-为什么要学这个-15"><a class="header" href="#-为什么要学这个-15">🎯 为什么要学这个</a></h2>
+<p>并发编程是现代应用程序的核心：</p>
+<ol>
+<li><strong>充分利用硬件</strong>：现代 CPU 都是多核的，单线程程序无法充分利用硬件性能</li>
+<li><strong>提升响应性</strong>：将耗时任务放到后台线程，主线程可以继续响应用户</li>
+<li><strong>提高吞吐量</strong>：并行处理多个请求（如 Web 服务器）</li>
+<li><strong>Rust 的优势</strong>：编译时保证线程安全，没有数据竞争！</li>
+</ol>
+<p><strong>与其他语言对比</strong>：</p>
+<ul>
+<li><strong>C/C++</strong>：性能高但容易出现数据竞争、死锁等问题</li>
+<li><strong>Go</strong>：goroutine 轻量但运行时开销大</li>
+<li><strong>Rust</strong>：零成本抽象 + 编译时安全保证 = 最佳选择！</li>
+</ul>
+<hr>
+<h2 id="-核心概念-14"><a class="header" href="#-核心概念-14">📖 核心概念</a></h2>
+<h3 id="1-线程-vs-进程"><a class="header" href="#1-线程-vs-进程">1. 线程 vs 进程</a></h3>
+<pre class="mermaid">graph TD
+    subgraph 进程A
+        T1A[主线程]
+        T2A[子线程1]
+        T3A[子线程2]
+        M1[内存空间]
+        T1A -.共享.-&gt; M1
+        T2A -.共享.-&gt; M1
+        T3A -.共享.-&gt; M1
+    end
+    
+    subgraph 进程B
+        T1B[主线程]
+        M2[内存空间]
+        T1B --&gt; M2
+    end
+    
+    style M1 fill:#ccffcc
+    style M2 fill:#ffcccc
+</pre>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">进程 (Process)</th><th style="text-align: left">线程 (Thread)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>内存空间</strong></td><td style="text-align: left">独立</td><td style="text-align: left">共享同一进程的内存</td></tr>
+<tr><td style="text-align: left"><strong>开销</strong></td><td style="text-align: left">重（MB 级）</td><td style="text-align: left">轻（KB 级）</td></tr>
+<tr><td style="text-align: left"><strong>通信</strong></td><td style="text-align: left">IPC（慢）</td><td style="text-align: left">共享内存（快但需要同步）</td></tr>
+<tr><td style="text-align: left"><strong>安全性</strong></td><td style="text-align: left">隔离性好</td><td style="text-align: left">需要手动保证线程安全</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="2-线程的生命周期"><a class="header" href="#2-线程的生命周期">2. 线程的生命周期</a></h3>
+<pre class="mermaid">sequenceDiagram
+    participant Main as 主线程
+    participant T as 子线程
+    
+    Main-&gt;&gt;Main: thread::spawn(闭包)
+    Main-&gt;&gt;T: 创建子线程
+    Note over Main,T: 两个线程并发执行
+    
+    par 主线程工作
+        Main-&gt;&gt;Main: 执行任务...
+    and 子线程工作
+        T-&gt;&gt;T: 执行闭包...
+    end
+    
+    alt 主线程先结束
+        Main-&gt;&gt;T: ❌ 强制终止子线程
+        Note over T: 未执行完也被终止
+    else 调用 join()
+        Main-&gt;&gt;T: 等待子线程完成
+        T--&gt;&gt;Main: ✅ 返回结果
+    end
+</pre>
+
+<hr>
+<h2 id="-代码示例-14"><a class="header" href="#-代码示例-14">💻 代码示例</a></h2>
+<h3 id="示例-1-基本线程创建"><a class="header" href="#示例-1-基本线程创建">示例 1: 基本线程创建</a></h3>
 <pre class="playground"><code class="language-rust">use std::thread;
 use std::time::Duration;
 
 fn main() {
-    thread::spawn(|| {
+    // 创建子线程
+    let handle = thread::spawn(|| {
         for i in 1..10 {
-            println!("hi number {} from the spawned thread!", i);
+            println!("🧵 子线程: number {}", i);
             thread::sleep(Duration::from_millis(1));
         }
     });
 
+    // 主线程继续执行
     for i in 1..5 {
-        println!("hi number {} from the main thread!", i);
+        println!("🚀 主线程: number {}", i);
         thread::sleep(Duration::from_millis(1));
     }
-}</code></pre>
-<p>注意：当主线程结束时，所有派生线程也会立即停止，不管它们是否执行完毕。</p>
-<h2 id="2-等待线程结束-join"><a class="header" href="#2-等待线程结束-join">2. 等待线程结束 (join)</a></h2>
-<p>为了确保派生线程执行完毕，我们可以保存 <code>spawn</code> 返回的 <code>JoinHandle</code>，并调用 <code>.join()</code>。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let handle = thread::spawn(|| {
-    // ...
-});
 
-handle.join().unwrap(); // 阻塞主线程直到 handle 代表的线程结束
-<span class="boring">}</span></code></pre>
-<h2 id="3-线程与-move-闭包"><a class="header" href="#3-线程与-move-闭包">3. 线程与 move 闭包</a></h2>
-<p>如果要在线程中使用主线程的数据，通常需要将数据的所有权<strong>移动 (move)</strong> 到线程中。</p>
+    // 等待子线程完成（重要！）
+    handle.join().unwrap();
+    
+    println!("✅ 所有线程完成");
+}</code></pre>
+<h3 id="示例-2-move-闭包---转移所有权"><a class="header" href="#示例-2-move-闭包---转移所有权">示例 2: move 闭包 - 转移所有权</a></h3>
 <pre class="playground"><code class="language-rust">use std::thread;
 
 fn main() {
     let v = vec![1, 2, 3];
 
-    // 强行将 v 的所有权移入闭包
+    // ✅ 使用 move 强制转移所有权
     let handle = thread::spawn(move || {
-        println!("Here's a vector: {:?}", v);
+        println!("📦 vector: {:?}", v);
     });
 
     handle.join().unwrap();
-    // println!("{:?}", v); // 错误！v 已经被移动了
 }</code></pre>
+<h3 id="示例-3-使用-joinhandle-获取返回值"><a class="header" href="#示例-3-使用-joinhandle-获取返回值">示例 3: 使用 JoinHandle 获取返回值</a></h3>
+<pre class="playground"><code class="language-rust">use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        42 // 返回计算结果
+    });
+
+    println!("⏳ 等待计算结果...");
+    let result = handle.join().unwrap();
+    println!("✨ 计算结果: {}", result);
+}</code></pre>
+<hr>
+<h2 id="-常见问题-faq-10"><a class="header" href="#-常见问题-faq-10">🤔 常见问题 FAQ</a></h2>
+<h3 id="q1-rust-线程-vs-go-goroutine-vs-c-thread"><a class="header" href="#q1-rust-线程-vs-go-goroutine-vs-c-thread">Q1: Rust 线程 vs Go goroutine vs C++ thread？</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">Rust std::thread</th><th style="text-align: left">Go goroutine</th><th style="text-align: left">C++ std::thread</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>模型</strong></td><td style="text-align: left">1:1 OS 线程</td><td style="text-align: left">M:N 绿色线程</td><td style="text-align: left">1:1 OS 线程</td></tr>
+<tr><td style="text-align: left"><strong>开销</strong></td><td style="text-align: left">~2MB</td><td style="text-align: left">~2KB</td><td style="text-align: left">~2MB</td></tr>
+<tr><td style="text-align: left"><strong>调度</strong></td><td style="text-align: left">OS 调度</td><td style="text-align: left">Go 运行时调度</td><td style="text-align: left">OS 调度</td></tr>
+<tr><td style="text-align: left"><strong>安全性</strong></td><td style="text-align: left">编译时保证</td><td style="text-align: left">运行时检查</td><td style="text-align: left">无保证</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="q2-join-会阻塞吗"><a class="header" href="#q2-join-会阻塞吗">Q2: join() 会阻塞吗？</a></h3>
+<p><strong>是的！</strong> <code>join()</code> 会阻塞当前线程直到目标线程结束。</p>
+<hr>
+<h2 id="-最佳实践-11"><a class="header" href="#-最佳实践-11">💡 最佳实践</a></h2>
+<ol>
+<li><strong>始终join()</strong>: 确保子线程完成或使用其他同步机制</li>
+<li><strong>线程命名</strong>: 使用 <code>Builder::new().name()</code> 便于调试</li>
+<li><strong>避免过度线程化</strong>: 线程不是免费的，每个约占 2MB 栈空间</li>
+</ol>
+<hr>
+<h2 id="-扩展阅读-14"><a class="header" href="#-扩展阅读-14">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">Rust Book: Fearless Concurrency</a></li>
+<li><a href="https://doc.rust-lang.org/std/thread/">std::thread 文档</a></li>
+</ul>
+<hr>
+<h2 id="-下一步-15"><a class="header" href="#-下一步-15">⏭️ 下一步</a></h2>
+<p><strong>下一节</strong>: <a href="Day16-30/23.MessagePassing/README.html">Day 23: 消息传递 (Message Passing)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-23-并发编程---消息传递-message-passing"><a class="header" href="#day-23-并发编程---消息传递-message-passing">Day 23: 并发编程 - 消息传递 (Message Passing)</a></h1>
 <p>Go 语言有一句名言：“不要通过共享内存来通信，而要通过通信来共享内存。” Rust 也支持这种方式，主要通过 <strong>Channel (通道)</strong> 来实现。</p>
@@ -7312,7 +7844,7 @@ docker run -p 6379:6379 mini-redis
 </tbody>
 </table>
 </div>
-<h2 id="下一步"><a class="header" href="#下一步">下一步</a></h2>
+<h2 id="下一步-1"><a class="header" href="#下一步-1">下一步</a></h2>
 <p>第四阶段到此结束！在接下来的第五阶段（Day 61-80），我们将进入 <strong>Web 开发实战</strong>，使用 Axum 或 Actix-web 构建完整的 RESTful API 应用。</p>
 <hr>
 <p><strong>恭喜完成 Mini-Redis 项目！</strong> 🎉</p>
@@ -8096,7 +8628,7 @@ async fn create_user(
 <li><a href="https://www.zero2prod.com">Rust Web 开发实战</a></li>
 <li><a href="https://docs.rs/tower">Tower 中间件指南</a></li>
 </ul>
-<h2 id="下一步-1"><a class="header" href="#下一步-1">下一步</a></h2>
+<h2 id="下一步-2"><a class="header" href="#下一步-2">下一步</a></h2>
 <p>Day 62 将深入学习 Axum 和 Actix-web 的核心特性，包括路由、提取器和响应类型。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-62-axumactix-web-入门"><a class="header" href="#day-62-axumactix-web-入门">Day 62: Axum/Actix-web 入门</a></h1>
@@ -8454,7 +8986,7 @@ curl -X POST http://localhost:3000/api/users \
 <li>实现错误处理中间件</li>
 <li>添加 CORS 支持</li>
 </ol>
-<h2 id="下一步-2"><a class="header" href="#下一步-2">下一步</a></h2>
+<h2 id="下一步-3"><a class="header" href="#下一步-3">下一步</a></h2>
 <p>Day 63 将学习高级路由和请求处理技术。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-63-路由与请求处理-1"><a class="header" href="#day-63-路由与请求处理-1">Day 63: 路由与请求处理</a></h1>
@@ -9029,7 +9561,7 @@ curl http://localhost:3000/api/users/1/posts
 <li>创建自定义提取器进行输入验证</li>
 <li>添加请求日志中间件</li>
 </ol>
-<h2 id="下一步-3"><a class="header" href="#下一步-3">下一步</a></h2>
+<h2 id="下一步-4"><a class="header" href="#下一步-4">下一步</a></h2>
 <p>Day 64 将学习中间件开发，包括日志、认证、CORS 等。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-64-中间件开发-1"><a class="header" href="#day-64-中间件开发-1">Day 64: 中间件开发</a></h1>
@@ -9622,7 +10154,7 @@ async fn main() {
 <li>添加请求体大小限制中间件</li>
 <li>创建性能监控中间件</li>
 </ol>
-<h2 id="下一步-4"><a class="header" href="#下一步-4">下一步</a></h2>
+<h2 id="下一步-5"><a class="header" href="#下一步-5">下一步</a></h2>
 <p>Day 65 将学习请求状态管理，包括应用状态、连接池等。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-65-请求状态管理-1"><a class="header" href="#day-65-请求状态管理-1">Day 65: 请求状态管理</a></h1>
@@ -10266,7 +10798,7 @@ async fn good_handler(State(state): State&lt;AppState&gt;) {
 <li>创建连接池监控端点</li>
 <li>实现分布式缓存</li>
 </ol>
-<h2 id="下一步-5"><a class="header" href="#下一步-5">下一步</a></h2>
+<h2 id="下一步-6"><a class="header" href="#下一步-6">下一步</a></h2>
 <p>Day 66 将学习数据库迁移，使用 SQLx 管理数据库schema变更。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-66-数据库迁移-migrations-1"><a class="header" href="#day-66-数据库迁移-migrations-1">Day 66: 数据库迁移 (Migrations)</a></h1>
@@ -10705,7 +11237,7 @@ CREATE TRIGGER update_posts_updated_at
 <li>实现数据归档迁移</li>
 <li>创建迁移测试套件</li>
 </ol>
-<h2 id="下一步-6"><a class="header" href="#下一步-6">下一步</a></h2>
+<h2 id="下一步-7"><a class="header" href="#下一步-7">下一步</a></h2>
 <p>Day 67 将学习 CRUD 操作实战，使用 SQLx 进行数据库操作。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-67-crud-操作实战-1"><a class="header" href="#day-67-crud-操作实战-1">Day 67: CRUD 操作实战</a></h1>
@@ -11209,7 +11741,7 @@ fn app(state: AppState) -&gt; Router {
 <li>创建审计日志系统</li>
 <li>实现批量操作 API</li>
 </ol>
-<h2 id="下一步-7"><a class="header" href="#下一步-7">下一步</a></h2>
+<h2 id="下一步-8"><a class="header" href="#下一步-8">下一步</a></h2>
 <p>Day 68 将学习复杂查询与事务，包括 JOIN、聚合和事务管理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-68-复杂查询与事务-1"><a class="header" href="#day-68-复杂查询与事务-1">Day 68: 复杂查询与事务</a></h1>
@@ -11453,7 +11985,7 @@ async fn get_post_statistics(pool: &amp;PgPool) -&gt; Result&lt;PostStatistics, 
 <li>优化慢查询</li>
 <li>实现数据导入导出</li>
 </ol>
-<h2 id="下一步-8"><a class="header" href="#下一步-8">下一步</a></h2>
+<h2 id="下一步-9"><a class="header" href="#下一步-9">下一步</a></h2>
 <p>Day 69 已完成 - JWT 用户认证系统。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-69-用户认证-jwt-1"><a class="header" href="#day-69-用户认证-jwt-1">Day 69: 用户认证 (JWT)</a></h1>
@@ -11966,7 +12498,7 @@ pub async fn reset_password(
 <li>添加 OAuth2 登录</li>
 <li>实现多因素认证 (MFA)</li>
 </ol>
-<h2 id="下一步-9"><a class="header" href="#下一步-9">下一步</a></h2>
+<h2 id="下一步-10"><a class="header" href="#下一步-10">下一步</a></h2>
 <p>Day 70 将学习基于角色的访问控制 (RBAC)，实现更细粒度的权限管理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-70-权限控制-rbac-1"><a class="header" href="#day-70-权限控制-rbac-1">Day 70: 权限控制 (RBAC)</a></h1>
@@ -12621,7 +13153,7 @@ curl -X POST http://localhost:3000/api/posts \
 <li>创建权限管理 API</li>
 <li>添加权限缓存机制</li>
 </ol>
-<h2 id="下一步-10"><a class="header" href="#下一步-10">下一步</a></h2>
+<h2 id="下一步-11"><a class="header" href="#下一步-11">下一步</a></h2>
 <p>Day 71 将学习模板引擎，实现服务端渲染。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-71-模板引擎-askamatera-1"><a class="header" href="#day-71-模板引擎-askamatera-1">Day 71: 模板引擎 (Askama/Tera)</a></h1>
@@ -12805,7 +13337,7 @@ async fn blog_post(
 <li>实现分页组件</li>
 <li>创建可复用的模板片段</li>
 </ol>
-<h2 id="下一步-11"><a class="header" href="#下一步-11">下一步</a></h2>
+<h2 id="下一步-12"><a class="header" href="#下一步-12">下一步</a></h2>
 <p>Day 72 将学习 WebAssembly (WASM) 简介。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-72-webassembly-wasm-简介-1"><a class="header" href="#day-72-webassembly-wasm-简介-1">Day 72: WebAssembly (WASM) 简介</a></h1>
@@ -12939,7 +13471,7 @@ pub fn grayscale(data: &amp;mut [u8]) {
 <li>创建加密工具</li>
 <li>实现数据可视化</li>
 </ol>
-<h2 id="下一步-12"><a class="header" href="#下一步-12">下一步</a></h2>
+<h2 id="下一步-13"><a class="header" href="#下一步-13">下一步</a></h2>
 <p>Day 73 将学习前端集成实战。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-73-前端集成实战-1"><a class="header" href="#day-73-前端集成实战-1">Day 73: 前端集成实战</a></h1>
@@ -12988,7 +13520,7 @@ let app = Router::new()
 <span class="boring">}</span></code></pre>
 <h3 id="前端-js"><a class="header" href="#前端-js">前端 (JS)</a></h3>
 <p>前端使用 HTML5 History API 实现无刷新跳转，并在页面加载时根据 URL 渲染不同组件。</p>
-<h2 id="下一步-13"><a class="header" href="#下一步-13">下一步</a></h2>
+<h2 id="下一步-14"><a class="header" href="#下一步-14">下一步</a></h2>
 <p>Day 74 将学习 API 文档生成 (OpenAPI)，为前后端协作提供更好的文档支持。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-74-api-文档生成-openapi-1"><a class="header" href="#day-74-api-文档生成-openapi-1">Day 74: API 文档生成 (OpenAPI)</a></h1>
@@ -13074,7 +13606,7 @@ cargo run
 <li>添加一个 <code>DELETE /users/{id}</code> 接口，并为其编写文档，注意处理 404 响应。</li>
 <li>尝试使用 <code>SecurityScheme</code> 为 API 添加 JWT 认证描述。</li>
 </ol>
-<h2 id="下一步-14"><a class="header" href="#下一步-14">下一步</a></h2>
+<h2 id="下一步-15"><a class="header" href="#下一步-15">下一步</a></h2>
 <p>Day 75 将学习容器化部署 (Docker)。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-75-容器化部署-docker-1"><a class="header" href="#day-75-容器化部署-docker-1">Day 75: 容器化部署 (Docker)</a></h1>
@@ -13133,7 +13665,7 @@ cargo run
 <li>尝试使用 <code>distroless</code> 镜像作为基础镜像 (<code>gcr.io/distroless/cc-debian12</code>) 以进一步减小体积并提高安全性。</li>
 <li>编写 GitHub Actions 脚本，自动构建并推送镜像到 Docker Hub 或 GHCR。</li>
 </ol>
-<h2 id="下一步-15"><a class="header" href="#下一步-15">下一步</a></h2>
+<h2 id="下一步-16"><a class="header" href="#下一步-16">下一步</a></h2>
 <p>Day 76-80 将开始完整的博客系统项目实战。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-76-博客系统---需求分析与设计"><a class="header" href="#day-76-博客系统---需求分析与设计">Day 76: 博客系统 - 需求分析与设计</a></h1>
@@ -13145,7 +13677,7 @@ cargo run
 <li>架构设计</li>
 <li>技术选型</li>
 </ul>
-<h2 id="下一步-16"><a class="header" href="#下一步-16">下一步</a></h2>
+<h2 id="下一步-17"><a class="header" href="#下一步-17">下一步</a></h2>
 <p>Day 77 将实现核心业务逻辑。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-77-博客系统---核心业务实现"><a class="header" href="#day-77-博客系统---核心业务实现">Day 77: 博客系统 - 核心业务实现</a></h1>
@@ -13157,7 +13689,7 @@ cargo run
 <li>评论服务实现</li>
 <li>标签服务实现</li>
 </ul>
-<h2 id="下一步-17"><a class="header" href="#下一步-17">下一步</a></h2>
+<h2 id="下一步-18"><a class="header" href="#下一步-18">下一步</a></h2>
 <p>Day 78 将开发 API 接口。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-78-博客系统---api-接口开发"><a class="header" href="#day-78-博客系统---api-接口开发">Day 78: 博客系统 - API 接口开发</a></h1>
@@ -13169,7 +13701,7 @@ cargo run
 <li>请求验证</li>
 <li>响应格式化</li>
 </ul>
-<h2 id="下一步-18"><a class="header" href="#下一步-18">下一步</a></h2>
+<h2 id="下一步-19"><a class="header" href="#下一步-19">下一步</a></h2>
 <p>Day 79 将进行测试与优化。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-79-博客系统---测试与优化"><a class="header" href="#day-79-博客系统---测试与优化">Day 79: 博客系统 - 测试与优化</a></h1>
@@ -13181,7 +13713,7 @@ cargo run
 <li>API 测试</li>
 <li>性能优化</li>
 </ul>
-<h2 id="下一步-19"><a class="header" href="#下一步-19">下一步</a></h2>
+<h2 id="下一步-20"><a class="header" href="#下一步-20">下一步</a></h2>
 <p>Day 80 将完成项目总结。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-80-博客系统完整版"><a class="header" href="#day-80-博客系统完整版">Day 80: 博客系统完整版</a></h1>
@@ -13912,7 +14444,7 @@ cargo bench
 <pre><code class="language-bash">cd Day81-90/81.OSConcepts
 cargo run
 </code></pre>
-<h2 id="下一步-20"><a class="header" href="#下一步-20">下一步</a></h2>
+<h2 id="下一步-21"><a class="header" href="#下一步-21">下一步</a></h2>
 <p>Day 82 将深入学习文件系统操作。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-82-文件系统操作深入-1"><a class="header" href="#day-82-文件系统操作深入-1">Day 82: 文件系统操作深入</a></h1>
@@ -14019,7 +14551,7 @@ cargo run
 <li>尝试使用 <code>notify</code> crate 监听文件系统的变化（如文件创建、修改）。</li>
 <li>编写一个程序，使用 mmap 实现大文件的高效复制。</li>
 </ol>
-<h2 id="下一步-21"><a class="header" href="#下一步-21">下一步</a></h2>
+<h2 id="下一步-22"><a class="header" href="#下一步-22">下一步</a></h2>
 <p>Day 83 将深入讲解进程管理与信号处理。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-83-进程管理与信号处理-1"><a class="header" href="#day-83-进程管理与信号处理-1">Day 83: 进程管理与信号处理</a></h1>
@@ -14124,7 +14656,7 @@ cargo run -- daemon
 <li>实现一个能够优雅关闭（Graceful Shutdown）的 Web 服务器原型，接收 SIGTERM 信号后停止接受新连接并等待现有请求完成。</li>
 <li>尝试使用 Unix Domain Socket (<code>std::os::unix::net::UnixStream</code>) 进行更高效的本地进程间通信。</li>
 </ol>
-<h2 id="下一步-22"><a class="header" href="#下一步-22">下一步</a></h2>
+<h2 id="下一步-23"><a class="header" href="#下一步-23">下一步</a></h2>
 <p>Day 84 将深入讲解原始套接字 (Raw Sockets) 与网络协议实现。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-84-原始套接字-raw-sockets-1"><a class="header" href="#day-84-原始套接字-raw-sockets-1">Day 84: 原始套接字 (Raw Sockets)</a></h1>
@@ -14148,7 +14680,7 @@ cargo run -- daemon
 <pre><code class="language-bash">cd Day81-90/84.RawSockets
 cargo run
 </code></pre>
-<h2 id="下一步-23"><a class="header" href="#下一步-23">下一步</a></h2>
+<h2 id="下一步-24"><a class="header" href="#下一步-24">下一步</a></h2>
 <p>Day 85 将学习嵌入式 Rust 简介。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-85-嵌入式-rust-简介-embedded-rust-introduction"><a class="header" href="#day-85-嵌入式-rust-简介-embedded-rust-introduction">Day 85: 嵌入式 Rust 简介 (Embedded Rust Introduction)</a></h1>
@@ -14619,7 +15151,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <li>实现并行版本的数据处理</li>
 <li>创建完整的基准测试套件</li>
 </ol>
-<h2 id="下一步-24"><a class="header" href="#下一步-24">下一步</a></h2>
+<h2 id="下一步-25"><a class="header" href="#下一步-25">下一步</a></h2>
 <p>Day 87 将学习内存优化技巧，包括零拷贝、内存池等。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-87-内存优化技巧-1"><a class="header" href="#day-87-内存优化技巧-1">Day 87: 内存优化技巧</a></h1>
@@ -14631,7 +15163,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <li>内存池</li>
 <li>自定义分配器</li>
 </ul>
-<h2 id="下一步-25"><a class="header" href="#下一步-25">下一步</a></h2>
+<h2 id="下一步-26"><a class="header" href="#下一步-26">下一步</a></h2>
 <p>Day 88 将学习 SIMD 与底层优化。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-88-simd-与底层优化-1"><a class="header" href="#day-88-simd-与底层优化-1">Day 88: SIMD 与底层优化</a></h1>
@@ -14643,7 +15175,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <li>编译器优化</li>
 <li>内联汇编</li>
 </ul>
-<h2 id="下一步-26"><a class="header" href="#下一步-26">下一步</a></h2>
+<h2 id="下一步-27"><a class="header" href="#下一步-27">下一步</a></h2>
 <p>Day 89 将学习持续集成流水线。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-89-持续集成流水线-1"><a class="header" href="#day-89-持续集成流水线-1">Day 89: 持续集成流水线</a></h1>
@@ -14655,7 +15187,7 @@ fn compare_implementations(c: &amp;mut Criterion) {
 <li>代码覆盖率</li>
 <li>自动发布</li>
 </ul>
-<h2 id="下一步-27"><a class="header" href="#下一步-27">下一步</a></h2>
+<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
 <p>Day 90 将学习 Rust 编译优化与配置。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-90-rust-编译优化与配置-compiler-optimization"><a class="header" href="#day-90-rust-编译优化与配置-compiler-optimization">Day 90: Rust 编译优化与配置 (Compiler Optimization)</a></h1>
@@ -15605,7 +16137,7 @@ cargo build
 cargo build
 cargo test
 </code></pre>
-<h2 id="下一步-28"><a class="header" href="#下一步-28">下一步</a></h2>
+<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
 <p>Day 94 将完善 <code>TaskScheduler</code> 的 gRPC 接口，并实现 <code>Dispatcher</code> 的实际轮询逻辑。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-94-核心模块开发-二"><a class="header" href="#day-94-核心模块开发-二">Day 94: 核心模块开发 (二)</a></h1>
@@ -15643,7 +16175,7 @@ cargo run
 # 在另一个终端运行测试客户端
 cargo run --example client
 </code></pre>
-<h2 id="下一步-29"><a class="header" href="#下一步-29">下一步</a></h2>
+<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
 <p>Day 95 将集成 Web API (Axum) 和认证模块，对外提供 HTTP 接口。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-95-外围模块与集成-1"><a class="header" href="#day-95-外围模块与集成-1">Day 95: 外围模块与集成</a></h1>
@@ -15695,7 +16227,7 @@ curl -X POST http://localhost:3000/api/login -H "Content-Type: application/json"
 # 2. 获取 Metrics
 curl http://localhost:3000/metrics
 </code></pre>
-<h2 id="下一步-30"><a class="header" href="#下一步-30">下一步</a></h2>
+<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
 <p>Day 96 将进行性能测试与调优，引入 SQLite 持久化并优化并发性能。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-96-性能测试与调优-1"><a class="header" href="#day-96-性能测试与调优-1">Day 96: 性能测试与调优</a></h1>
@@ -15767,7 +16299,7 @@ cargo run
 # 访问 Swagger UI
 # 打开浏览器访问: http://localhost:3000/swagger-ui/
 </code></pre>
-<h2 id="下一步-31"><a class="header" href="#下一步-31">下一步</a></h2>
+<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
 <p>Day 98 将进行发布准备，包括版本管理、Docker 镜像构建和发布清单检查。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-98-发布准备与版本管理-1"><a class="header" href="#day-98-发布准备与版本管理-1">Day 98: 发布准备与版本管理</a></h1>
@@ -15807,7 +16339,7 @@ docker build -t dtask:1.0.0 .
 <h3 id="运行-docker-容器"><a class="header" href="#运行-docker-容器">运行 Docker 容器</a></h3>
 <pre><code class="language-bash">docker run -p 3000:3000 -p 50051:50051 dtask:1.0.0
 </code></pre>
-<h2 id="下一步-32"><a class="header" href="#下一步-32">下一步</a></h2>
+<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
 <p>Day 99 将对整个项目进行复盘和展示。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-99-项目展示与复盘-1"><a class="header" href="#day-99-项目展示与复盘-1">Day 99: 项目展示与复盘</a></h1>
@@ -15841,7 +16373,7 @@ docker build -t dtask:1.0.0 .
 <li><a href="Day91-100/99.Presentation/PRESENTATION.html">项目演示 (PRESENTATION.md)</a></li>
 <li><a href="Day91-100/99.Presentation/REVIEW.html">技术复盘 (REVIEW.md)</a></li>
 </ul>
-<h2 id="下一步-33"><a class="header" href="#下一步-33">下一步</a></h2>
+<h2 id="下一步-34"><a class="header" href="#下一步-34">下一步</a></h2>
 <p>Day 100 将庆祝完成 100 天 Rust 挑战，并展望未来。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-100-成为-rustacean-之路-1"><a class="header" href="#day-100-成为-rustacean-之路-1">Day 100: 成为 Rustacean 之路</a></h1>

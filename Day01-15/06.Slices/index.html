@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-db38cd84.js";
+            window.path_to_searchindex_js = "../../searchindex-dcae11b0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -327,9 +327,7 @@ fn main() {
 因为 <code>String</code> 实现了 <code>Deref&lt;Target=str&gt;</code>，所以 Rust 可以自动把 <code>&amp;String</code> 当作 <code>&amp;str</code> 用。反之则不行。</p>
 <hr>
 <h2 id="-代码示例实现-first_word"><a class="header" href="#-代码示例实现-first_word">💻 代码示例：实现 first_word</a></h2>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>fn first_word(s: &amp;str) -&gt; &amp;str {
+<pre class="playground"><code class="language-rust">fn first_word(s: &amp;str) -&gt; &amp;str {
     let bytes = s.as_bytes(); // 转换为字节数组以便逐个字节检查
 
     for (i, &amp;item) in bytes.iter().enumerate() {
@@ -341,7 +339,194 @@ fn main() {
 
     &amp;s[..] // 没找到空格，意味着整个字符串就是一个单词
 }
+
+fn main() {
+    let my_string = String::from("hello world");
+    
+    // 对 String 取切片
+    let word = first_word(&amp;my_string[..]);
+    println!("第一个单词: {}", word); // "hello"
+    
+    // 对字符串字面值直接使用
+    let word = first_word("rust programming");
+    println!("第一个单词: {}", word); // "rust"
+}</code></pre>
+<hr>
+<h2 id="-实战应用"><a class="header" href="#-实战应用">🚀 实战应用</a></h2>
+<h3 id="场景1解析命令行参数"><a class="header" href="#场景1解析命令行参数">场景1：解析命令行参数</a></h3>
+<p>切片常用于处理命令行参数：</p>
+<pre class="playground"><code class="language-rust">fn parse_command(input: &amp;str) -&gt; (&amp;str, &amp;str) {
+    let bytes = input.as_bytes();
+    
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return (&amp;input[..i], &amp;input[i+1..]); // 返回命令和参数
+        }
+    }
+    
+    (input, "") // 没有参数
+}
+
+fn main() {
+    let (cmd, args) = parse_command("run --verbose");
+    println!("命令: {}, 参数: {}", cmd, args);
+    // 输出: 命令: run, 参数: --verbose
+}</code></pre>
+<h3 id="场景2数据窗口处理"><a class="header" href="#场景2数据窗口处理">场景2：数据窗口处理</a></h3>
+<p>使用切片高效处理大数组的一部分：</p>
+<pre class="playground"><code class="language-rust">fn process_chunk(data: &amp;[i32]) -&gt; i32 {
+    data.iter().sum() // 计算和
+}
+
+fn main() {
+    let large_array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    // 处理前5个元素
+    let sum1 = process_chunk(&amp;large_array[..5]);
+    println!("前5个元素的和: {}", sum1); // 15
+    
+    // 处理后5个元素
+    let sum2 = process_chunk(&amp;large_array[5..]);
+    println!("后5个元素的和: {}", sum2); // 40
+}</code></pre>
+<h3 id="场景3字符串分割"><a class="header" href="#场景3字符串分割">场景3：字符串分割</a></h3>
+<pre class="playground"><code class="language-rust">fn split_by_char(s: &amp;str, delimiter: char) -&gt; Vec&lt;&amp;str&gt; {
+    let mut result = Vec::new();
+    let mut start = 0;
+    
+    for (i, c) in s.char_indices() {
+        if c == delimiter {
+            result.push(&amp;s[start..i]);
+            start = i + delimiter.len_utf8(); // UTF-8字符可能占多个字节
+        }
+    }
+    
+    // 添加最后一部分
+    result.push(&amp;s[start..]);
+    result
+}
+
+fn main() {
+    let parts = split_by_char("Rust,Go,Python", ',');
+    println!("{:?}", parts); // ["Rust", "Go", "Python"]
+}</code></pre>
+<hr>
+<h2 id="-深入理解切片-vs-所有权"><a class="header" href="#-深入理解切片-vs-所有权">🔍 深入理解：切片 vs 所有权</a></h2>
+<pre class="mermaid">sequenceDiagram
+    participant Main as main函数
+    participant S as String (s)
+    participant Slice as 切片 (word)
+    
+    Main-&gt;&gt;S: let s = String::from("hello")
+    Note over S: 拥有堆数据
+    
+    Main-&gt;&gt;Slice: let word = &amp;s[0..5]
+    Note over Slice: 借用部分数据&lt;br/&gt;不拥有所有权
+    
+    Note over Main,Slice: ❌ 不能修改 s&lt;br/&gt;因为 word 还在借用
+    
+    Main-&gt;&gt;Slice: 使用 word
+    Note over Slice: word 作用域结束
+    
+    Main-&gt;&gt;S: 现在可以修改 s
+    Note over S: 借用已结束
+</pre>
+
+<p><strong>关键点</strong>：</p>
+<ul>
+<li>切片持有借用期间，原数据不能被修改</li>
+<li>这确保了切片始终有效</li>
+<li>借用检查器会在编译期验证这一点</li>
+</ul>
+<hr>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">❓ 常见问题 FAQ</a></h2>
+<h3 id="q1-为什么-01-对中文字符串会崩溃"><a class="header" href="#q1-为什么-01-对中文字符串会崩溃">Q1: 为什么 <code>[0..1]</code> 对中文字符串会崩溃？</a></h3>
+<p><strong>A</strong>: Rust 的字符串是 UTF-8 编码的。一个中文字符可能占 3 个字节。切片必须在字符边界上：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = "你好";
+// let slice = &amp;s[0..1]; // ❌ Panic! 切在字符中间
+
+// 正确做法1：按字符迭代
+for (i, c) in s.char_indices() {
+    println!("{}: {}", i, c); // 0: 你, 3: 好
+}
+
+// 正确做法2：使用完整字节范围
+let first_char = &amp;s[0..3]; // ✅ "你"
 <span class="boring">}</span></code></pre>
+<h3 id="q2-切片和引用有什么区别"><a class="header" href="#q2-切片和引用有什么区别">Q2: 切片和引用有什么区别？</a></h3>
+<p><strong>A</strong>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">引用 <code>&amp;T</code></th><th style="text-align: left">切片 <code>&amp;[T]</code> / <code>&amp;str</code></th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left">内容</td><td style="text-align: left">指向单个值</td><td style="text-align: left">指向连续序列</td></tr>
+<tr><td style="text-align: left">大小</td><td style="text-align: left">固定（指针大小）</td><td style="text-align: left">胖指针（ptr + len）</td></tr>
+<tr><td style="text-align: left">示例</td><td style="text-align: left"><code>&amp;String</code>, <code>&amp;i32</code></td><td style="text-align: left"><code>&amp;[i32]</code>, <code>&amp;str</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="q3-什么时候用-to_string-vs-to_owned"><a class="header" href="#q3-什么时候用-to_string-vs-to_owned">Q3: 什么时候用 <code>to_string()</code> vs <code>to_owned()</code>？</a></h3>
+<p><strong>A</strong>: 两者都可以把 <code>&amp;str</code> 转换为 <code>String</code>：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s: &amp;str = "hello";
+
+let s1 = s.to_string();  // 语义清晰：转为字符串
+let s2 = s.to_owned();   // 语义：获取所有权的副本
+
+// 性能相同，推荐 to_string() 因为更明确
+<span class="boring">}</span></code></pre>
+<h3 id="q4-为什么函数参数推荐用-str-而不是-string"><a class="header" href="#q4-为什么函数参数推荐用-str-而不是-string">Q4: 为什么函数参数推荐用 <code>&amp;str</code> 而不是 <code>&amp;String</code>？</a></h3>
+<p><strong>A</strong>:</p>
+<pre class="playground"><code class="language-rust">// ❌ 限制性强
+fn process(s: &amp;String) {
+    println!("{}", s);
+}
+
+// ✅ 通用性强
+fn process(s: &amp;str) {
+    println!("{}", s);
+}
+
+fn main() {
+    let owned = String::from("hello");
+    let literal = "world";
+    
+    // process(&amp;owned);  // ❌ 第一个版本：需要 &amp;String
+    // process(literal); // ❌ 第一个版本：不接受 &amp;str
+    
+    process(&amp;owned);  // ✅ 第二个版本：自动解引用
+    process(literal); // ✅ 第二个版本：直接接受
+}</code></pre>
+<hr>
+<h2 id="-最佳实践总结"><a class="header" href="#-最佳实践总结">💡 最佳实践总结</a></h2>
+<ol>
+<li><strong>函数参数</strong>: 优先使用 <code>&amp;str</code> 和 <code>&amp;[T]</code> 而非 <code>&amp;String</code> 和 <code>&amp;Vec&lt;T&gt;</code></li>
+<li><strong>UTF-8 安全</strong>: 使用 <code>.char_indices()</code> 而不是直接索引</li>
+<li><strong>Range 简写</strong>: <code>..n</code> 代替 <code>0..n</code>，<code>n..</code> 代替 <code>n..len</code></li>
+<li><strong>全切片</strong>: 需要传递整个集合时使用 <code>&amp;s[..]</code> 或直接 <code>&amp;s</code></li>
+<li><strong>性能</strong>: 切片是零成本抽象，不涉及内存复制</li>
+</ol>
+<hr>
+<h2 id="-知识点速记"><a class="header" href="#-知识点速记">🎯 知识点速记</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">概念</th><th style="text-align: left">说明</th><th style="text-align: left">示例</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>切片类型</strong></td><td style="text-align: left"><code>&amp;[T]</code> (数组切片), <code>&amp;str</code> (字符串切片)</td><td style="text-align: left"><code>&amp;[1,2,3]</code>, <code>&amp;"hello"</code></td></tr>
+<tr><td style="text-align: left"><strong>胖指针</strong></td><td style="text-align: left">ptr + len 两部分</td><td style="text-align: left">占 2 个字长</td></tr>
+<tr><td style="text-align: left"><strong>Range</strong></td><td style="text-align: left"><code>a..b</code> 不含b, <code>a..=b</code> 含b</td><td style="text-align: left"><code>0..5</code>, <code>0..=4</code></td></tr>
+<tr><td style="text-align: left"><strong>UTF-8</strong></td><td style="text-align: left">必须在字符边界切片</td><td style="text-align: left">用 <code>.char_indices()</code></td></tr>
+<tr><td style="text-align: left"><strong>借用规则</strong></td><td style="text-align: left">切片持续期间不能修改原数据</td><td style="text-align: left">编译期检查</td></tr>
+</tbody>
+</table>
+</div>
 <hr>
 <h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
 <p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>

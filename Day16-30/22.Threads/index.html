@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-db38cd84.js";
+            window.path_to_searchindex_js = "../../searchindex-dcae11b0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,51 +178,185 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-22-并发编程---线程-threads"><a class="header" href="#day-22-并发编程---线程-threads">Day 22: 并发编程 - 线程 (Threads)</a></h1>
-<p>Rust 中的并发编程非常安全，因为 Rust 的所有权和类型系统会在编译时捕获许多并发错误（如数据竞争）。</p>
-<h2 id="1-创建线程"><a class="header" href="#1-创建线程">1. 创建线程</a></h2>
-<p>使用 <code>std::thread::spawn</code> 创建新线程。</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Difficulty-⭐⭐⭐⭐-orange?style=flat-square" alt="Difficulty">
+  <img src="https://img.shields.io/badge/Topic-Concurrency-blue?style=flat-square" alt="Topic">
+  <img src="https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&amp;style=flat-square" alt="Rust">
+</p>
+
+<p>Rust 中的并发编程非常安全，因为 Rust 的所有权和类型系统会在<strong>编译时</strong>捕获许多并发错误（如数据竞争）。这让 Rust 成为编写高性能并发程序的理想语言。</p>
+<hr>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>理解线程的基本概念和工作原理</li>
+<li>掌握使用 <code>std::thread::spawn</code> 创建和管理线程</li>
+<li>学会使用 <code>Join Handle</code> 等待线程完成</li>
+<li>理解 <code>move</code> 闭包在多线程中的作用</li>
+<li>掌握线程安全的数据传递方式</li>
+<li>了解线程的性能开销和使用场景</li>
+</ul>
+<hr>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<p>并发编程是现代应用程序的核心：</p>
+<ol>
+<li><strong>充分利用硬件</strong>：现代 CPU 都是多核的，单线程程序无法充分利用硬件性能</li>
+<li><strong>提升响应性</strong>：将耗时任务放到后台线程，主线程可以继续响应用户</li>
+<li><strong>提高吞吐量</strong>：并行处理多个请求（如 Web 服务器）</li>
+<li><strong>Rust 的优势</strong>：编译时保证线程安全，没有数据竞争！</li>
+</ol>
+<p><strong>与其他语言对比</strong>：</p>
+<ul>
+<li><strong>C/C++</strong>：性能高但容易出现数据竞争、死锁等问题</li>
+<li><strong>Go</strong>：goroutine 轻量但运行时开销大</li>
+<li><strong>Rust</strong>：零成本抽象 + 编译时安全保证 = 最佳选择！</li>
+</ul>
+<hr>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-线程-vs-进程"><a class="header" href="#1-线程-vs-进程">1. 线程 vs 进程</a></h3>
+<pre class="mermaid">graph TD
+    subgraph 进程A
+        T1A[主线程]
+        T2A[子线程1]
+        T3A[子线程2]
+        M1[内存空间]
+        T1A -.共享.-&gt; M1
+        T2A -.共享.-&gt; M1
+        T3A -.共享.-&gt; M1
+    end
+    
+    subgraph 进程B
+        T1B[主线程]
+        M2[内存空间]
+        T1B --&gt; M2
+    end
+    
+    style M1 fill:#ccffcc
+    style M2 fill:#ffcccc
+</pre>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">进程 (Process)</th><th style="text-align: left">线程 (Thread)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>内存空间</strong></td><td style="text-align: left">独立</td><td style="text-align: left">共享同一进程的内存</td></tr>
+<tr><td style="text-align: left"><strong>开销</strong></td><td style="text-align: left">重（MB 级）</td><td style="text-align: left">轻（KB 级）</td></tr>
+<tr><td style="text-align: left"><strong>通信</strong></td><td style="text-align: left">IPC（慢）</td><td style="text-align: left">共享内存（快但需要同步）</td></tr>
+<tr><td style="text-align: left"><strong>安全性</strong></td><td style="text-align: left">隔离性好</td><td style="text-align: left">需要手动保证线程安全</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="2-线程的生命周期"><a class="header" href="#2-线程的生命周期">2. 线程的生命周期</a></h3>
+<pre class="mermaid">sequenceDiagram
+    participant Main as 主线程
+    participant T as 子线程
+    
+    Main-&gt;&gt;Main: thread::spawn(闭包)
+    Main-&gt;&gt;T: 创建子线程
+    Note over Main,T: 两个线程并发执行
+    
+    par 主线程工作
+        Main-&gt;&gt;Main: 执行任务...
+    and 子线程工作
+        T-&gt;&gt;T: 执行闭包...
+    end
+    
+    alt 主线程先结束
+        Main-&gt;&gt;T: ❌ 强制终止子线程
+        Note over T: 未执行完也被终止
+    else 调用 join()
+        Main-&gt;&gt;T: 等待子线程完成
+        T--&gt;&gt;Main: ✅ 返回结果
+    end
+</pre>
+
+<hr>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-1-基本线程创建"><a class="header" href="#示例-1-基本线程创建">示例 1: 基本线程创建</a></h3>
 <pre class="playground"><code class="language-rust">use std::thread;
 use std::time::Duration;
 
 fn main() {
-    thread::spawn(|| {
+    // 创建子线程
+    let handle = thread::spawn(|| {
         for i in 1..10 {
-            println!("hi number {} from the spawned thread!", i);
+            println!("🧵 子线程: number {}", i);
             thread::sleep(Duration::from_millis(1));
         }
     });
 
+    // 主线程继续执行
     for i in 1..5 {
-        println!("hi number {} from the main thread!", i);
+        println!("🚀 主线程: number {}", i);
         thread::sleep(Duration::from_millis(1));
     }
-}</code></pre>
-<p>注意：当主线程结束时，所有派生线程也会立即停止，不管它们是否执行完毕。</p>
-<h2 id="2-等待线程结束-join"><a class="header" href="#2-等待线程结束-join">2. 等待线程结束 (join)</a></h2>
-<p>为了确保派生线程执行完毕，我们可以保存 <code>spawn</code> 返回的 <code>JoinHandle</code>，并调用 <code>.join()</code>。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let handle = thread::spawn(|| {
-    // ...
-});
 
-handle.join().unwrap(); // 阻塞主线程直到 handle 代表的线程结束
-<span class="boring">}</span></code></pre>
-<h2 id="3-线程与-move-闭包"><a class="header" href="#3-线程与-move-闭包">3. 线程与 move 闭包</a></h2>
-<p>如果要在线程中使用主线程的数据，通常需要将数据的所有权<strong>移动 (move)</strong> 到线程中。</p>
+    // 等待子线程完成（重要！）
+    handle.join().unwrap();
+    
+    println!("✅ 所有线程完成");
+}</code></pre>
+<h3 id="示例-2-move-闭包---转移所有权"><a class="header" href="#示例-2-move-闭包---转移所有权">示例 2: move 闭包 - 转移所有权</a></h3>
 <pre class="playground"><code class="language-rust">use std::thread;
 
 fn main() {
     let v = vec![1, 2, 3];
 
-    // 强行将 v 的所有权移入闭包
+    // ✅ 使用 move 强制转移所有权
     let handle = thread::spawn(move || {
-        println!("Here's a vector: {:?}", v);
+        println!("📦 vector: {:?}", v);
     });
 
     handle.join().unwrap();
-    // println!("{:?}", v); // 错误！v 已经被移动了
 }</code></pre>
+<h3 id="示例-3-使用-joinhandle-获取返回值"><a class="header" href="#示例-3-使用-joinhandle-获取返回值">示例 3: 使用 JoinHandle 获取返回值</a></h3>
+<pre class="playground"><code class="language-rust">use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        42 // 返回计算结果
+    });
+
+    println!("⏳ 等待计算结果...");
+    let result = handle.join().unwrap();
+    println!("✨ 计算结果: {}", result);
+}</code></pre>
+<hr>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 FAQ</a></h2>
+<h3 id="q1-rust-线程-vs-go-goroutine-vs-c-thread"><a class="header" href="#q1-rust-线程-vs-go-goroutine-vs-c-thread">Q1: Rust 线程 vs Go goroutine vs C++ thread？</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">Rust std::thread</th><th style="text-align: left">Go goroutine</th><th style="text-align: left">C++ std::thread</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>模型</strong></td><td style="text-align: left">1:1 OS 线程</td><td style="text-align: left">M:N 绿色线程</td><td style="text-align: left">1:1 OS 线程</td></tr>
+<tr><td style="text-align: left"><strong>开销</strong></td><td style="text-align: left">~2MB</td><td style="text-align: left">~2KB</td><td style="text-align: left">~2MB</td></tr>
+<tr><td style="text-align: left"><strong>调度</strong></td><td style="text-align: left">OS 调度</td><td style="text-align: left">Go 运行时调度</td><td style="text-align: left">OS 调度</td></tr>
+<tr><td style="text-align: left"><strong>安全性</strong></td><td style="text-align: left">编译时保证</td><td style="text-align: left">运行时检查</td><td style="text-align: left">无保证</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="q2-join-会阻塞吗"><a class="header" href="#q2-join-会阻塞吗">Q2: join() 会阻塞吗？</a></h3>
+<p><strong>是的！</strong> <code>join()</code> 会阻塞当前线程直到目标线程结束。</p>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>始终join()</strong>: 确保子线程完成或使用其他同步机制</li>
+<li><strong>线程命名</strong>: 使用 <code>Builder::new().name()</code> 便于调试</li>
+<li><strong>避免过度线程化</strong>: 线程不是免费的，每个约占 2MB 栈空间</li>
+</ol>
+<hr>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">Rust Book: Fearless Concurrency</a></li>
+<li><a href="https://doc.rust-lang.org/std/thread/">std::thread 文档</a></li>
+</ul>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p><strong>下一节</strong>: <a href="../23.MessagePassing/README.html">Day 23: 消息传递 (Message Passing)</a></p>
 
                     </main>
 
