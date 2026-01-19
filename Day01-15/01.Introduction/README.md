@@ -35,13 +35,13 @@ Rust 是一门赋予每个人构建可靠且高效软件能力的系统编程语
 
 ```mermaid
 quadrantChart
-    title 编程语言权衡图
-    x-axis 低控制力 (High Level) --> 高控制力 (Low Level)
-    y-axis 低安全性 (Risky) --> 高安全性 (Safe)
-    quadrant-1 理想之选 (Rust)
-    quadrant-2 安全但受限 (Java/Go/Python)
-    quadrant-3 灵活但危险 (Assembly)
-    quadrant-4 强大但易错 (C/C++)
+    title "编程语言权衡图"
+    x-axis "低控制力 (High Level)" --> "高控制力 (Low Level)"
+    y-axis "低安全性 (Risky)" --> "高安全性 (Safe)"
+    quadrant-1 "理想之选 (Rust)"
+    quadrant-2 "安全但受限 (Java/Go/Python)"
+    quadrant-3 "灵活但危险 (Assembly)"
+    quadrant-4 "强大但易错 (C/C++)"
     "C/C++": [0.9, 0.2]
     "Java/Go": [0.2, 0.8]
     "Python/JS": [0.1, 0.85]
