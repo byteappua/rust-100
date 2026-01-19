@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-3d9e69d9.js";
+            window.path_to_searchindex_js = "../../searchindex-4f5511ec.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-355d1505.js"></script>
@@ -202,8 +202,8 @@
 </ol>
 <pre class="mermaid">graph TD
     Start([开始定义变量]) --&gt; IsChange{需要修改值吗?}
-    IsChange -- No --&gt; Let[使用 let x = 5&lt;br&gt;(推荐, 默认安全)]
-    IsChange -- Yes --&gt; Mut[使用 let mut x = 5&lt;br&gt;(显式声明意图)]
+    IsChange -- No --&gt; Let["使用 let x = 5 (推荐, 默认安全)"]
+    IsChange -- Yes --&gt; Mut["使用 let mut x = 5 (显式声明意图)"]
     
     style Let fill:#cfc,stroke:#333
     style Mut fill:#fcc,stroke:#333
@@ -259,23 +259,23 @@ println!("The value of x is: {}", x);
     class Type {
         &lt;&lt;Rust Types&gt;&gt;
     }
-    class Scalar["标量类型 (Scalar)"] {
+    class Scalar["标量类型"] {
         代表单一值
     }
-    class Compound["复合类型 (Compound)"] {
+    class Compound["复合类型"] {
         组合多个值
     }
     
     Type &lt;|-- Scalar
     Type &lt;|-- Compound
     
-    Scalar &lt;|-- Integer["整数 (i32, u8...)"]
-    Scalar &lt;|-- Float["浮点 (f64, f32)"]
-    Scalar &lt;|-- Boolean["布尔 (bool)"]
-    Scalar &lt;|-- Char["字符 (char)"]
+    Scalar &lt;|-- Integer["整数"]
+    Scalar &lt;|-- Float["浮点"]
+    Scalar &lt;|-- Boolean["布尔"]
+    Scalar &lt;|-- Char["字符"]
     
-    Compound &lt;|-- Tuple["元组 (Tuple)"]
-    Compound &lt;|-- Array["数组 (Array)"]
+    Compound &lt;|-- Tuple["元组"]
+    Compound &lt;|-- Array["数组"]
 </pre>
 
 <hr>
