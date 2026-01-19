@@ -1,179 +1,205 @@
-# Day 02: 变量与数据类型
+# Day 02: 变量与数据类型 (Variables & Types)
 
-## 📝 学习目标
-- 理解 Rust 中的变量不可变性 (Immutability)
-- 掌握如何定义可变变量 (`mut`)
-- 了解常量 (`const`) 与变量的区别
-- 理解变量隐藏 (Shadowing) 的机制
-- 熟悉 Rust 的基本数据类型 (标量类型和复合类型)
+欢迎来到 **Rust 100 Days** 的第二天！今天我们将探讨 Rust 的"法律与秩序"：**严格的类型系统**与**所有权规则的雏形**。
 
-## 🎯 为什么要学这个
-变量和数据类型是任何编程语言的基石。在 Rust 中，这些概念尤为特殊：
-- **默认不可变**：这是 Rust 内存安全和并发安全设计的核心，强迫你思考数据的变化。
-- **静态强类型**：Rust 编译器在编译期就能捕获大量类型错误，避免运行时的崩溃。
-- **隐藏 (Shadowing)**：提供了一种优雅的方式来处理变量转换，而无需创建临时变量名。
+在 Rust 中，变量不仅仅是存储数据的容器，它们还承载着关于"可变性"和"生命周期"的契约。
 
-## 📖 核心概念
+---
 
-### 1. 变量与可变性
+## 📋 目录 (Table of Contents)
 
-在 Rust 中，变量默认是**不可变**的。一旦值被绑定到一个变量名，你就不能改变它。
+1. [核心哲学：默认不可变 (Immutability)](#-核心哲学默认不可变-immutability)
+2. [变量的艺术：可变性与隐藏 (Mutability & Shadowing)](#-变量的艺术可变性与隐藏-mutability--shadowing)
+3. [Rust 类型系统全景图 (Type System)](#-rust-类型系统全景图-type-system)
+4. [基础类型详解 (Primitives)](#-基础类型详解-primitives)
+5. [复合类型详解 (Compound Types)](#-复合类型详解-compound-types)
+6. [专业编码习惯 (Professional Habits)](#-专业编码习惯-professional-habits)
+7. [练习与扩展](#-练习与扩展-exercises)
 
-#### 不可变变量
-```rust
-let x = 5;
-// x = 6; // 编译错误！不能修改不可变变量
+---
+
+## �️ 核心哲学：默认不可变 (Immutability)
+
+在其他语言中，变量往往默认是可变的（如 JS 的 `var/let`, Python, C++）。但在 Rust 中，变量**默认不可变**。
+
+### 为什么这样设计？
+
+1. **安全性 (Safety)**: 如果一个值不可变，你就永远不用担心它在你不注意的时候被修改了。
+2. **并发 (Concurrency)**: 多线程同时读取不可变数据是绝对安全的，不需要加锁。
+3. **编译器优化**: 编译器可以对不可变数据做更多优化。
+
+```mermaid
+graph TD
+    Start([开始定义变量]) --> IsChange{需要修改值吗?}
+    IsChange -- No --> Let[使用 let x = 5<br>(推荐, 默认安全)]
+    IsChange -- Yes --> Mut[使用 let mut x = 5<br>(显式声明意图)]
+    
+    style Let fill:#cfc,stroke:#333
+    style Mut fill:#fcc,stroke:#333
 ```
 
-#### 可变变量
-如果你需要修改变量的值，必须使用 `mut` 关键字。
+---
+
+## 🎨 变量的艺术：可变性与隐藏 (Mutability & Shadowing)
+
+### 1. 可变变量 (`mut`)
+
+当你必须修改变量时，使用 `mut` 关键字。
+
 ```rust
 let mut x = 5;
 println!("The value of x is: {}", x);
-x = 6;
+x = 6; // ✅ 合法
 println!("The value of x is: {}", x);
 ```
 
-### 2. 常量 (Constants)
-常量使用 `const` 关键字声明，必须注明类型。它们不仅不可变，而且总是不可变。
-- 可以在任何作用域声明，包括全局作用域。
-- 只能被设置为常量表达式，不能是函数调用的结果。
+### 2. 常量 (`const`)
+
+常量是**总是不可变**的。这与 `let` 不可变变量不同：
+
+* 必须标注类型。
+* 只能设置为常量表达式，不能是函数调用的结果。
+* 在编译期直接替换到用到它的地方。
 
 ```rust
 const MAX_POINTS: u32 = 100_000;
 ```
 
-### 3. 隐藏 (Shadowing)
-你可以声明和前面变量同名的新变量，新变量会"隐藏"旧变量。
-- 使用 `let` 关键字再次声明。
-- 可以改变变量的类型。
-- 原变量在隐藏后不可访问，但在作用域结束后如果新变量销毁，原变量不会恢复（因为是覆盖绑定）。
+### 3. 隐藏 (Shadowing) - Rust 的"忍术"
 
-```rust
-let x = 5;
-let x = x + 1; // x 现在是 6
-let x = "spaces"; // x 现在是字符串类型
+这是 Rust 特有的强大特性。你可以使用 `let` 再次声明同名变量。这**不是**修改旧变量，而是**创建了一个新变量**，并"遮盖"了旧的。
+
+```mermaid
+sequenceDiagram
+    participant Scope as 作用域
+    participant Mem as 内存栈
+    
+    Note over Scope: let x = 5;
+    Scope->>Mem: 压入 x (i32: 5)
+    
+    Note over Scope: let x = x + 1;
+    Scope->>Mem: 读取旧 x, 计算 6<br>压入新 x (i32: 6)<br>旧 x 变为不可见
+    
+    Note over Scope: let x = "spaces";
+    Scope->>Mem: 压入新 x (&str: "spaces")<br>允许改变类型!
 ```
 
-### 4. 数据类型
+**Shadowing vs Mutability**
 
-Rust 是静态类型语言，必须在编译期知道所有变量的类型。编译器通常可以根据值推断类型。
+* **Shadowing (Let x ... Let x)**: 创建新变量，**可以改变类型**。
+* **Mutability (Let mut x ... x = )**: 修改同一变量，**不能改变类型**。
 
-#### 标量类型 (Scalar Types)
-代表一个单独的值。
+---
 
-- **整型**: `i8` - `i128`, `u8` - `u128`, `isize`, `usize` (基于架构)。默认为 `i32`。
-- **浮点型**: `f32`, `f64`. 默认为 `f64`。
-- **布尔型**: `bool` (`true`, `false`).
-- **字符型**: `char`. 代表 Unicode 标量值 (4字节)。例如 `'a'`, `'ℤ'`, `'😻'`.
+## 🌳 Rust 类型系统全景图 (Type System)
 
-#### 复合类型 (Compound Types)
-可以将多个值组合成一个类型。
+Rust 是**静态强类型**语言。也就是在编译期必须知道所有变量的类型。
 
-- **元组 (Tuple)**:
-  - 长度固定。
-  - 可以包含不同类型。
-  ```rust
-  let tup: (i32, f64, u8) = (500, 6.4, 1);
-  let (x, y, z) = tup; // 解构
-  let five_hundred = tup.0; // 点号访问
-  ```
-
-- **数组 (Array)**:
-  - 长度固定。
-  - 必须包含相同类型。
-  - 数据存储在栈 (stack) 上。
-  ```rust
-  let a = [1, 2, 3, 4, 5];
-  let first = a[0];
-  let months = ["January", "February", "March"];
-  ```
-
-## 💻 代码示例
-
-### 示例 1: 变量与可变性
-```rust
-fn main() {
-    let x = 5;
-    println!("x = {}", x);
-    // x = 6; // 错误
-
-    let mut y = 10;
-    println!("y = {}", y);
-    y = 20;
-    println!("y updated = {}", y);
-}
+```mermaid
+classDiagram
+    class Type {
+        <<Rust Types>>
+    }
+    class Scalar["标量类型 (Scalar)"] {
+        代表单一值
+    }
+    class Compound["复合类型 (Compound)"] {
+        组合多个值
+    }
+    
+    Type <|-- Scalar
+    Type <|-- Compound
+    
+    Scalar <|-- Integer["整数 (i32, u8...)"]
+    Scalar <|-- Float["浮点 (f64, f32)"]
+    Scalar <|-- Boolean["布尔 (bool)"]
+    Scalar <|-- Char["字符 (char)"]
+    
+    Compound <|-- Tuple["元组 (Tuple)"]
+    Compound <|-- Array["数组 (Array)"]
 ```
 
-### 示例 2: 变量隐藏
+---
+
+## 🧱 基础类型详解 (Primitives)
+
+### 1. 整数 (Integer)
+
+| 长度 | 有符号 (Signed) | 无符号 (Unsigned) | 场景 |
+| :--- | :--- | :--- | :--- |
+| 8-bit | `i8` | `u8` | 字节流, 文件 IO |
+| 32-bit | `i32` (**默认**) | `u32` | 一般数字 |
+| 64-bit | `i64` | `u64` | 大数 |
+| Arch | `isize` | `usize` | 索引, 指针大小 |
+
+> **⚠️ 关于溢出**: 在 Debug 模式下，整数溢出会导致程序 Panic (崩溃)。在 Release 模式下，Rust 会执行二进制补码环绕 (Wrapping) 而不是 Panic。
+
+### 2. 浮点数 (Floating-Point)
+
+* `f64` (**默认**): 双精度，速度与 f32 几乎一样，但在现代 CPU 上精度更高。
+* `f32`: 单精度，用于极度节省内存或特定图形计算。
+
+### 3. 布尔与字符
+
+* `bool`: `true` 或 `false`. (1 字节)
+* `char`: 代表一个 **Unicode 标量值**。它是 4 字节的！这意味着它可以存储中文、Emoji (`😻`) 等。**注意使用单引号** `' '`。
+
+---
+
+## 📦 复合类型详解 (Compound Types)
+
+### 1. 元组 (Tuple)
+
+将多个**不同类型**的值组合在一起。长度固定。
+
 ```rust
-fn main() {
-    let spaces = "   "; // 字符串类型
-    let spaces = spaces.len(); // usize 类型
-    println!("Spaces length: {}", spaces);
-}
+let tup: (i32, f64, u8) = (500, 6.4, 1);
+let (x, y, z) = tup; // 解构 (Destructuring)
+let five_hundred = tup.0; // 点号索引
 ```
 
-### 示例 3: 数学运算
-```rust
-fn main() {
-    // 加法
-    let sum = 5 + 10;
-    // 减法
-    let difference = 95.5 - 4.3;
-    // 乘法
-    let product = 4 * 30;
-    // 除法
-    let quotient = 56.7 / 32.2;
-    let floored = 2 / 3; // 结果为 0
-    // 取余
-    let remainder = 43 % 5;
+### 2. 数组 (Array)
 
-    println!("Sum: {}", sum);
-}
+将多个**相同类型**的值组合在一起。**长度固定**，分配在**栈 (Stack)** 上。
+
+```rust
+// 类型: [i32; 5] -> [类型; 本数]
+let a = [1, 2, 3, 4, 5]; 
+
+// 初始化语法：5 个 3
+let a = [3; 5]; // [3, 3, 3, 3, 3]
 ```
 
-## 🏋️ 练习题
+> **🤔 什么时候用数组？**: 当你知道元素个数确定不变时（如一年 12 个月）。如果你需要动态增删元素，请使用 **Vector** (`Vec<T>`)（后续章节介绍）。
 
-我们为你准备了专门的练习题来巩固这些概念。
+---
 
-- **练习 1**: 变量绑定与可变性
-- **练习 2**: 基本数据类型的使用
-- **练习 3**: 元组和数组的操作
+## 🧢 专业编码习惯 (Professional Habits)
 
-👉 **[点击这里查看练习题](./exercises/README.md)**
+1. **命名规范**:
+    * 变量、函数: `snake_case` (如 `user_id`, `calculate_sum`)
+    * 常量: `SCREAMING_SNAKE_CASE` (如 `MAX_RETRY`)
+    * 类型: `UpperCamelCase` (如 `String`, `TcpStream`)
+2. **类型注解**: 虽然编译器很聪明，但在定义稍微复杂的类型时，手动写上类型注解有助于可读性。
+3. **未使用变量**: 如果你声明了一个变量但还没想好怎么用，Rust 编译器会给警告。在变量名前加 `_` (如 `_x`) 可以消除警告。
+4. **数字字面量**: 使用下划线增加可读性。`1_000_000` 比 `1000000` 清晰得多。
 
-## 🤔 常见问题 (FAQ)
+---
 
-### Q1: 为什么 Rust 默认变量是不可变的？
-A: 这是一个权衡。不可变性使得代码更易于推理（尤其是在并发环境下），消除了"数据竞争"的一大来源。当你明确需要修改数据时，`mut` 关键字作为一个显式的标记，提醒读者注意这里的状态变化。
+## 🏋️ 练习与扩展 (Exercises)
 
-### Q2: `let` 隐藏 (Shadowing) 和 `mut` 有什么区别？
-A:
-1. `mut` 允许你改变同一个变量绑定的**值**，但不能改变**类型**。
-2. Shadowing 是使用 `let` 声明了一个**全新**的变量，只是名字相同。它可以改变**类型**，也可以改变**可变性**（例如从可变变为不可变）。
+动手时间！
 
-### Q3: 什么时候应该用数组，什么时候用 Vector？
-A: 数组长度是固定的，分配在栈上，速度快。如果你知道元素的数量不会改变（比如月份、一周的天数），用数组。如果你需要动态增删元素，使用标准库提供的 `Vec<T>`（向量）。
+1. **类型转换**: 尝试将 `i32` 转换为 `i64`？(提示: 使用 `as` 关键字)
+2. **数组越界**: 创建一个长度为 5 的数组，尝试访问索引 10，观察编译期和运行时的行为。
+3. **Shadowing 魔法**: 利用 Shadowing 将一个字符串类型的数字 (`"42"`) 转换为整数类型 (`42`)。
 
-## 💡 最佳实践
-- **优先不可变**：除非你确定需要修改它，否则不要加 `mut`。
-- **显式类型标注**：虽然编译器能推断类型，但在定义复杂类型或公共 API 时，显式标注类型能提高代码可读性。
-- **使用下划线**：在数字字面量中使用 `_` 提高可读性，如 `1_000_000`。
-- **未使用的变量**：如果声明了变量但未被使用，编译器会警告。如果你是有意为之，给变量名加下划线前缀 `_x`。
+👉 **[点击这里访问详细练习题目录](./exercises/README.md)**
 
-## 🔗 扩展阅读
-- [Rust 程序设计语言 - 变量和可变性](https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html)
-- [Rust 程序设计语言 - 数据类型](https://doc.rust-lang.org/book/ch03-02-data-types.html)
-
-## 📚 本节要点回顾
-- 变量默认不可变，需用 `mut` 声明可变。
-- 常量 `const` 始终不可变且需标注类型。
-- Shadowing 允许重用变量名并改变类型。
-- 标量类型包括整数、浮点数、布尔值和字符。
-- 复合类型包括元组（异构、定长）和数组（同构、定长）。
+---
 
 ## ⏭️ 下一步
-熟悉了数据的存储方式，接下来我们将学习如何控制程序的执行流程。
 
-下一节: [Day 03: 函数与控制流](../03.FunctionsAndControlFlow/README.md)
+掌握了数据的形态，接下来我们要让数据"动"起来。下一章，我们将学习如何组织代码流程。
+
+[**Day 03: 函数与控制流 (Functions & Control Flow)**](../03.FunctionsAndControlFlow/README.md)
