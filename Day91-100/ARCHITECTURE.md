@@ -8,7 +8,7 @@ The DTask system consists of a cluster of Scheduler nodes (managing state via Ra
 
 ```mermaid
 C4Context
-    title System Context Diagram for DTask
+    title "System Context Diagram for DTask"
 
     Person(user, "User/Client", "Submits tasks and queries status")
 
