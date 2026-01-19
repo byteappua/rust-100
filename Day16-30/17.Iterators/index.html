@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6dab09ab.js";
+            window.path_to_searchindex_js = "../../searchindex-4dd97b08.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,77 +178,98 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-17-迭代器-iterators"><a class="header" href="#day-17-迭代器-iterators">Day 17: 迭代器 (Iterators)</a></h1>
-<p>迭代器模式允许你对一个项的序列进行某些处理。迭代器负责遍历序列中的每一项和决定序列何时结束的逻辑。</p>
-<h2 id="1-iterator-trait"><a class="header" href="#1-iterator-trait">1. Iterator Trait</a></h2>
-<p>在 Rust 中，迭代器都实现了 <code>Iterator</code> trait。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>理解 <code>Iterator</code> trait 及其核心方法 <code>next</code>。</li>
+<li>掌握消费适配器（Consuming Adaptors）如 <code>sum</code>, <code>collect</code>。</li>
+<li>掌握迭代器适配器（Iterator Adaptors）如 <code>map</code>, <code>filter</code>, <code>zip</code>。</li>
+<li>能够实现自定义迭代器。</li>
+</ul>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<p>迭代器模式是 Rust 处理序列数据的主要方式。它不仅语法简洁，而且在 Rust 中是<strong>零成本抽象</strong>（Zero-Cost Abstractions）。通常情况下，使用迭代器的速度与手写底层 <code>for</code> 循环一样快，甚至更快（因为编译器能更好地优化边界检查）。</p>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-iterator-trait"><a class="header" href="#1-iterator-trait">1. Iterator Trait</a></h3>
+<p>所有迭代器都实现了 <code>Iterator</code> trait。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub trait Iterator {
     type Item;
     fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
-    // 此处省略了其它有默认实现的方法
+    // ... 其它方法有默认实现
 }
 <span class="boring">}</span></code></pre>
-<h2 id="2-使用迭代器"><a class="header" href="#2-使用迭代器">2. 使用迭代器</a></h2>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let v1 = vec![1, 2, 3];
-let v1_iter = v1.iter();
-
-for val in v1_iter {
-    println!("Got: {}", val);
-}
-<span class="boring">}</span></code></pre>
-<h2 id="3-消费适配器-consuming-adaptors"><a class="header" href="#3-消费适配器-consuming-adaptors">3. 消费适配器 (Consuming Adaptors)</a></h2>
-<p>调用 <code>next</code> 方法的方法被称为消费适配器，因为它们会消耗迭代器。</p>
 <ul>
-<li><code>sum()</code>: 获取所有权并反复调用 <code>next</code> 遍历迭代器，将结果求和。</li>
-<li><code>collect()</code>: 将迭代器转换成一个集合。</li>
+<li><code>next</code> 方法返回 <code>Option&lt;Self::Item&gt;</code>。如果返回 <code>Some(item)</code>，则处理下一个元素；如果返回 <code>None</code>，则迭代结束。</li>
 </ul>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let v1 = vec![1, 2, 3];
-let v1_iter = v1.iter();
-let total: i32 = v1_iter.sum();
-<span class="boring">}</span></code></pre>
-<h2 id="4-迭代器适配器-iterator-adaptors"><a class="header" href="#4-迭代器适配器-iterator-adaptors">4. 迭代器适配器 (Iterator Adaptors)</a></h2>
-<p>允许我们将当前迭代器转换成不同类型的迭代器。</p>
+<h3 id="2-创建迭代器"><a class="header" href="#2-创建迭代器">2. 创建迭代器</a></h3>
 <ul>
-<li><code>map()</code>: 对每个元素调用闭包。</li>
-<li><code>filter()</code>: 过滤元素。</li>
+<li><code>iter()</code>: 创建不可变引用的迭代器。</li>
+<li><code>iter_mut()</code>: 创建可变引用的迭代器。</li>
+<li><code>into_iter()</code>: 创建获取所有权的迭代器。</li>
 </ul>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let v1: Vec&lt;i32&gt; = vec![1, 2, 3];
-let v2: Vec&lt;_&gt; = v1.iter().map(|x| x + 1).collect();
-<span class="boring">}</span></code></pre>
-<h2 id="5-自定义迭代器"><a class="header" href="#5-自定义迭代器">5. 自定义迭代器</a></h2>
-<p>我们可以为自己的类型实现 <code>Iterator</code> trait。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>struct Counter {
-    count: u32,
-}
+<h3 id="3-消费适配器-consuming-adaptors"><a class="header" href="#3-消费适配器-consuming-adaptors">3. 消费适配器 (Consuming Adaptors)</a></h3>
+<p>这些方法会调用 <code>next</code>，消耗掉迭代器，并生成一个最终结果。</p>
+<ul>
+<li><code>collect()</code>: 将迭代器转换成集合（如 <code>Vec</code>, <code>HashMap</code>）。</li>
+<li><code>sum()</code>, <code>product()</code>: 求和、求积。</li>
+<li><code>count()</code>: 计算元素个数。</li>
+<li><code>for_each()</code>: 对每个元素执行操作。</li>
+</ul>
+<h3 id="4-迭代器适配器-iterator-adaptors"><a class="header" href="#4-迭代器适配器-iterator-adaptors">4. 迭代器适配器 (Iterator Adaptors)</a></h3>
+<p>这些方法将当前迭代器转换成另一个迭代器。它们是<strong>惰性</strong>的（Lazy），必须配合消费适配器才会执行。</p>
+<ul>
+<li><code>map()</code>: 转换元素。</li>
+<li><code>filter()</code>: 筛选元素。</li>
+<li><code>zip()</code>: 将两个迭代器合并为一个元组迭代器。</li>
+<li><code>chain()</code>: 连接两个迭代器。</li>
+<li><code>enumerate()</code>: 添加索引。</li>
+</ul>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-1-基本使用"><a class="header" href="#示例-1-基本使用">示例 1: 基本使用</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let v1 = vec![1, 2, 3];
+    let v1_iter = v1.iter(); // 惰性，不产生任何操作
 
-impl Counter {
-    fn new() -&gt; Counter {
-        Counter { count: 0 }
+    for val in v1_iter { // 这里隐式调用 next
+        println!("Got: {}", val);
     }
-}
+}</code></pre>
+<h3 id="示例-2-map-和-filter"><a class="header" href="#示例-2-map-和-filter">示例 2: map 和 filter</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    let v1: Vec&lt;i32&gt; = vec![1, 2, 3];
 
-impl Iterator for Counter {
-    type Item = u32;
+    // map 和 filter 都是惰性的，必须最后调用 collect
+    let v2: Vec&lt;_&gt; = v1.iter()
+                       .map(|x| x + 1)
+                       .filter(|x| x % 2 == 0)
+                       .collect();
 
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
-        if self.count &lt; 5 {
-            self.count += 1;
-            Some(self.count)
-        } else {
-            None
-        }
-    }
-}
-<span class="boring">}</span></code></pre>
+    println!("{:?}", v2); // [2, 4]
+}</code></pre>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<h3 id="练习-1-平方和"><a class="header" href="#练习-1-平方和">练习 1: 平方和</a></h3>
+<p>编写一个函数，接受一个 <code>&amp;[i32]</code>，返回其中所有偶数的平方和。使用迭代器链式调用实现。
+<a href="./exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
+<h3 id="练习-2-自定义迭代器"><a class="header" href="#练习-2-自定义迭代器">练习 2: 自定义迭代器</a></h3>
+<p>实现一个 <code>Counter</code> 结构体，从 1 数到 5。
+<a href="./exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
+<h3 id="练习-3-复杂链式操作"><a class="header" href="#练习-3-复杂链式操作">练习 3: 复杂链式操作</a></h3>
+<p>给定一个字符串向量，过滤出长度大于 3 的字符串，将其转换为大写，并用逗号连接成一个单一的字符串。
+<a href="./exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
+<h2 id="-常见问题"><a class="header" href="#-常见问题">🤔 常见问题</a></h2>
+<h3 id="q1-什么时候用-iter-vs-into_iter"><a class="header" href="#q1-什么时候用-iter-vs-into_iter">Q1: 什么时候用 <code>iter()</code> vs <code>into_iter()</code>?</a></h3>
+<p>A:</p>
+<ul>
+<li><code>iter()</code>: 当你想遍历数据的引用（借用），保留原始数据时。</li>
+<li><code>into_iter()</code>: 当你想获取数据的所有权（移动），原始数据不再需要时。</li>
+</ul>
+<h3 id="q2-为什么-collect-需要类型标注"><a class="header" href="#q2-为什么-collect-需要类型标注">Q2: 为什么 <code>collect()</code> 需要类型标注？</a></h3>
+<p>A: <code>collect()</code> 可以将迭代器转换成多种不同的集合（Vec, LinkedList, HashMap 等）。编译器通常无法推断你想转换成哪种具体类型，所以需要显式标注 <code>Vec&lt;_&gt;</code> 或 <code>Vec&lt;i32&gt;</code>。</p>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">Rust Book: Processing a Series of Items with Iterators</a></li>
+<li><a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">Standard Library: Iterator</a></li>
+</ul>
 
                     </main>
 

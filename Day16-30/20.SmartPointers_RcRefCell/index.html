@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6dab09ab.js";
+            window.path_to_searchindex_js = "../../searchindex-4dd97b08.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,52 +178,113 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-20-智能指针---rc-与-refcell"><a class="header" href="#day-20-智能指针---rc-与-refcell">Day 20: 智能指针 - Rc<t> 与 RefCell<t></t></t></a></h1>
-<h2 id="1-rc-引用计数"><a class="header" href="#1-rc-引用计数">1. Rc<t> (引用计数)</t></a></h2>
-<p><code>Rc&lt;T&gt;</code> (Reference Counting) 允许一个值有多个所有者。当所有者数量为 0 时，值才会被清理。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li><strong>特点</strong>：只能用于单线程场景。</li>
-<li><strong>用途</strong>：用于图结构等多个部分读取同一数据的情况。</li>
+<li>理解 <code>Rc&lt;T&gt;</code> 如何实现多重所有权。</li>
+<li>理解 <code>RefCell&lt;T&gt;</code> 的内部可变性（Interior Mutability）模式。</li>
+<li>掌握编译时借用检查与运行时借用检查的区别。</li>
+<li>能够组合使用 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code> 来实现可变的共享数据。</li>
+</ul>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<p>在 Rust 中，所有权规则非常严格：一个值在同一时间只能有一个所有者，或者多个不可变借用，或者一个可变借用。
+但在实际数据结构（如双向链表、图、GUI 控件树）中，一个节点可能被多个其他节点引用，或者我们需要在不可变引用的上下文中修改数据（例如缓存、模拟对象）。<code>Rc</code> 和 <code>RefCell</code> 提供了绕过严格静态检查的安全机制。</p>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-rc-引用计数"><a class="header" href="#1-rc-引用计数">1. Rc<t> (引用计数)</t></a></h3>
+<p><code>Rc</code> 代表 <strong>Reference Counting</strong>。它用于在堆上分配数据，供程序的多个部分读取。</p>
+<ul>
+<li><strong>多重所有权</strong>：通过 <code>Rc::clone(&amp;a)</code> 创建新的指向同一数据的引用（增加计数），而不是深拷贝数据。</li>
+<li><strong>不可变性</strong>：<code>Rc&lt;T&gt;</code> 指向的数据默认是不可变的。</li>
+<li><strong>单线程</strong>：<code>Rc</code> 不是线程安全的。多线程请使用 <code>Arc</code>。</li>
+</ul>
+<h3 id="2-refcell-内部可变性"><a class="header" href="#2-refcell-内部可变性">2. RefCell<t> (内部可变性)</t></a></h3>
+<p><code>RefCell&lt;T&gt;</code> 允许你在持有不可变引用的前提下修改内部数据。</p>
+<ul>
+<li><strong>运行时检查</strong>：普通引用在编译时检查借用规则。<code>RefCell</code> 在<strong>运行时</strong>检查。</li>
+<li><strong>Borrowing</strong>：
+<ul>
+<li><code>borrow()</code>: 返回 <code>Ref&lt;T&gt;</code>（类似 <code>&amp;T</code>）。</li>
+<li><code>borrow_mut()</code>: 返回 <code>RefMut&lt;T&gt;</code>（类似 <code>&amp;mut T</code>）。</li>
+</ul>
+</li>
+<li><strong>Panic</strong>：如果在运行时违反借用规则（例如同时存在两个 <code>RefMut</code>），程序会 Panic。</li>
+</ul>
+<h3 id="3-组合技-rcrefcell"><a class="header" href="#3-组合技-rcrefcell">3. 组合技: Rc&lt;RefCell<t>&gt;</t></a></h3>
+<p>如果你需要一个数据既有<strong>多个所有者</strong>，又能<strong>被修改</strong>，就可以结合使用：</p>
+<ul>
+<li><code>Rc</code> 负责让数据有多个所有者。</li>
+<li><code>RefCell</code> 负责让拥有者可以修改数据。</li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use std::rc::Rc;
-
-let a = Rc::new(5);
-let b = Rc::clone(&amp;a); // 增加引用计数，不会深拷贝
-println!("count = {}", Rc::strong_count(&amp;a));
-<span class="boring">}</span></code></pre>
-<h2 id="2-refcell-内部可变性"><a class="header" href="#2-refcell-内部可变性">2. RefCell<t> (内部可变性)</t></a></h2>
-<p><code>RefCell&lt;T&gt;</code> 代表其数据的单一所有权。它与 <code>Box&lt;T&gt;</code> 的区别在于：</p>
-<ul>
-<li><code>Box&lt;T&gt;</code>: 编译时执行借用规则检查。</li>
-<li><code>RefCell&lt;T&gt;</code>: <strong>运行时</strong>执行借用规则检查。如果违反规则（如同时存在两个可变借用），程序会 panic。</li>
-</ul>
-<h3 id="内部可变性模式"><a class="header" href="#内部可变性模式">内部可变性模式</a></h3>
-<p>允许你修改一个不可变引用背后的数据。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>use std::cell::RefCell;
-
-let x = RefCell::new(5);
-*x.borrow_mut() += 1;
-assert_eq!(*x.borrow(), 6);
-<span class="boring">}</span></code></pre>
-<h2 id="3-结合-rc-和-refcell"><a class="header" href="#3-结合-rc-和-refcell">3. 结合 Rc<t> 和 RefCell<t></t></t></a></h2>
-<p>这是 Rust 中常见的模式：拥有多个所有者，且每个所有者都能修改数据。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[derive(Debug)]
-enum List {
-    Cons(Rc&lt;RefCell&lt;i32&gt;&gt;, Rc&lt;List&gt;),
-    Nil,
-}
-
-use std::rc::Rc;
 use std::cell::RefCell;
 
 let value = Rc::new(RefCell::new(5));
-// ...
+let a = Rc::clone(&amp;value);
+let b = Rc::clone(&amp;value);
+
+*a.borrow_mut() += 10;
+println!("b sees: {}", b.borrow()); // 15
 <span class="boring">}</span></code></pre>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-1-rc-共享列表"><a class="header" href="#示例-1-rc-共享列表">示例 1: Rc 共享列表</a></h3>
+<pre class="playground"><code class="language-rust">use std::rc::Rc;
+
+enum List {
+    Cons(i32, Rc&lt;List&gt;),
+    Nil,
+}
+
+use List::{Cons, Nil};
+
+fn main() {
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    let b = Cons(3, Rc::clone(&amp;a));
+    let c = Cons(4, Rc::clone(&amp;a)); // b 和 c 都共享 a
+}</code></pre>
+<h3 id="示例-2-refcell-修改值"><a class="header" href="#示例-2-refcell-修改值">示例 2: RefCell 修改值</a></h3>
+<pre class="playground"><code class="language-rust">use std::cell::RefCell;
+
+fn main() {
+    let x = RefCell::new(42);
+
+    {
+        let mut m = x.borrow_mut();
+        *m += 1;
+    } // m 离开作用域，借用结束
+
+    println!("x = {:?}", x.borrow());
+}</code></pre>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<h3 id="练习-1-rc-基础"><a class="header" href="#练习-1-rc-基础">练习 1: Rc 基础</a></h3>
+<p>创建两个列表 <code>b</code> 和 <code>c</code>，它们都共享列表 <code>a</code> 的尾部。打印引用计数的变化。
+<a href="./exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
+<h3 id="练习-2-内部可变性"><a class="header" href="#练习-2-内部可变性">练习 2: 内部可变性</a></h3>
+<p>编写一个 Mock Messenger，它记录发送给它的消息。使用 <code>RefCell</code> 来在不可变方法 <code>send</code> 中修改内部的 <code>sent_messages</code> 列表。
+<a href="./exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
+<h3 id="练习-3-共享可变树节点"><a class="header" href="#练习-3-共享可变树节点">练习 3: 共享可变树节点</a></h3>
+<p>定义一个树节点结构体，每个节点包含一个值和子节点列表。使用 <code>Rc&lt;RefCell&lt;Node&gt;&gt;</code> 使得父节点和子节点可以互相引用（或者简单的多所有权修改测试），并修改某个子节点的值，验证父节点也能看到修改。
+<a href="./exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
+<h2 id="-常见问题"><a class="header" href="#-常见问题">🤔 常见问题</a></h2>
+<h3 id="q1-cellt-和-refcellt-有什么区别"><a class="header" href="#q1-cellt-和-refcellt-有什么区别">Q1: <code>Cell&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 有什么区别？</a></h3>
+<p>A:</p>
+<ul>
+<li><code>Cell&lt;T&gt;</code>: 适用于实现了 <code>Copy</code> 的类型（如整数）。它通过<strong>复制</strong>值进出来工作 (<code>get</code>, <code>set</code>)，没有借用检查开销，永远不会 Panic。</li>
+<li><code>RefCell&lt;T&gt;</code>: 适用于任何类型。它通过<strong>引用</strong>工作 (<code>borrow</code>, <code>borrow_mut</code>)，有运行时开销和 Panic 风险。</li>
+</ul>
+<h3 id="q2-为什么不总是使用-rcrefcellt"><a class="header" href="#q2-为什么不总是使用-rcrefcellt">Q2: 为什么不总是使用 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code>？</a></h3>
+<p>A:</p>
+<ol>
+<li><strong>性能开销</strong>：引用计数更新和运行时借用检查都有开销。</li>
+<li><strong>安全性</strong>：运行时 Panic 比编译时错误更糟糕。</li>
+<li><strong>复杂性</strong>：类型签名变得很长且难以阅读。
+只在确实需要时使用。</li>
+</ol>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch15-05-interior-mutability.html">Rust Book: RefCell<t> and the Interior Mutability Pattern</t></a></li>
+<li><a href="https://doc.rust-lang.org/book/ch15-06-reference-cycles.html">Rust Book: Reference Cycles</a></li>
+</ul>
 
                     </main>
 

@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6dab09ab.js";
+            window.path_to_searchindex_js = "../../searchindex-4dd97b08.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -178,25 +178,31 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-18-cargo-进阶与-cratesio"><a class="header" href="#day-18-cargo-进阶与-cratesio">Day 18: Cargo 进阶与 Crates.io</a></h1>
-<p>Cargo 不仅是构建工具，也是依赖管理和包管理器。</p>
-<h2 id="1-发布配置-release-profiles"><a class="header" href="#1-发布配置-release-profiles">1. 发布配置 (Release Profiles)</a></h2>
-<p>Cargo 有两个主要的配置：</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li><code>dev</code> profile: <code>cargo build</code> 使用。默认优化程度低，包含 debug 信息。</li>
-<li><code>release</code> profile: <code>cargo build --release</code> 使用。默认优化程度高。</li>
+<li>理解 Cargo 的 Release Profiles (<code>dev</code> vs <code>release</code>)。</li>
+<li>掌握如何编写文档注释 (<code>///</code>) 并运行文档测试。</li>
+<li>学会使用 Cargo Workspaces 管理多个包。</li>
+<li>了解如何发布包到 Crates.io 以及版本管理。</li>
+</ul>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
+<p>Cargo 是 Rust 生态系统的基石。它不仅仅是一个构建工具，还是依赖管理器、文档生成器和测试运行器。掌握 Cargo 的高级用法对于构建大型项目、优化构建速度和发布高质量的库至关重要。</p>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
+<h3 id="1-发布配置-release-profiles"><a class="header" href="#1-发布配置-release-profiles">1. 发布配置 (Release Profiles)</a></h3>
+<p>Cargo 提供了两种主要的预设配置：</p>
+<ul>
+<li><strong>dev</strong>: 运行 <code>cargo build</code> 时使用。默认 <code>opt-level = 0</code> (无优化)，包含调试信息，构建速度快。</li>
+<li><strong>release</strong>: 运行 <code>cargo build --release</code> 时使用。默认 <code>opt-level = 3</code> (最高优化)，去除部分调试信息，运行速度快但构建慢。</li>
 </ul>
 <p>可以在 <code>Cargo.toml</code> 中自定义：</p>
 <pre><code class="language-toml">[profile.dev]
-opt-level = 0
-
-[profile.release]
-opt-level = 3
+opt-level = 1 # 开发时稍微优化一点
 </code></pre>
-<h2 id="2-文档注释"><a class="header" href="#2-文档注释">2. 文档注释</a></h2>
-<p>使用 <code>///</code> 编写文档注释，支持 Markdown。</p>
+<h3 id="2-文档注释"><a class="header" href="#2-文档注释">2. 文档注释</a></h3>
+<p>Rust 拥有一流的文档支持。使用 <code>///</code> 编写文档注释，支持 Markdown。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>/// Adds one to the number given.
+</span>/// 将给定的数字加一。
 ///
 /// # Examples
 ///
@@ -211,37 +217,74 @@ pub fn add_one(x: i32) -&gt; i32 {
 }
 <span class="boring">}</span></code></pre>
 <ul>
-<li>运行 <code>cargo doc --open</code> 生成并查看文档。</li>
-<li>文档注释中的代码块会被 <code>cargo test</code> 作为测试运行（文档测试）。</li>
+<li><code>cargo doc --open</code>: 生成并打开 HTML 文档。</li>
+<li>代码块内的代码会被当做测试运行 (<code>cargo test</code>)。</li>
 </ul>
-<h2 id="3-发布到-cratesio"><a class="header" href="#3-发布到-cratesio">3. 发布到 Crates.io</a></h2>
-<ol>
-<li>注册账号并获取 API token。</li>
-<li><code>cargo login &lt;token&gt;</code>。</li>
-<li>在 <code>Cargo.toml</code> 中添加元数据（license, description, etc.）。</li>
-<li><code>cargo publish</code>。</li>
-</ol>
-<p>注意：一旦发布，版本永久存在。可以使用 <code>cargo yank</code> 撤回（标记为不可用，但已存在的依赖不受影响）。</p>
-<h2 id="4-cargo-工作空间-workspaces"><a class="header" href="#4-cargo-工作空间-workspaces">4. Cargo 工作空间 (Workspaces)</a></h2>
-<p>工作空间是一组共享同一个 <code>Cargo.lock</code> 和输出目录的包。</p>
-<h3 id="目录结构"><a class="header" href="#目录结构">目录结构</a></h3>
-<pre><code>workspace_demo/
-├── Cargo.toml
-├── add_one/
-│   ├── Cargo.toml
-│   └── src/main.rs
-└── adder/
-    ├── Cargo.toml
-    └── src/main.rs
+<h3 id="3-cargo-workspaces-工作空间"><a class="header" href="#3-cargo-workspaces-工作空间">3. Cargo Workspaces (工作空间)</a></h3>
+<p>当项目变得很大时，可以将其拆分为多个 crate。Workspace 允许这些 crate 共享同一个 <code>Cargo.lock</code> 和输出目录 (<code>target/</code>)。</p>
+<p><strong>目录结构示例</strong>:</p>
+<pre><code>my-project/
+├── Cargo.toml (Workspace root)
+├── crates/
+│   ├── api/
+│   │   ├── Cargo.toml
+│   │   └── src/lib.rs
+│   └── core/
+│       ├── Cargo.toml
+│       └── src/lib.rs
 </code></pre>
-<h3 id="根-cargotoml"><a class="header" href="#根-cargotoml">根 Cargo.toml</a></h3>
+<p><strong>根 Cargo.toml</strong>:</p>
 <pre><code class="language-toml">[workspace]
-
 members = [
-    "adder",
-    "add_one",
+    "crates/api",
+    "crates/core",
 ]
 </code></pre>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
+<h3 id="示例-1-条件编译-conditional-compilation"><a class="header" href="#示例-1-条件编译-conditional-compilation">示例 1: 条件编译 (Conditional Compilation)</a></h3>
+<pre class="playground"><code class="language-rust">fn main() {
+    if cfg!(target_os = "linux") {
+        println!("Running on Linux!");
+    } else {
+        println!("Not running on Linux.");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // 只有在 cargo test 时才编译此模块
+}</code></pre>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<h3 id="练习-1-编写文档测试"><a class="header" href="#练习-1-编写文档测试">练习 1: 编写文档测试</a></h3>
+<p>为一个简单的数学函数编写文档注释，包含 Examples 部分，确保代码示例是可运行的测试。
+<a href="./exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
+<h3 id="练习-2-条件编译"><a class="header" href="#练习-2-条件编译">练习 2: 条件编译</a></h3>
+<p>编写代码，根据是否开启了某个 Feature (假设名为 “advanced”) 来编译不同的函数实现。
+<em>(注意：单文件练习难以模拟 Cargo.toml feature 配置，这里使用 <code>cfg</code> 属性演示)</em>
+<a href="./exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
+<h3 id="练习-3-workspace-模拟"><a class="header" href="#练习-3-workspace-模拟">练习 3: Workspace 模拟</a></h3>
+<p>创建一个模拟 Workspace 结构的说明。这不仅是一个代码练习，而是一个架构设计练习。
+<a href="./exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
+<h2 id="-常见问题"><a class="header" href="#-常见问题">🤔 常见问题</a></h2>
+<h3 id="q1-cargolock-应该提交到-git-吗"><a class="header" href="#q1-cargolock-应该提交到-git-吗">Q1: <code>Cargo.lock</code> 应该提交到 Git 吗？</a></h3>
+<p>A:</p>
+<ul>
+<li>如果是 <strong>二进制项目 (bin)</strong>：<strong>应该</strong>提交，确保所有人构建出的可执行文件依赖版本一致。</li>
+<li>如果是 <strong>库项目 (lib)</strong>：通常<strong>不</strong>提交，让库的依赖版本由使用者的 <code>Cargo.lock</code> 决定（但这有争议，现代观点建议尽量提交以保证 CI 稳定性）。</li>
+</ul>
+<h3 id="q2-什么是语义化版本-semver"><a class="header" href="#q2-什么是语义化版本-semver">Q2: 什么是语义化版本 (SemVer)？</a></h3>
+<p>A: 格式为 <code>Major.Minor.Patch</code> (如 <code>1.2.3</code>)。</p>
+<ul>
+<li>Major: 不兼容的 API 修改。</li>
+<li>Minor: 向后兼容的功能新增。</li>
+<li>Patch: 向后兼容的 Bug 修复。
+Cargo 默认锁定 Major 版本不变（如 <code>^1.2.3</code> 允许升级到 <code>1.9.9</code> 但不允许 <code>2.0.0</code>）。</li>
+</ul>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
+<li><a href="https://rust-lang.github.io/api-guidelines/">Rust API Guidelines</a></li>
+</ul>
 
                     </main>
 
