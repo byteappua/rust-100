@@ -31,8 +31,8 @@
 ```mermaid
 graph TD
     Start([开始定义变量]) --> IsChange{需要修改值吗?}
-    IsChange -- No --> Let[使用 let x = 5<br>(推荐, 默认安全)]
-    IsChange -- Yes --> Mut[使用 let mut x = 5<br>(显式声明意图)]
+    IsChange -- No --> Let["使用 let x = 5 (推荐, 默认安全)"]
+    IsChange -- Yes --> Mut["使用 let mut x = 5 (显式声明意图)"]
     
     style Let fill:#cfc,stroke:#333
     style Mut fill:#fcc,stroke:#333
@@ -100,23 +100,23 @@ classDiagram
     class Type {
         <<Rust Types>>
     }
-    class Scalar["标量类型 (Scalar)"] {
+    class Scalar["标量类型"] {
         代表单一值
     }
-    class Compound["复合类型 (Compound)"] {
+    class Compound["复合类型"] {
         组合多个值
     }
     
     Type <|-- Scalar
     Type <|-- Compound
     
-    Scalar <|-- Integer["整数 (i32, u8...)"]
-    Scalar <|-- Float["浮点 (f64, f32)"]
-    Scalar <|-- Boolean["布尔 (bool)"]
-    Scalar <|-- Char["字符 (char)"]
+    Scalar <|-- Integer["整数"]
+    Scalar <|-- Float["浮点"]
+    Scalar <|-- Boolean["布尔"]
+    Scalar <|-- Char["字符"]
     
-    Compound <|-- Tuple["元组 (Tuple)"]
-    Compound <|-- Array["数组 (Array)"]
+    Compound <|-- Tuple["元组"]
+    Compound <|-- Array["数组"]
 ```
 
 ---

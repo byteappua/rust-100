@@ -185,11 +185,11 @@ Cargo 创建了一个标准的工程结构：
 ```mermaid
 graph TD
     Project[hello_world/]
-    Config[Cargo.toml 📄<br>(项目配置)]
-    Lock[Cargo.lock 🔒<br>(依赖版本锁定)]
+    Config["Cargo.toml 📄 (项目配置)"]
+    Lock["Cargo.lock 🔒 (依赖版本锁定)"]
     Src[src/ 📂]
-    Main[main.rs 🦀<br>(源码入口)]
-    Target[target/ 🗑️<br>(编译产物)]
+    Main["main.rs 🦀 (源码入口)"]
+    Target["target/ 🗑️ (编译产物)"]
     
     Project --> Config
     Project --> Lock
