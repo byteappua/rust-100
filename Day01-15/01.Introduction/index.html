@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-cdf98a39.js";
+            window.path_to_searchindex_js = "../../searchindex-507a4bb0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -181,172 +181,257 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust&amp;style=flat-square" alt="Rust Version">
   <a href="https://doc.rust-lang.org/book/"><img src="https://img.shields.io/badge/Reference-The%20Book-blue?logo=bookstack&amp;style=flat-square" alt="The Book"></a>
+  <a href="https://github.com/rust-lang/rust"><img src="https://img.shields.io/badge/Stars-80k%2B-yellow?logo=github&amp;style=flat-square" alt="GitHub Stars"></a>
 </p>
 
-<p>欢迎来到 Rust 的世界！今天我们将迈出成为 Rustacean 的第一步。我们将搭建开发环境，理解 Rust 的工具链，并亲手编写运行第一个 Rust 程序。</p>
-<h2 id="-学习目标-learning-objectives"><a class="header" href="#-学习目标-learning-objectives">📝 学习目标 (Learning Objectives)</a></h2>
-<ul>
-<li><strong>理解核心价值</strong>：明白为什么 Rust 被称为“最受喜爱的编程语言“。</li>
-<li><strong>掌握环境搭建</strong>：安装并配置 <code>rustup</code>, <code>cargo</code>, <code>rustc</code>。</li>
-<li><strong>熟悉工具链</strong>：理解 Rust 工具链的组成部分及其作用。</li>
-<li><strong>编写程序</strong>：使用 <code>cargo</code> 创建、编译和运行项目。</li>
-<li><strong>探索生态</strong>：了解 Crates.io 和 Docs.rs。</li>
-</ul>
+<p>欢迎来到 <strong>Rust 100 Days</strong> 的第一天！今天我们将开启一段从零到精通的系统编程之旅。</p>
+<p>本节不仅仅是“Hello World“，我们将深入理解 Rust 的工程化工具链，建立正确的心智模型，并配置一个专业级的开发环境。</p>
 <hr>
-<h2 id="-为什么要学-rust-why-rust"><a class="header" href="#-为什么要学-rust-why-rust">🎯 为什么要学 Rust? (Why Rust?)</a></h2>
-<p>Rust 连续多年被 Stack Overflow 开发者评为“最受喜爱的编程语言“，这绝非偶然。它解决了传统系统编程语言（如 C/C++）的痛点，同时提供了现代化的开发体验。</p>
-<h3 id="1--内存安全-memory-safety"><a class="header" href="#1--内存安全-memory-safety">1. 🛡️ 内存安全 (Memory Safety)</a></h3>
-<p>Rust 最著名的特性。它通过<strong>所有权 (Ownership)</strong> 和 <strong>借用 (Borrowing)</strong> 机制，在编译阶段就消除了空指针、数据竞争和悬空指针等常见的内存错误。最重要的是，它<strong>不需要垃圾回收 (GC)</strong>，这意味着没有运行时暂停。</p>
-<h3 id="2--极致性能-performance"><a class="header" href="#2--极致性能-performance">2. ⚡ 极致性能 (Performance)</a></h3>
-<p>Rust 是编译型语言，其运行速度媲美 C/C++。它拥有“零成本抽象 (Zero-Cost Abstractions)“的能力——你使用的越高级的抽象，编译后的代码质量并不比手写的底层代码差。</p>
-<h3 id="3--现代化工具链-modern-toolchain"><a class="header" href="#3--现代化工具链-modern-toolchain">3. 🛠️ 现代化工具链 (Modern Toolchain)</a></h3>
-<p>不同于 C++ 需要自己配置 Build System (CMake, Make) 和包管理 (Conan, Vcpkg)，Rust 自带的 <strong>Cargo</strong> 提供了世界级的包管理、构建、测试和文档生成体验，开箱即用。</p>
-<h3 id="4--强大的社区与生态-community"><a class="header" href="#4--强大的社区与生态-community">4. 🤝 强大的社区与生态 (Community)</a></h3>
-<p>从操作系统 (Linux, Windows) 到 WebAssembly，从区块链 (Polkadot, Solana) 到高性能网络服务 (AWS, Cloudflare)，Rust 的应用场景极其广泛。</p>
+<h2 id="-目录-table-of-contents"><a class="header" href="#-目录-table-of-contents">📋 目录 (Table of Contents)</a></h2>
+<ol>
+<li><a href="#-为什么选择-rust-why-rust">为什么选择 Rust? (Why Rust?)</a></li>
+<li><a href="#-核心概念所有权与内存安全-core-concepts">核心概念：所有权与内存安全</a></li>
+<li><a href="#-架构预览rust-工具链-toolchain">架构预览：Rust 工具链</a></li>
+<li><a href="#-环境搭建-installation">环境搭建 (Installation)</a></li>
+<li><a href="#-第一个-rust-项目-hello-world">第一个 Rust 项目 (Hello World)</a></li>
+<li><a href="#-专业开发工作流-professional-workflow">专业开发工作流 (Professional Workflow)</a></li>
+<li><a href="#-生态系统与资源-resources">生态系统与资源</a></li>
+<li><a href="#-练习与扩展-exercises">练习与扩展</a></li>
+</ol>
 <hr>
-<h2 id="-核心概念图解-core-concepts"><a class="header" href="#-核心概念图解-core-concepts">📖 核心概念图解 (Core Concepts)</a></h2>
-<p>在开始动手之前，让我们先理清 Rust 开发环境的架构。</p>
-<pre class="mermaid">graph TD
-    User([开发者]) --&gt;|管理版本| Rustup
-    User --&gt;|构建项目| Cargo
-    
-    subgraph Toolchain [Rust 工具链]
-        Rustup[Rustup&lt;br&gt;工具链安装器]
-        Cargo[Cargo&lt;br&gt;包管理器 &amp; 构建工具]
-        Rustc[Rustc&lt;br&gt;编译器]
-        Std[Std Lib&lt;br&gt;标准库]
-    end
-    
-    Rustup --&gt;|安装/更新| Cargo
-    Rustup --&gt;|安装/更新| Rustc
-    Rustup --&gt;|安装/更新| Std
-    
-    Cargo --&gt;|调用| Rustc
-    Rustc --&gt;|链接| Std
-    Rustc --&gt;|生成| Binary([可执行文件])
+<h2 id="-为什么选择-rust-why-rust"><a class="header" href="#-为什么选择-rust-why-rust">🎯 为什么选择 Rust? (Why Rust?)</a></h2>
+<p>Rust 是一门赋予每个人构建可靠且高效软件能力的系统编程语言。它解决了计算机科学中长久以来的“不可能三角“：<strong>安全</strong>、<strong>并发</strong>与<strong>速度</strong>。</p>
+<h3 id="语言特性四象限"><a class="header" href="#语言特性四象限">语言特性四象限</a></h3>
+<p>大多数语言只能在“控制力“和“安全性“之间二选一，而 Rust 打破了这一常规：</p>
+<pre class="mermaid">quadrantChart
+    title 编程语言权衡图
+    x-axis 低控制力 (High Level) --&gt; 高控制力 (Low Level)
+    y-axis 低安全性 (Risky) --&gt; 高安全性 (Safe)
+    quadrant-1 理想之选 (Rust)
+    quadrant-2 安全但受限 (Java/Go/Python)
+    quadrant-3 灵活但危险 (Assembly)
+    quadrant-4 强大但易错 (C/C++)
+    "C/C++": [0.9, 0.2]
+    "Java/Go": [0.2, 0.8]
+    "Python/JS": [0.1, 0.85]
+    "Rust": [0.85, 0.9]
 </pre>
 
+<ol>
+<li><strong>🛡️ 内存安全 (Memory Safety)</strong>: 编译期杜绝空指针、数据竞争和缓冲区溢出。无 GC（垃圾回收），却拥有内存即时回收的能力。</li>
+<li><strong>⚡ 零成本抽象 (Zero-Cost Abstractions)</strong>: 高级语法（如迭代器、闭包）编译后与手写底层汇编一样快。</li>
+<li><strong>🔧 现代工具链</strong>: 拥有业界顶尖的包管理器 (Cargo)、文档生成器和格式化工具。</li>
+</ol>
+<hr>
+<h2 id="-核心概念所有权与内存安全-core-concepts"><a class="header" href="#-核心概念所有权与内存安全-core-concepts">🧠 核心概念：所有权与内存安全 (Core Concepts)</a></h2>
+<p>Rust 的核心在于<strong>所有权 (Ownership)</strong>。这是 Rust 无需垃圾回收就能保证内存安全的关键。</p>
 <ul>
-<li><strong><code>rustup</code></strong>: 你的 Rust 环境管家。负责安装 Rust、切换版本（Stable/Nightly）以及下载标准库源码等组件。</li>
-<li><strong><code>cargo</code></strong>: 你的瑞士军刀。负责新建项目、下载依赖、编译代码、运行测试。</li>
-<li><strong><code>rustc</code></strong>: 幕后的工匠。实际的编译器，通常由 Cargo 调用，你很少需要直接运行它。</li>
+<li><strong>所有权规则</strong>: 每个值都有一个变量作为它的“所有者“。同一时间只能有一个所有者。</li>
+<li><strong>借用 (Borrowing)</strong>: 类似现实中的“借东西“。你可以借用数据（引用），但必须遵守规则（要么一个可变引用，要么多个不可变引用）。</li>
 </ul>
+<pre class="mermaid">graph LR
+    subgraph GC [垃圾回收语言 (Java/Go)]
+        Alloc1[申请内存] --&gt; Run1[运行时扫描] --&gt; Free1[GC回收]
+        style GC fill:#f9f,stroke:#333,stroke-dasharray: 5 5
+    end
+    
+    subgraph Manual [手动管理 (C/C++)]
+        Alloc2[malloc] --&gt; Use[使用] --&gt; Free2[free?]
+        Free2 --忘记?--&gt; Leak[内存泄漏]
+        Free2 --太早?--&gt; Dangling[悬空指针]
+        style Manual fill:#fcc,stroke:#333,stroke-dasharray: 5 5
+    end
+    
+    subgraph Rust [Rust 模型]
+        Alloc3[绑定变量] --&gt; Scope[作用域结束] --&gt; AutoFree[编译器插入 Drop]
+        style Rust fill:#cfc,stroke:#333
+    end
+</pre>
+
+<hr>
+<h2 id="-架构预览rust-工具链-toolchain"><a class="header" href="#-架构预览rust-工具链-toolchain">🏗️ 架构预览：Rust 工具链 (Toolchain)</a></h2>
+<p>你是通过 <code>rustup</code> 来管理整个 Rust 宇宙的。</p>
+<pre class="mermaid">classDiagram
+    class Rustup {
+        +install()
+        +update()
+        +target add()
+        +component add()
+        管理版本 (Stable/Nightly)
+    }
+    class Cargo {
+        +new()
+        +build()
+        +run()
+        +test()
+        包管理与构建工具
+    }
+    class Rustc {
+        +compile()
+        底层编译器
+    }
+    
+    Rustup &lt;|-- Cargo : 安装管理
+    Rustup &lt;|-- Rustc : 安装管理
+    Cargo ..&gt; Rustc : 调用
+</pre>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">组件</th><th style="text-align: left">描述</th><th style="text-align: left">类比</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>rustup</code></strong></td><td style="text-align: left">安装器、版本管理器</td><td style="text-align: left"><code>nvm</code> / <code>pyenv</code></td></tr>
+<tr><td style="text-align: left"><strong><code>cargo</code></strong></td><td style="text-align: left">构建系统、包管理器、测试运行器</td><td style="text-align: left"><code>npm</code> + <code>webpack</code> + <code>mocha</code></td></tr>
+<tr><td style="text-align: left"><strong><code>rustc</code></strong></td><td style="text-align: left">Rust 编译器</td><td style="text-align: left"><code>gcc</code> / <code>clang</code> / <code>javac</code></td></tr>
+<tr><td style="text-align: left"><strong><code>std</code></strong></td><td style="text-align: left">标准库</td><td style="text-align: left">Python Standard Lib</td></tr>
+</tbody>
+</table>
+</div>
 <hr>
 <h2 id="-环境搭建-installation"><a class="header" href="#-环境搭建-installation">💻 环境搭建 (Installation)</a></h2>
-<h3 id="windows--macos--linux"><a class="header" href="#windows--macos--linux">Windows / macOS / Linux</a></h3>
-<p>官方推荐使用 <code>rustup</code> 进行安装。</p>
-<p><strong>macOS / Linux:</strong></p>
+<h3 id="1-安装-rust"><a class="header" href="#1-安装-rust">1. 安装 Rust</a></h3>
+<p><strong>Unix (macOS / Linux):</strong></p>
 <pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 </code></pre>
 <p><strong>Windows:</strong></p>
 <ol>
 <li>下载 <a href="https://win.rustup.rs/">rustup-init.exe</a>。</li>
-<li>运行安装程序，一路回车即可。</li>
-<li><strong>注意</strong>：Rust 依赖 C++ 构建环境。如果安装提示缺少 <code>C++ Build Tools</code>，请安装 Visual Studio 2022 (勾选 “Desktop development with C++”) 或 MinGW。</li>
+<li>安装 <strong>Visual Studio 2022</strong> 的 “Desktop development with C++” 工作负载（这是因为 Windows 版本的 Rust 依赖 MSVC链接器）。</li>
 </ol>
-<h3 id="-验证安装"><a class="header" href="#-验证安装">✅ 验证安装</a></h3>
-<p>安装完成后，关闭并重新打开终端，输入以下命令检查：</p>
-<pre><code class="language-bash">rustc --version
-# 输出示例: rustc 1.75.0 (82e1608df 2023-12-21)
+<h3 id="2配置镜像-可选推荐国内用户"><a class="header" href="#2配置镜像-可选推荐国内用户">2.配置镜像 (可选，推荐国内用户)</a></h3>
+<p>为了加速下载，配置字节跳动或清华源：
+在 <code>~/.cargo/config.toml</code> (Linux/Mac) 或 <code>%USERPROFILE%\.cargo\config.toml</code> (Windows) 中添加：</p>
+<pre><code class="language-toml">[source.crates-io]
+replace-with = 'rsproxy'
 
+[source.rsproxy]
+registry = "https://rsproxy.cn/crates.io-index"
+[source.rsproxy-sparse]
+registry = "sparse+https://rsproxy.cn/index/"
+
+[registries.crates-io]
+protocol = "sparse"
+</code></pre>
+<h3 id="3-验证安装"><a class="header" href="#3-验证安装">3. 验证安装</a></h3>
+<pre><code class="language-bash">rustc --version
+# rustc 1.75.0 (...)
 cargo --version
-# 输出示例: cargo 1.75.0 (1d8b05cdd 2023-11-20)
+# cargo 1.75.0 (...)
 </code></pre>
-<h3 id="-推荐编辑器插件-vs-code"><a class="header" href="#-推荐编辑器插件-vs-code">🧩 推荐编辑器插件 (VS Code)</a></h3>
-<p>强烈建议使用 <strong>VS Code</strong> 配合 <strong>rust-analyzer</strong> 插件。它提供了极致的代码补全、类型提示和重构功能。</p>
 <hr>
-<h2 id="-hello-world-与-cargo-项目结构"><a class="header" href="#-hello-world-与-cargo-项目结构">🚀 Hello World 与 Cargo 项目结构</a></h2>
-<p>虽然可以用 <code>rustc main.rs</code> 直接编译文件，但在实际开发中，我们<strong>始终使用 Cargo</strong>。</p>
-<h3 id="1-创建项目"><a class="header" href="#1-创建项目">1. 创建项目</a></h3>
-<pre><code class="language-bash">cargo new hello_rust
-cd hello_rust
+<h2 id="-第一个-rust-项目-hello-world"><a class="header" href="#-第一个-rust-项目-hello-world">🚀 第一个 Rust 项目 (Hello World)</a></h2>
+<p>我们不直接调用 <code>rustc</code>，而是始终使用 <code>cargo</code>。</p>
+<h3 id="创建与运行"><a class="header" href="#创建与运行">创建与运行</a></h3>
+<pre><code class="language-bash">cargo new hello_world
+cd hello_world
+cargo run
 </code></pre>
-<h3 id="2-项目结构剖析"><a class="header" href="#2-项目结构剖析">2. 项目结构剖析</a></h3>
-<p>Cargo 会自动生成标准的项目结构：</p>
+<h3 id="项目结构剖析"><a class="header" href="#项目结构剖析">项目结构剖析</a></h3>
+<p>Cargo 创建了一个标准的工程结构：</p>
 <pre class="mermaid">graph TD
-    Root[hello_rust/]
-    Config[Cargo.toml]
-    Lock[Cargo.lock]
-    Src[src/]
-    Main[main.rs]
-    GitIgnore[.gitignore]
-    Target[target/ 📂]
+    Project[hello_world/]
+    Config[Cargo.toml 📄&lt;br&gt;(项目配置)]
+    Lock[Cargo.lock 🔒&lt;br&gt;(依赖版本锁定)]
+    Src[src/ 📂]
+    Main[main.rs 🦀&lt;br&gt;(源码入口)]
+    Target[target/ 🗑️&lt;br&gt;(编译产物)]
     
-    Root --&gt; Config
-    Root --&gt; Lock
-    Root --&gt; Src
-    Root --&gt; GitIgnore
-    Root --&gt; Target
+    Project --&gt; Config
+    Project --&gt; Lock
+    Project --&gt; Src
+    Project --&gt; Target
     Src --&gt; Main
     
-    style Target fill:#f96,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
-    style Config fill:#bbf,stroke:#333,stroke-width:2px
-    style Main fill:#bfb,stroke:#333,stroke-width:2px
+    style Lock fill:#eee,stroke:#999
+    style Target fill:#fee,stroke:#f99
 </pre>
 
 <ul>
-<li><strong><code>Cargo.toml</code></strong>: 项目的配置文件。定义了项目名称、版本以及<strong>依赖库 (Dependencies)</strong>。类似 Node.js 的 <code>package.json</code>。</li>
-<li><strong><code>src/main.rs</code></strong>: 源代码文件。</li>
-<li><strong><code>Cargo.lock</code></strong>: 自动生成的文件，锁定所有依赖的确切版本。<strong>不要手动修改它</strong>。</li>
-<li><strong><code>target/</code></strong>: 编译输出目录。包含编译后的二进制文件和中间产物。这个目录通常很大，且会被 Git 忽略。</li>
+<li><strong>Cargo.toml</strong>: 清单文件。定义依赖 (dependencies)。</li>
+<li><strong>Cargo.lock</strong>: <strong>不要手动修改！</strong> 它确保你的同事和服务器使用完全一致的依赖版本。</li>
+<li><strong>target/</strong>: 很大，包含构建产物。应加入 <code>.gitignore</code>。</li>
 </ul>
-<h3 id="3-代码解读-srcmainrs"><a class="header" href="#3-代码解读-srcmainrs">3. 代码解读 (<code>src/main.rs</code>)</a></h3>
+<h3 id="代码解读-mainrs"><a class="header" href="#代码解读-mainrs">代码解读 (<code>main.rs</code>)</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
-    println!("Hello, world!");
+    println!("Hello, World!");
 }</code></pre>
 <ul>
-<li><code>fn main() {}</code>: 程序的入口函数。</li>
-<li><code>println!</code>: 这是一个<strong>宏 (Macro)</strong>，注意末尾的 <code>!</code>。宏是 Rust 强大的元编程特性，这里它用于向控制台打印文本。如果它是普通函数，则是 <code>println</code> (无感叹号)。</li>
+<li><code>fn</code>: 定义函数 (Function)。</li>
+<li><code>main</code>: 程序入口。</li>
+<li><code>println!</code>: 注意那个 <strong>!</strong>。这代表它是一个 <strong>宏 (Macro)</strong>，而不是普通函数。宏在编译时展开代码，更加强大灵活。</li>
 </ul>
 <hr>
-<h2 id="-编译与运行流程-compilation-flow"><a class="header" href="#-编译与运行流程-compilation-flow">⚙️ 编译与运行流程 (Compilation Flow)</a></h2>
-<p>在 Rust 中，开发循环通常涉及以下命令：</p>
-<pre class="mermaid">flowchart LR
-    Write[编写代码] --&gt; Check[Cargo Check]
-    Check --&gt;|通过| Build[Cargo Build]
-    Build --&gt;|调试| Run[Cargo Run]
-    Run --&gt;|发布| Release[Cargo Build --release]
+<h2 id="-专业开发工作流-professional-workflow"><a class="header" href="#-专业开发工作流-professional-workflow">⚙️ 专业开发工作流 (Professional Workflow)</a></h2>
+<p>作为一个专业的 Rustacean，你的日常不仅仅是 <code>build</code>。Rust 提供了全套内置工具。</p>
+<pre class="mermaid">sequenceDiagram
+    participant Dev as 开发者
+    participant Code as 源代码
+    participant Fmt as Format 🎨
+    participant Clip as Clippy 🧐
+    participant Comp as Compiler ⚙️
     
-    style Check fill:#ff9,stroke:#333
-    style Run fill:#9f9,stroke:#333
+    Dev-&gt;&gt;Code: 编写代码
+    Dev-&gt;&gt;Fmt: cargo fmt
+    Fmt--&gt;&gt;Code: 自动格式化
+    Dev-&gt;&gt;Clip: cargo clippy
+    Clip--&gt;&gt;Dev: 提出修改建议 (Lint)
+    Dev-&gt;&gt;Comp: cargo check
+    Comp--&gt;&gt;Dev: 快速检查错误
+    Dev-&gt;&gt;Comp: cargo test
+    Comp--&gt;&gt;Dev: 运行单元测试
 </pre>
 
+<h3 id="常用命令清单"><a class="header" href="#常用命令清单">常用命令清单</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">命令</th><th style="text-align: left">作用</th><th style="text-align: left">场景</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>cargo new &lt;name&gt;</code></td><td style="text-align: left">创建新项目</td><td style="text-align: left">开始新工作</td></tr>
+<tr><td style="text-align: left"><code>cargo check</code></td><td style="text-align: left"><strong>最常用</strong>。快速语法检查，不生成二进制</td><td style="text-align: left">编码过程中频繁运行 (快!)</td></tr>
+<tr><td style="text-align: left"><code>cargo build</code></td><td style="text-align: left">编译 (Debug模式)</td><td style="text-align: left">调试运行</td></tr>
+<tr><td style="text-align: left"><code>cargo build --release</code></td><td style="text-align: left">编译 (Release模式)</td><td style="text-align: left">生产环境发布 (开启最高优化)</td></tr>
+<tr><td style="text-align: left"><code>cargo run</code></td><td style="text-align: left">编译并运行</td><td style="text-align: left">本地测试</td></tr>
+<tr><td style="text-align: left"><code>cargo fmt</code></td><td style="text-align: left">格式化代码</td><td style="text-align: left">保持代码风格统一</td></tr>
+<tr><td style="text-align: left"><code>cargo clippy</code></td><td style="text-align: left">linter 工具</td><td style="text-align: left">获取优化代码的建议</td></tr>
+<tr><td style="text-align: left"><code>cargo doc --open</code></td><td style="text-align: left">生成并打开文档</td><td style="text-align: left">查看依赖库的文档</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>💡 提示</strong>: <code>cargo check</code> 比 <code>cargo build</code> 快得多。养成随手 <code>check</code> 的习惯。</p>
+</blockquote>
+<hr>
+<h2 id="-生态系统与资源-resources"><a class="header" href="#-生态系统与资源-resources">🌍 生态系统与资源 (Resources)</a></h2>
+<ul>
+<li><strong><a href="https://crates.io/">Crates.io</a></strong>: Rust 的 NPM/PyPI。官方包仓库。</li>
+<li><strong><a href="https://docs.rs/">Docs.rs</a></strong>: 所有 Crates 的文档中心。</li>
+<li><strong><a href="https://doc.rust-lang.org/std/">Rust Standard Library</a></strong>: 标准库文档，你的红宝书。</li>
+<li><strong><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></strong>: 官方教材 (“The Book”)。</li>
+</ul>
+<h3 id="推荐-vs-code-插件"><a class="header" href="#推荐-vs-code-插件">推荐 VS Code 插件</a></h3>
 <ol>
-<li><strong><code>cargo check</code></strong>: 🚀 <strong>最常用</strong>。快速检查代码能否通过编译，但不生成可执行文件。速度极快，适合开发过程中频繁运行。</li>
-<li><strong><code>cargo run</code></strong>: 编译并直接运行程序。</li>
-<li><strong><code>cargo build</code></strong>: 仅编译，生成的可执行文件在 <code>target/debug/</code> 下。</li>
-<li><strong><code>cargo build --release</code></strong>: 📦 <strong>发布构建</strong>。开启最高优化级别，编译时间长，但生成的程序运行速度最快。产物在 <code>target/release/</code> 下。</li>
+<li><strong>rust-analyzer</strong>: 官方核心插件，提供极强的代码补全和分析。</li>
+<li><strong>CodeLLDB</strong> (macOS/Linux) / <strong>C/C++</strong> (Windows):用于调试。</li>
+<li><strong>Even Better TOML</strong>: 支持编辑 <code>Cargo.toml</code>。</li>
+<li><strong>Crates</strong>: 显示依赖项的最新版本。</li>
 </ol>
 <hr>
-<h2 id="-rust-生态系统-ecosystem"><a class="header" href="#-rust-生态系统-ecosystem">� Rust 生态系统 (Ecosystem)</a></h2>
-<ul>
-<li><strong><a href="https://crates.io/">Crates.io</a></strong>: Rust 的官方包仓库。你可以在这里找到数以万计的第三方库（在 Rust 中称为 <strong>Crate</strong>）。</li>
-<li><strong><a href="https://docs.rs/">Docs.rs</a></strong>: 文档中心。Crates.io 上托管的所有 Crate 的文档都会自动生成并托管在这里。</li>
-</ul>
+<h2 id="-练习与扩展-exercises"><a class="header" href="#-练习与扩展-exercises">🏋️ 练习与扩展 (Exercises)</a></h2>
+<p>光看不练假把式。请完成以下练习：</p>
+<ol>
+<li><strong>环境体检</strong>: 运行 <code>cargo fmt</code> 和 <code>cargo clippy</code> 在你的 Hello World 项目上，看看会发生什么。</li>
+<li><strong>配置尝鲜</strong>: 修改 <code>Cargo.toml</code>，添加一个依赖（例如 <code>ferris-says = "0.2"</code>），然后在 <code>main.rs</code> 中使用它。</li>
+<li><strong>文档探索</strong>: 运行 <code>cargo doc --open</code> 查看自动生成的文档。</li>
+</ol>
+<p>👉 <strong><a href="./exercises/README.html">点击这里访问详细练习题目录</a></strong></p>
 <hr>
-<h2 id="-练习题-exercises"><a class="header" href="#-练习题-exercises">🏋️ 练习题 (Exercises)</a></h2>
-<p>我们为你准备了实践练习，帮助你巩固今天的知识。</p>
-<ul>
-<li><strong>练习 1</strong>: 修正代码并运行</li>
-<li><strong>练习 2</strong>: 使用 Cargo 创建并配置新项目</li>
-<li><strong>练习 3</strong>: 探索 Cargo.toml</li>
-</ul>
-<p>👉 <strong><a href="./exercises/README.html">点击这里开始练习</a></strong></p>
-<hr>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<p><strong>Q: 为什么生成的 exe 文件这么大？</strong>
-A: Debug 模式下包含了大量调试符号。尝试 <code>cargo build --release</code>，并使用 <code>strip</code> 命令（Linux/Mac）可以显著减小体积。此外，Rust 默认静态链接标准库，这使得程序在没有安装 Rust 的机器上也能直接运行，但增加了体积。</p>
-<p><strong>Q: <code>use std::io;</code> 是什么意思？</strong>
-A: 这表示引入标准库 (<code>std</code>) 中的 <code>io</code> 模块。Rust 默认只引入最常用的一组项（称为 Prelude），其他需要手动引入。</p>
-<hr>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch01-00-getting-started.html">Rust 程序设计语言 - 第一章</a></li>
-<li><a href="https://doc.rust-lang.org/rust-by-example/hello.html">Rust by Example - Hello World</a></li>
-</ul>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>环境搭建完成，工具链也已就绪。下一节，我们将深入研究 Rust 的基础——变量与数据类型。</p>
-<p><a href="../02.VariablesAndTypes/README.html"><strong>Day 02: 变量与数据类型</strong></a></p>
+<p>一旦你的环境准备就绪，我们就可以开始真正的编程了。下一章我们将学习 Rust 最基础的构建块。</p>
+<p><a href="../02.VariablesAndTypes/README.html"><strong>Day 02: 变量与数据类型 (Variables &amp; Types)</strong></a></p>
 
                     </main>
 
