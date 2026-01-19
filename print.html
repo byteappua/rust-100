@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6a6a6780.js";
+            window.path_to_searchindex_js = "searchindex-db38cd84.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-cec6f113.js"></script>
@@ -2634,11 +2634,11 @@ fn      add_one  (x: i32)               -&gt; i32 {
 </ul>
 <h3 id="决策流程图"><a class="header" href="#决策流程图">决策流程图</a></h3>
 <pre class="mermaid">graph TD
-    Start([代码片段]) --&gt; HasSemi{结尾有分号吗&lt;br&gt;';' ?}
-    HasSemi -- Yes --&gt; Statement[语句 Statement]
-    Statement --&gt; ReturnsUnit[返回单元类型: ()]
-    HasSemi -- No --&gt; Expression[表达式 Expression]
-    Expression --&gt; ReturnsValue[返回计算出的值]
+    Start(["代码片段"]) --&gt; HasSemi{"结尾有分号吗&lt;br&gt;';' ?"}
+    HasSemi -- Yes --&gt; Statement["语句 Statement"]
+    Statement --&gt; ReturnsUnit["返回单元类型: ()"]
+    HasSemi -- No --&gt; Expression["表达式 Expression"]
+    Expression --&gt; ReturnsValue["返回计算出的值"]
     
     style Statement fill:#f9f,stroke:#333
     style Expression fill:#9f9,stroke:#333
@@ -2670,11 +2670,11 @@ let number = if condition { 5 } else { 6 };
 <h3 id="2-循环体系-loop-system"><a class="header" href="#2-循环体系-loop-system">2. 循环体系 (Loop System)</a></h3>
 <p>Rust 提供了三种循环工具，分别应对不同场景。</p>
 <pre class="mermaid">graph TD
-    Start([开始循环]) --&gt; KnownRange{是遍历范围&lt;br&gt;或集合吗?}
-    KnownRange -- Yes --&gt; For[使用 for 循环&lt;br&gt;(最安全/最常用)]
-    KnownRange -- No --&gt; InfLoop{需要无限循环&lt;br&gt;或手动控制退出?}
-    InfLoop -- Yes --&gt; Loop[使用 loop 循环&lt;br&gt;(可返回值)]
-    InfLoop -- No --&gt; While[使用 while 循环&lt;br&gt;(基于条件)]
+    Start(["开始循环"]) --&gt; KnownRange{"是遍历范围&lt;br&gt;或集合吗?"}
+    KnownRange -- Yes --&gt; For["使用 for 循环&lt;br&gt;(最安全/最常用)"]
+    KnownRange -- No --&gt; InfLoop{"需要无限循环&lt;br&gt;或手动控制退出?"}
+    InfLoop -- Yes --&gt; Loop["使用 loop 循环&lt;br&gt;(可返回值)"]
+    InfLoop -- No --&gt; While["使用 while 循环&lt;br&gt;(基于条件)"]
     
     style For fill:#cfc,stroke:#333,stroke-width:2px
 </pre>
@@ -2750,384 +2750,616 @@ let result = loop {
 <h1 id="day-04-所有权-ownership"><a class="header" href="#day-04-所有权-ownership">Day 04: 所有权 (Ownership)</a></h1>
 <h2 id="-学习目标-1"><a class="header" href="#-学习目标-1">📝 学习目标</a></h2>
 <ul>
-<li>理解 Rust 内存管理的三种方式</li>
-<li>掌握所有权的三大基本规则</li>
-<li>理解 Stack 与 Heap 的区别</li>
-<li>掌握移动 (Move) 和克隆 (Clone) 语义</li>
-<li>理解 Copy Trait 及其适用场景</li>
+<li>深层理解 Stack (栈) 与 Heap (堆) 的工作原理与区别</li>
+<li>彻底掌握所有权 (Ownership) 三大原则</li>
+<li>理解内存回收机制 (Scope &amp; Drop)</li>
+<li>掌握 移动 (Move)、克隆 (Clone) 与 拷贝 (Copy) 的底层语义</li>
+<li>能够识别并修复常见的所有权编译错误</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<p>所有权是 Rust 最独特、最核心的特性。</p>
-<ul>
-<li><strong>无需 GC 的安全</strong>：它让 Rust 在没有垃圾回收 (GC) 的情况下保证内存安全，避免了 Java/Python 的 GC 停顿问题。</li>
-<li><strong>避免常见错误</strong>：它在编译期就杜绝了空指针、双重释放 (Double Free)、悬垂指针 (Dangling Pointer) 等 C/C++ 常见 bug。</li>
-<li><strong>并发安全</strong>：所有权系统天然地限制了多线程间的数据竞争。</li>
-</ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-内存管理模型"><a class="header" href="#1-内存管理模型">1. 内存管理模型</a></h3>
-<p>Rust 选择了一条不同的路：通过<strong>所有权系统</strong>管理内存，包含一组在<strong>编译时</strong>检查的规则。运行时没有额外开销。</p>
-<h3 id="2-栈-stack-与-堆-heap"><a class="header" href="#2-栈-stack-与-堆-heap">2. 栈 (Stack) 与 堆 (Heap)</a></h3>
-<ul>
-<li><strong>栈 (Stack)</strong>: 后进先出，速度极快。存储固定大小数据 (如 <code>i32</code>, <code>bool</code>)。</li>
-<li><strong>堆 (Heap)</strong>: 存储大小未知或可变的数据 (如 <code>String</code>, <code>Vec</code>)。访问需通过指针，速度稍慢。</li>
-</ul>
-<h3 id="3-所有权三原则"><a class="header" href="#3-所有权三原则">3. 所有权三原则</a></h3>
+<h2 id="-核心概念为什么需要所有权"><a class="header" href="#-核心概念为什么需要所有权">🎯 核心概念：为什么需要所有权？</a></h2>
+<p>所有程序都需要管理其运行时使用的计算机内存。现有的编程语言主要采用两种方式：</p>
 <ol>
-<li><strong>每个值都有一个所有者 (Owner)</strong>：每个数据只能被一个变量拥有。</li>
-<li><strong>同一时间只能有一个所有者</strong>：避免了多重所有权的混乱。</li>
-<li><strong>所有者离开作用域，值被丢弃</strong>：自动释放资源，防止内存泄漏。</li>
+<li><strong>垃圾回收机制 (GC)</strong>：如 Java, Python, Go。程序运行时不断寻找不再使用的内存并释放。
+<ul>
+<li><em>优点</em>：开发简单。</li>
+<li><em>缺点</em>：运行时开销 (Stop-the-world)，不可预测的性能。</li>
+</ul>
+</li>
+<li><strong>手动分配释放</strong>：如 C, C++。程序员显式申请 (<code>malloc/new</code>) 和释放 (<code>free/delete</code>) 内存。
+<ul>
+<li><em>优点</em>：控制力强，性能极高。</li>
+<li><em>缺点</em>：容易内存泄漏 (Memory Leak) 或双重释放 (Double Free)，导致安全漏洞。</li>
+</ul>
+</li>
 </ol>
-<h3 id="4-移动语义-move-semantics"><a class="header" href="#4-移动语义-move-semantics">4. 移动语义 (Move Semantics)</a></h3>
-<p>对于复杂类型（如 <code>String</code>），赋值操作是 <strong>移动 (Move)</strong> 而非浅拷贝。</p>
+<p><strong>Rust 选择了第三种方式：所有权系统</strong>。
+内存管理通过一套编译器在编译时检查的规则进行管理。<strong>运行时没有任何额外开销</strong>。</p>
+<hr>
+<h2 id="-预备知识栈-stack-与-堆-heap"><a class="header" href="#-预备知识栈-stack-与-堆-heap">📚 预备知识：栈 (Stack) 与 堆 (Heap)</a></h2>
+<p>理解所有权之前，必须先理清栈与堆的区别。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">栈 (Stack)</th><th style="text-align: left">堆 (Heap)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>组织方式</strong></td><td style="text-align: left">后进先出 (LIFO)，像一摞盘子</td><td style="text-align: left">只有指针在栈上，数据在内存中无序存放 (类似餐厅找空桌子)</td></tr>
+<tr><td style="text-align: left"><strong>大小</strong></td><td style="text-align: left">编译时已知且固定</td><td style="text-align: left">运行时动态变化</td></tr>
+<tr><td style="text-align: left"><strong>速度</strong></td><td style="text-align: left"><strong>极快</strong> (无需寻找空间，直接压栈)</td><td style="text-align: left"><strong>较慢</strong> (需要分配器寻找足够大的空间并标记)</td></tr>
+<tr><td style="text-align: left"><strong>访问</strong></td><td style="text-align: left">极快 (局部性好)</td><td style="text-align: left">较慢 (需要通过指针跳转)</td></tr>
+<tr><td style="text-align: left"><strong>典型数据</strong></td><td style="text-align: left"><code>i32</code>, <code>bool</code>, <code>char</code>, 固定数组</td><td style="text-align: left"><code>String</code>, <code>Vec</code>, 复杂对象</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>💡 <strong>Rust 的性能秘密</strong>：尽量在栈上分配数据，减少堆分配是 Rust 高性能的关键之一。</p>
+</blockquote>
+<hr>
+<h2 id="-所有权规则-the-rules"><a class="header" href="#-所有权规则-the-rules">🛡️ 所有权规则 (The Rules)</a></h2>
+<p>这是 Rust 内存管理的宪法，必须牢记：</p>
+<ol>
+<li><strong>Rust 中的每一个值都有一个被称为其 所有者 (Owner) 的变量。</strong></li>
+<li><strong>值在任一时刻有且只有一个所有者。</strong></li>
+<li><strong>当所有者 (变量) 离开作用域 (Scope) 时，这个值将被丢弃 (Dropped)。</strong></li>
+</ol>
+<h3 id="作用域-scope-示意"><a class="header" href="#作用域-scope-示意">作用域 (Scope) 示意</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{                      // s 在这里无效，它还没声明
+    let s = "hello";   // s 从这里开始有效
+                       // 使用 s
+}                      // 此作用域结束，s 不再有效，内存被释放
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-内存布局与移动语义-move"><a class="header" href="#-内存布局与移动语义-move">🧠 内存布局与移动语义 (Move)</a></h2>
+<h3 id="1-变量绑定背后的内存-string-为例"><a class="header" href="#1-变量绑定背后的内存-string-为例">1. 变量绑定背后的内存 (String 为例)</a></h3>
+<p><code>String</code> 类型由三部分组成，存储在 <strong>栈</strong> 上：</p>
+<ol>
+<li><code>ptr</code>: 指向存放字符串内容的堆内存指针</li>
+<li><code>len</code>: 当前字符串长度 (字节)</li>
+<li><code>capacity</code>: 堆内存总容量</li>
+</ol>
+<p>实际的字符串内容 (“hello”) 存储在 <strong>堆</strong> 上。</p>
+<pre class="mermaid">graph LR
+    subgraph Stack [栈帧 Stack Frame]
+        s1[s1 table]
+        s1_ptr[ptr]
+        s1_len[len: 5]
+        s1_cap[capacity: 5]
+    end
+    
+    subgraph Heap [堆内存 Heap Memory]
+        h_h[h]
+        h_e[e]
+        h_l1[l]
+        h_l2[l]
+        h_o[o]
+    end
+
+    s1_ptr --&gt; h_h
+    h_h -.- h_e -.- h_l1 -.- h_l2 -.- h_o
+</pre>
+
+<h3 id="2-移动-move-rust-的默认行为"><a class="header" href="#2-移动-move-rust-的默认行为">2. 移动 (Move): Rust 的默认行为</a></h3>
+<p>当我们把 <code>s1</code> 赋值给 <code>s2</code> 时：</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s1 = String::from("hello");
-let s2 = s1; // s1 的所有权移动给了 s2
-// println!("{}", s1); // 错误！s1 已失效
+let s2 = s1; // ⚠️ 这里发生了移动 (Move)
+// println!("{}", s1); // ❌ 错误！s1 已经失效
 <span class="boring">}</span></code></pre>
-<h3 id="5-克隆-clone"><a class="header" href="#5-克隆-clone">5. 克隆 (Clone)</a></h3>
-<p>如果你确实需要深度拷贝堆上的数据，使用 <code>.clone()</code> 方法。</p>
+<p><strong>发生了什么？</strong>
+Rust <strong>不会</strong> 复制堆上的数据（那样太慢）。Rust 只是拷贝了栈上的元数据 (<code>ptr</code>, <code>len</code>, <code>cap</code>)。
+为了保证 <strong>规则 #2 (同一时间只有一个所有者)</strong> 和防止 <strong>Double Free (二次释放)</strong>，Rust 视 <code>s1</code> 为无效。</p>
+<pre class="mermaid">graph LR
+    subgraph Stack
+        s1[s1 (Invalidated)] -.-&gt; heap_data
+        s2[s2 (New Owner)] --&gt; heap_data
+    end
+    
+    subgraph Heap
+        heap_data["h | e | l | l | o"]
+    end
+    
+    style s1 fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5
+    style s2 fill:#ccffcc,stroke:#00ff00
+</pre>
+
+<p>这被称为 <strong>Move (移动)</strong>，而不是浅拷贝 (Shallow Copy)。因为旧变量失效了。</p>
+<hr>
+<h2 id="-克隆-clone-与-拷贝-copy"><a class="header" href="#-克隆-clone-与-拷贝-copy">🧬 克隆 (Clone) 与 拷贝 (Copy)</a></h2>
+<h3 id="1-克隆-clone-深度复制"><a class="header" href="#1-克隆-clone-深度复制">1. 克隆 (Clone): 深度复制</a></h3>
+<p>如果你确实需要两个独立的堆数据副本，必须显式调用 <code>.clone()</code>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s1 = String::from("hello");
-let s2 = s1.clone(); // 堆数据被复制
-println!("s1 = {}, s2 = {}", s1, s2); // 正常运行
+let s2 = s1.clone(); // ✅ 堆数据被真正复制了
+println!("s1 = {}, s2 = {}", s1, s2);
 <span class="boring">}</span></code></pre>
-<h3 id="6-copy-trait"><a class="header" href="#6-copy-trait">6. Copy Trait</a></h3>
-<p>对于存储在栈上的简单类型（如整数），赋值是自动 <strong>拷贝 (Copy)</strong>。</p>
+<p><strong>内存布局</strong>：</p>
+<pre class="mermaid">graph TD
+    subgraph Stack
+        s1[s1] --&gt; heap1
+        s2[s2] --&gt; heap2
+    end
+    
+    subgraph Heap
+        heap1["hello"]
+        heap2["hello (Copy)"]
+    end
+</pre>
+
+<h3 id="2-拷贝-copy-栈上的自动复制"><a class="header" href="#2-拷贝-copy-栈上的自动复制">2. 拷贝 (Copy): 栈上的自动复制</a></h3>
+<p>对于像整型这样完全存储在栈上的类型，没有“深浅拷贝”之分。复制非常快，Rust 默认允许这种行为。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let x = 5;
-let y = x; // x 的值被拷贝给 y
-println!("x = {}, y = {}", x, y); // x 依然有效
+let y = x; // 自动 Copy
+println!("x = {}, y = {}", x, y); // ✅ x 依然有效
 <span class="boring">}</span></code></pre>
-<p><strong>常见的 Copy 类型</strong>: 整数、浮点数、布尔值、字符、元素全是 Copy 的元组。</p>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-所有权转移"><a class="header" href="#示例-1-所有权转移">示例 1: 所有权转移</a></h3>
+<p><strong>哪些类型是 <code>Copy</code> 的？</strong></p>
+<ul>
+<li>所有整数类型 (<code>u32</code>, <code>i32</code>…)</li>
+<li>布尔类型 (<code>bool</code>)</li>
+<li>浮点数 (<code>f64</code>)</li>
+<li>字符类型 (<code>char</code>)</li>
+<li>元组 (当且仅当其包含的类型也都是 <code>Copy</code> 的，如 <code>(i32, i32)</code>)</li>
+</ul>
+<blockquote>
+<p>⚠️ 注意：<code>String</code> 不是 Copy 的，<code>Vec</code> 不是 Copy 的。任何需要分配堆内存的类型通常都不是 Copy 的。</p>
+</blockquote>
+<hr>
+<h2 id="-函数与所有权"><a class="header" href="#-函数与所有权">🤝 函数与所有权</a></h2>
+<p>将值传递给函数，语义与赋值语句一样：要么是 <strong>移动 (Move)</strong>，要么是 <strong>拷贝 (Copy)</strong>。</p>
 <pre class="playground"><code class="language-rust">fn main() {
-    let s = String::from("hello");
-    takes_ownership(s); // s 被移动到函数内
-    // println!("{}", s); // 错误！s 在这里无效了
+    let s = String::from("hello");  // s 进入作用域
+    
+    takes_ownership(s);             // s 的值移动进入函数
+                                    // ... 所以这里不再有效
+    // println!("{}", s);           // ❌ 编译错误
 
-    let x = 5;
-    makes_copy(x); // x 是 Copy 类型，传递的是副本
-    println!("{}", x); // x 依然有效
-}
+    let x = 5;                      // x 进入作用域
+    makes_copy(x);                  // x 应该移动进入函数，
+                                    // 但 i32 是 Copy，所以后面可继续使用 x
+} // 这里：x 移出作用域。s 的值已被移动，所以不会对 s 做任何操作。
 
-fn takes_ownership(some_string: String) {
+fn takes_ownership(some_string: String) { // some_string 进入作用域
     println!("{}", some_string);
-} // some_string 离开作用域，内存被释放
+} // some_string 移出作用域，`drop` 被调用。内存释放。
 
-fn makes_copy(some_integer: i32) {
+fn makes_copy(some_integer: i32) { 
     println!("{}", some_integer);
 }</code></pre>
-<h3 id="示例-2-返回值转移所有权"><a class="header" href="#示例-2-返回值转移所有权">示例 2: 返回值转移所有权</a></h3>
+<h3 id="返回值与作用域"><a class="header" href="#返回值与作用域">返回值与作用域</a></h3>
+<p>函数返回值也可以转移所有权。</p>
 <pre class="playground"><code class="language-rust">fn main() {
-    let s1 = gives_ownership();         //返回值移动给 s1
+    let s1 = gives_ownership();         // gives_ownership 将返回值移动给 s1
     let s2 = String::from("hello");     // s2 进入作用域
-    let s3 = takes_and_gives_back(s2);  // s2 被移动到函数，函数返回值移动给 s3
-} // s3 离开作用域被 drop。s2 已被移动无操作。s1 离开作用域被 drop。
+    let s3 = takes_and_gives_back(s2);  // s2 被移动到函数，
+                                        // 函数也将返回值移动给 s3
+} 
 
 fn gives_ownership() -&gt; String {
     let some_string = String::from("yours");
-    some_string // 返回 some_string 并移出给调用者
+    some_string // 返回 some_string，并移出给调用函数
 }
 
-fn takes_and_gives_back(a_string: String) -&gt; String {
+fn takes_and_gives_back(a_string: String) -&gt; String { 
     a_string  // 原样返回
 }</code></pre>
-<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们为你准备了练习题来深度体验所有权机制。</p>
-<ul>
-<li><strong>练习 1</strong>: 修复所有权移动导致的错误</li>
-<li><strong>练习 2</strong>: 使用 Clone 解决移动问题</li>
-<li><strong>练习 3</strong>: 区分 Copy 和 Move 类型</li>
-</ul>
-<p>👉 <strong><a href="Day01-15/04.Ownership/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-为什么-rust-不默认使用-clone"><a class="header" href="#q1-为什么-rust-不默认使用-clone">Q1: 为什么 Rust 不默认使用 Clone？</a></h3>
-<p>A: <code>Clone</code> 通常涉及堆内存分配和数据复制，开销较大。Rust 倾向于性能优先，默认行为（Move）是零成本的（只拷贝指针）。如果需要深拷贝，必须显式调用 <code>.clone()</code>。</p>
-<h3 id="q2-什么是-raii"><a class="header" href="#q2-什么是-raii">Q2: 什么是 RAII？</a></h3>
-<p>A: RAII (Resource Acquisition Is Initialization) 是一种编程模式，资源（内存、文件句柄等）的生命周期绑定到变量的作用域。Rust 的所有权系统就是 RAII 的完美体现：变量创建即获取资源，离开作用域即释放资源。</p>
+<hr>
+<h2 id="-常见陷阱部分移动-partial-move"><a class="header" href="#-常见陷阱部分移动-partial-move">🚫 常见陷阱：部分移动 (Partial Move)</a></h2>
+<p>在解构复杂类型时，要小心部分字段被移动。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct User {
+    username: String,
+    active: bool,
+}
+
+let user1 = User { 
+    username: String::from("someone"), 
+    active: true 
+};
+
+let name = user1.username; // hex: username 被移动走了！
+
+// println!("{}", user1.username); // ❌ 错误：user1.username 已无效
+println!("{}", user1.active);      // ✅ 正确：active 是 Copy 类型 (bool)
+// ⚠️ 此时整个 user1 变量不能再作为一个整体被使用了
+<span class="boring">}</span></code></pre>
+<hr>
 <h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
-<ul>
-<li><strong>理解 Move</strong>: 习惯变量被“移动“而不是“拷贝“。</li>
-<li><strong>少用 Clone</strong>: 除非真的需要两个独立的数据副本，否则尽量避免 <code>clone</code>，因为这会影响性能。考虑使用 <strong>引用</strong> (下一节的内容) 来共享数据。</li>
-<li><strong>利用作用域</strong>: 利用 <code>{}</code> 手动控制变量的生命周期，及时释放内存。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html">Rust 程序设计语言 - 什么是所有权</a></li>
-<li><a href="extras/ownership-deep-dive.html">Extra: 所有权深度剖析</a> (强烈推荐阅读！)</li>
-</ul>
-<h2 id="-本节要点回顾"><a class="header" href="#-本节要点回顾">📚 本节要点回顾</a></h2>
-<ul>
-<li>堆数据默认移动 (Move)，栈数据默认拷贝 (Copy)。</li>
-<li>所有权规则保证了内存安全，防止双重释放。</li>
-<li>变量离开作用域时自动调用 <code>drop</code> 释放资源。</li>
-</ul>
+<ol>
+<li><strong>拥抱 Move</strong>：不要因为害怕 Move 而到处 Clone。Move 是高效且安全的，习惯它。</li>
+<li><strong>理解生命周期</strong>：脑海中要时刻跟踪变量何时产生，何时离开作用域。</li>
+<li><strong>引用代替所有权转移</strong>：如果不想交出所有权，请使用 <strong>引用 (Reference)</strong> (下一节内容)。</li>
+</ol>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="Day01-15/04.Ownership/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>修复所有权错误</strong>：识别 Move 发生的位置并修复。</li>
+<li><strong>实现 Clone</strong>：手动克隆数据以保留原值。</li>
+<li><strong>Drop 顺序</strong>：观察变量离开作用域时的清理顺序。</li>
+</ol>
+<hr>
 <h2 id="-下一步-3"><a class="header" href="#-下一步-3">⏭️ 下一步</a></h2>
-<p>所有权虽然强大，但如果我们每次使用数据都要转移所有权再还回来，那就太麻烦了。Rust 提供了 <strong>引用 (References)</strong> 来解决这个问题。</p>
-<p>下一节: <a href="Day01-15/05.ReferencesAndBorrowing/README.html">Day 05: 引用与借用</a></p>
+<p>如果每次函数调用都要把所有权“借出去”再“还回来”太麻烦了。有没有办法访问数据但不获取所有权？
+答案是有的。</p>
+<p>下一节: <a href="Day01-15/05.ReferencesAndBorrowing/README.html">Day 05: 引用与借用 (References &amp; Borrowing)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-05-引用与借用-references-and-borrowing"><a class="header" href="#day-05-引用与借用-references-and-borrowing">Day 05: 引用与借用 (References and Borrowing)</a></h1>
 <h2 id="-学习目标-2"><a class="header" href="#-学习目标-2">📝 学习目标</a></h2>
 <ul>
-<li>理解引用的概念 (Pointer without ownership)</li>
-<li>掌握 <strong>借用 (Borrowing)</strong> 的规则</li>
+<li>理解 <strong>引用 (Reference)</strong> 的底层内存模型</li>
+<li>彻底掌握 <strong>借用 (Borrowing)</strong> 的两大核心规则</li>
 <li>区分 <strong>不可变引用</strong> (<code>&amp;T</code>) 和 <strong>可变引用</strong> (<code>&amp;mut T</code>)</li>
-<li>熟练处理引用作用域和数据竞争问题</li>
-<li>了解悬垂引用 (Dangling References) 及其预防</li>
+<li>理解 <strong>数据竞争 (Data Race)</strong> 及其预防机制</li>
+<li>识别 <strong>悬垂引用 (Dangling References)</strong></li>
 </ul>
-<h2 id="-为什么要学这个-1"><a class="header" href="#-为什么要学这个-1">🎯 为什么要学这个</a></h2>
-<p>所有权系统虽然安全，但如果每次使用数据都要转移所有权再还回来（像 Day 04 练习那样），代码会非常啰嗦。
-<strong>引用</strong>允许我们使用值而不获取其所有权。这就像是现实生活中的“借用“：你借了一本书看，看完得还回去，你不能把书烧了（Drop）或者转手卖给别人（Move）。</p>
-<h2 id="-核心概念-1"><a class="header" href="#-核心概念-1">📖 核心概念</a></h2>
-<h3 id="1-引用-reference"><a class="header" href="#1-引用-reference">1. 引用 (Reference)</a></h3>
-<p>引用是指向内存中某处数据的指针，但它保证总是有效的。</p>
-<ul>
-<li>符号：<code>&amp;</code></li>
-<li>创建引用称为 <strong>借用</strong>。</li>
-</ul>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let s1 = String::from("hello");
-let len = calculate_length(&amp;s1); // &amp;s1 创建了一个引用
-// s1 仍然有效
-<span class="boring">}</span></code></pre>
-<h3 id="2-可变引用-mutable-references"><a class="header" href="#2-可变引用-mutable-references">2. 可变引用 (Mutable References)</a></h3>
-<p>默认引用是不可变的。如果你想修改借来的数据，必须使用可变引用。</p>
-<ul>
-<li>符号：<code>&amp;mut</code></li>
-</ul>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let mut s = String::from("hello");
-change(&amp;mut s); // 传递可变引用
-<span class="boring">}</span></code></pre>
-<h3 id="3-借用规则-the-rules-of-borrowing"><a class="header" href="#3-借用规则-the-rules-of-borrowing">3. 借用规则 (The Rules of Borrowing)</a></h3>
-<p>这是 Rust 编译器 (Borrow Checker) 最严格检查的地方：</p>
+<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个？</a></h2>
+<p>在 Day 04 中，我们发现所有权转移（Move）虽然安全，但有时很麻烦：</p>
 <ol>
-<li><strong>要么</strong> 只能有一个可变引用，<strong>要么</strong> 只能有任意数量的不可变引用。
-<ul>
-<li>这被称为 “Reader-Writer Lock” 模式：多读单写。</li>
-</ul>
-</li>
-<li>引用必须总是有效的 (不能指向空或无效内存)。</li>
+<li><strong>麻烦的归还</strong>：传入函数的变量，如果不手动返回，外面就不能用了。</li>
+<li><strong>性能开销</strong>：如果为了保留原值而频繁 <code>Clone</code>，性能会很差。</li>
 </ol>
-<h3 id="4-数据竞争-data-race"><a class="header" href="#4-数据竞争-data-race">4. 数据竞争 (Data Race)</a></h3>
-<p>Rust 的规则在编译期就根除了数据竞争。数据竞争发生于：</p>
+<p><strong>引用 (Reference)</strong> 允许我们使用值而不获取其所有权。</p>
+<blockquote>
+<p><strong>比喻</strong>：引用就像是“租借“。你借了一本书（引用），你有权看（读），甚至经允许可以做笔记（写），但你不能把书卖了（Move）或者烧了（Drop），因为书的主人不是你。</p>
+</blockquote>
+<hr>
+<h2 id="-核心概念引用的本质"><a class="header" href="#-核心概念引用的本质">🏗️ 核心概念：引用的本质</a></h2>
+<p><strong>引用</strong> 是一个地址（指针），它指向了内存中属于其他人的数据。
+<strong>解引用</strong> (<code>*</code>) 是通过指针访问数据的操作。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = 5;
+let y = &amp;x; // y 是 x 的引用
+// *y 等于 5
+<span class="boring">}</span></code></pre>
+<h3 id="内存布局示意图"><a class="header" href="#内存布局示意图">内存布局示意图</a></h3>
+<p>假设 <code>s1</code> 是一个 <code>String</code>，<code>s</code> 是 <code>&amp;s1</code>。</p>
+<pre class="mermaid">graph LR
+    subgraph Stack
+        s[s: &amp;String] --&gt; s1_ptr
+        s1[s1: String]
+        s1_ptr[ptr]
+        s1_len[len]
+        s1_cap[capacity]
+    end
+    
+    subgraph Heap
+        data["hello"]
+    end
+    
+    s1_ptr --&gt; data
+    
+    style s fill:#ccffcc,stroke:#00ff00
+    style s1 fill:#eeeeee,stroke:#333333
+</pre>
+
 <ul>
+<li><code>s1</code> 拥有堆数据。</li>
+<li><code>s</code> 仅仅是指向 <code>s1</code> 的指针。</li>
+<li>当 <code>s</code> 离开作用域，<strong>不会</strong> 触发堆数据的 drop，因为它不拥有所有权。</li>
+</ul>
+<hr>
+<h2 id="-引用类型对比"><a class="header" href="#-引用类型对比">⚖️ 引用类型对比</a></h2>
+<p>Rust 有两种引用，对应两种借用方式：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">不可变引用 (<code>&amp;T</code>)</th><th style="text-align: left">可变引用 (<code>&amp;mut T</code>)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>符号</strong></td><td style="text-align: left"><code>&amp;</code></td><td style="text-align: left"><code>&amp;mut</code></td></tr>
+<tr><td style="text-align: left"><strong>所有权</strong></td><td style="text-align: left">无</td><td style="text-align: left">无</td></tr>
+<tr><td style="text-align: left"><strong>权限</strong></td><td style="text-align: left"><strong>只读</strong> (Read-Only)</td><td style="text-align: left"><strong>读写</strong> (Read-Write)</td></tr>
+<tr><td style="text-align: left"><strong>数量限制</strong></td><td style="text-align: left">任意多个</td><td style="text-align: left"><strong>同一时间只能有一个</strong></td></tr>
+<tr><td style="text-align: left"><strong>比喻</strong></td><td style="text-align: left">很多人同时看一张只读的公告牌</td><td style="text-align: left">只有一个人拿着笔在修改白板</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="-借用规则-the-rules-of-borrowing"><a class="header" href="#-借用规则-the-rules-of-borrowing">🛡️ 借用规则 (The Rules of Borrowing)</a></h2>
+<p>这是 Rust 编译器 (Borrow Checker) 最核心的检查逻辑，必须背诵：</p>
+<ol>
+<li><strong>在任意给定时间，你要么只能有一个可变引用，要么只能有多个不可变引用。</strong> (不能同时存在)</li>
+<li><strong>引用必须总是有效的。</strong> (不能是悬垂指针)</li>
+</ol>
+<h3 id="为什么要有规则-1防止数据竞争-data-race"><a class="header" href="#为什么要有规则-1防止数据竞争-data-race">为什么要有规则 1？防止数据竞争 (Data Race)</a></h3>
+<p>数据竞争会导致未定义的行为，非常难以调试。它发生在：</p>
+<ol>
 <li>两个或更多指针同时访问同一数据。</li>
 <li>至少有一个指针被用来写入数据。</li>
 <li>没有同步数据的机制。</li>
-</ul>
-<p>Rust 拒绝编译存在数据竞争的代码：</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let mut s = String::from("hello");
-let r1 = &amp;mut s;
-let r2 = &amp;mut s; // 错误！同时存在两个可变引用
-<span class="boring">}</span></code></pre>
-<h3 id="5-悬垂引用-dangling-references"><a class="header" href="#5-悬垂引用-dangling-references">5. 悬垂引用 (Dangling References)</a></h3>
-<p>在 C++ 中，你可能返回一个指向栈上局部变量的指针，函数结束后该变量被释放，指针变成了“悬垂指针“。
-Rust 编译器会保证这不可能发生：引用（借用）的生命周期不能超过数据所有者的生命周期。</p>
-<h2 id="-代码示例-1"><a class="header" href="#-代码示例-1">💻 代码示例</a></h2>
-<h3 id="示例-1-不可变借用"><a class="header" href="#示例-1-不可变借用">示例 1: 不可变借用</a></h3>
+</ol>
+<p>Rust 在编译阶段就杜绝了这种情况！</p>
+<hr>
+<h2 id="-代码实战"><a class="header" href="#-代码实战">💻 代码实战</a></h2>
+<h3 id="场景-1-不可变借用-只读"><a class="header" href="#场景-1-不可变借用-只读">场景 1: 不可变借用 (只读)</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
     let s1 = String::from("hello");
-    let len = calculate_length(&amp;s1); // 借用 s1
-    println!("The length of '{}' is {}.", s1, len); // s1 依然可用
+    let len = calculate_length(&amp;s1); // 把引用传进去
+    println!("The length of '{}' is {}.", s1, len); // s1 依然有效！
 }
 
-fn calculate_length(s: &amp;String) -&gt; usize { // s 是引用，不拥有所有权
+fn calculate_length(s: &amp;String) -&gt; usize { // s 是引用
     s.len()
-} // s 离开作用域，什么也不会发生（不会 drop 堆数据）</code></pre>
-<h3 id="示例-2-可变借用"><a class="header" href="#示例-2-可变借用">示例 2: 可变借用</a></h3>
+} // s 离开作用域，因为没有所有权，什么也不会发生</code></pre>
+<h3 id="场景-2-可变借用-读写"><a class="header" href="#场景-2-可变借用-读写">场景 2: 可变借用 (读写)</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
-    let mut s = String::from("hello");
+    let mut s = String::from("hello"); // 必须是 mut 变量才能创建 mut 引用
     change(&amp;mut s);
     println!("{}", s); // 输出 "hello, world"
 }
 
 fn change(some_string: &amp;mut String) {
-    some_string.push_str(", world");
+    some_string.push_str(", world"); // 可以修改
 }</code></pre>
-<h3 id="示例-3-作用域与引用的生命周期"><a class="header" href="#示例-3-作用域与引用的生命周期">示例 3: 作用域与引用的生命周期</a></h3>
-<p>注意：引用的作用域从声明开始，到<strong>最后一次使用</strong>结束。这意味着编译器比以前更聪明了 (NLL - Non-Lexical Lifetimes)。</p>
+<h3 id="场景-3-违反借用规则-编译错误"><a class="header" href="#场景-3-违反借用规则-编译错误">场景 3: 违反借用规则 (编译错误)</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let mut s = String::from("hello");
 
-let r1 = &amp;s; // 没问题
-let r2 = &amp;s; // 没问题
-println!("{} and {}", r1, r2);
-// r1 和 r2 在这里不再使用了
+let r1 = &amp;s; // no problem
+let r2 = &amp;s; // no problem
+let r3 = &amp;mut s; // ❌ 错误！不能在拥有不可变引用的同时创建可变引用
 
-let r3 = &amp;mut s; // 没问题！因为 r1, r2 已经结束使用
+// println!("{}, {}, and {}", r1, r2, r3); 
+<span class="boring">}</span></code></pre>
+<blockquote>
+<p><strong>错误原因</strong>：<code>r1</code> 和 <code>r2</code> 期望数据不变，但 <code>r3</code> 随时可能修改数据。这破坏了 <code>r1</code> 和 <code>r2</code> 的预期。</p>
+</blockquote>
+<hr>
+<h2 id="-悬垂引用-dangling-references"><a class="header" href="#-悬垂引用-dangling-references">🧟 悬垂引用 (Dangling References)</a></h2>
+<p>在 C++ 中，很容易返回一个指向栈上局部变量的指针，函数结束后该变量释放，指针指向无效内存。
+<strong>Rust 编译器保证永远不会出现悬垂引用</strong>。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    let reference_to_nothing = dangle();
+}
+
+fn dangle() -&gt; &amp;String { // 试图返回引用
+    let s = String::from("hello"); // s 是新创建的
+    &amp;s // 返回 s 的引用
+} // ❌ s 离开作用域被 drop，内存释放
+  // 返回的引用指向了无效内存！Rust 会阻止编译。</code></pre>
+<p><strong>解决方案</strong>：直接返回 String (转移所有权)，而不是引用。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn no_dangle() -&gt; String {
+    let s = String::from("hello");
+    s
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-引用的作用域-nll"><a class="header" href="#-引用的作用域-nll">🔬 引用的作用域 (NLL)</a></h2>
+<p>自 Rust 1.31 起，引用的作用域不仅仅是花括号 <code>{}</code>，而是 <strong>从声明开始，到最后一次使用结束</strong>。这被称为 <strong>Non-Lexical Lifetimes (NLL)</strong>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut s = String::from("hello");
+
+let r1 = &amp;s; 
+let r2 = &amp;s;
+println!("{} and {}", r1, r2);
+// r1 和 r2 的作用域在这里就结束了！因为后面没再用过它们。
+
+let r3 = &amp;mut s; // ✅ 现在可以了！因为 r1/r2 已经"死"了
 println!("{}", r3);
 <span class="boring">}</span></code></pre>
-<h2 id="-练习题-1"><a class="header" href="#-练习题-1">🏋️ 练习题</a></h2>
-<ul>
-<li><strong>练习 1</strong>: 修复借用检查器错误</li>
-<li><strong>练习 2</strong>: 使用可变引用修改数据</li>
-<li><strong>练习 3</strong>: 引用混合使用的问题</li>
-</ul>
-<p>👉 <strong><a href="Day01-15/05.ReferencesAndBorrowing/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-1"><a class="header" href="#-常见问题-faq-1">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-为什么要限制同时只能有一个可变引用"><a class="header" href="#q1-为什么要限制同时只能有一个可变引用">Q1: 为什么要限制同时只能有一个可变引用？</a></h3>
-<p>A: 为了防止数据竞争。如果两个指针都能写，谁先谁后？如果一个在读一个在写，读到的是写了一半的脏数据怎么办？Rust 通过强制“多读单写“在编译期解决了这个问题。</p>
-<h3 id="q2--符号是做什么的"><a class="header" href="#q2--符号是做什么的">Q2: <code>*</code> 符号是做什么的？</a></h3>
-<p>A: <code>*</code> 是 <strong>解引用 (Dereference)</strong> 操作符，是 <code>&amp;</code> 的逆操作。通过引用访问数据通常是自动解引用的（比如调用方法时），但在某些情况下（如修改数值）你需要显式使用 <code>*r = 10</code>。</p>
+<hr>
 <h2 id="-最佳实践-1"><a class="header" href="#-最佳实践-1">💡 最佳实践</a></h2>
-<ul>
-<li><strong>能用不可变引用就别用可变引用</strong>：这让代码更清晰，编译器优化空间更大。</li>
-<li><strong>利用 NLL 特性</strong>：如果你需要再次借用，确保之前的引用已经不再使用了。</li>
-<li><strong>避免在长函数中持有可变引用</strong>：这会锁定对象，阻止其他地方读取。</li>
-</ul>
-<h2 id="-扩展阅读-1"><a class="header" href="#-扩展阅读-1">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html">Rust 程序设计语言 - 引用与借用</a></li>
-</ul>
-<h2 id="-本节要点回顾-1"><a class="header" href="#-本节要点回顾-1">📚 本节要点回顾</a></h2>
-<ul>
-<li><code>&amp;T</code> 是只读引用，<code>&amp;mut T</code> 是读写引用。</li>
-<li>借用规则：1个可变 OR N个不可变。</li>
-<li>引用就像借书，必须有借有还，且不能借已销毁的书。</li>
-</ul>
+<ol>
+<li>
+<p><strong>默认不可变</strong>：优先使用 <code>&amp;T</code>，只有在确实需要修改时才用 <code>&amp;mut T</code>。</p>
+</li>
+<li>
+<p><strong>显式解引用</strong>：虽然 <code>.</code> 操作符会自动解引用，但在做数值运算或赋值时，别忘了 <code>*</code>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut x = 10;
+let r = &amp;mut x;
+*r += 5; // 显式解引用来修改值
+<span class="boring">}</span></code></pre>
+</li>
+<li>
+<p><strong>理解借用检查器是朋友</strong>：它虽然有时很烦人，但它在帮你避免很难调试的并发 Bug。</p>
+</li>
+</ol>
+<hr>
+<h2 id="-练习题-1"><a class="header" href="#-练习题-1">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="Day01-15/05.ReferencesAndBorrowing/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>修复多重借用</strong>：解决同时存在可变和不可变引用的错误。</li>
+<li><strong>生命周期初探</strong>：理解引用为何失效。</li>
+<li><strong>解引用操作</strong>：练习使用 <code>*</code> 读写数据。</li>
+</ol>
+<hr>
 <h2 id="-下一步-4"><a class="header" href="#-下一步-4">⏭️ 下一步</a></h2>
-<p>引用是指向整个数据的。如果我们只想引用数据的一部分（比如字符串的一个片段）呢？</p>
-<p>下一节: <a href="Day01-15/06.Slices/README.html">Day 06: 切片类型</a></p>
+<p>如果我们只想引用字符串的一部分（比如 “hello world” 中的 “hello”）怎么办？创建一个新的 String 太浪费了。
+Rust 提供了 <strong>切片 (Slice)</strong> 来解决这个问题。</p>
+<p>下一节: <a href="Day01-15/06.Slices/README.html">Day 06: 切片类型 (Slices)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-06-切片-slices"><a class="header" href="#day-06-切片-slices">Day 06: 切片 (Slices)</a></h1>
 <h2 id="-学习目标-3"><a class="header" href="#-学习目标-3">📝 学习目标</a></h2>
 <ul>
-<li>理解什么是切片 (Slice) 以及它为什么重要</li>
-<li>掌握字符串切片 (<code>&amp;str</code>) 的创建和使用</li>
-<li>掌握数组切片的用法</li>
-<li>理解切片与所有权的关系（借用，无所有权）</li>
+<li>理解 <strong>切片 (Slice)</strong> 的底层内存结构 (<code>ptr</code> + <code>len</code>)</li>
+<li>熟练使用 <code>Range</code> 语法 (<code>..</code>) 创建切片</li>
+<li>掌握 <strong>字符串切片</strong> (<code>&amp;str</code>) 与 <code>String</code> 的区别</li>
+<li>理解为什么 <strong>字符串字面值</strong> 是切片</li>
+<li>了解数组切片及其在参数传递中的优势</li>
 </ul>
-<h2 id="-为什么要学这个-2"><a class="header" href="#-为什么要学这个-2">🎯 为什么要学这个</a></h2>
-<p>切片是 Rust 中处理集合数据的核心工具之一。</p>
-<ul>
-<li><strong>高效</strong>：切片只是对现有数据的引用，不需要复制数据，因此非常轻量高效。</li>
-<li><strong>安全</strong>：切片确保你访问的数据范围是有效的，编译器会帮你检查越界（运行时 panic，但编译期借用检查能防止数据失效）。</li>
-<li><strong>通用</strong>：编写接收切片 (<code>&amp;str</code>, <code>&amp;[T]</code>) 而不是具体类型 (<code>String</code>, <code>Vec&lt;T&gt;</code>) 的函数，可以增加代码的复用性。</li>
-</ul>
-<h2 id="-核心概念-2"><a class="header" href="#-核心概念-2">📖 核心概念</a></h2>
-<h3 id="1-什么是切片"><a class="header" href="#1-什么是切片">1. 什么是切片？</a></h3>
-<p>切片 (Slice) 允许你引用集合中一段连续的元素序列，而不需要引用整个集合。
-切片是一种 <strong>引用</strong>，所以它 <strong>没有所有权</strong>。</p>
-<h3 id="2-字符串切片-string-slices"><a class="header" href="#2-字符串切片-string-slices">2. 字符串切片 (String Slices)</a></h3>
-<p>字符串切片是指向 <code>String</code> 中一部分内容的引用。类型标记为 <code>&amp;str</code>。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let s = String::from("hello world");
+<h2 id="-核心概念什么是切片"><a class="header" href="#-核心概念什么是切片">🎯 核心概念：什么是切片？</a></h2>
+<p>切片引用了集合中 <strong>一段连续的元素序列</strong>，而不是引用整个集合。
+切片是一类 <strong>引用</strong>，所以它 <strong>没有所有权</strong>。</p>
+<blockquote>
+<p><strong>比喻</strong>：如果是 <code>String</code> 是一整块面包，那么切片 (<code>&amp;str</code>) 就是这块面包上切下来的一片。你不能拥有这片面包（它还连在整块上），但你可以看它、闻它。</p>
+</blockquote>
+<hr>
+<h2 id="-内存模型切片长什么样"><a class="header" href="#-内存模型切片长什么样">🧠 内存模型：切片长什么样？</a></h2>
+<p>切片是一个 <strong>胖指针 (Fat Pointer)</strong>，它包含两部分信息，存储在栈上：</p>
+<ol>
+<li><strong>指针 (ptr)</strong>：指向切片起始位置的数据。</li>
+<li><strong>长度 (len)</strong>：切片包含多少个元素（或字节）。</li>
+</ol>
+<h3 id="字符串切片图解"><a class="header" href="#字符串切片图解">字符串切片图解</a></h3>
+<p>假设我们有一个 <code>String</code>：<code>let s = String::from("hello world");</code>
+我们创建一个切片：<code>let world = &amp;s[6..11];</code></p>
+<pre class="mermaid">graph LR
+    subgraph Stack
+        s[s: String]
+        s_ptr[ptr]
+        s_len[len: 11]
+        s_cap[cap: 11]
 
-let hello = &amp;s[0..5];
-let world = &amp;s[6..11];
-<span class="boring">}</span></code></pre>
-<p>内部结构：切片存储了一个指向起始位置的指针和一个长度。</p>
-<h4 id="range-语法"><a class="header" href="#range-语法">Range 语法</a></h4>
-<p>使用 <code>[starting_index..ending_index]</code>：</p>
+        world[world: &amp;str]
+        w_ptr[ptr]
+        w_len[len: 5]
+    end
+    
+    subgraph Heap
+        h_h[h]
+        h_e[e]
+        h_l1[l]
+        h_l2[l]
+        h_o[o]
+        h_sp["(space)"]
+        h_w[w]
+        h_o2[o]
+        h_r[r]
+        h_l3[l]
+        h_d[d]
+    end
+
+    s_ptr --&gt; h_h
+    h_h -.- h_e -.- h_l1 -.- h_l2 -.- h_o -.- h_sp -.- h_w -.- h_o2 -.- h_r -.- h_l3 -.- h_d
+
+    w_ptr --&gt; h_w
+    
+    style world fill:#ccffcc,stroke:#00ff00
+    style s fill:#eeeeee,stroke:#333333
+    style h_w fill:#ccffcc,stroke:#00ff00
+    style h_o2 fill:#ccffcc,stroke:#00ff00
+    style h_r fill:#ccffcc,stroke:#00ff00
+    style h_l3 fill:#ccffcc,stroke:#00ff00
+    style h_d fill:#ccffcc,stroke:#00ff00
+</pre>
+
+<p><strong>解释</strong>：</p>
 <ul>
-<li>从 <code>starting_index</code> 开始（包含）。</li>
-<li>到 <code>ending_index</code> 结束（不包含）。</li>
+<li><code>s</code> 拥有整个堆数据。</li>
+<li><code>world</code> 在栈上，它的指针指向堆内存的第 6 个字节，长度为 5。</li>
 </ul>
-<p><strong>简写形式</strong>：</p>
+<hr>
+<h2 id="-语法range-范围"><a class="header" href="#-语法range-范围">✂️ 语法：Range (范围)</a></h2>
+<p>Rust 使用 <code>..</code> 语法来表示范围。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">语法</th><th style="text-align: left">说明</th><th style="text-align: left">等价数学表达</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>0..5</code></td><td style="text-align: left">从 0 开始，到 5 结束 (不含 5)</td><td style="text-align: left">$[0, 5)$</td></tr>
+<tr><td style="text-align: left"><code>0..=4</code></td><td style="text-align: left">从 0 开始，到 4 结束 (包含 4)</td><td style="text-align: left">$[0, 4]$</td></tr>
+<tr><td style="text-align: left"><code>..2</code></td><td style="text-align: left">从头开始，到 2 结束</td><td style="text-align: left">$[0, 2)$</td></tr>
+<tr><td style="text-align: left"><code>3..</code></td><td style="text-align: left">从 3 开始，直到最后</td><td style="text-align: left">$[3, len)$</td></tr>
+<tr><td style="text-align: left"><code>..</code></td><td style="text-align: left"><strong>全切片</strong>：引用整个集合</td><td style="text-align: left">$[0, len)$</td></tr>
+</tbody>
+</table>
+</div>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s = String::from("hello");
 let len = s.len();
 
-let slice = &amp;s[0..2];
-let slice = &amp;s[..2]; // 省略开头，默认为 0
-
-let slice = &amp;s[3..len];
-let slice = &amp;s[3..]; // 省略结尾，默认为 len
-
-let slice = &amp;s[0..len];
-let slice = &amp;s[..]; // 引用整个字符串
+let slice1 = &amp;s[0..2]; // "he"
+let slice2 = &amp;s[..2];  // "he" (简写)
+let slice3 = &amp;s[3..];  // "lo"
+let slice4 = &amp;s[..];   // "hello" (完整切片)
 <span class="boring">}</span></code></pre>
-<h3 id="3-字符串字面值就是切片"><a class="header" href="#3-字符串字面值就是切片">3. 字符串字面值就是切片</a></h3>
-<p>我们经常使用的字符串字面值：</p>
+<hr>
+<h2 id="-字符串切片-str"><a class="header" href="#-字符串切片-str">🧵 字符串切片 (<code>&amp;str</code>)</a></h2>
+<p>类型标识：<code>&amp;str</code> (读作 “string slice”)。</p>
+<h3 id="为什么字符串字面值不可变"><a class="header" href="#为什么字符串字面值不可变">为什么字符串字面值不可变？</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let s = "Hello, world!";
 <span class="boring">}</span></code></pre>
-<p>这里的 <code>s</code> 的类型其实就是 <code>&amp;str</code>。它是一个指向二进制程序特定位置的切片。这也是为什么字符串字面值是不可变的。</p>
-<h3 id="4-数组切片"><a class="header" href="#4-数组切片">4. 数组切片</a></h3>
-<p>不仅仅是字符串，数组也可以有切片。类型标记为 <code>&amp;[T]</code>。</p>
+<p>这里的 <code>s</code> 的类型就是 <code>&amp;str</code>。它指向了编译后二进制文件的数据区。因为二进制文件在运行时不可修改，所以字面值永远是不可变的。</p>
+<h3 id="-危险utf-8-字符边界"><a class="header" href="#-危险utf-8-字符边界">⚠️ 危险：UTF-8 字符边界</a></h3>
+<p>Rust 的 <code>String</code> 是 UTF-8 编码的。一个字符（如中文）可能占用 3 个字节。
+<strong>如果你切在个字符的中间，程序会崩溃 (Panic)！</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let s = "你好";
+// "你" 占 3 字节，"好" 占 3 字节。总长 6。
+
+// let w = &amp;s[0..1]; 
+// ❌ 运行时 Panic! 
+// 错误信息：byte index 1 is not a char boundary; it is inside '你' (bytes 0..3)
+<span class="boring">}</span></code></pre>
+<p><strong>正确做法</strong>：小心计算字节索引，或者使用 <code>.chars()</code> 遍历字符。</p>
+<hr>
+<h2 id="-其他切片"><a class="header" href="#-其他切片">📦 其他切片</a></h2>
+<p>不仅仅是字符串，数组 (Array) 和 向量 (Vector) 也可以切片。类型标识：<code>&amp;[T]</code>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>let a = [1, 2, 3, 4, 5];
+
 let slice = &amp;a[1..3]; // 类型是 &amp;[i32]
 assert_eq!(slice, &amp;[2, 3]);
 <span class="boring">}</span></code></pre>
-<h3 id="5-切片作为函数参数"><a class="header" href="#5-切片作为函数参数">5. 切片作为函数参数</a></h3>
-<p><strong>最佳实践</strong>：如果你的函数只需要读取数据而不需要拥有它，尽量使用切片作为参数。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>// ❌ 不推荐：只能接收 String
+<hr>
+<h2 id="-最佳实践函数参数"><a class="header" href="#-最佳实践函数参数">💡 最佳实践：函数参数</a></h2>
+<p><strong>黄金法则</strong>：在定义函数参数时，尽量使用 <strong>切片 (<code>&amp;str</code>, <code>&amp;[T]</code>)</strong> 而不是具体类型 (<code>&amp;String</code>, <code>&amp;Vec&lt;T&gt;</code>)。</p>
+<pre class="playground"><code class="language-rust">// 👎 限制性强：只能传 String
 fn first_word(s: &amp;String) -&gt; &amp;str { ... }
 
-// ✅ 推荐：可以接收 String 的切片，也可以接收字符串字面值
+// 👍 通用性强：可以传 String, &amp;str, 甚至字面值
 fn first_word(s: &amp;str) -&gt; &amp;str { ... }
-<span class="boring">}</span></code></pre>
-<p>这样，<code>first_word</code>既可以接受 <code>String</code> (通过 <code>&amp;String</code> 或 <code>&amp;s[..]</code>)，也可以接受 <code>&amp;str</code>。</p>
-<h2 id="-代码示例-2"><a class="header" href="#-代码示例-2">💻 代码示例</a></h2>
-<h3 id="示例-获取第一个单词"><a class="header" href="#示例-获取第一个单词">示例: 获取第一个单词</a></h3>
+
+fn main() {
+    let s = String::from("hello");
+    let literal = "world";
+
+    first_word(&amp;s);      // 自动解引用强制转换 (Deref Coercion)
+    first_word(&amp;s[..]);  // 显式全切片
+    first_word(literal); // 传字面值
+}</code></pre>
+<p><strong>为什么？</strong>
+因为 <code>String</code> 实现了 <code>Deref&lt;Target=str&gt;</code>，所以 Rust 可以自动把 <code>&amp;String</code> 当作 <code>&amp;str</code> 用。反之则不行。</p>
+<hr>
+<h2 id="-代码示例实现-first_word"><a class="header" href="#-代码示例实现-first_word">💻 代码示例：实现 first_word</a></h2>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn first_word(s: &amp;str) -&gt; &amp;str {
-    let bytes = s.as_bytes(); // 转换为字节数组以遍历
+    let bytes = s.as_bytes(); // 转换为字节数组以便逐个字节检查
 
     for (i, &amp;item) in bytes.iter().enumerate() {
+        // 寻找第一个空格
         if item == b' ' {
-            return &amp;s[0..i]; // 找到空格，返回之前的切片
+            return &amp;s[0..i]; // 找到空格，返回开头到空格前的切片
         }
     }
 
-    &amp;s[..] // 没有空格，返回整个字符串
+    &amp;s[..] // 没找到空格，意味着整个字符串就是一个单词
 }
 <span class="boring">}</span></code></pre>
+<hr>
 <h2 id="-练习题-2"><a class="header" href="#-练习题-2">🏋️ 练习题</a></h2>
-<p>我们为你准备了关于切片操作的练习题。</p>
-<ul>
-<li><strong>练习 1</strong>: 字符串切片基础</li>
-<li><strong>练习 2</strong>: 数组切片</li>
-<li><strong>练习 3</strong>: 实现 <code>first_word</code></li>
-</ul>
 <p>👉 <strong><a href="Day01-15/06.Slices/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-2"><a class="header" href="#-常见问题-faq-2">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-切片会导致所有权转移吗"><a class="header" href="#q1-切片会导致所有权转移吗">Q1: 切片会导致所有权转移吗？</a></h3>
-<p>A: 不会。切片是引用，它借用了原本的数据。原数据的所有者必须在切片使用期间保持有效。</p>
-<h3 id="q2-为什么-s01-处理中文会报错"><a class="header" href="#q2-为什么-s01-处理中文会报错">Q2: 为什么 <code>s[0..1]</code> 处理中文会报错？</a></h3>
-<p>A: Rust 的 <code>String</code> 是 UTF-8 编码的。一个中文字符通常占 3 个字节。<code>s[0..1]</code> 试图切取第 1 个字节，但这只是中文字符的一部分，不是合法的字符边界。Rust 为了防止产生无效字符串，会直接 panic。
-<strong>解决</strong>：使用 <code>chars()</code> 迭代器，或者确保切片索引在字符边界上（如 <code>0..3</code>）。</p>
-<h3 id="q3-string-和-str-有什么区别"><a class="header" href="#q3-string-和-str-有什么区别">Q3: <code>&amp;String</code> 和 <code>&amp;str</code> 有什么区别？</a></h3>
-<p>A: <code>&amp;String</code> 是对 <code>String</code> 类型的引用。<code>&amp;str</code> 是字符串切片。
-由于 <code>String</code> 实现了 <code>Deref</code> trait，你可以把 <code>&amp;String</code> 传给需要 <code>&amp;str</code> 的函数，Rust 会自动转换（强制解引用）。但反过来不行。所以参数定义为 <code>&amp;str</code> 更通用。</p>
-<h2 id="-最佳实践-2"><a class="header" href="#-最佳实践-2">💡 最佳实践</a></h2>
-<ul>
-<li><strong>函数参数优先使用切片</strong>：使用 <code>&amp;str</code> 而不是 <code>&amp;String</code>，使用 <code>&amp;[T]</code> 而不是 <code>&amp;Vec&lt;T&gt;</code>。</li>
-<li><strong>小心 UTF-8</strong>：对包含非 ASCII 字符的字符串做索引切片时要格外小心。</li>
-</ul>
-<h2 id="-扩展阅读-2"><a class="header" href="#-扩展阅读-2">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch04-03-slices.html">Rust 程序设计语言 - 切片</a></li>
-</ul>
-<h2 id="-本节要点回顾-2"><a class="header" href="#-本节要点回顾-2">📚 本节要点回顾</a></h2>
-<ul>
-<li>切片是对集合中连续元素的引用。</li>
-<li><code>&amp;str</code> 是字符串切片，字面值也是 <code>&amp;str</code>。</li>
-<li><code>&amp;[T]</code> 是数组/Vec 切片。</li>
-<li>Range 语法 <code>..</code> 用于指定范围。</li>
-<li>切片没有所有权。</li>
-</ul>
+<ol>
+<li><strong>切片基础</strong>：练习使用 Range 语法。</li>
+<li><strong>重写函数</strong>：将接收 <code>&amp;String</code> 的函数重构为接收 <code>&amp;str</code>。</li>
+<li><strong>数组切片</strong>：尝试对整数数组进行切片操作。</li>
+</ol>
+<hr>
 <h2 id="-下一步-5"><a class="header" href="#-下一步-5">⏭️ 下一步</a></h2>
-<p>有了切片，我们可以高效地操作数据了。接下来我们将学习 Rust 中最重要的数据组织方式——结构体。</p>
-<p>下一节: <a href="Day01-15/07.Structs/README.html">Day 07: 结构体</a></p>
+<p>有了切片，我们能高效查看数据了。但如果是不同类型的数据组合呢？
+比如一个用户，有名字(String)、年龄(u8)、邮箱(String)…
+我们需要 <strong>结构体 (Structs)</strong>。</p>
+<p>下一节: <a href="Day01-15/07.Structs/README.html">Day 07: 结构体 (Structs)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-07-结构体-structs"><a class="header" href="#day-07-结构体-structs">Day 07: 结构体 (Structs)</a></h1>
 <h2 id="-学习目标-4"><a class="header" href="#-学习目标-4">📝 学习目标</a></h2>
@@ -3137,14 +3369,14 @@ fn first_word(s: &amp;str) -&gt; &amp;str { ... }
 <li>掌握结构体方法的定义 (<code>impl</code>)</li>
 <li>理解关联函数 (<code>Associated Functions</code>)</li>
 </ul>
-<h2 id="-为什么要学这个-3"><a class="header" href="#-为什么要学这个-3">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-1"><a class="header" href="#-为什么要学这个-1">🎯 为什么要学这个</a></h2>
 <p>结构体是 Rust 中创建自定义数据类型的主要方式。</p>
 <ul>
 <li><strong>数据组织</strong>：将相关联的数据组合在一起，赋予名字和意义（如 <code>User</code>, <code>Rectangle</code>）。</li>
 <li><strong>面向对象</strong>：配合 <code>impl</code> 块，结构体提供了类似面向对象语言中“类“的功能（数据+行为），但更轻量。</li>
 <li><strong>类型安全</strong>：通过定义不同的结构体，编译器可以帮你区分看似相同但含义不同的数据（如 <code>Miles(u32)</code> 和 <code>Kilometers(u32)</code>）。</li>
 </ul>
-<h2 id="-核心概念-3"><a class="header" href="#-核心概念-3">📖 核心概念</a></h2>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
 <h3 id="1-经典结构体-classic-structs"><a class="header" href="#1-经典结构体-classic-structs">1. 经典结构体 (Classic Structs)</a></h3>
 <p>最常用的形式，每个字段都有名字。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -3237,7 +3469,7 @@ impl Rectangle {
 // 调用方式
 let sq = Rectangle::square(3);
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-3"><a class="header" href="#-代码示例-3">💻 代码示例</a></h2>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
 <h3 id="示例-完整的矩形程序"><a class="header" href="#示例-完整的矩形程序">示例: 完整的矩形程序</a></h3>
 <pre class="playground"><code class="language-rust">#[derive(Debug)] // 允许使用 {:?} 打印
 struct Rectangle {
@@ -3271,7 +3503,7 @@ fn main() {
 <li><strong>练习 3</strong>: 矩形计算方法</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/07.Structs/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-3"><a class="header" href="#-常见问题-faq-3">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-self-mut-self-self-有什么区别"><a class="header" href="#q1-self-mut-self-self-有什么区别">Q1: <code>&amp;self</code>, <code>&amp;mut self</code>, <code>self</code> 有什么区别？</a></h3>
 <ul>
 <li><code>&amp;self</code>: <strong>不可变借用</strong>。最常用，只读取数据。</li>
@@ -3280,17 +3512,17 @@ fn main() {
 </ul>
 <h3 id="q2-为什么不能直接打印结构体-println-user"><a class="header" href="#q2-为什么不能直接打印结构体-println-user">Q2: 为什么不能直接打印结构体 <code>println!("{}", user)</code>？</a></h3>
 <p>A: <code>println!</code> 默认使用 <code>Display</code> trait（<code>{}</code>），结构体默认没有实现它。可以使用 <code>#[derive(Debug)]</code> 自动实现 <code>Debug</code> trait，然后用 <code>{:?}</code> 或 <code>{:#?}</code> 打印。</p>
-<h2 id="-最佳实践-3"><a class="header" href="#-最佳实践-3">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-2"><a class="header" href="#-最佳实践-2">💡 最佳实践</a></h2>
 <ul>
 <li><strong>大写驼峰命名</strong>：结构体名称遵循 <code>PascalCase</code>（如 <code>UserAccount</code>）。</li>
 <li><strong>字段蛇形命名</strong>：字段名称遵循 <code>snake_case</code>（如 <code>user_id</code>）。</li>
 <li><strong>优先使用 String</strong>：在结构体中存储文本时，优先使用 <code>String</code> 拥有所有权，避免复杂的生命周期问题（直到你确实需要引用）。</li>
 </ul>
-<h2 id="-扩展阅读-3"><a class="header" href="#-扩展阅读-3">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch05-00-structs.html">Rust 程序设计语言 - 使用结构体组织数据</a></li>
 </ul>
-<h2 id="-本节要点回顾-3"><a class="header" href="#-本节要点回顾-3">📚 本节要点回顾</a></h2>
+<h2 id="-本节要点回顾"><a class="header" href="#-本节要点回顾">📚 本节要点回顾</a></h2>
 <ul>
 <li><code>struct</code> 关键字定义结构体。</li>
 <li><code>impl</code> 块定义方法和关联函数。</li>
@@ -3310,14 +3542,14 @@ fn main() {
 <li>理解模式匹配中的绑定值和穷尽性</li>
 <li>掌握 <code>if let</code> 语法糖</li>
 </ul>
-<h2 id="-为什么要学这个-4"><a class="header" href="#-为什么要学这个-4">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-2"><a class="header" href="#-为什么要学这个-2">🎯 为什么要学这个</a></h2>
 <p>枚举允许你列举所有可能的值来定义一个类型。</p>
 <ul>
 <li><strong>表达能力强</strong>：枚举可以清晰地表达“一组相关项中的某一项“（如 IP 地址是 V4 或 V6）。</li>
 <li><strong>类型安全</strong>：Rust 的 <code>Option&lt;T&gt;</code> 替代了其他语言中的 <code>null</code>，迫使你在编译期处理“无值“的情况，彻底杜绝了“空指针异常“。</li>
 <li><strong>强大的控制流</strong>：<code>match</code> 模式匹配比 <code>switch</code> 强大得多，它能解构数据、检查完整性。</li>
 </ul>
-<h2 id="-核心概念-4"><a class="header" href="#-核心概念-4">📖 核心概念</a></h2>
+<h2 id="-核心概念-1"><a class="header" href="#-核心概念-1">📖 核心概念</a></h2>
 <h3 id="1-定义枚举"><a class="header" href="#1-定义枚举">1. 定义枚举</a></h3>
 <p>枚举 (Enumerations) 包含多个变体 (Variants)。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -3408,7 +3640,7 @@ if let Some(3) = some_u8_value {
 }
 <span class="boring">}</span></code></pre>
 <p><code>if let</code> 放弃了穷尽性检查，换取了简洁。</p>
-<h2 id="-代码示例-4"><a class="header" href="#-代码示例-4">💻 代码示例</a></h2>
+<h2 id="-代码示例-1"><a class="header" href="#-代码示例-1">💻 代码示例</a></h2>
 <h3 id="示例-处理-option"><a class="header" href="#示例-处理-option">示例: 处理 Option</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -3431,24 +3663,24 @@ let none = plus_one(None);
 <li><strong>练习 3</strong>: 硬币分类器</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/08.Enums/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-4"><a class="header" href="#-常见问题-faq-4">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-1"><a class="header" href="#-常见问题-faq-1">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-什么时候用-struct什么时候用-enum"><a class="header" href="#q1-什么时候用-struct什么时候用-enum">Q1: 什么时候用 struct，什么时候用 enum？</a></h3>
 <p>A: 如果你的数据是“并且“的关系（既有名字又有年龄），用 struct。如果你的数据是“或者“的关系（要是 IPv4 要么是 IPv6），用 enum。</p>
 <h3 id="q2-为什么-optionsome5-可以直接写成-some5"><a class="header" href="#q2-为什么-optionsome5-可以直接写成-some5">Q2: 为什么 <code>Option::Some(5)</code> 可以直接写成 <code>Some(5)</code>？</a></h3>
 <p>A: 因为 <code>Option</code> 及其变体 <code>Some</code>, <code>None</code> 被包含在了 Rust 的预导入模块 (prelude) 中，不需要手动 <code>use</code>。</p>
 <h3 id="q3-if-let-和-match-性能有区别吗"><a class="header" href="#q3-if-let-和-match-性能有区别吗">Q3: <code>if let</code> 和 <code>match</code> 性能有区别吗？</a></h3>
 <p>A: 几乎没有区别。编译器通常会优化它们生成相似的汇编代码。选择依据主要是代码的可读性和是否需要穷尽性检查。</p>
-<h2 id="-最佳实践-4"><a class="header" href="#-最佳实践-4">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-3"><a class="header" href="#-最佳实践-3">💡 最佳实践</a></h2>
 <ul>
 <li><strong>利用类型系统</strong>：尽量使用枚举来表示状态机的状态，利用编译器检查确保状态转换正确。</li>
 <li><strong>优先 match</strong>：对于复杂的条件判断，<code>match</code> 比一堆 <code>if else</code> 更清晰且更安全（穷尽性检查）。</li>
 <li><strong>处理 None</strong>：不要急着 <code>unwrap()</code>，尽量使用 <code>match</code> 或 <code>if let</code> 优雅地处理 <code>None</code>。</li>
 </ul>
-<h2 id="-扩展阅读-4"><a class="header" href="#-扩展阅读-4">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-1"><a class="header" href="#-扩展阅读-1">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">Rust 程序设计语言 - 枚举与模式匹配</a></li>
 </ul>
-<h2 id="-本节要点回顾-4"><a class="header" href="#-本节要点回顾-4">📚 本节要点回顾</a></h2>
+<h2 id="-本节要点回顾-1"><a class="header" href="#-本节要点回顾-1">📚 本节要点回顾</a></h2>
 <ul>
 <li><code>enum</code> 定义枚举。</li>
 <li><code>Option&lt;T&gt;</code> 处理空值。</li>
@@ -3469,14 +3701,14 @@ let none = plus_one(None);
 <li>熟练使用路径 (<code>crate</code>, <code>super</code>, <code>self</code>) 引用项</li>
 <li>掌握 <code>use</code> 关键字引入作用域与 <code>pub use</code> 重导出</li>
 </ul>
-<h2 id="-为什么要学这个-5"><a class="header" href="#-为什么要学这个-5">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-3"><a class="header" href="#-为什么要学这个-3">🎯 为什么要学这个</a></h2>
 <p>随着代码量的增加，将所有代码写在一个文件中会变得难以维护。Rust 的模块系统提供了强大的工具来帮助你：</p>
 <ul>
 <li><strong>组织代码</strong>: 将相关功能分组，提高代码可读性。</li>
 <li><strong>控制可见性</strong>: 隐藏内部实现细节，只暴露必要的公共 API（封装）。</li>
 <li><strong>重用代码</strong>: 方便在不同项目间共享代码。</li>
 </ul>
-<h2 id="-核心概念-5"><a class="header" href="#-核心概念-5">📖 核心概念</a></h2>
+<h2 id="-核心概念-2"><a class="header" href="#-核心概念-2">📖 核心概念</a></h2>
 <h3 id="1-代码组织层次"><a class="header" href="#1-代码组织层次">1. 代码组织层次</a></h3>
 <p>Rust 的模块系统由三个主要部分组成：</p>
 <ul>
@@ -3519,7 +3751,7 @@ pub fn eat_at_restaurant() {
     hosting::add_to_waitlist();
 }
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-5"><a class="header" href="#-代码示例-5">💻 代码示例</a></h2>
+<h2 id="-代码示例-2"><a class="header" href="#-代码示例-2">💻 代码示例</a></h2>
 <h3 id="示例-1-模块定义与可见性"><a class="header" href="#示例-1-模块定义与可见性">示例 1: 模块定义与可见性</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -3595,20 +3827,20 @@ pub use crate::front_of_house::hosting; // 重导出，方便外部使用
 <li><strong>练习 3</strong>: 将单文件模块重构为多文件结构</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/09.Modules/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-5"><a class="header" href="#-常见问题-faq-5">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-2"><a class="header" href="#-常见问题-faq-2">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-modrs-和-文件名rs-有什么区别"><a class="header" href="#q1-modrs-和-文件名rs-有什么区别">Q1: <code>mod.rs</code> 和 <code>文件名.rs</code> 有什么区别？</a></h3>
 <p>A: 它们在功能上是一样的。<code>mod.rs</code> 是 Rust 2015 的风格，类似于 <code>index.html</code>。<code>文件名.rs</code> 是 Rust 2018 引入的风格，更简洁，避免了编辑器中打开很多个 <code>mod.rs</code> 导致混淆。现在推荐使用后者。</p>
 <h3 id="q2-什么时候该用-pub-use"><a class="header" href="#q2-什么时候该用-pub-use">Q2: 什么时候该用 <code>pub use</code>？</a></h3>
 <p>A: 当你希望重新组织 crate 的公共 API 结构，使其与内部实现结构不同时。例如，你内部有很多嵌套模块，但希望用户能直接从顶级模块导入常用功能。</p>
 <h3 id="q3-二进制-crate-mainrs-可以包含模块吗"><a class="header" href="#q3-二进制-crate-mainrs-可以包含模块吗">Q3: 二进制 crate (<code>main.rs</code>) 可以包含模块吗？</a></h3>
 <p>A: 可以。但在实际项目中，通常建议将核心逻辑放入库 crate (<code>lib.rs</code>)，而 <code>main.rs</code> 只负责解析参数和调用库函数。这样更容易测试和重用代码。</p>
-<h2 id="-最佳实践-5"><a class="header" href="#-最佳实践-5">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-4"><a class="header" href="#-最佳实践-4">💡 最佳实践</a></h2>
 <ul>
 <li><strong>库开发</strong>: 将 <code>main.rs</code> 保持精简，逻辑放入 <code>lib.rs</code>。</li>
 <li><strong>Prelude 模式</strong>: 如果你的库有很多常用的 trait 或结构体，可以创建一个 <code>prelude</code> 模块并通过 <code>pub use</code> 导出它们，方便用户一次性导入。</li>
 <li><strong>保持私有</strong>: 默认保持模块和字段私有，只有确有必要暴露给外部时才添加 <code>pub</code>。</li>
 </ul>
-<h2 id="-扩展阅读-5"><a class="header" href="#-扩展阅读-5">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-2"><a class="header" href="#-扩展阅读-2">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html">Rust 程序设计语言 - 模块系统</a></li>
 </ul>
@@ -3624,14 +3856,14 @@ pub use crate::front_of_house::hosting; // 重导出，方便外部使用
 <li>熟练使用 <strong>HashMap (<code>HashMap&lt;K, V&gt;</code>)</strong> 进行键值存储</li>
 <li>理解这些集合在内存中的布局（堆内存）</li>
 </ul>
-<h2 id="-为什么要学这个-6"><a class="header" href="#-为什么要学这个-6">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-4"><a class="header" href="#-为什么要学这个-4">🎯 为什么要学这个</a></h2>
 <p>Rust 的标准库提供了许多强大的数据结构，称为“集合“。与内置的数组和元组不同：</p>
 <ul>
 <li>它们的数据存储在 <strong>堆 (Heap)</strong> 上。</li>
 <li>它们的大小是 <strong>动态</strong> 的（运行时可变）。</li>
 <li>它们是处理不定长数据的基石。</li>
 </ul>
-<h2 id="-核心概念-6"><a class="header" href="#-核心概念-6">📖 核心概念</a></h2>
+<h2 id="-核心概念-3"><a class="header" href="#-核心概念-3">📖 核心概念</a></h2>
 <h3 id="1-vector-向量"><a class="header" href="#1-vector-向量">1. Vector (向量)</a></h3>
 <p><code>Vec&lt;T&gt;</code> 是一个可增长的数组。它在内存中是连续存储的。</p>
 <ul>
@@ -3682,7 +3914,7 @@ v.pop();        // 删除最后一个并返回 Option&lt;T&gt;
 let mut scores = HashMap::new();
 scores.insert(String::from("Blue"), 10);
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-6"><a class="header" href="#-代码示例-6">💻 代码示例</a></h2>
+<h2 id="-代码示例-3"><a class="header" href="#-代码示例-3">💻 代码示例</a></h2>
 <h3 id="示例-1-vector-操作与枚举"><a class="header" href="#示例-1-vector-操作与枚举">示例 1: Vector 操作与枚举</a></h3>
 <p>Vector 只能存储同一种类型。如果需要存储不同类型，可以使用枚举。</p>
 <pre class="playground"><code class="language-rust">#[derive(Debug)]
@@ -3725,19 +3957,19 @@ fn main() {
 <li><strong>练习 3</strong>: 员工部门管理系统 (HashMap 综合应用)</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/10.CommonCollections/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-6"><a class="header" href="#-常见问题-faq-6">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-3"><a class="header" href="#-常见问题-faq-3">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-string-和-str-有什么区别"><a class="header" href="#q1-string-和-str-有什么区别">Q1: <code>&amp;String</code> 和 <code>&amp;str</code> 有什么区别？</a></h3>
 <p>A: <code>String</code> 是堆上分配的、可变的字符串对象。<code>&amp;str</code> 是字符串切片（通常是对 String 或字面量的引用），是不可变的视图。函数参数通常建议写 <code>&amp;str</code> 以兼容两种类型（<code>&amp;String</code> 会自动强转为 <code>&amp;str</code>）。</p>
 <h3 id="q2-为什么-s1--s2-中-s1-必须被移动"><a class="header" href="#q2-为什么-s1--s2-中-s1-必须被移动">Q2: 为什么 <code>s1 + &amp;s2</code> 中 <code>s1</code> 必须被移动？</a></h3>
 <p>A: <code>+</code> 运算符调用的是 <code>add</code> 方法：<code>fn add(self, s: &amp;str) -&gt; String</code>。第一个参数是 <code>self</code>，意味着它获取了 <code>s1</code> 的所有权。为了效率，它直接在 <code>s1</code> 的缓冲区上追加 <code>s2</code> 的内容，并返回修改后的 <code>s1</code>，避免了重新分配新内存。</p>
 <h3 id="q3-什么时候用数组-t-n什么时候用-vect"><a class="header" href="#q3-什么时候用数组-t-n什么时候用-vect">Q3: 什么时候用数组 <code>[T; N]</code>，什么时候用 <code>Vec&lt;T&gt;</code>？</a></h3>
 <p>A: 如果数据数量固定且较小，用数组（栈分配，更快）。如果数量不确定或很大，用 Vector。</p>
-<h2 id="-最佳实践-6"><a class="header" href="#-最佳实践-6">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-5"><a class="header" href="#-最佳实践-5">💡 最佳实践</a></h2>
 <ul>
 <li><strong>预分配容量</strong>: 如果知道大概要存多少元素，使用 <code>Vec::with_capacity(n)</code> 或 <code>HashMap::with_capacity(n)</code> 可以减少内存重新分配的次数，提高性能。</li>
 <li><strong>Entry API</strong>: 修改 HashMap 时优先使用 <code>entry</code> API，代码更简洁且效率更高（只计算一次哈希值）。</li>
 </ul>
-<h2 id="-扩展阅读-6"><a class="header" href="#-扩展阅读-6">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-3"><a class="header" href="#-扩展阅读-3">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch08-00-common-collections.html">Rust 程序设计语言 - 常见集合</a></li>
 </ul>
@@ -3754,13 +3986,13 @@ fn main() {
 <li>了解如何在 <code>main</code> 函数中处理错误</li>
 <li>掌握 <code>panic!</code> 的使用场景</li>
 </ul>
-<h2 id="-为什么要学这个-7"><a class="header" href="#-为什么要学这个-7">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-5"><a class="header" href="#-为什么要学这个-5">🎯 为什么要学这个</a></h2>
 <p>Rust 以安全著称，而处理错误是安全的重要组成部分。</p>
 <ul>
 <li><strong>强制处理</strong>: Rust 不使用异常 (Exception)。它迫使你在编译时就必须决定如何处理可能发生的错误，从而消除了运行时未捕获异常导致的崩溃。</li>
 <li><strong>清晰明确</strong>: 函数签名明确指出了可能失败的操作。</li>
 </ul>
-<h2 id="-核心概念-7"><a class="header" href="#-核心概念-7">📖 核心概念</a></h2>
+<h2 id="-核心概念-4"><a class="header" href="#-核心概念-4">📖 核心概念</a></h2>
 <h3 id="1-错误的分类"><a class="header" href="#1-错误的分类">1. 错误的分类</a></h3>
 <ul>
 <li><strong>不可恢复错误</strong>: 严重的 bug，如数组越界。Rust 使用 <code>panic!</code> 宏来处理，程序会打印错误信息并退出。</li>
@@ -3794,7 +4026,7 @@ fn read_username() -&gt; Result&lt;String, io::Error&gt; {
     Ok(s)
 }
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-7"><a class="header" href="#-代码示例-7">💻 代码示例</a></h2>
+<h2 id="-代码示例-4"><a class="header" href="#-代码示例-4">💻 代码示例</a></h2>
 <h3 id="示例-1-基本的-result-处理"><a class="header" href="#示例-1-基本的-result-处理">示例 1: 基本的 Result 处理</a></h3>
 <pre class="playground"><code class="language-rust">use std::fs::File;
 use std::io::ErrorKind;
@@ -3839,7 +4071,7 @@ fn main() {
 <li><strong>练习 3</strong>: 解析 CSV 数据</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/11.ErrorHandling/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-7"><a class="header" href="#-常见问题-faq-7">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-4"><a class="header" href="#-常见问题-faq-4">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-什么时候用-panic-什么时候用-result"><a class="header" href="#q1-什么时候用-panic-什么时候用-result">Q1: 什么时候用 panic! 什么时候用 Result？</a></h3>
 <p>A:</p>
 <ul>
@@ -3853,12 +4085,12 @@ fn main() {
     let f = File::open("hello.txt")?;
     Ok(())
 }</code></pre>
-<h2 id="-最佳实践-7"><a class="header" href="#-最佳实践-7">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-6"><a class="header" href="#-最佳实践-6">💡 最佳实践</a></h2>
 <ul>
 <li><strong>不要滥用 unwrap</strong>: 在生产代码中，尽量使用 <code>match</code>, <code>unwrap_or</code>, <code>expect</code> 或 <code>?</code>，除非你 100% 确定不会失败。</li>
 <li><strong>自定义错误</strong>: 对于库的开发者，定义自己的错误类型（通常是一个 Enum），可以更清晰地表达错误意图。</li>
 </ul>
-<h2 id="-扩展阅读-7"><a class="header" href="#-扩展阅读-7">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-4"><a class="header" href="#-扩展阅读-4">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch09-00-error-handling.html">Rust 程序设计语言 - 错误处理</a></li>
 </ul>
@@ -3874,13 +4106,13 @@ fn main() {
 <li>理解 Rust 的 <strong>单态化 (Monomorphization)</strong> 机制（零成本抽象）</li>
 <li>能够阅读和编写带有基本 Trait Bound 的泛型代码</li>
 </ul>
-<h2 id="-为什么要学这个-8"><a class="header" href="#-为什么要学这个-8">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-6"><a class="header" href="#-为什么要学这个-6">🎯 为什么要学这个</a></h2>
 <ul>
 <li><strong>减少重复代码</strong>: 不需要为 i32, f64, String 分别写一个排序函数，只需写一个泛型排序函数。</li>
 <li><strong>类型安全</strong>: 编译器确保泛型参数的使用是合法的。</li>
 <li><strong>高性能</strong>: Rust 的泛型在编译时展开，运行时没有任何性能损耗。</li>
 </ul>
-<h2 id="-核心概念-8"><a class="header" href="#-核心概念-8">📖 核心概念</a></h2>
+<h2 id="-核心概念-5"><a class="header" href="#-核心概念-5">📖 核心概念</a></h2>
 <h3 id="1-什么是泛型"><a class="header" href="#1-什么是泛型">1. 什么是泛型？</a></h3>
 <p>泛型是具体类型的占位符。就像函数参数是值的占位符一样，泛型参数是类型的占位符。通常使用 <code>T</code> (Type) 来表示。</p>
 <h3 id="2-在哪里使用泛型"><a class="header" href="#2-在哪里使用泛型">2. 在哪里使用泛型？</a></h3>
@@ -3894,7 +4126,7 @@ fn main() {
 <p>这是 Rust 泛型高性能的秘密。
 当编译泛型代码时，Rust 会寻找所有使用该泛型的地方，并为每个具体类型生成专门的代码副本。
 例如，如果你用了 <code>Option&lt;i32&gt;</code> 和 <code>Option&lt;f64&gt;</code>，编译器会生成两个不同的枚举定义。这会稍微增加二进制文件大小，但运行时速度极快（静态分发）。</p>
-<h2 id="-代码示例-8"><a class="header" href="#-代码示例-8">💻 代码示例</a></h2>
+<h2 id="-代码示例-5"><a class="header" href="#-代码示例-5">💻 代码示例</a></h2>
 <h3 id="示例-1-泛型结构体"><a class="header" href="#示例-1-泛型结构体">示例 1: 泛型结构体</a></h3>
 <pre class="playground"><code class="language-rust">struct Point&lt;T&gt; {
     x: T,
@@ -3944,17 +4176,17 @@ impl Point&lt;f32&gt; {
 <li><strong>练习 3</strong>: 混合泛型结构体操作</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/12.Generics/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-8"><a class="header" href="#-常见问题-faq-8">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-5"><a class="header" href="#-常见问题-faq-5">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-impl-pointt-和-implt-pointt-有什么区别"><a class="header" href="#q1-impl-pointt-和-implt-pointt-有什么区别">Q1: <code>impl Point&lt;T&gt;</code> 和 <code>impl&lt;T&gt; Point&lt;T&gt;</code> 有什么区别？</a></h3>
 <p>A: <code>impl&lt;T&gt; Point&lt;T&gt;</code> 读作“为任意类型 T 实现 Point<t>”。第一个 <code>&lt;T&gt;</code> 声明了 T 是一个泛型参数，而不是一个具体的类型名称。如果没有第一个 <code>&lt;T&gt;</code>，编译器会以为 <code>T</code> 是某个具体的 struct 或 enum 的名字。</t></p>
 <h3 id="q2-泛型会拖慢编译速度吗"><a class="header" href="#q2-泛型会拖慢编译速度吗">Q2: 泛型会拖慢编译速度吗？</a></h3>
 <p>A: 会。因为编译器需要为每个具体类型生成代码副本（单态化），这增加了编译工作量。但它换来的是运行时的极致性能。</p>
-<h2 id="-最佳实践-8"><a class="header" href="#-最佳实践-8">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-7"><a class="header" href="#-最佳实践-7">💡 最佳实践</a></h2>
 <ul>
 <li><strong>命名规范</strong>: 单个泛型参数通常叫 <code>T</code>。如果有多个，通常用 <code>T, U, V</code> 或更具描述性的名字（如 <code>K, V</code> 用于 Key-Value）。</li>
 <li><strong>约束</strong>: 虽然这节课还没深入讲 Trait Bound，但要注意，如果你在泛型函数中使用了 <code>&gt;</code> 运算符，你需要告诉编译器 <code>T</code> 是可以比较的（<code>T: PartialOrd</code>）。</li>
 </ul>
-<h2 id="-扩展阅读-8"><a class="header" href="#-扩展阅读-8">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-5"><a class="header" href="#-扩展阅读-5">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch10-01-syntax.html">Rust 程序设计语言 - 泛型</a></li>
 </ul>
@@ -3971,13 +4203,13 @@ impl Point&lt;f32&gt; {
 <li>掌握孤儿规则 (Orphan Rule)</li>
 <li>了解常用的派生 Trait (<code>#[derive]</code>)</li>
 </ul>
-<h2 id="-为什么要学这个-9"><a class="header" href="#-为什么要学这个-9">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-7"><a class="header" href="#-为什么要学这个-7">🎯 为什么要学这个</a></h2>
 <ul>
 <li><strong>多态</strong>: Trait 是 Rust 实现多态的核心机制。它允许你编写能够处理任何具有特定行为（方法）的类型的代码。</li>
 <li><strong>抽象</strong>: 定义共享的行为接口，而不关心具体实现细节。</li>
 <li><strong>约束</strong>: 限制泛型参数必须具备的功能（如“必须能被打印”）。</li>
 </ul>
-<h2 id="-核心概念-9"><a class="header" href="#-核心概念-9">📖 核心概念</a></h2>
+<h2 id="-核心概念-6"><a class="header" href="#-核心概念-6">📖 核心概念</a></h2>
 <h3 id="1-定义与实现"><a class="header" href="#1-定义与实现">1. 定义与实现</a></h3>
 <p>Trait 定义了一组方法签名。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -4039,7 +4271,7 @@ where
     Tweet { ... }
 }
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-9"><a class="header" href="#-代码示例-9">💻 代码示例</a></h2>
+<h2 id="-代码示例-6"><a class="header" href="#-代码示例-6">💻 代码示例</a></h2>
 <h3 id="示例-1-基本实现"><a class="header" href="#示例-1-基本实现">示例 1: 基本实现</a></h3>
 <pre class="playground"><code class="language-rust">trait Speak {
     fn say_hello(&amp;self);
@@ -4089,18 +4321,18 @@ fn main() {
 <li><strong>练习 4</strong>: 实现标准库 Trait (<code>Display</code>)</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/13.Traits/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-9"><a class="header" href="#-常见问题-faq-9">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-6"><a class="header" href="#-常见问题-faq-6">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-trait-和-javac-的-interface-有什么区别"><a class="header" href="#q1-trait-和-javac-的-interface-有什么区别">Q1: Trait 和 Java/C# 的 Interface 有什么区别？</a></h3>
 <p>A: 非常相似，但 Trait 可以包含默认实现（Java 8+ 接口也可以）。最大的区别在于 Trait 可以作为泛型约束 (Bounds)，不仅用于动态分发，更多用于静态单态化。此外，Trait 不支持字段（数据），只定义行为。</p>
 <h3 id="q2-什么是关联类型-associated-types"><a class="header" href="#q2-什么是关联类型-associated-types">Q2: 什么是关联类型 (Associated Types)？</a></h3>
 <p>A: 这是进阶话题 (Day 28)。简单来说，它是 Trait 定义中的类型占位符，例如 <code>Iterator</code> trait 有一个 <code>type Item;</code>，实现时指定具体的 Item 类型。</p>
-<h2 id="-最佳实践-9"><a class="header" href="#-最佳实践-9">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-8"><a class="header" href="#-最佳实践-8">💡 最佳实践</a></h2>
 <ul>
 <li><strong>优先使用标准 Trait</strong>: 如 <code>Display</code>, <code>Debug</code>, <code>Default</code>, <code>Clone</code>, <code>Copy</code> 等。遵循 Rust 的惯例会让你的类型更好用。</li>
 <li><strong>使用 Derive</strong>: 只要可能，就通过 <code>#[derive(...)]</code> 自动实现标准 Trait，减少样板代码。</li>
 <li><strong>单一职责</strong>: 定义小而专注的 Trait，而不是大而全的 Trait。</li>
 </ul>
-<h2 id="-扩展阅读-9"><a class="header" href="#-扩展阅读-9">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-6"><a class="header" href="#-扩展阅读-6">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch10-02-traits.html">Rust 程序设计语言 - Traits</a></li>
 </ul>
@@ -4117,13 +4349,13 @@ fn main() {
 <li>理解生命周期省略规则 (Elision Rules)</li>
 <li>理解 <code>'static</code> 生命周期</li>
 </ul>
-<h2 id="-为什么要学这个-10"><a class="header" href="#-为什么要学这个-10">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-8"><a class="header" href="#-为什么要学这个-8">🎯 为什么要学这个</a></h2>
 <p>Rust 的借用检查器需要确保所有的引用都是有效的，不会指向已经被释放的内存（悬垂引用）。</p>
 <ul>
 <li><strong>大部分时候</strong>：生命周期是隐式的，编译器能自动推断。</li>
 <li><strong>有时候</strong>：引用的关系比较复杂（比如函数返回两个引用参数中的一个），编译器无法确定，需要你手动通过注解告诉它。</li>
 </ul>
-<h2 id="-核心概念-10"><a class="header" href="#-核心概念-10">📖 核心概念</a></h2>
+<h2 id="-核心概念-7"><a class="header" href="#-核心概念-7">📖 核心概念</a></h2>
 <h3 id="1-悬垂引用-dangling-references"><a class="header" href="#1-悬垂引用-dangling-references">1. 悬垂引用 (Dangling References)</a></h3>
 <p>生命周期的主要目的是避免悬垂引用。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -4174,7 +4406,7 @@ fn main() {
 <li>字符串字面值都是 <code>'static</code> 的。</li>
 <li><code>let s: &amp;'static str = "I have a static lifetime.";</code></li>
 </ul>
-<h2 id="-代码示例-10"><a class="header" href="#-代码示例-10">💻 代码示例</a></h2>
+<h2 id="-代码示例-7"><a class="header" href="#-代码示例-7">💻 代码示例</a></h2>
 <h3 id="示例-1-结构体持有引用"><a class="header" href="#示例-1-结构体持有引用">示例 1: 结构体持有引用</a></h3>
 <pre class="playground"><code class="language-rust">struct Book&lt;'a&gt; {
     title: &amp;'a str,
@@ -4204,17 +4436,17 @@ fn main() {
 <li><strong>练习 3</strong>: 结构体引用</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/14.Lifetimes/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-10"><a class="header" href="#-常见问题-faq-10">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-7"><a class="header" href="#-常见问题-faq-7">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-为什么编译器不能自己分析出来非要我写注解"><a class="header" href="#q1-为什么编译器不能自己分析出来非要我写注解">Q1: 为什么编译器不能自己分析出来，非要我写注解？</a></h3>
 <p>A: 在函数边界上，Rust 选择要求显式签名。这意味着编译器只需要分析函数的签名就能检查调用者和被调用者的代码，而不需要深入函数体内部。如果依赖函数体推断，修改函数内部实现可能会意外破坏外部调用者的代码（打破向后兼容性）。</p>
 <h3 id="q2-标注了-a-就能让变量活得更久吗"><a class="header" href="#q2-标注了-a-就能让变量活得更久吗">Q2: 标注了 <code>'a</code> 就能让变量活得更久吗？</a></h3>
 <p>A: 不能。生命周期注解是 <strong>描述性的 (Descriptive)</strong>，不是 <strong>指令性的 (Prescriptive)</strong>。它只是在检查，如果实际生命周期不满足注解的要求，编译器会报错，而不是去延长变量的寿命。</p>
-<h2 id="-最佳实践-10"><a class="header" href="#-最佳实践-10">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-9"><a class="header" href="#-最佳实践-9">💡 最佳实践</a></h2>
 <ul>
 <li><strong>利用省略规则</strong>: 只有编译器报错时才添加显式生命周期。</li>
 <li><strong>理解所有权</strong>: 很多生命周期问题可以通过转移所有权（例如返回 <code>String</code> 而不是 <code>&amp;str</code>）来解决，尤其是当你不确定谁该拥有数据时。</li>
 </ul>
-<h2 id="-扩展阅读-10"><a class="header" href="#-扩展阅读-10">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-7"><a class="header" href="#-扩展阅读-7">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html">Rust 程序设计语言 - 生命周期</a></li>
 </ul>
@@ -4231,14 +4463,14 @@ fn main() {
 <li>了解集成测试与文档测试</li>
 <li>掌握 <code>cargo test</code> 的常用参数</li>
 </ul>
-<h2 id="-为什么要学这个-11"><a class="header" href="#-为什么要学这个-11">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-9"><a class="header" href="#-为什么要学这个-9">🎯 为什么要学这个</a></h2>
 <ul>
 <li><strong>正确性</strong>: 确保代码按预期工作。</li>
 <li><strong>重构信心</strong>: 当你修改代码时，测试能立刻告诉你是否破坏了现有功能。</li>
 <li><strong>文档</strong>: 测试用例本身就是很好的代码使用示例（特别是文档测试）。</li>
 <li><strong>Rust 原生支持</strong>: 可以在代码文件中直接写测试，不需要额外的框架。</li>
 </ul>
-<h2 id="-核心概念-11"><a class="header" href="#-核心概念-11">📖 核心概念</a></h2>
+<h2 id="-核心概念-8"><a class="header" href="#-核心概念-8">📖 核心概念</a></h2>
 <h3 id="1-单元测试-unit-tests"><a class="header" href="#1-单元测试-unit-tests">1. 单元测试 (Unit Tests)</a></h3>
 <p>通常位于源码文件的底部，封装在 <code>mod tests</code> 模块中。</p>
 <ul>
@@ -4275,7 +4507,7 @@ mod tests {
 <li><code>assert_ne!(left, right)</code>: 验证不等。</li>
 <li><code>debug_assert!(...)</code>: 只在 Debug 模式下运行。</li>
 </ul>
-<h2 id="-代码示例-11"><a class="header" href="#-代码示例-11">💻 代码示例</a></h2>
+<h2 id="-代码示例-8"><a class="header" href="#-代码示例-8">💻 代码示例</a></h2>
 <h3 id="示例-1-基本测试与-panic-测试"><a class="header" href="#示例-1-基本测试与-panic-测试">示例 1: 基本测试与 Panic 测试</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -4325,18 +4557,18 @@ fn it_works() -&gt; Result&lt;(), String&gt; {
 <li><strong>练习 3</strong>: 编写文档测试（模拟）</li>
 </ul>
 <p>👉 <strong><a href="Day01-15/15.Testing/exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq-11"><a class="header" href="#-常见问题-faq-11">🤔 常见问题 (FAQ)</a></h2>
+<h2 id="-常见问题-faq-8"><a class="header" href="#-常见问题-faq-8">🤔 常见问题 (FAQ)</a></h2>
 <h3 id="q1-cargo-test-默认是并行运行的吗"><a class="header" href="#q1-cargo-test-默认是并行运行的吗">Q1: <code>cargo test</code> 默认是并行运行的吗？</a></h3>
 <p>A: 是的。如果你的测试相互依赖（例如都操作同一个文件或数据库），这可能会导致问题。可以使用 <code>cargo test -- --test-threads=1</code> 来串行运行测试。</p>
 <h3 id="q2-既然可以测试私有函数那还需要集成测试吗"><a class="header" href="#q2-既然可以测试私有函数那还需要集成测试吗">Q2: 既然可以测试私有函数，那还需要集成测试吗？</a></h3>
 <p>A: 需要。单元测试关注实现的细节（白盒），集成测试关注对外暴露的 API 是否好用、多个组件能否正确协作（黑盒）。两者缺一不可。</p>
-<h2 id="-最佳实践-11"><a class="header" href="#-最佳实践-11">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-10"><a class="header" href="#-最佳实践-10">💡 最佳实践</a></h2>
 <ul>
 <li><strong>TDD (测试驱动开发)</strong>: 先写一个失败的测试，再写代码让它通过。</li>
 <li><strong>测试覆盖率</strong>: 尽量覆盖各种边缘情况 (Edge Cases)，不仅仅是正常路径 (Happy Path)。</li>
 <li><strong>文档即测试</strong>: 尽量为公有 API 编写包含示例代码的文档注释。</li>
 </ul>
-<h2 id="-扩展阅读-11"><a class="header" href="#-扩展阅读-11">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-8"><a class="header" href="#-扩展阅读-8">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch11-00-testing.html">Rust 程序设计语言 - 测试</a></li>
 </ul>
@@ -4353,7 +4585,7 @@ fn it_works() -&gt; Result&lt;(), String&gt; {
 <li>学会使用 <code>move</code> 关键字强制转移所有权。</li>
 <li>能够将闭包作为参数传递或作为返回值。</li>
 </ul>
-<h2 id="-为什么要学这个-12"><a class="header" href="#-为什么要学这个-12">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-10"><a class="header" href="#-为什么要学这个-10">🎯 为什么要学这个</a></h2>
 <p>闭包是函数式编程的核心概念之一，在 Rust 中被广泛用于：</p>
 <ul>
 <li><strong>迭代器适配器</strong>：如 <code>map</code>, <code>filter</code> 等。</li>
@@ -4362,7 +4594,7 @@ fn it_works() -&gt; Result&lt;(), String&gt; {
 <li><strong>延迟计算</strong>：仅在需要时执行代码。</li>
 </ul>
 <p>相比普通函数，闭包最强大的能力是<strong>捕获其定义作用域中的变量</strong>，这使得它们非常灵活。</p>
-<h2 id="-核心概念-12"><a class="header" href="#-核心概念-12">📖 核心概念</a></h2>
+<h2 id="-核心概念-9"><a class="header" href="#-核心概念-9">📖 核心概念</a></h2>
 <h3 id="1-定义闭包"><a class="header" href="#1-定义闭包">1. 定义闭包</a></h3>
 <p>闭包通常不需要像函数那样标注参数和返回值类型，编译器能自动推断。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -4388,7 +4620,7 @@ std::thread::spawn(move || {
     println!("From thread: {:?}", list);
 });
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-12"><a class="header" href="#-代码示例-12">💻 代码示例</a></h2>
+<h2 id="-代码示例-9"><a class="header" href="#-代码示例-9">💻 代码示例</a></h2>
 <h3 id="示例-1-基础用法与类型推断"><a class="header" href="#示例-1-基础用法与类型推断">示例 1: 基础用法与类型推断</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
     let example_closure = |x| x;
@@ -4426,7 +4658,7 @@ where
 <p>A: 当你需要将闭包传递给新线程，或者希望闭包完全拥有它捕获的数据（例如为了防止外部修改，或者为了返回闭包）时。</p>
 <h3 id="q2-为什么不能直接返回闭包"><a class="header" href="#q2-为什么不能直接返回闭包">Q2: 为什么不能直接返回闭包？</a></h3>
 <p>A: 闭包没有具体的大小（Unsized），因为每个闭包都是独特的匿名类型。要返回闭包，通常需要将其装箱：<code>Box&lt;dyn Fn(i32) -&gt; i32&gt;</code> 或使用 <code>impl Trait</code> 语法：<code>fn return_closure() -&gt; impl Fn(i32) -&gt; i32</code>。</p>
-<h2 id="-扩展阅读-12"><a class="header" href="#-扩展阅读-12">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-9"><a class="header" href="#-扩展阅读-9">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">Rust Book: Closures</a></li>
 <li><a href="https://doc.rust-lang.org/rust-by-example/fn/closures.html">Rust by Example: Closures</a></li>
@@ -4440,9 +4672,9 @@ where
 <li>掌握迭代器适配器（Iterator Adaptors）如 <code>map</code>, <code>filter</code>, <code>zip</code>。</li>
 <li>能够实现自定义迭代器。</li>
 </ul>
-<h2 id="-为什么要学这个-13"><a class="header" href="#-为什么要学这个-13">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-11"><a class="header" href="#-为什么要学这个-11">🎯 为什么要学这个</a></h2>
 <p>迭代器模式是 Rust 处理序列数据的主要方式。它不仅语法简洁，而且在 Rust 中是<strong>零成本抽象</strong>（Zero-Cost Abstractions）。通常情况下，使用迭代器的速度与手写底层 <code>for</code> 循环一样快，甚至更快（因为编译器能更好地优化边界检查）。</p>
-<h2 id="-核心概念-13"><a class="header" href="#-核心概念-13">📖 核心概念</a></h2>
+<h2 id="-核心概念-10"><a class="header" href="#-核心概念-10">📖 核心概念</a></h2>
 <h3 id="1-iterator-trait"><a class="header" href="#1-iterator-trait">1. Iterator Trait</a></h3>
 <p>所有迭代器都实现了 <code>Iterator</code> trait。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -4479,7 +4711,7 @@ where
 <li><code>chain()</code>: 连接两个迭代器。</li>
 <li><code>enumerate()</code>: 添加索引。</li>
 </ul>
-<h2 id="-代码示例-13"><a class="header" href="#-代码示例-13">💻 代码示例</a></h2>
+<h2 id="-代码示例-10"><a class="header" href="#-代码示例-10">💻 代码示例</a></h2>
 <h3 id="示例-1-基本使用"><a class="header" href="#示例-1-基本使用">示例 1: 基本使用</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
     let v1 = vec![1, 2, 3];
@@ -4520,7 +4752,7 @@ where
 </ul>
 <h3 id="q2-为什么-collect-需要类型标注"><a class="header" href="#q2-为什么-collect-需要类型标注">Q2: 为什么 <code>collect()</code> 需要类型标注？</a></h3>
 <p>A: <code>collect()</code> 可以将迭代器转换成多种不同的集合（Vec, LinkedList, HashMap 等）。编译器通常无法推断你想转换成哪种具体类型，所以需要显式标注 <code>Vec&lt;_&gt;</code> 或 <code>Vec&lt;i32&gt;</code>。</p>
-<h2 id="-扩展阅读-13"><a class="header" href="#-扩展阅读-13">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-10"><a class="header" href="#-扩展阅读-10">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">Rust Book: Processing a Series of Items with Iterators</a></li>
 <li><a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">Standard Library: Iterator</a></li>
@@ -4534,9 +4766,9 @@ where
 <li>学会使用 Cargo Workspaces 管理多个包。</li>
 <li>了解如何发布包到 Crates.io 以及版本管理。</li>
 </ul>
-<h2 id="-为什么要学这个-14"><a class="header" href="#-为什么要学这个-14">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-12"><a class="header" href="#-为什么要学这个-12">🎯 为什么要学这个</a></h2>
 <p>Cargo 是 Rust 生态系统的基石。它不仅仅是一个构建工具，还是依赖管理器、文档生成器和测试运行器。掌握 Cargo 的高级用法对于构建大型项目、优化构建速度和发布高质量的库至关重要。</p>
-<h2 id="-核心概念-14"><a class="header" href="#-核心概念-14">📖 核心概念</a></h2>
+<h2 id="-核心概念-11"><a class="header" href="#-核心概念-11">📖 核心概念</a></h2>
 <h3 id="1-发布配置-release-profiles"><a class="header" href="#1-发布配置-release-profiles">1. 发布配置 (Release Profiles)</a></h3>
 <p>Cargo 提供了两种主要的预设配置：</p>
 <ul>
@@ -4589,7 +4821,7 @@ members = [
     "crates/core",
 ]
 </code></pre>
-<h2 id="-代码示例-14"><a class="header" href="#-代码示例-14">💻 代码示例</a></h2>
+<h2 id="-代码示例-11"><a class="header" href="#-代码示例-11">💻 代码示例</a></h2>
 <h3 id="示例-1-条件编译-conditional-compilation"><a class="header" href="#示例-1-条件编译-conditional-compilation">示例 1: 条件编译 (Conditional Compilation)</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
     if cfg!(target_os = "linux") {
@@ -4629,7 +4861,7 @@ mod tests {
 <li>Patch: 向后兼容的 Bug 修复。
 Cargo 默认锁定 Major 版本不变（如 <code>^1.2.3</code> 允许升级到 <code>1.9.9</code> 但不允许 <code>2.0.0</code>）。</li>
 </ul>
-<h2 id="-扩展阅读-14"><a class="header" href="#-扩展阅读-14">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-11"><a class="header" href="#-扩展阅读-11">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
 <li><a href="https://rust-lang.github.io/api-guidelines/">Rust API Guidelines</a></li>
@@ -4644,9 +4876,9 @@ Cargo 默认锁定 Major 版本不变（如 <code>^1.2.3</code> 允许升级到 
 <li>理解 <code>Deref</code> trait 和解引用强制转换 (Deref Coercion)。</li>
 <li>理解 <code>Drop</code> trait 和资源清理。</li>
 </ul>
-<h2 id="-为什么要学这个-15"><a class="header" href="#-为什么要学这个-15">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-13"><a class="header" href="#-为什么要学这个-13">🎯 为什么要学这个</a></h2>
 <p>在 Rust 中，默认情况下所有值都分配在栈上。栈非常快，但空间有限且要求数据大小固定。智能指针 <code>Box&lt;T&gt;</code> 是最基本的工具，用于将数据移动到堆上。掌握它对于处理大型数据结构、递归类型（如树、图）以及面向对象编程（Trait Objects）至关重要。</p>
-<h2 id="-核心概念-15"><a class="header" href="#-核心概念-15">📖 核心概念</a></h2>
+<h2 id="-核心概念-12"><a class="header" href="#-核心概念-12">📖 核心概念</a></h2>
 <h3 id="1-栈-vs-堆"><a class="header" href="#1-栈-vs-堆">1. 栈 vs 堆</a></h3>
 <ul>
 <li><strong>栈</strong>: 后进先出，速度极快。所有存储在栈上的数据必须有已知的大小。</li>
@@ -4679,7 +4911,7 @@ Rust 提供<strong>解引用强制转换 (Deref Coercion)</strong>：如果 <cod
 例如：<code>String</code> 实现 <code>Deref&lt;Target=str&gt;</code>，所以 <code>&amp;String</code> 可以传给接受 <code>&amp;str</code> 的函数。</p>
 <h3 id="5-drop-trait"><a class="header" href="#5-drop-trait">5. Drop Trait</a></h3>
 <p><code>Drop</code> trait 类似于其他语言的析构函数。当值离开作用域时，Rust 会自动调用 <code>drop</code> 方法。我们可以实现它来释放文件、网络连接等资源。</p>
-<h2 id="-代码示例-15"><a class="header" href="#-代码示例-15">💻 代码示例</a></h2>
+<h2 id="-代码示例-12"><a class="header" href="#-代码示例-12">💻 代码示例</a></h2>
 <h3 id="示例-1-基本-box-使用"><a class="header" href="#示例-1-基本-box-使用">示例 1: 基本 Box 使用</a></h3>
 <pre class="playground"><code class="language-rust">fn main() {
     let b = Box::new(5);
@@ -4713,7 +4945,7 @@ fn main() {
 <p>A: 在优化构建 (<code>--release</code>) 中，编译器通常会优化掉中间的栈拷贝，直接在堆上构建对象。但在 Debug 模式下，可能会先在栈上创建再移动到堆上。</p>
 <h3 id="q2-既然-rust-有-gc-吗"><a class="header" href="#q2-既然-rust-有-gc-吗">Q2: 既然 Rust 有 GC 吗？</a></h3>
 <p>A: Rust 没有垃圾回收器 (GC)。<code>Box</code> 利用所有权系统和 <code>Drop</code> trait 来管理内存。当 <code>Box</code> 离开作用域时，它拥有的堆内存会被立即释放。</p>
-<h2 id="-扩展阅读-15"><a class="header" href="#-扩展阅读-15">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-12"><a class="header" href="#-扩展阅读-12">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch15-01-box.html">Rust Book: Using Box<t> to Point to Data on the Heap</t></a></li>
 <li><a href="https://doc.rust-lang.org/book/ch15-00-smart-pointers.html">Rust Book: Smart Pointers</a></li>
@@ -4727,10 +4959,10 @@ fn main() {
 <li>掌握编译时借用检查与运行时借用检查的区别。</li>
 <li>能够组合使用 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code> 来实现可变的共享数据。</li>
 </ul>
-<h2 id="-为什么要学这个-16"><a class="header" href="#-为什么要学这个-16">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-14"><a class="header" href="#-为什么要学这个-14">🎯 为什么要学这个</a></h2>
 <p>在 Rust 中，所有权规则非常严格：一个值在同一时间只能有一个所有者，或者多个不可变借用，或者一个可变借用。
 但在实际数据结构（如双向链表、图、GUI 控件树）中，一个节点可能被多个其他节点引用，或者我们需要在不可变引用的上下文中修改数据（例如缓存、模拟对象）。<code>Rc</code> 和 <code>RefCell</code> 提供了绕过严格静态检查的安全机制。</p>
-<h2 id="-核心概念-16"><a class="header" href="#-核心概念-16">📖 核心概念</a></h2>
+<h2 id="-核心概念-13"><a class="header" href="#-核心概念-13">📖 核心概念</a></h2>
 <h3 id="1-rc-引用计数"><a class="header" href="#1-rc-引用计数">1. Rc<t> (引用计数)</t></a></h3>
 <p><code>Rc</code> 代表 <strong>Reference Counting</strong>。它用于在堆上分配数据，供程序的多个部分读取。</p>
 <ul>
@@ -4768,7 +5000,7 @@ let b = Rc::clone(&amp;value);
 *a.borrow_mut() += 10;
 println!("b sees: {}", b.borrow()); // 15
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-16"><a class="header" href="#-代码示例-16">💻 代码示例</a></h2>
+<h2 id="-代码示例-13"><a class="header" href="#-代码示例-13">💻 代码示例</a></h2>
 <h3 id="示例-1-rc-共享列表"><a class="header" href="#示例-1-rc-共享列表">示例 1: Rc 共享列表</a></h3>
 <pre class="playground"><code class="language-rust">use std::rc::Rc;
 
@@ -4822,7 +5054,7 @@ fn main() {
 <li><strong>复杂性</strong>：类型签名变得很长且难以阅读。
 只在确实需要时使用。</li>
 </ol>
-<h2 id="-扩展阅读-16"><a class="header" href="#-扩展阅读-16">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-13"><a class="header" href="#-扩展阅读-13">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch15-05-interior-mutability.html">Rust Book: RefCell<t> and the Interior Mutability Pattern</t></a></li>
 <li><a href="https://doc.rust-lang.org/book/ch15-06-reference-cycles.html">Rust Book: Reference Cycles</a></li>

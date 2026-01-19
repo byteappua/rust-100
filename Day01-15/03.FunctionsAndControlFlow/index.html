@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6a6a6780.js";
+            window.path_to_searchindex_js = "../../searchindex-db38cd84.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -227,11 +227,11 @@ fn      add_one  (x: i32)               -&gt; i32 {
 </ul>
 <h3 id="决策流程图"><a class="header" href="#决策流程图">决策流程图</a></h3>
 <pre class="mermaid">graph TD
-    Start([代码片段]) --&gt; HasSemi{结尾有分号吗&lt;br&gt;';' ?}
-    HasSemi -- Yes --&gt; Statement[语句 Statement]
-    Statement --&gt; ReturnsUnit[返回单元类型: ()]
-    HasSemi -- No --&gt; Expression[表达式 Expression]
-    Expression --&gt; ReturnsValue[返回计算出的值]
+    Start(["代码片段"]) --&gt; HasSemi{"结尾有分号吗&lt;br&gt;';' ?"}
+    HasSemi -- Yes --&gt; Statement["语句 Statement"]
+    Statement --&gt; ReturnsUnit["返回单元类型: ()"]
+    HasSemi -- No --&gt; Expression["表达式 Expression"]
+    Expression --&gt; ReturnsValue["返回计算出的值"]
     
     style Statement fill:#f9f,stroke:#333
     style Expression fill:#9f9,stroke:#333
@@ -263,11 +263,11 @@ let number = if condition { 5 } else { 6 };
 <h3 id="2-循环体系-loop-system"><a class="header" href="#2-循环体系-loop-system">2. 循环体系 (Loop System)</a></h3>
 <p>Rust 提供了三种循环工具，分别应对不同场景。</p>
 <pre class="mermaid">graph TD
-    Start([开始循环]) --&gt; KnownRange{是遍历范围&lt;br&gt;或集合吗?}
-    KnownRange -- Yes --&gt; For[使用 for 循环&lt;br&gt;(最安全/最常用)]
-    KnownRange -- No --&gt; InfLoop{需要无限循环&lt;br&gt;或手动控制退出?}
-    InfLoop -- Yes --&gt; Loop[使用 loop 循环&lt;br&gt;(可返回值)]
-    InfLoop -- No --&gt; While[使用 while 循环&lt;br&gt;(基于条件)]
+    Start(["开始循环"]) --&gt; KnownRange{"是遍历范围&lt;br&gt;或集合吗?"}
+    KnownRange -- Yes --&gt; For["使用 for 循环&lt;br&gt;(最安全/最常用)"]
+    KnownRange -- No --&gt; InfLoop{"需要无限循环&lt;br&gt;或手动控制退出?"}
+    InfLoop -- Yes --&gt; Loop["使用 loop 循环&lt;br&gt;(可返回值)"]
+    InfLoop -- No --&gt; While["使用 while 循环&lt;br&gt;(基于条件)"]
     
     style For fill:#cfc,stroke:#333,stroke-width:2px
 </pre>
