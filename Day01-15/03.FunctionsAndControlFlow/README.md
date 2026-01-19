@@ -52,11 +52,11 @@ fn      add_one  (x: i32)               -> i32 {
 
 ```mermaid
 graph TD
-    Start([代码片段]) --> HasSemi{结尾有分号吗<br>';' ?}
-    HasSemi -- Yes --> Statement[语句 Statement]
-    Statement --> ReturnsUnit[返回单元类型: ()]
-    HasSemi -- No --> Expression[表达式 Expression]
-    Expression --> ReturnsValue[返回计算出的值]
+    Start(["代码片段"]) --> HasSemi{"结尾有分号吗<br>';' ?"}
+    HasSemi -- Yes --> Statement["语句 Statement"]
+    Statement --> ReturnsUnit["返回单元类型: ()"]
+    HasSemi -- No --> Expression["表达式 Expression"]
+    Expression --> ReturnsValue["返回计算出的值"]
     
     style Statement fill:#f9f,stroke:#333
     style Expression fill:#9f9,stroke:#333
@@ -99,11 +99,11 @@ Rust 提供了三种循环工具，分别应对不同场景。
 
 ```mermaid
 graph TD
-    Start([开始循环]) --> KnownRange{是遍历范围<br>或集合吗?}
-    KnownRange -- Yes --> For[使用 for 循环<br>(最安全/最常用)]
-    KnownRange -- No --> InfLoop{需要无限循环<br>或手动控制退出?}
-    InfLoop -- Yes --> Loop[使用 loop 循环<br>(可返回值)]
-    InfLoop -- No --> While[使用 while 循环<br>(基于条件)]
+    Start(["开始循环"]) --> KnownRange{"是遍历范围<br>或集合吗?"}
+    KnownRange -- Yes --> For["使用 for 循环<br>(最安全/最常用)"]
+    KnownRange -- No --> InfLoop{"需要无限循环<br>或手动控制退出?"}
+    InfLoop -- Yes --> Loop["使用 loop 循环<br>(可返回值)"]
+    InfLoop -- No --> While["使用 while 循环<br>(基于条件)"]
     
     style For fill:#cfc,stroke:#333,stroke-width:2px
 ```
