@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-451bf5d8.js";
+            window.path_to_searchindex_js = "../../searchindex-cdf98a39.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-cec6f113.js"></script>
@@ -206,7 +206,7 @@
 <hr>
 <h2 id="-核心概念图解-core-concepts"><a class="header" href="#-核心概念图解-core-concepts">📖 核心概念图解 (Core Concepts)</a></h2>
 <p>在开始动手之前，让我们先理清 Rust 开发环境的架构。</p>
-<pre><code class="language-mermaid">graph TD
+<pre class="mermaid">graph TD
     User([开发者]) --&gt;|管理版本| Rustup
     User --&gt;|构建项目| Cargo
     
@@ -224,7 +224,8 @@
     Cargo --&gt;|调用| Rustc
     Rustc --&gt;|链接| Std
     Rustc --&gt;|生成| Binary([可执行文件])
-</code></pre>
+</pre>
+
 <ul>
 <li><strong><code>rustup</code></strong>: 你的 Rust 环境管家。负责安装 Rust、切换版本（Stable/Nightly）以及下载标准库源码等组件。</li>
 <li><strong><code>cargo</code></strong>: 你的瑞士军刀。负责新建项目、下载依赖、编译代码、运行测试。</li>
@@ -262,7 +263,7 @@ cd hello_rust
 </code></pre>
 <h3 id="2-项目结构剖析"><a class="header" href="#2-项目结构剖析">2. 项目结构剖析</a></h3>
 <p>Cargo 会自动生成标准的项目结构：</p>
-<pre><code class="language-mermaid">graph TD
+<pre class="mermaid">graph TD
     Root[hello_rust/]
     Config[Cargo.toml]
     Lock[Cargo.lock]
@@ -281,7 +282,8 @@ cd hello_rust
     style Target fill:#f96,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
     style Config fill:#bbf,stroke:#333,stroke-width:2px
     style Main fill:#bfb,stroke:#333,stroke-width:2px
-</code></pre>
+</pre>
+
 <ul>
 <li><strong><code>Cargo.toml</code></strong>: 项目的配置文件。定义了项目名称、版本以及<strong>依赖库 (Dependencies)</strong>。类似 Node.js 的 <code>package.json</code>。</li>
 <li><strong><code>src/main.rs</code></strong>: 源代码文件。</li>
@@ -299,7 +301,7 @@ cd hello_rust
 <hr>
 <h2 id="-编译与运行流程-compilation-flow"><a class="header" href="#-编译与运行流程-compilation-flow">⚙️ 编译与运行流程 (Compilation Flow)</a></h2>
 <p>在 Rust 中，开发循环通常涉及以下命令：</p>
-<pre><code class="language-mermaid">flowchart LR
+<pre class="mermaid">flowchart LR
     Write[编写代码] --&gt; Check[Cargo Check]
     Check --&gt;|通过| Build[Cargo Build]
     Build --&gt;|调试| Run[Cargo Run]
@@ -307,7 +309,8 @@ cd hello_rust
     
     style Check fill:#ff9,stroke:#333
     style Run fill:#9f9,stroke:#333
-</code></pre>
+</pre>
+
 <ol>
 <li><strong><code>cargo check</code></strong>: 🚀 <strong>最常用</strong>。快速检查代码能否通过编译，但不生成可执行文件。速度极快，适合开发过程中频繁运行。</li>
 <li><strong><code>cargo run</code></strong>: 编译并直接运行程序。</li>
@@ -396,6 +399,8 @@ A: 这表示引入标准库 (<code>std</code>) 中的 <code>io</code> 模块。R
         <script src="../../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="../../mermaid-616a109f.min.js"></script>
+        <script src="../../mermaid-init-777d3606.js"></script>
 
 
 
