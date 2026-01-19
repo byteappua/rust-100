@@ -1,0 +1,40 @@
+name: Validate Mermaid Diagrams
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  mermaid-validate:
+    name: Mermaid Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (optional)
+        run: |
+          # Ensure npm cache is available for faster installs (npx will still fetch packages when needed)
+          npm ci || true
+
+      - name: Run mermaid validation script
+        run: |
+          node scripts/validate_mermaid.js
+        env:
+          CI: true
+
+      - name: Upload rendered diagrams
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mermaid-validation-artifacts
+          path: .cache/mermaid_validate
