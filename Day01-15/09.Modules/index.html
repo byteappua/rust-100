@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4f5511ec.js";
+            window.path_to_searchindex_js = "../../searchindex-b0b19368.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -180,158 +180,193 @@
                         <h1 id="day-09-模块系统-modules"><a class="header" href="#day-09-模块系统-modules">Day 09: 模块系统 (Modules)</a></h1>
 <h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>理解 Rust 代码组织结构：Package、Crate 和 Module</li>
-<li>掌握模块定义与文件拆分</li>
-<li>深入理解可见性规则 (<code>pub</code>, <code>priv</code>)</li>
-<li>熟练使用路径 (<code>crate</code>, <code>super</code>, <code>self</code>) 引用项</li>
-<li>掌握 <code>use</code> 关键字引入作用域与 <code>pub use</code> 重导出</li>
+<li>理解 Rust 代码组织的三层结构：Package -&gt; Crate -&gt; Module</li>
+<li>掌握 <strong>模块树 (Module Tree)</strong> 的构建与导航</li>
+<li>彻底理解 <strong>可见性 (<code>pub</code>)</strong> 规则</li>
+<li>熟练运用 <strong><code>use</code></strong> 和 <strong><code>pub use</code></strong></li>
+<li>掌握将模块拆分为单文件或多文件的最佳实践</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<p>随着代码量的增加，将所有代码写在一个文件中会变得难以维护。Rust 的模块系统提供了强大的工具来帮助你：</p>
+<h2 id="-核心概念代码的文件系统"><a class="header" href="#-核心概念代码的文件系统">🎯 核心概念：代码的文件系统</a></h2>
+<p>随着项目变大，把所有代码写在一个文件里是不可行的。Rust 的模块系统就像电脑的文件系统：</p>
 <ul>
-<li><strong>组织代码</strong>: 将相关功能分组，提高代码可读性。</li>
-<li><strong>控制可见性</strong>: 隐藏内部实现细节，只暴露必要的公共 API（封装）。</li>
-<li><strong>重用代码</strong>: 方便在不同项目间共享代码。</li>
+<li><strong>Crate</strong> 就像一个磁盘分区（C盘/D盘）。</li>
+<li><strong>Module</strong> 就像文件夹，可以嵌套。</li>
+<li><strong>Item</strong> (函数/结构体) 就像文件。</li>
 </ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-代码组织层次"><a class="header" href="#1-代码组织层次">1. 代码组织层次</a></h3>
-<p>Rust 的模块系统由三个主要部分组成：</p>
+<p>我们通过 <strong>路径 (Paths)</strong> 来找到它们。</p>
+<hr>
+<h2 id="-代码组织层次"><a class="header" href="#-代码组织层次">🏗️ 代码组织层次</a></h2>
+<pre class="mermaid">graph TD
+    Package[Package: Cargo 项目] --&gt;|包含 1 个 Cargo.toml| Crates
+    Crates --&gt; BinaryCrate[Binary Crate: main.rs]
+    Crates --&gt; LibraryCrate[Library Crate: lib.rs]
+    LibraryCrate --&gt; ModuleRoot[Module Root]
+    ModuleRoot --&gt; SubMod1[Module A]
+    ModuleRoot --&gt; SubMod2[Module B]
+    SubMod1 --&gt; Fn1[Function / Struct]
+</pre>
+
+<ol>
+<li><strong>Package (包)</strong>: Cargo 的功能单元，包含 <code>Cargo.toml</code>。</li>
+<li><strong>Crate (箱)</strong>: 编译单元。
 <ul>
-<li><strong>包 (Package)</strong>: 一个 Cargo 项目，包含 <code>Cargo.toml</code> 配置文件。一个包可以包含零个或一个库 Crate，以及任意多个二进制 Crate。</li>
-<li><strong>Crate</strong>: 编译单元。可以是库 (Library Crate) 或二进制文件 (Binary Crate)。</li>
-<li><strong>模块 (Module)</strong>: 在 Crate 内部组织代码的单元，可以嵌套，形成树状结构。</li>
+<li><strong>Binary Crate</strong>: 可执行文件 (<code>src/main.rs</code>)。</li>
+<li><strong>Library Crate</strong>: 库文件 (<code>src/lib.rs</code>)。</li>
 </ul>
-<h3 id="2-定义模块"><a class="header" href="#2-定义模块">2. 定义模块</a></h3>
-<p>使用 <code>mod</code> 关键字定义模块。模块内可以包含函数、结构体、枚举、常量、Trait，甚至其他模块。</p>
+</li>
+<li><strong>Module (模块)</strong>: 组织代码的逻辑单元。</li>
+</ol>
+<hr>
+<h2 id="-模块树与路径"><a class="header" href="#-模块树与路径">🌳 模块树与路径</a></h2>
+<p>假设我们构建一个餐厅库 <code>restaurant</code>。即使所有代码都在 <code>lib.rs</code> 里，它们也形成了树状结构。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>// lib.rs 或 main.rs
-
+</span>// lib.rs (Crate Root)
 mod front_of_house {
-    mod hosting {
-        fn add_to_waitlist() {}
-    }
-}
-<span class="boring">}</span></code></pre>
-<h3 id="3-路径-paths"><a class="header" href="#3-路径-paths">3. 路径 (Paths)</a></h3>
-<p>要在模块树中找到某个项，我们需要使用路径：</p>
-<ul>
-<li><strong>绝对路径</strong>: 从 Crate 根开始，以 <code>crate</code> 开头。</li>
-<li><strong>相对路径</strong>: 从当前模块开始，以 <code>self</code>、<code>super</code> 或当前模块名开头。</li>
-</ul>
-<h3 id="4-可见性-visibility"><a class="header" href="#4-可见性-visibility">4. 可见性 (Visibility)</a></h3>
-<p>Rust 中默认所有项（函数、方法、结构体、枚举、模块和常量）都是 <strong>私有的 (private)</strong>。</p>
-<ul>
-<li>父模块无法直接访问子模块的私有项。</li>
-<li>子模块可以使用祖先模块中的所有项（包括私有的）。</li>
-<li>使用 <code>pub</code> 关键字将项标记为公有。</li>
-</ul>
-<h3 id="5-use-关键字"><a class="header" href="#5-use-关键字">5. use 关键字</a></h3>
-<p><code>use</code> 关键字可以将路径引入当前作用域，像创建软链接一样，避免每次都写长长的路径。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>use crate::front_of_house::hosting;
-
-pub fn eat_at_restaurant() {
-    hosting::add_to_waitlist();
-}
-<span class="boring">}</span></code></pre>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-模块定义与可见性"><a class="header" href="#示例-1-模块定义与可见性">示例 1: 模块定义与可见性</a></h3>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>mod back_of_house {
-    pub struct Breakfast {
-        pub toast: String,      // 公有字段
-        seasonal_fruit: String, // 私有字段
-    }
-
-    impl Breakfast {
-        pub fn summer(toast: String) -&gt; Breakfast {
-            Breakfast {
-                toast,
-                seasonal_fruit: String::from("peaches"),
-            }
-        }
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
     }
 }
 
 pub fn eat_at_restaurant() {
-    // 订购一份早餐，可以随心所欲地改变吐司的类型
-    let mut meal = back_of_house::Breakfast::summer(String::from("Rye"));
-    meal.toast = String::from("Wheat");
-    println!("I'd like {} toast please", meal.toast);
+    // 绝对路径
+    crate::front_of_house::hosting::add_to_waitlist();
 
-    // 下面这行代码会导致编译错误，因为 seasonal_fruit 字段是私有的
-    // meal.seasonal_fruit = String::from("blueberries");
+    // 相对路径
+    front_of_house::hosting::add_to_waitlist();
 }
 <span class="boring">}</span></code></pre>
-<h3 id="示例-2-使用-super-访问父模块"><a class="header" href="#示例-2-使用-super-访问父模块">示例 2: 使用 super 访问父模块</a></h3>
+<h3 id="路径解析表"><a class="header" href="#路径解析表">路径解析表</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">路径类型</th><th style="text-align: left">关键字</th><th style="text-align: left">说明</th><th style="text-align: left">例子</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>绝对路径</strong></td><td style="text-align: left"><code>crate</code></td><td style="text-align: left">从根模块 (Root) 开始</td><td style="text-align: left"><code>crate::front_of_house::xx</code></td></tr>
+<tr><td style="text-align: left"><strong>相对路径</strong></td><td style="text-align: left"><code>self</code></td><td style="text-align: left">从当前模块开始</td><td style="text-align: left"><code>self::xx</code> (通常省略)</td></tr>
+<tr><td style="text-align: left"><strong>父级路径</strong></td><td style="text-align: left"><code>super</code></td><td style="text-align: left">从父模块开始 (类似 <code>../</code>)</td><td style="text-align: left"><code>super::xx</code></td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="-可见性-visibility"><a class="header" href="#-可见性-visibility">👁️ 可见性 (Visibility)</a></h2>
+<p>Rust 的默认行为是 <strong>私有 (Private)</strong>。这与其他语言不同。</p>
+<ul>
+<li><strong>红灯 (Private)</strong>: 默认情况。父模块无法访问子模块的私有项。同级模块可以互访。</li>
+<li><strong>绿灯 (Public)</strong>: 使用 <code>pub</code> 关键字。对任何人开放。</li>
+</ul>
+<pre class="mermaid">graph TD
+    subgraph CrateRoot [Crate Root]
+        eat[fn eat_at_restaurant]
+        
+        subgraph ModFront [mod front_of_house]
+            subgraph ModHosting [pub mod hosting]
+                add[pub fn add_to_waitlist]
+                seat[fn seat_at_table (Private)]
+            end
+            
+            subgraph ModServing [mod serving]
+                take[fn take_order]
+            end
+        end
+    end
+    
+    eat --&gt;|✅ Pub| ModFront
+    eat --&gt;|✅ Pub| ModHosting
+    eat --&gt;|✅ Pub| add
+    eat -.-&gt;|❌ Private| seat
+    eat -.-&gt;|❌ Private| ModServing
+    
+    style seat fill:#ffcccc,stroke:#ff0000
+    style ModServing fill:#ffcccc,stroke:#ff0000
+    style add fill:#ccffcc,stroke:#00ff00
+</pre>
+
+<blockquote>
+<p><strong>规则</strong>：要想访问深层模块的函数，路径上的<strong>每一个</strong>模块都必须是 <code>pub</code> 的。</p>
+</blockquote>
+<hr>
+<h2 id="-use-关键字"><a class="header" href="#-use-关键字">📍 use 关键字</a></h2>
+<p><code>use</code> 就像创建快捷方式（软链接）。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>fn serve_order() {}
-
-mod back_of_house {
-    fn fix_incorrect_order() {
-        cook_order();
-        // 使用 super 访问父模块中的函数
-        super::serve_order();
+</span>mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
     }
+}
 
-    fn cook_order() {}
+// 引入路径到作用域
+use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist(); // 简短多了！
 }
 <span class="boring">}</span></code></pre>
-<h2 id="-模块拆分-文件结构"><a class="header" href="#-模块拆分-文件结构">🛠️ 模块拆分 (文件结构)</a></h2>
-<p>当模块变大时，应该将其拆分到独立文件中。Rust 支持两种风格：</p>
-<p><strong>风格 1 (现代风格，推荐):</strong></p>
-<pre><code class="language-text">src/
-├── lib.rs
-├── front_of_house.rs  &lt;-- 对应 mod front_of_house
-└── front_of_house/
-    └── hosting.rs     &lt;-- 对应 mod front_of_house 里的 mod hosting
-</code></pre>
-<p><strong>风格 2 (传统风格):</strong></p>
-<pre><code class="language-text">src/
-├── lib.rs
-├── front_of_house/
-    ├── mod.rs         &lt;-- 对应 mod front_of_house
-    └── hosting.rs
-</code></pre>
-<p>在 <code>lib.rs</code> 中声明模块：</p>
+<h3 id="处理命名冲突as"><a class="header" href="#处理命名冲突as">处理命名冲突：<code>as</code></a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>mod front_of_house; // 告诉编译器去查找 front_of_house.rs 或 front_of_house/mod.rs
+</span>use std::fmt::Result;
+use std::io::Result as IoResult; // 重命名
 
-pub use crate::front_of_house::hosting; // 重导出，方便外部使用
+fn function1() -&gt; Result { ... }
+fn function2() -&gt; IoResult&lt;()&gt; { ... }
 <span class="boring">}</span></code></pre>
+<h3 id="重导出-pub-use"><a class="header" href="#重导出-pub-use">重导出 (<code>pub use</code>)</a></h3>
+<p>当你希望将内部结构隐藏，对外暴露统一的 API 时使用。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod front_of_house {
+    pub mod hosting { ... }
+}
+
+// 外部用户可以直接通过 restaurant::hosting 访问，而不需要知道 front_of_house 的存在
+pub use crate::front_of_house::hosting;
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-文件与模块拆分"><a class="header" href="#-文件与模块拆分">📂 文件与模块拆分</a></h2>
+<p>当 <code>lib.rs</code> 变得太长时，我们应该拆分文件。Rust 会根据模块名自动查找文件。</p>
+<p><strong>假设 <code>lib.rs</code> 内容：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod front_of_house; // 声明模块，内容去文件里找
+<span class="boring">}</span></code></pre>
+<p><strong>Rust 查找顺序图：</strong></p>
+<pre class="mermaid">graph LR
+    Decl["mod front_of_house;"] --&gt; Check1{"检查 src/front_of_house.rs?"}
+    Check1 --Yes--&gt; Found1[加载该文件]
+    Check1 --No--&gt; Check2{"检查 src/front_of_house/mod.rs?"}
+    Check2 --Yes--&gt; Found2[加载该文件]
+    Check2 --No--&gt; Error[编译错误]
+</pre>
+
+<h3 id="推荐目录结构"><a class="header" href="#推荐目录结构">推荐目录结构</a></h3>
+<pre><code class="language-text">src/
+├── lib.rs              (包含 mod front_of_house;)
+└── front_of_house.rs   (包含 mod hosting;)
+    └── hosting.rs      (包含 fn add_to_waitlist)
+</code></pre>
+<p>注意：如果 <code>front_of_house</code> 有子模块，需要创建一个同名文件夹。</p>
+<hr>
 <h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们准备了练习题来帮助你掌握模块系统的使用。</p>
-<ul>
-<li><strong>练习 1</strong>: 修复可见性错误</li>
-<li><strong>练习 2</strong>: 使用 <code>use</code> 简化代码</li>
-<li><strong>练习 3</strong>: 将单文件模块重构为多文件结构</li>
-</ul>
 <p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-modrs-和-文件名rs-有什么区别"><a class="header" href="#q1-modrs-和-文件名rs-有什么区别">Q1: <code>mod.rs</code> 和 <code>文件名.rs</code> 有什么区别？</a></h3>
-<p>A: 它们在功能上是一样的。<code>mod.rs</code> 是 Rust 2015 的风格，类似于 <code>index.html</code>。<code>文件名.rs</code> 是 Rust 2018 引入的风格，更简洁，避免了编辑器中打开很多个 <code>mod.rs</code> 导致混淆。现在推荐使用后者。</p>
-<h3 id="q2-什么时候该用-pub-use"><a class="header" href="#q2-什么时候该用-pub-use">Q2: 什么时候该用 <code>pub use</code>？</a></h3>
-<p>A: 当你希望重新组织 crate 的公共 API 结构，使其与内部实现结构不同时。例如，你内部有很多嵌套模块，但希望用户能直接从顶级模块导入常用功能。</p>
-<h3 id="q3-二进制-crate-mainrs-可以包含模块吗"><a class="header" href="#q3-二进制-crate-mainrs-可以包含模块吗">Q3: 二进制 crate (<code>main.rs</code>) 可以包含模块吗？</a></h3>
-<p>A: 可以。但在实际项目中，通常建议将核心逻辑放入库 crate (<code>lib.rs</code>)，而 <code>main.rs</code> 只负责解析参数和调用库函数。这样更容易测试和重用代码。</p>
+<ol>
+<li><strong>修复可见性</strong>: 修改代码使父模块能访问子模块函数。</li>
+<li><strong>使用 use</strong>: 简化冗长的函数调用路径。</li>
+<li><strong>文件拆分</strong>: 将一个巨型 <code>lib.rs</code> 拆分成多个文件。</li>
+</ol>
+<hr>
 <h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
-<ul>
-<li><strong>库开发</strong>: 将 <code>main.rs</code> 保持精简，逻辑放入 <code>lib.rs</code>。</li>
-<li><strong>Prelude 模式</strong>: 如果你的库有很多常用的 trait 或结构体，可以创建一个 <code>prelude</code> 模块并通过 <code>pub use</code> 导出它们，方便用户一次性导入。</li>
-<li><strong>保持私有</strong>: 默认保持模块和字段私有，只有确有必要暴露给外部时才添加 <code>pub</code>。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html">Rust 程序设计语言 - 模块系统</a></li>
-</ul>
+<ol>
+<li><strong>lib.rs vs main.rs</strong>: 尽量把逻辑放入 <code>lib.rs</code>，<code>main.rs</code> 只负责启动。这样代码更容易测试和复用。</li>
+<li><strong>避免 <code>use *</code></strong>: 通配符导入会污染作用域，让你不知道名字是哪来的。只在测试模块 (<code>tests</code>) 中使用。</li>
+<li><strong>绝对路径优先</strong>: 在定义 <code>use</code> 时，尽量使用 <code>crate::</code> 开头的绝对路径，这样代码移动时如果不跨 crate 会更稳定（或者出错更明显）。</li>
+</ol>
+<hr>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>掌握了代码组织方式后，我们来看看 Rust 标准库中提供的常用数据结构。</p>
-<p>下一节: <a href="../10.CommonCollections/README.html">Day 10: 常用集合</a></p>
+<p>代码组织好了，接下来我们需要了解 Rust 标准库中最常用的工具——集合。</p>
+<p>下一节: <a href="../10.CommonCollections/README.html">Day 10: 常用集合 (Common Collections)</a></p>
 
                     </main>
 
