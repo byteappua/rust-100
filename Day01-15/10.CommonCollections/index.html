@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-b0b19368.js";
+            window.path_to_searchindex_js = "../../searchindex-1a69fd7d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -180,131 +180,176 @@
                         <h1 id="day-10-常用集合-common-collections"><a class="header" href="#day-10-常用集合-common-collections">Day 10: 常用集合 (Common Collections)</a></h1>
 <h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>掌握 <strong>Vector (<code>Vec&lt;T&gt;</code>)</strong> 的增删改查操作</li>
-<li>理解 <strong>String</strong> 的编码机制与操作限制</li>
-<li>熟练使用 <strong>HashMap (<code>HashMap&lt;K, V&gt;</code>)</strong> 进行键值存储</li>
-<li>理解这些集合在内存中的布局（堆内存）</li>
+<li>掌握 <strong>Vector (<code>Vec&lt;T&gt;</code>)</strong> 的内存布局与动态增长机制</li>
+<li>深入理解 <strong>String</strong> (UTF-8) 为什么不支持索引</li>
+<li>熟练使用 <strong>HashMap (<code>HashMap&lt;K, V&gt;</code>)</strong></li>
+<li>理解集合与 <strong>所有权 (Ownership)</strong> 的交互</li>
+<li>学会使用 <code>with_capacity</code> 优化性能</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<p>Rust 的标准库提供了许多强大的数据结构，称为“集合“。与内置的数组和元组不同：</p>
+<h2 id="-核心概念堆上的动态数据"><a class="header" href="#-核心概念堆上的动态数据">🎯 核心概念：堆上的动态数据</a></h2>
+<p>Rust 标准库提供了一系列强大的数据结构，称为 <strong>集合 (Collections)</strong>。
+与数组 (<code>[T; N]</code>) 和元组不同，集合的数据存储在 <strong>堆 (Heap)</strong> 上，这意味着：</p>
+<ol>
+<li><strong>动态大小</strong>：不需要在编译时知道大小，可以随时通过 API 增长或缩小。</li>
+<li><strong>所有权管理</strong>：集合拥有其存储的数据，集合被 Drop 时，数据也会被 Drop。</li>
+</ol>
+<hr>
+<h2 id="1-vector-向量"><a class="header" href="#1-vector-向量">1. Vector (向量)</a></h2>
+<p><code>Vec&lt;T&gt;</code> 是一个可增长的数组。它是 Rust 中最常用的集合。</p>
+<h3 id="内存布局"><a class="header" href="#内存布局">内存布局</a></h3>
+<p><code>Vec&lt;T&gt;</code> 在栈上由三个字段组成，指向堆上的数据缓冲区。</p>
+<pre class="mermaid">graph LR
+    subgraph Stack [StackTrace: Vec]
+        ptr[ptr]
+        len[len: 3]
+        cap[capacity: 5]
+    end
+    
+    subgraph Heap [Heap Buffer]
+        d1[1]
+        d2[2]
+        d3[3]
+        unused1[.]
+        unused2[.]
+    end
+
+    ptr --&gt; d1
+    d1 -.- d2 -.- d3 -.- unused1 -.- unused2
+
+    style len fill:#ccffcc
+    style cap fill:#ffcccc
+</pre>
+
 <ul>
-<li>它们的数据存储在 <strong>堆 (Heap)</strong> 上。</li>
-<li>它们的大小是 <strong>动态</strong> 的（运行时可变）。</li>
-<li>它们是处理不定长数据的基石。</li>
+<li><strong>len (长度)</strong>: 当前存了多少个元素。</li>
 </ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-vector-向量"><a class="header" href="#1-vector-向量">1. Vector (向量)</a></h3>
-<p><code>Vec&lt;T&gt;</code> 是一个可增长的数组。它在内存中是连续存储的。</p>
 <ul>
-<li><strong>创建</strong>: <code>Vec::new()</code> 或 <code>vec![1, 2, 3]</code>。</li>
-<li><strong>访问</strong>: 下标索引 <code>&amp;v[i]</code> (越界 Panic) 或 <code>v.get(i)</code> (返回 <code>Option</code>)。</li>
-<li><strong>遍历</strong>: <code>for x in &amp;v</code>。</li>
+<li><strong>capacity (容量)</strong>: 堆上预分配了多少空间。当 <code>push</code> 超过容量时，Vec 会自动重新分配更大的内存（通常翻倍）并搬运数据。</li>
+</ul>
+<h3 id="常用操作"><a class="header" href="#常用操作">常用操作</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 创建：使用 vec! 宏
+let mut v = vec![1, 2, 3];
+
+// 添加
+v.push(4); 
+
+// 读取：推荐使用 get，处理越界安全
+match v.get(100) {
+    Some(value) =&gt; println!("Value is {}", value),
+    None =&gt; println!("Index out of bounds!"),
+}
+// v[100] // ❌ 这会导致 panic
+
+// 遍历
+for i in &amp;v {
+    println!("{}", i);
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="2-string-字符串"><a class="header" href="#2-string-字符串">2. String (字符串)</a></h2>
+<p><strong>Rust 的 <code>String</code> 是 UTF-8 编码的字节序列。</strong> 这与 C++ 或 Java 的字符串有本质区别。</p>
+<h3 id="为什么不支持索引-s0"><a class="header" href="#为什么不支持索引-s0">为什么不支持索引 <code>s[0]</code>？</a></h3>
+<p>假设有一个字符串 <code>s = "你好"</code>。
+在 UTF-8 编码中，汉字通常占 3 个字节。</p>
+<pre class="mermaid">graph LR
+    subgraph Conceptual [字符视角]
+        c1[你]
+        c2[好]
+    end
+    
+    subgraph Bytes [底层字节视角]
+        b1[228]
+        b2[189]
+        b3[160]
+        b4[229]
+        b5[165]
+        b6[189]
+    end
+
+    c1 --- b1 &amp; b2 &amp; b3
+    c2 --- b4 &amp; b5 &amp; b6
+</pre>
+
+<ul>
+<li>长度 <code>s.len()</code> 是 <strong>6</strong> (字节数)。</li>
+<li>如果你试图访问 <code>s[0]</code>，你只能拿到 <code>228</code> 这个字节，它没有任何意义，也不是“你“的一半。</li>
+<li>为了避免歧义和 O(N) 的索引性能陷阱，Rust <strong>禁止</strong> 使用 <code>[]</code> 索引字符串。</li>
+</ul>
+<h3 id="正确的遍历方式"><a class="header" href="#正确的遍历方式">正确的遍历方式</a></h3>
+<ul>
+<li><strong>遍历字符</strong>: 使用 <code>.chars()</code></li>
+<li><strong>遍历字节</strong>: 使用 <code>.bytes()</code></li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>let mut v = vec![1, 2, 3];
-v.push(4);      // 添加
-v.pop();        // 删除最后一个并返回 Option&lt;T&gt;
+</span>for c in "你好".chars() {
+    println!("{}", c); // 打印 "你", "好"
+}
 <span class="boring">}</span></code></pre>
-<h3 id="2-string-字符串"><a class="header" href="#2-string-字符串">2. String (字符串)</a></h3>
-<p>Rust 的 <code>String</code> 是 UTF-8 编码的字节序列。</p>
+<hr>
+<h2 id="3-hashmap-哈希表"><a class="header" href="#3-hashmap-哈希表">3. HashMap (哈希表)</a></h2>
+<p><code>HashMap&lt;K, V&gt;</code> 使用哈希函数将键映射到值。</p>
+<pre class="mermaid">graph LR
+    Key[Key: "Blue"] --&gt; HashFunc[Hash Function]
+    HashFunc --&gt; Index[Index: 2]
+    Index --&gt; Bucket[Value: 10]
+</pre>
+
+<h3 id="所有权规则"><a class="header" href="#所有权规则">所有权规则</a></h3>
 <ul>
-<li><strong>本质</strong>: <code>String</code> 是 <code>Vec&lt;u8&gt;</code> 的封装。</li>
-<li><strong>不支持索引</strong>: <code>s[0]</code> 是非法的，因为一个 UTF-8 字符可能占用 1-4 个字节，简单的字节索引无法准确对应字符。</li>
-<li><strong>操作</strong>: <code>push_str</code>, <code>+</code> (拼接), <code>format!</code>。</li>
-<li><strong>遍历</strong>:
-<ul>
-<li><code>s.chars()</code>: 遍历 Unicode 标量值 (char)。</li>
-<li><code>s.bytes()</code>: 遍历原始字节。</li>
-</ul>
-</li>
-</ul>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let s = String::from("你好");
-// s.len() 是 6 (每个汉字 3 字节)
-// s.chars().count() 是 2
-<span class="boring">}</span></code></pre>
-<h3 id="3-hashmap-哈希表"><a class="header" href="#3-hashmap-哈希表">3. HashMap (哈希表)</a></h3>
-<p><code>HashMap&lt;K, V&gt;</code> 存储键值对映射。</p>
-<ul>
-<li><strong>所有权</strong>:
-<ul>
-<li>对于实现了 <code>Copy</code> 的类型 (如 <code>i32</code>)，值会被拷贝。</li>
-<li>对于 <code>String</code> 等类型，值的所有权会被移动进 HashMap。</li>
-</ul>
-</li>
-<li><strong>更新</strong>: <code>insert</code> (覆盖), <code>entry(...).or_insert(...)</code> (不存在则插入)。</li>
+<li>对于实现了 <code>Copy</code> 的类型 (<code>i32</code>, <code>bool</code>)，数据会被复制进 HashMap。</li>
+<li>对于拥有所有权的类型 (<code>String</code>)，所有权会被 <strong>移动 (Move)</strong> 进 HashMap。</li>
 </ul>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use std::collections::HashMap;
 
-let mut scores = HashMap::new();
-scores.insert(String::from("Blue"), 10);
+let field_name = String::from("Favorite color");
+let field_value = String::from("Blue");
+
+let mut map = HashMap::new();
+map.insert(field_name, field_value);
+// ⚠️ field_name 和 field_value 在这里失效了！被移到了 map 中。
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-vector-操作与枚举"><a class="header" href="#示例-1-vector-操作与枚举">示例 1: Vector 操作与枚举</a></h3>
-<p>Vector 只能存储同一种类型。如果需要存储不同类型，可以使用枚举。</p>
-<pre class="playground"><code class="language-rust">#[derive(Debug)]
-enum SpreadsheetCell {
-    Int(i32),
-    Float(f64),
-    Text(String),
-}
+<h3 id="给力的-entry-api"><a class="header" href="#给力的-entry-api">给力的 Entry API</a></h3>
+<p>不仅可以插入数据，还可以根据键是否存在来执行逻辑，代码非常优雅。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut scores = HashMap::new();
+scores.insert(String::from("Blue"), 10);
 
-fn main() {
-    let row = vec![
-        SpreadsheetCell::Int(3),
-        SpreadsheetCell::Text(String::from("blue")),
-        SpreadsheetCell::Float(10.12),
-    ];
+// "Yellow" 不存在，插入 50
+scores.entry(String::from("Yellow")).or_insert(50);
+// "Blue" 存在，不修改，返回 10
+scores.entry(String::from("Blue")).or_insert(50);
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-性能优化with_capacity"><a class="header" href="#-性能优化with_capacity">💡 性能优化：<code>with_capacity</code></a></h2>
+<p>由于 Vec 和 HashMap 在增长时需要重新分配内存和拷贝数据（开销昂贵），如果你预先知道大概有多少数据，<strong>请务必使用 <code>with_capacity</code></strong>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 😡 可能会重新分配多次（1-&gt;2-&gt;4-&gt;8...）
+let mut v = Vec::new();
+for i in 0..1024 { v.push(i); }
 
-    for cell in &amp;row {
-        println!("{:?}", cell);
-    }
-}</code></pre>
-<h3 id="示例-2-hashmap-统计词频"><a class="header" href="#示例-2-hashmap-统计词频">示例 2: HashMap 统计词频</a></h3>
-<pre class="playground"><code class="language-rust">use std::collections::HashMap;
-
-fn main() {
-    let text = "hello world wonderful world";
-    let mut map = HashMap::new();
-
-    for word in text.split_whitespace() {
-        let count = map.entry(word).or_insert(0);
-        *count += 1;
-    }
-
-    println!("{:?}", map);
-}</code></pre>
+// 😍 只分配一次内存
+let mut v = Vec::with_capacity(1024);
+for i in 0..1024 { v.push(i); }
+<span class="boring">}</span></code></pre>
+<hr>
 <h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们准备了练习题来帮助你掌握这三种集合的使用。</p>
-<ul>
-<li><strong>练习 1</strong>: 使用 Vector 进行统计（平均数、中位数、众数）</li>
-<li><strong>练习 2</strong>: Pig Latin (猪拉丁语) 转换工具</li>
-<li><strong>练习 3</strong>: 员工部门管理系统 (HashMap 综合应用)</li>
-</ul>
 <p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-string-和-str-有什么区别"><a class="header" href="#q1-string-和-str-有什么区别">Q1: <code>&amp;String</code> 和 <code>&amp;str</code> 有什么区别？</a></h3>
-<p>A: <code>String</code> 是堆上分配的、可变的字符串对象。<code>&amp;str</code> 是字符串切片（通常是对 String 或字面量的引用），是不可变的视图。函数参数通常建议写 <code>&amp;str</code> 以兼容两种类型（<code>&amp;String</code> 会自动强转为 <code>&amp;str</code>）。</p>
-<h3 id="q2-为什么-s1--s2-中-s1-必须被移动"><a class="header" href="#q2-为什么-s1--s2-中-s1-必须被移动">Q2: 为什么 <code>s1 + &amp;s2</code> 中 <code>s1</code> 必须被移动？</a></h3>
-<p>A: <code>+</code> 运算符调用的是 <code>add</code> 方法：<code>fn add(self, s: &amp;str) -&gt; String</code>。第一个参数是 <code>self</code>，意味着它获取了 <code>s1</code> 的所有权。为了效率，它直接在 <code>s1</code> 的缓冲区上追加 <code>s2</code> 的内容，并返回修改后的 <code>s1</code>，避免了重新分配新内存。</p>
-<h3 id="q3-什么时候用数组-t-n什么时候用-vect"><a class="header" href="#q3-什么时候用数组-t-n什么时候用-vect">Q3: 什么时候用数组 <code>[T; N]</code>，什么时候用 <code>Vec&lt;T&gt;</code>？</a></h3>
-<p>A: 如果数据数量固定且较小，用数组（栈分配，更快）。如果数量不确定或很大，用 Vector。</p>
-<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
-<ul>
-<li><strong>预分配容量</strong>: 如果知道大概要存多少元素，使用 <code>Vec::with_capacity(n)</code> 或 <code>HashMap::with_capacity(n)</code> 可以减少内存重新分配的次数，提高性能。</li>
-<li><strong>Entry API</strong>: 修改 HashMap 时优先使用 <code>entry</code> API，代码更简洁且效率更高（只计算一次哈希值）。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch08-00-common-collections.html">Rust 程序设计语言 - 常见集合</a></li>
-</ul>
+<ol>
+<li><strong>统计工具</strong>: 给定一组整数，计算平均数、中位数和众数。</li>
+<li><strong>Pig Latin</strong>: 实现一个简单的单词转换逻辑，练习字符串处理。</li>
+<li><strong>部门管理</strong>: 使用 HashMap 管理“部门-&gt;员工列表“的关系。</li>
+</ol>
+<hr>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>现在我们已经掌握了基础语法和常用数据结构。但在编程中，错误是不可避免的。Rust 有一套独特且安全的错误处理机制。</p>
-<p>下一节: <a href="../11.ErrorHandling/README.html">Day 11: 错误处理</a></p>
+<p>到目前为止，我们写的代码如果出错（比如 Vector 越界）就会 Panic 崩溃。实际上 Rust 有一套非常完善的 <strong>错误处理</strong> 机制，可以让我们稳健地处理异常。</p>
+<p>下一节: <a href="../11.ErrorHandling/README.html">Day 11: 错误处理 (Error Handling)</a></p>
 
                     </main>
 

@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-b0b19368.js";
+            window.path_to_searchindex_js = "../../searchindex-1a69fd7d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -180,123 +180,166 @@
                         <h1 id="day-11-错误处理-error-handling"><a class="header" href="#day-11-错误处理-error-handling">Day 11: 错误处理 (Error Handling)</a></h1>
 <h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>理解 Rust 错误处理哲学：可恢复 vs 不可恢复错误</li>
-<li>掌握 <code>Result&lt;T, E&gt;</code> 枚举及其常用方法 (<code>unwrap</code>, <code>expect</code>)</li>
-<li>熟练使用 <code>?</code> 运算符传播错误</li>
-<li>了解如何在 <code>main</code> 函数中处理错误</li>
-<li>掌握 <code>panic!</code> 的使用场景</li>
+<li>理解 Rust <strong>可恢复 (Result)</strong> 与 <strong>不可恢复 (Panic)</strong> 错误的区别</li>
+<li>掌握 <strong><code>Result&lt;T, E&gt;</code></strong> 的核心用法</li>
+<li>熟练使用 <strong><code>?</code> 运算符</strong> 传播错误</li>
+<li>学会 <strong><code>unwrap</code></strong> 和 <strong><code>expect</code></strong> 的适用场景</li>
+<li>了解如何在 <code>main</code> 函数中优雅地处理错误</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<p>Rust 以安全著称，而处理错误是安全的重要组成部分。</p>
-<ul>
-<li><strong>强制处理</strong>: Rust 不使用异常 (Exception)。它迫使你在编译时就必须决定如何处理可能发生的错误，从而消除了运行时未捕获异常导致的崩溃。</li>
-<li><strong>清晰明确</strong>: 函数签名明确指出了可能失败的操作。</li>
-</ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-错误的分类"><a class="header" href="#1-错误的分类">1. 错误的分类</a></h3>
-<ul>
-<li><strong>不可恢复错误</strong>: 严重的 bug，如数组越界。Rust 使用 <code>panic!</code> 宏来处理，程序会打印错误信息并退出。</li>
-<li><strong>可恢复错误</strong>: 预期的失败，如文件未找到。Rust 使用 <code>Result&lt;T, E&gt;</code> 类型来处理，允许程序做出响应（如创建新文件）。</li>
-</ul>
-<h3 id="2-result-枚举"><a class="header" href="#2-result-枚举">2. Result 枚举</a></h3>
+<h2 id="-核心哲学向左走向右走"><a class="header" href="#-核心哲学向左走向右走">🎯 核心哲学：向左走？向右走？</a></h2>
+<p>Rust 将错误分为两大类。在写代码时，你首先要面对的决策是：</p>
+<pre class="mermaid">graph TD
+    Start[错误发生] --&gt; Q1{问题严重吗?}
+    Q1 --"Yes (Bug/不可恢复)"--&gt; Panic[Panic! (崩溃退出)]
+    Q1 --"No (预期情况/可恢复)"--&gt; Result[Result (返回错误值)]
+    
+    Panic --&gt; Ex1[数组越界]
+    Panic --&gt; Ex2[逻辑不可能到达的分支]
+    
+    Result --&gt; Ex3[文件未找到]
+    Result --&gt; Ex4[网络超时]
+    Result --&gt; Ex5[解析数字失败]
+    
+    style Panic fill:#ffcccc,stroke:#ff0000
+    style Result fill:#ccffcc,stroke:#00ff00
+</pre>
+
+<ol>
+<li><strong>不可恢复错误 (panic!)</strong>: 表示代码中有 Bug。Rust 会打印错误信息，清理栈内存，然后退出。</li>
+<li><strong>可恢复错误 (Result)</strong>: 表示即便代码没写错也可能发生的情况（如文件不存在）。你需要显式处理它。</li>
+</ol>
+<hr>
+<h2 id="-不可恢复错误panic"><a class="header" href="#-不可恢复错误panic">💥 不可恢复错误：<code>panic!</code></a></h2>
+<p>当程序遇到无法处理的糟糕情况时，就 panic。</p>
+<pre class="playground"><code class="language-rust">fn main() {
+    // 显式 panic
+    panic!("crash and burn");
+    
+    // 隐式 panic (例如数组越界)
+    let v = vec![1, 2, 3];
+    v[99];
+}</code></pre>
+<hr>
+<h2 id="-可恢复错误resultt-e"><a class="header" href="#-可恢复错误resultt-e">🛡️ 可恢复错误：<code>Result&lt;T, E&gt;</code></a></h2>
+<p><code>Result</code> 是一个枚举，定义如下：</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum Result&lt;T, E&gt; {
-    Ok(T),  // 操作成功，包含结果值
-    Err(E), // 操作失败，包含错误信息
+    Ok(T),  // 成功，包含值 T
+    Err(E), // 失败，包含错误 E
 }
 <span class="boring">}</span></code></pre>
-<h3 id="3-处理-result"><a class="header" href="#3-处理-result">3. 处理 Result</a></h3>
-<ul>
-<li><strong>match</strong>: 最基本的处理方式，显式处理每种情况。</li>
-<li><strong>unwrap()</strong>: 如果是 <code>Ok</code> 返回值，如果是 <code>Err</code> 直接 panic。用于原型开发或确定不会失败的场景。</li>
-<li><strong>expect(msg)</strong>: 同 <code>unwrap</code>，但可以指定 panic 时的错误信息（推荐）。</li>
-</ul>
-<h3 id="4-传播错误-"><a class="header" href="#4-传播错误-">4. 传播错误 (?)</a></h3>
-<p>当函数内部发生错误，且你希望由调用者来处理时，可以使用 <code>?</code> 运算符。</p>
+<h3 id="处理-result-的四种姿势"><a class="header" href="#处理-result-的四种姿势">处理 Result 的四种姿势</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">方法</th><th style="text-align: left">说明</th><th style="text-align: left">适用场景</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>match</code></strong></td><td style="text-align: left">显式处理 <code>Ok</code> 和 <code>Err</code> 分支</td><td style="text-align: left">需要对错误做精细处理（如文件不存在则创建）</td></tr>
+<tr><td style="text-align: left"><strong><code>unwrap()</code></strong></td><td style="text-align: left">成功返值，失败 panic</td><td style="text-align: left">原型开发、测试、你 100% 确定不会失败时</td></tr>
+<tr><td style="text-align: left"><strong><code>expect(msg)</code></strong></td><td style="text-align: left">同 <code>unwrap</code>，但可自定义 panic 信息</td><td style="text-align: left">同上，但比 unwrap 提供更多调试信息 (推荐)</td></tr>
+<tr><td style="text-align: left"><strong><code>?</code></strong></td><td style="text-align: left">成功返值，失败则 <strong>立即返回 Err 给调用者</strong></td><td style="text-align: left">函数内部，想把锅甩给调用者时 (最常用)</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="-传播错误-运算符"><a class="header" href="#-传播错误-运算符">🚀 传播错误：<code>?</code> 运算符</a></h2>
+<p><code>?</code> 是 Rust 中极其优雅的语法糖。它能消除大量的 <code>match</code> 嵌套。</p>
+<h3 id="-的工作流程"><a class="header" href="#-的工作流程"><code>?</code> 的工作流程</a></h3>
+<pre class="mermaid">graph LR
+    Step1[代码: File::open?] --&gt; Check{是 Ok 还是 Err?}
+    Check --Ok(file)--&gt; ReturnVal[表达式求值为 file] --&gt; Continue[继续执行下一行]
+    Check --Err(e)--&gt; ReturnErr[return Err(e)] --&gt; Exit[函数立即结束]
+    
+    style ReturnErr fill:#ffcccc,stroke:#ff0000
+    style Continue fill:#ccffcc,stroke:#00ff00
+</pre>
+
+<h3 id="代码对比"><a class="header" href="#代码对比">代码对比</a></h3>
+<p><strong>未使用 <code>?</code> (啰嗦)</strong>:</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use std::fs::File;
-use std::io;
-use std::io::Read;
+use std::io::{self, Read};
 
 fn read_username() -&gt; Result&lt;String, io::Error&gt; {
+    let f = File::open("hello.txt");
+
+    let mut f = match f {
+        Ok(file) =&gt; file,
+        Err(e) =&gt; return Err(e), // 手动返回错误
+    };
+
     let mut s = String::new();
-    File::open("hello.txt")?.read_to_string(&amp;mut s)?; // 失败则直接返回 Err
+    match f.read_to_string(&amp;mut s) {
+        Ok(_) =&gt; Ok(s),
+        Err(e) =&gt; Err(e), // 手动返回错误
+    }
+}
+<span class="boring">}</span></code></pre>
+<p><strong>使用 <code>?</code> (优雅)</strong>:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn read_username() -&gt; Result&lt;String, io::Error&gt; {
+    let mut s = String::new();
+    // 链式调用：打开文件 -&gt; 读取内容
+    File::open("hello.txt")?.read_to_string(&amp;mut s)?;
     Ok(s)
 }
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-基本的-result-处理"><a class="header" href="#示例-1-基本的-result-处理">示例 1: 基本的 Result 处理</a></h3>
+<hr>
+<h2 id="-实用示例"><a class="header" href="#-实用示例">💻 实用示例</a></h2>
+<h3 id="示例-1-main-函数也返回-result"><a class="header" href="#示例-1-main-函数也返回-result">示例 1: <code>main</code> 函数也返回 Result</a></h3>
+<p>为了在 <code>main</code> 中使用 <code>?</code>，我们需要修改它的返回类型。</p>
 <pre class="playground"><code class="language-rust">use std::fs::File;
-use std::io::ErrorKind;
+use std::error::Error;
 
-fn main() {
-    let f = File::open("hello.txt");
-
-    let f = match f {
-        Ok(file) =&gt; file,
-        Err(error) =&gt; match error.kind() {
-            ErrorKind::NotFound =&gt; match File::create("hello.txt") {
-                Ok(fc) =&gt; fc,
-                Err(e) =&gt; panic!("Tried to create file but there was a problem: {:?}", e),
-            },
-            other_error =&gt; {
-                panic!("There was a problem opening the file: {:?}", other_error)
-            }
-        },
-    };
-}</code></pre>
-<h3 id="示例-2-使用-unwrap_or_else"><a class="header" href="#示例-2-使用-unwrap_or_else">示例 2: 使用 unwrap_or_else</a></h3>
-<p>这是处理错误的更 Rust 风格的方式，避免了深层嵌套的 match。</p>
-<pre class="playground"><code class="language-rust">use std::fs::File;
-use std::io::ErrorKind;
-
-fn main() {
-    let f = File::open("hello.txt").unwrap_or_else(|error| {
-        if error.kind() == ErrorKind::NotFound {
-            File::create("hello.txt").unwrap_or_else(|error| {
-                panic!("Problem creating the file: {:?}", error);
-            })
-        } else {
-            panic!("Problem opening the file: {:?}", error);
-        }
-    });
-}</code></pre>
-<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们准备了练习题来帮助你掌握错误处理模式。</p>
-<ul>
-<li><strong>练习 1</strong>: 安全的数学运算</li>
-<li><strong>练习 2</strong>: 文件读取与错误传播</li>
-<li><strong>练习 3</strong>: 解析 CSV 数据</li>
-</ul>
-<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-什么时候用-panic-什么时候用-result"><a class="header" href="#q1-什么时候用-panic-什么时候用-result">Q1: 什么时候用 panic! 什么时候用 Result？</a></h3>
-<p>A:</p>
-<ul>
-<li>如果错误是由于调用者使用了错误的代码（Bug）导致的（如索引越界），或者处于无法恢复的损坏状态，使用 <code>panic!</code>。</li>
-<li>如果错误是预期的（如网络超时、文件不存在），使用 <code>Result</code>。</li>
-<li>在示例代码、原型代码和测试中，常用 <code>unwrap</code> (即 panic)。</li>
-</ul>
-<h3 id="q2-可以在-main-函数中使用--吗"><a class="header" href="#q2-可以在-main-函数中使用--吗">Q2: 可以在 main 函数中使用 ? 吗？</a></h3>
-<p>A: 可以，但 <code>main</code> 函数必须返回 <code>Result</code>。</p>
-<pre class="playground"><code class="language-rust">fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    let f = File::open("hello.txt")?;
+// Box&lt;dyn Error&gt; 意味着 "任意类型的错误"
+fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+    let f = File::open("hello.txt")?; // 如果失败，程序以非0状态码退出
+    
     Ok(())
 }</code></pre>
+<h3 id="示例-2-自定义验证错误"><a class="header" href="#示例-2-自定义验证错误">示例 2: 自定义验证错误</a></h3>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug)]
+struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -&gt; Guess {
+        if value &lt; 1 || value &gt; 100 {
+            // 这里用 panic 是合适的，因为违反了 API 契约（Bug）
+            panic!("Guess value must be between 1 and 100, got {}.", value);
+        }
+
+        Guess { value }
+    }
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>安全除法</strong>: 编写一个除法函数，当除数为 0 时返回 Err。</li>
+<li><strong>文件读取</strong>: 使用 <code>?</code> 重构文件读取代码。</li>
+<li><strong>解析 CSV</strong>: 尝试解析一个可能格式错误的字符串，处理解析错误。</li>
+</ol>
+<hr>
 <h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
-<ul>
-<li><strong>不要滥用 unwrap</strong>: 在生产代码中，尽量使用 <code>match</code>, <code>unwrap_or</code>, <code>expect</code> 或 <code>?</code>，除非你 100% 确定不会失败。</li>
-<li><strong>自定义错误</strong>: 对于库的开发者，定义自己的错误类型（通常是一个 Enum），可以更清晰地表达错误意图。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch09-00-error-handling.html">Rust 程序设计语言 - 错误处理</a></li>
-</ul>
+<ol>
+<li><strong>库代码优先用 Result</strong>: 编写给别人用的库时，尽量不要 panic，把决定权交给用户。</li>
+<li><strong>善用 <code>expect</code></strong>: 除非写 Demo，否则尽量用 <code>expect</code> 代替 <code>unwrap</code>，这能让你在 Debug 时省下很多头发。</li>
+<li><strong>转换错误</strong>: 有时这层函数返回 <code>AppError</code>，下层返回 <code>io::Error</code>。可以使用 <code>map_err</code> 进行转换。</li>
+</ol>
+<hr>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>有了错误处理的基础，我们可以编写更健壮的程序。接下来我们将学习如何编写更通用、更灵活的代码。</p>
-<p>下一节: <a href="../12.Generics/README.html">Day 12: 泛型</a></p>
+<p>在前面的课程中，我们为了复用代码，比如求两个 <code>i32</code> 的最大值，可能写了 <code>fn max(a: i32, b: i32)</code>。如果要处理 <code>f64</code> 怎么办？再写一个？
+不，Rust 有 <strong>泛型 (Generics)</strong>。</p>
+<p>下一节: <a href="../12.Generics/README.html">Day 12: 泛型 (Generics)</a></p>
 
                     </main>
 

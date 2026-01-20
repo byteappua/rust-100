@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-b0b19368.js";
+            window.path_to_searchindex_js = "../../searchindex-1a69fd7d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -180,53 +180,26 @@
                         <h1 id="day-12-泛型-generics"><a class="header" href="#day-12-泛型-generics">Day 12: 泛型 (Generics)</a></h1>
 <h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>理解泛型的概念与作用</li>
-<li>掌握在函数、结构体、枚举和方法中定义泛型</li>
-<li>理解 Rust 的 <strong>单态化 (Monomorphization)</strong> 机制（零成本抽象）</li>
-<li>能够阅读和编写带有基本 Trait Bound 的泛型代码</li>
+<li>理解 <strong>泛型 (Generics)</strong> 的概念与作用</li>
+<li>掌握在 <strong>函数、结构体、枚举、方法</strong> 中使用泛型</li>
+<li>深入理解 <strong>单态化 (Monomorphization)</strong> 与 <strong>零成本抽象</strong></li>
+<li>读懂 <code>impl&lt;T&gt; Point&lt;T&gt;</code> 这种复杂的语法</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<ul>
-<li><strong>减少重复代码</strong>: 不需要为 i32, f64, String 分别写一个排序函数，只需写一个泛型排序函数。</li>
-<li><strong>类型安全</strong>: 编译器确保泛型参数的使用是合法的。</li>
-<li><strong>高性能</strong>: Rust 的泛型在编译时展开，运行时没有任何性能损耗。</li>
-</ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-什么是泛型"><a class="header" href="#1-什么是泛型">1. 什么是泛型？</a></h3>
-<p>泛型是具体类型的占位符。就像函数参数是值的占位符一样，泛型参数是类型的占位符。通常使用 <code>T</code> (Type) 来表示。</p>
-<h3 id="2-在哪里使用泛型"><a class="header" href="#2-在哪里使用泛型">2. 在哪里使用泛型？</a></h3>
-<ul>
-<li><strong>函数</strong>: <code>fn largest&lt;T&gt;(list: &amp;[T]) -&gt; T { ... }</code></li>
-<li><strong>结构体</strong>: <code>struct Point&lt;T&gt; { x: T, y: T }</code></li>
-<li><strong>枚举</strong>: <code>enum Result&lt;T, E&gt; { Ok(T), Err(E) }</code></li>
-<li><strong>方法</strong>: <code>impl&lt;T&gt; Point&lt;T&gt; { ... }</code></li>
-</ul>
-<h3 id="3-单态化-monomorphization"><a class="header" href="#3-单态化-monomorphization">3. 单态化 (Monomorphization)</a></h3>
-<p>这是 Rust 泛型高性能的秘密。
-当编译泛型代码时，Rust 会寻找所有使用该泛型的地方，并为每个具体类型生成专门的代码副本。
-例如，如果你用了 <code>Option&lt;i32&gt;</code> 和 <code>Option&lt;f64&gt;</code>，编译器会生成两个不同的枚举定义。这会稍微增加二进制文件大小，但运行时速度极快（静态分发）。</p>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-泛型结构体"><a class="header" href="#示例-1-泛型结构体">示例 1: 泛型结构体</a></h3>
-<pre class="playground"><code class="language-rust">struct Point&lt;T&gt; {
-    x: T,
-    y: T,
-}
-
-fn main() {
-    let integer = Point { x: 5, y: 10 };
-    let float = Point { x: 1.0, y: 4.0 };
-    // let error = Point { x: 5, y: 4.0 }; // 错误！T 必须是相同类型
-}</code></pre>
-<h3 id="示例-2-多个泛型参数"><a class="header" href="#示例-2-多个泛型参数">示例 2: 多个泛型参数</a></h3>
-<pre class="playground"><code class="language-rust">struct PointBoth&lt;T, U&gt; {
-    x: T,
-    y: U,
-}
-
-fn main() {
-    let both = PointBoth { x: 5, y: 4.0 }; // 合法
-}</code></pre>
-<h3 id="示例-3-泛型方法"><a class="header" href="#示例-3-泛型方法">示例 3: 泛型方法</a></h3>
+<h2 id="-核心概念类型的占位符"><a class="header" href="#-核心概念类型的占位符">🎯 核心概念：类型的占位符</a></h2>
+<p>泛型通过使用 <strong>占位符</strong> 替换具体类型，来减少代码重复。</p>
+<blockquote>
+<p><strong>比喻</strong>：函数参数 <code>fn foo(value: i32)</code> 里的 <code>value</code> 是 <strong>值</strong> 的占位符。泛型 <code>fn foo&lt;T&gt;(arg: T)</code> 里的 <code>T</code> 是 <strong>类型</strong> 的占位符。</p>
+</blockquote>
+<hr>
+<h2 id="-泛型的应用场景"><a class="header" href="#-泛型的应用场景">🏗️ 泛型的应用场景</a></h2>
+<h3 id="1-泛型函数"><a class="header" href="#1-泛型函数">1. 泛型函数</a></h3>
+<p>使用 <code>&lt;T&gt;</code> 声明泛型参数。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 读取：函数 largest 对于任意类型 T，接收 T 的切片，返回 T
+fn largest&lt;T&gt;(list: &amp;[T]) -&gt; T { ... }
+<span class="boring">}</span></code></pre>
+<h3 id="2-泛型结构体"><a class="header" href="#2-泛型结构体">2. 泛型结构体</a></h3>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>struct Point&lt;T&gt; {
@@ -234,44 +207,118 @@ fn main() {
     y: T,
 }
 
+let integer = Point { x: 5, y: 10 };
+let float = Point { x: 1.0, y: 4.0 };
+<span class="boring">}</span></code></pre>
+<h3 id="3-泛型枚举"><a class="header" href="#3-泛型枚举">3. 泛型枚举</a></h3>
+<p>最经典的两个例子：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-泛型方法与语法解析"><a class="header" href="#-泛型方法与语法解析">⚙️ 泛型方法与语法解析</a></h2>
+<p>这部分语法初学者容易晕：</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+// 语法解析：
+// impl&lt;T&gt;  : 告诉编译器 "Hey，后面的 T 是泛型，不是具体的 struct 名字"
+// Point&lt;T&gt; : 我们正在为泛型结构体 Point&lt;T&gt; 实现方法
 impl&lt;T&gt; Point&lt;T&gt; {
     fn x(&amp;self) -&gt; &amp;T {
         &amp;self.x
     }
 }
-
-// 也可以为特定类型实现方法
+<span class="boring">}</span></code></pre>
+<p><strong>可以为特定类型实现特有方法：</strong></p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 这里的 impl 后面没有 &lt;f32&gt;，因为 f32 是具体类型
 impl Point&lt;f32&gt; {
     fn distance_from_origin(&amp;self) -&gt; f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
 }
 <span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-性能秘密单态化-monomorphization"><a class="header" href="#-性能秘密单态化-monomorphization">🚀 性能秘密：单态化 (Monomorphization)</a></h2>
+<p>很多语言（如 Java）的泛型在运行时会有性能损耗（Type Erasure / Boxing）。
+<strong>Rust 的泛型是零成本抽象 (Zero Cost Abstraction)。</strong></p>
+<p><strong>原理</strong>：在编译期间，Rust 编译器会进行 <strong>单态化</strong> — 为每一个用到的具体类型生成一份专门的代码副本。</p>
+<pre class="mermaid">graph TD
+    Source["源代码: Option&amp;lt;T&amp;gt;"] --&gt; Analysis{"用了哪些类型?"}
+    
+    Analysis --"使用了 i32"--&gt; Gen1["生成代码: Option_i32"]
+    Analysis --"使用了 f64"--&gt; Gen2["生成代码: Option_f64"]
+    
+    Gen1 --&gt; Binary[最终二进制文件]
+    Gen2 --&gt; Binary
+    
+    style Source fill:#e1f5fe
+    style Binary fill:#e8f5e9
+    style Gen1 fill:#fff9c4,stroke-dasharray: 5 5
+    style Gen2 fill:#fff9c4,stroke-dasharray: 5 5
+</pre>
+
+<p>这意味着：</p>
+<ol>
+<li><strong>编译变慢</strong>：编译器要做更多工作。</li>
+<li><strong>文件变大</strong>：生成了多份代码。</li>
+<li><strong>运行极快</strong>：运行时就像手写了 <code>IntOption</code>, <code>FloatOption</code> 一样，没有虚函数调用开销，是 <strong>静态分发 (Static Dispatch)</strong>。</li>
+</ol>
+<hr>
+<h2 id="-多种泛型参数"><a class="header" href="#-多种泛型参数">⚖️ 多种泛型参数</a></h2>
+<p>你可以使用多个泛型参数，用逗号分隔。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Point&lt;T, U&gt; {
+    x: T, // x 是类型 T
+    y: U, // y 是类型 U
+}
+
+let p = Point { x: 5, y: 4.0 }; // T=i32, U=f64
+<span class="boring">}</span></code></pre>
+<blockquote>
+<p><strong>最佳实践</strong>：泛型参数过多会导致代码难以阅读。如果超过 3 个，通常意味着你的代码需要重构了。</p>
+</blockquote>
+<hr>
 <h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们准备了练习题来帮助你掌握泛型的使用。</p>
-<ul>
-<li><strong>练习 1</strong>: 简单的泛型封装</li>
-<li><strong>练习 2</strong>: 泛型函数实现</li>
-<li><strong>练习 3</strong>: 混合泛型结构体操作</li>
-</ul>
 <p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-impl-pointt-和-implt-pointt-有什么区别"><a class="header" href="#q1-impl-pointt-和-implt-pointt-有什么区别">Q1: <code>impl Point&lt;T&gt;</code> 和 <code>impl&lt;T&gt; Point&lt;T&gt;</code> 有什么区别？</a></h3>
-<p>A: <code>impl&lt;T&gt; Point&lt;T&gt;</code> 读作“为任意类型 T 实现 Point<t>”。第一个 <code>&lt;T&gt;</code> 声明了 T 是一个泛型参数，而不是一个具体的类型名称。如果没有第一个 <code>&lt;T&gt;</code>，编译器会以为 <code>T</code> 是某个具体的 struct 或 enum 的名字。</t></p>
-<h3 id="q2-泛型会拖慢编译速度吗"><a class="header" href="#q2-泛型会拖慢编译速度吗">Q2: 泛型会拖慢编译速度吗？</a></h3>
-<p>A: 会。因为编译器需要为每个具体类型生成代码副本（单态化），这增加了编译工作量。但它换来的是运行时的极致性能。</p>
+<ol>
+<li><strong>实现泛型结构体</strong>: 创建一个坐标点结构体，支持不同数值类型。</li>
+<li><strong>交换函数</strong>: 编写一个泛型函数 <code>swap</code>，交换两个值的位置。</li>
+<li><strong>方法实现</strong>: 为你的泛型结构体实现 getter 方法。</li>
+</ol>
+<hr>
 <h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>命名规范</strong>:
 <ul>
-<li><strong>命名规范</strong>: 单个泛型参数通常叫 <code>T</code>。如果有多个，通常用 <code>T, U, V</code> 或更具描述性的名字（如 <code>K, V</code> 用于 Key-Value）。</li>
-<li><strong>约束</strong>: 虽然这节课还没深入讲 Trait Bound，但要注意，如果你在泛型函数中使用了 <code>&gt;</code> 运算符，你需要告诉编译器 <code>T</code> 是可以比较的（<code>T: PartialOrd</code>）。</li>
+<li>第一个泛型参数通常叫 <code>T</code> (Type)。</li>
+<li>或者是 <code>E</code> (Error), <code>K</code> (Key), <code>V</code> (Value)。</li>
+<li>如果含义复杂，可以用全名，如 <code>R: Reader</code>。</li>
 </ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch10-01-syntax.html">Rust 程序设计语言 - 泛型</a></li>
-</ul>
+</li>
+<li><strong>Trait Bounds (预告)</strong>: 单写 <code>&lt;T&gt;</code> 意味着 T 可以是任何类型。但如果你想在函数里比较大小 (<code>a &gt; b</code>)，必须限制 <code>T</code> 实现了比较功能。这将在下一节 Trait 中详细讲解。</li>
+</ol>
+<hr>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>泛型让我们定义了“某种类型”，但如果我们想限制这种类型必须具有“某些行为”（比如能被打印、能被比较）怎么办？这就是 Trait 的作用。</p>
-<p>下一节: <a href="../13.Traits/README.html">Day 13: Trait</a></p>
+<p>现在我们的函数可以接收任意类型 <code>T</code> 了。但是，如果我们想规定 <code>T</code> 必须有 “打印功能” 或者 “比较功能” 怎么办？
+我们需要一种机制来描述类型<strong>能做什么</strong>。</p>
+<p>下一节: <a href="../13.Traits/README.html">Day 13: Trait (特性)</a></p>
 
                     </main>
 
