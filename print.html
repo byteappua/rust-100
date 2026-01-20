@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-32e194be.js";
+            window.path_to_searchindex_js = "searchindex-c0907910.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-794baa04.js"></script>
@@ -6488,120 +6488,220 @@ where
 <h1 id="day-17-迭代器-iterators"><a class="header" href="#day-17-迭代器-iterators">Day 17: 迭代器 (Iterators)</a></h1>
 <h2 id="-学习目标-14"><a class="header" href="#-学习目标-14">📝 学习目标</a></h2>
 <ul>
-<li>理解 <code>Iterator</code> trait 及其核心方法 <code>next</code>。</li>
-<li>掌握消费适配器（Consuming Adaptors）如 <code>sum</code>, <code>collect</code>。</li>
-<li>掌握迭代器适配器（Iterator Adaptors）如 <code>map</code>, <code>filter</code>, <code>zip</code>。</li>
-<li>能够实现自定义迭代器。</li>
+<li>理解 <strong>Iterator Trait</strong> 及其核心 <code>next</code> 方法</li>
+<li>掌握 <strong>惰性求值 (Lazy Evaluation)</strong> 的工作原理</li>
+<li>熟练使用 <strong>Iterator Adaptors</strong> (<code>map</code>, <code>filter</code>) 和 <strong>Consuming Adaptors</strong> (<code>collect</code>, <code>sum</code>)</li>
+<li>了解迭代器作为 <strong>零成本抽象</strong> 的性能优势</li>
+<li>能够手动实现 <code>Iterator</code> trait</li>
 </ul>
-<h2 id="-为什么要学这个-1"><a class="header" href="#-为什么要学这个-1">🎯 为什么要学这个</a></h2>
-<p>迭代器模式是 Rust 处理序列数据的主要方式。它不仅语法简洁，而且在 Rust 中是<strong>零成本抽象</strong>（Zero-Cost Abstractions）。通常情况下，使用迭代器的速度与手写底层 <code>for</code> 循环一样快，甚至更快（因为编译器能更好地优化边界检查）。</p>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-iterator-trait"><a class="header" href="#1-iterator-trait">1. Iterator Trait</a></h3>
-<p>所有迭代器都实现了 <code>Iterator</code> trait。</p>
+<h2 id="-核心概念处理序列的流水线"><a class="header" href="#-核心概念处理序列的流水线">🎯 核心概念：处理序列的流水线</a></h2>
+<p>在 Rust 中，迭代器模式是处理序列数据（如数组、Vec）的标准方式。
+不同于传统的 <code>for (int i=0; i&lt;n; i++)</code> 循环，Rust 的迭代器提供了 <strong>声明式</strong> 的高层抽象，就像一条数据处理流水线。</p>
+<h3 id="迭代器流水线-pipeline"><a class="header" href="#迭代器流水线-pipeline">迭代器流水线 (Pipeline)</a></h3>
+<pre class="mermaid">graph LR
+    Source[数据源: Vec] --&gt; Iter[iter: 迭代器]
+    Iter --Next--&gt; Map[map: +1]
+    Map --Next--&gt; Filter[filter: 偶数?]
+    Filter --Next--&gt; Collect[collect: 收集结果]
+    
+    style Source fill:#e1f5fe
+    style Collect fill:#ffe0b2
+    style Map fill:#f0f4c3
+    style Filter fill:#f0f4c3
+</pre>
+
+<p>每个环节（Adapter）都对数据进行处理，最后由消费者（Consumer, 如 <code>collect</code>）触发整个流程。</p>
+<hr>
+<h2 id="-创建迭代器"><a class="header" href="#-创建迭代器">🛠️ 创建迭代器</a></h2>
+<p>有三种主要方式将集合转换为迭代器，对应 Rust 的三种所有权形态：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">方法</th><th style="text-align: left">返回类型</th><th style="text-align: left">所有权行为</th><th style="text-align: left">适用场景</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>iter()</code></strong></td><td style="text-align: left"><code>Iterator&lt;Item = &amp;T&gt;</code></td><td style="text-align: left"><strong>借用</strong> (Immutable Borrow)</td><td style="text-align: left">只读遍历，保留原数据</td></tr>
+<tr><td style="text-align: left"><strong><code>iter_mut()</code></strong></td><td style="text-align: left"><code>Iterator&lt;Item = &amp;mut T&gt;</code></td><td style="text-align: left"><strong>可变借用</strong> (Mutable Borrow)</td><td style="text-align: left">修改原数据</td></tr>
+<tr><td style="text-align: left"><strong><code>into_iter()</code></strong></td><td style="text-align: left"><code>Iterator&lt;Item = T&gt;</code></td><td style="text-align: left"><strong>获取所有权</strong> (Move)</td><td style="text-align: left">消费数据，原集合不可用</td></tr>
+</tbody>
+</table>
+</div>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub trait Iterator {
-    type Item;
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
-    // ... 其它方法有默认实现
+</span>let v = vec![1, 2, 3];
+let v_iter = v.iter(); // v 还在
+let v_owned_iter = v.into_iter(); // v 被 move 了
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-惰性求值-lazy-evaluation"><a class="header" href="#-惰性求值-lazy-evaluation">💤 惰性求值 (Lazy Evaluation)</a></h2>
+<p>Rust 的迭代器是 <strong>惰性</strong> 的。这意味着创建迭代器适配器（如 <code>map</code>）<strong>不会发生任何事情</strong>。
+只有当你调用消费适配器（如 <code>collect</code>, <code>sum</code>, <code>for</code> 循环）时，数据才会真正开始流动。</p>
+<pre class="mermaid">sequenceDiagram
+    participant User
+    participant Iterator
+    participant Map
+    participant Filter
+
+    User-&gt;&gt;Iterator: v.iter()
+    Note right of Iterator: (没动作)
+    User-&gt;&gt;Map: .map(...)
+    Note right of Map: (没动作，只构建结构体)
+    User-&gt;&gt;Filter: .filter(...)
+    Note right of Filter: (没动作，只构建结构体)
+    
+    User-&gt;&gt;Filter: .collect() 🔥
+    Note right of User: 触发！开始拉取数据
+    Filter-&gt;&gt;Map: next()?
+    Map-&gt;&gt;Iterator: next()?
+    Iterator--&gt;&gt;Map: Some(1)
+    Map--&gt;&gt;Filter: 2
+    Filter--&gt;&gt;User: (保留)
+</pre>
+
+<hr>
+<h2 id="-常用方法"><a class="header" href="#-常用方法">🚀 常用方法</a></h2>
+<h3 id="1-迭代器适配器-iterator-adaptors"><a class="header" href="#1-迭代器适配器-iterator-adaptors">1. 迭代器适配器 (Iterator Adaptors)</a></h3>
+<p>返回一个新的迭代器，支持链式调用。</p>
+<ul>
+<li><code>map</code>: 转换</li>
+<li><code>filter</code>: 过滤</li>
+<li><code>zip</code>: 两个迭代器合并</li>
+<li><code>enumerate</code>: 附加索引 <code>(i, val)</code></li>
+<li><code>take(n)</code>: 只取前 n 个</li>
+<li><code>skip(n)</code>: 跳过前 n 个</li>
+</ul>
+<h3 id="2-消费适配器-consuming-adaptors"><a class="header" href="#2-消费适配器-consuming-adaptors">2. 消费适配器 (Consuming Adaptors)</a></h3>
+<p>调用 <code>next</code> 直到结束，返回最终结果。</p>
+<ul>
+<li><code>collect</code>: 转回集合</li>
+<li><code>sum</code>, <code>product</code>: 数值计算</li>
+<li><code>count</code>: 计数</li>
+<li><code>for_each</code>: 对每个元素执行副作用</li>
+<li><code>find</code>: 查找第一个符合条件的元素</li>
+</ul>
+<hr>
+<h2 id="-代码实战-2"><a class="header" href="#-代码实战-2">💻 代码实战</a></h2>
+<h3 id="示例-1-声明式-vs-命令式"><a class="header" href="#示例-1-声明式-vs-命令式">示例 1: 声明式 vs 命令式</a></h3>
+<p>求偶数的平方和。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let v = vec![1, 2, 3, 4, 5];
+
+// 命令式 (Imperative)
+let mut sum = 0;
+for x in &amp;v {
+    if x % 2 == 0 {
+        sum += x * x;
+    }
+}
+
+// 函数式 (Functional) - 更清晰，且性能极佳
+let sum: i32 = v.iter()
+                .filter(|&amp;x| x % 2 == 0)
+                .map(|x| x * x)
+                .sum();
+<span class="boring">}</span></code></pre>
+<h3 id="示例-2-自定义迭代器"><a class="header" href="#示例-2-自定义迭代器">示例 2: 自定义迭代器</a></h3>
+<p>只要实现 <code>next</code> 方法，你的类型就是迭代器。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct Counter {
+    count: u32,
+}
+
+impl Counter {
+    fn new() -&gt; Counter { Counter { count: 0 } }
+}
+
+impl Iterator for Counter {
+    type Item = u32;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        if self.count &lt; 5 {
+            self.count += 1;
+            Some(self.count)
+        } else {
+            None
+        }
+    }
 }
 <span class="boring">}</span></code></pre>
-<ul>
-<li><code>next</code> 方法返回 <code>Option&lt;Self::Item&gt;</code>。如果返回 <code>Some(item)</code>，则处理下一个元素；如果返回 <code>None</code>，则迭代结束。</li>
-</ul>
-<h3 id="2-创建迭代器"><a class="header" href="#2-创建迭代器">2. 创建迭代器</a></h3>
-<ul>
-<li><code>iter()</code>: 创建不可变引用的迭代器。</li>
-<li><code>iter_mut()</code>: 创建可变引用的迭代器。</li>
-<li><code>into_iter()</code>: 创建获取所有权的迭代器。</li>
-</ul>
-<h3 id="3-消费适配器-consuming-adaptors"><a class="header" href="#3-消费适配器-consuming-adaptors">3. 消费适配器 (Consuming Adaptors)</a></h3>
-<p>这些方法会调用 <code>next</code>，消耗掉迭代器，并生成一个最终结果。</p>
-<ul>
-<li><code>collect()</code>: 将迭代器转换成集合（如 <code>Vec</code>, <code>HashMap</code>）。</li>
-<li><code>sum()</code>, <code>product()</code>: 求和、求积。</li>
-<li><code>count()</code>: 计算元素个数。</li>
-<li><code>for_each()</code>: 对每个元素执行操作。</li>
-</ul>
-<h3 id="4-迭代器适配器-iterator-adaptors"><a class="header" href="#4-迭代器适配器-iterator-adaptors">4. 迭代器适配器 (Iterator Adaptors)</a></h3>
-<p>这些方法将当前迭代器转换成另一个迭代器。它们是<strong>惰性</strong>的（Lazy），必须配合消费适配器才会执行。</p>
-<ul>
-<li><code>map()</code>: 转换元素。</li>
-<li><code>filter()</code>: 筛选元素。</li>
-<li><code>zip()</code>: 将两个迭代器合并为一个元组迭代器。</li>
-<li><code>chain()</code>: 连接两个迭代器。</li>
-<li><code>enumerate()</code>: 添加索引。</li>
-</ul>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-基本使用"><a class="header" href="#示例-1-基本使用">示例 1: 基本使用</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    let v1 = vec![1, 2, 3];
-    let v1_iter = v1.iter(); // 惰性，不产生任何操作
-
-    for val in v1_iter { // 这里隐式调用 next
-        println!("Got: {}", val);
-    }
-}</code></pre>
-<h3 id="示例-2-map-和-filter"><a class="header" href="#示例-2-map-和-filter">示例 2: map 和 filter</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    let v1: Vec&lt;i32&gt; = vec![1, 2, 3];
-
-    // map 和 filter 都是惰性的，必须最后调用 collect
-    let v2: Vec&lt;_&gt; = v1.iter()
-                       .map(|x| x + 1)
-                       .filter(|x| x % 2 == 0)
-                       .collect();
-
-    println!("{:?}", v2); // [2, 4]
-}</code></pre>
+<hr>
+<h2 id="-性能零成本抽象"><a class="header" href="#-性能零成本抽象">⚡ 性能：零成本抽象</a></h2>
+<p>你可能会担心：这么多层 <code>map</code>, <code>filter</code> 函数调用，会不会很慢？
+<strong>答案是：不会。</strong></p>
+<p>Rust 编译器（LLVM）会极其聪明地将这些高层抽象优化成极其紧凑的机器码，通常会被展开成与手写汇编相当甚至更快的循环。这就是 <strong>零成本抽象 (Zero-Cost Abstractions)</strong>：</p>
+<blockquote>
+<p>“What you don’t use, you don’t pay for. And what you do use, you couldn’t hand code any better.” - Bjarne Stroustrup</p>
+</blockquote>
+<hr>
 <h2 id="-练习题-13"><a class="header" href="#-练习题-13">🏋️ 练习题</a></h2>
-<h3 id="练习-1-平方和"><a class="header" href="#练习-1-平方和">练习 1: 平方和</a></h3>
-<p>编写一个函数，接受一个 <code>&amp;[i32]</code>，返回其中所有偶数的平方和。使用迭代器链式调用实现。
-<a href="Day16-30/17.Iterators/exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
-<h3 id="练习-2-自定义迭代器"><a class="header" href="#练习-2-自定义迭代器">练习 2: 自定义迭代器</a></h3>
-<p>实现一个 <code>Counter</code> 结构体，从 1 数到 5。
-<a href="Day16-30/17.Iterators/exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
-<h3 id="练习-3-复杂链式操作"><a class="header" href="#练习-3-复杂链式操作">练习 3: 复杂链式操作</a></h3>
-<p>给定一个字符串向量，过滤出长度大于 3 的字符串，将其转换为大写，并用逗号连接成一个单一的字符串。
-<a href="Day16-30/17.Iterators/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-2"><a class="header" href="#-常见问题-2">🤔 常见问题</a></h2>
-<h3 id="q1-什么时候用-iter-vs-into_iter"><a class="header" href="#q1-什么时候用-iter-vs-into_iter">Q1: 什么时候用 <code>iter()</code> vs <code>into_iter()</code>?</a></h3>
-<p>A:</p>
-<ul>
-<li><code>iter()</code>: 当你想遍历数据的引用（借用），保留原始数据时。</li>
-<li><code>into_iter()</code>: 当你想获取数据的所有权（移动），原始数据不再需要时。</li>
-</ul>
-<h3 id="q2-为什么-collect-需要类型标注"><a class="header" href="#q2-为什么-collect-需要类型标注">Q2: 为什么 <code>collect()</code> 需要类型标注？</a></h3>
-<p>A: <code>collect()</code> 可以将迭代器转换成多种不同的集合（Vec, LinkedList, HashMap 等）。编译器通常无法推断你想转换成哪种具体类型，所以需要显式标注 <code>Vec&lt;_&gt;</code> 或 <code>Vec&lt;i32&gt;</code>。</p>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">Rust Book: Processing a Series of Items with Iterators</a></li>
-<li><a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">Standard Library: Iterator</a></li>
-</ul>
+<p>👉 <strong><a href="Day16-30/17.Iterators/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>基础练习</strong>: 使用迭代器重构一个普通的 <code>for</code> 循环。</li>
+<li><strong>自定义迭代器</strong>: 实现一个生成斐波那契数列的迭代器。</li>
+<li><strong>复杂链式</strong>: 结合 <code>zip</code>, <code>map</code>, <code>filter</code> 处理复杂数据。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-10"><a class="header" href="#-最佳实践-10">💡 最佳实践</a></h2>
+<ol>
+<li><strong>优先使用迭代器</strong>: 相比索引循环 (<code>for i in 0..len</code>)，迭代器不仅更安全（无越界风险），而且通常更快（省略了边界检查）。</li>
+<li><strong>Side Effects</strong>: 如果你只想产生副作用（如打印），使用 <code>for</code> 循环比 <code>.map(...).collect()</code> 更惯用且更高效（避免了分配无用的集合）。或者使用 <code>for_each</code>。</li>
+<li><strong>无限迭代器</strong>: 迭代器可以是无限的（如 <code>0..</code>），只要你记得用 <code>take</code> 截断它。</li>
+</ol>
+<hr>
+<h2 id="-下一步-24"><a class="header" href="#-下一步-24">⏭️ 下一步</a></h2>
+<p>我们已经掌握了 Rust 的大部分核心特性。现在，我们将开始接触 Rust 的独特工具链和生态系统管理。</p>
+<p>下一节: <a href="Day16-30/18.CargoAndCrates/README.html">Day 18: Cargo 与 Crates</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-18-cargo-进阶与-cratesio"><a class="header" href="#day-18-cargo-进阶与-cratesio">Day 18: Cargo 进阶与 Crates.io</a></h1>
 <h2 id="-学习目标-15"><a class="header" href="#-学习目标-15">📝 学习目标</a></h2>
 <ul>
-<li>理解 Cargo 的 Release Profiles (<code>dev</code> vs <code>release</code>)。</li>
-<li>掌握如何编写文档注释 (<code>///</code>) 并运行文档测试。</li>
-<li>学会使用 Cargo Workspaces 管理多个包。</li>
-<li>了解如何发布包到 Crates.io 以及版本管理。</li>
+<li>理解 <strong>Release Profiles</strong> (<code>dev</code> vs <code>release</code>) 及其配置</li>
+<li>熟练编写 <strong>文档注释</strong> (<code>///</code>) 并通过 <code>cargo test</code> 运行文档测试</li>
+<li>掌握 <strong>Cargo Workspaces</strong> 管理多包项目 (Monorepo)</li>
+<li>理解 <strong>Cargo.lock</strong> 的作用与 <strong>语义化版本 (SemVer)</strong></li>
+<li>了解发布包到 Crates.io 的流程</li>
 </ul>
-<h2 id="-为什么要学这个-2"><a class="header" href="#-为什么要学这个-2">🎯 为什么要学这个</a></h2>
-<p>Cargo 是 Rust 生态系统的基石。它不仅仅是一个构建工具，还是依赖管理器、文档生成器和测试运行器。掌握 Cargo 的高级用法对于构建大型项目、优化构建速度和发布高质量的库至关重要。</p>
-<h2 id="-核心概念-1"><a class="header" href="#-核心概念-1">📖 核心概念</a></h2>
-<h3 id="1-发布配置-release-profiles"><a class="header" href="#1-发布配置-release-profiles">1. 发布配置 (Release Profiles)</a></h3>
-<p>Cargo 提供了两种主要的预设配置：</p>
+<h2 id="-核心概念cargo-不仅仅是构建工具"><a class="header" href="#-核心概念cargo-不仅仅是构建工具">🎯 核心概念：Cargo 不仅仅是构建工具</a></h2>
+<p>Cargo 是 Rust 生态系统的统一接口，它身兼数职：构建系统、包管理器、测试运行器、文档生成器和发布工具。</p>
+<h3 id="依赖解析流程"><a class="header" href="#依赖解析流程">依赖解析流程</a></h3>
+<p>当你在 <code>Cargo.toml</code> 中写下 <code>rand = "0.8"</code> 时，Cargo 实际上做了很多工作：</p>
+<pre class="mermaid">graph TD
+    Toml[Cargo.toml&lt;br&gt;约束: rand ^0.8] --&gt; Solver{版本求解器}
+    Registry[Crates.io&lt;br&gt;索引数据库] --&gt; Solver
+    Solver --计算最优解--&gt; Lock[Cargo.lock&lt;br&gt;精确版本: rand 0.8.5]
+    Lock --&gt; Build[构建过程]
+    
+    style Lock fill:#d1c4e9
+    style Toml fill:#b3e5fc
+</pre>
+
 <ul>
-<li><strong>dev</strong>: 运行 <code>cargo build</code> 时使用。默认 <code>opt-level = 0</code> (无优化)，包含调试信息，构建速度快。</li>
-<li><strong>release</strong>: 运行 <code>cargo build --release</code> 时使用。默认 <code>opt-level = 3</code> (最高优化)，去除部分调试信息，运行速度快但构建慢。</li>
+<li><strong>Cargo.toml</strong>: 描述你的 <strong>意图</strong> (我要一个兼容 0.8 的版本)。</li>
+<li><strong>Cargo.lock</strong>: 记录 <strong>事实</strong> (实际构建时用了 0.8.5 版)。<strong>确保可复现构建</strong>。</li>
 </ul>
-<p>可以在 <code>Cargo.toml</code> 中自定义：</p>
+<hr>
+<h2 id="-发布配置-release-profiles"><a class="header" href="#-发布配置-release-profiles">🚀 发布配置 (Release Profiles)</a></h2>
+<p>Cargo 预设了两种主要的 Profile，分别用于开发和发布。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">Profile</th><th style="text-align: left">命令</th><th style="text-align: left"><code>opt-level</code> (0-3)</th><th style="text-align: left">调试信息</th><th style="text-align: left">目标</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>dev</code></strong></td><td style="text-align: left"><code>cargo build</code></td><td style="text-align: left">0 (无优化)</td><td style="text-align: left">包含</td><td style="text-align: left">快速编译，方便 Debug</td></tr>
+<tr><td style="text-align: left"><strong><code>release</code></strong></td><td style="text-align: left"><code>cargo build --release</code></td><td style="text-align: left">3 (最大优化)</td><td style="text-align: left">不包含</td><td style="text-align: left">运行时极快，二进制小</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>自定义配置 (<code>Cargo.toml</code>)</strong>:</p>
 <pre><code class="language-toml">[profile.dev]
-opt-level = 1 # 开发时稍微优化一点
+opt-level = 1 # 开发时也稍微优化一下，虽然编译慢点，但运行快点
 </code></pre>
-<h3 id="2-文档注释"><a class="header" href="#2-文档注释">2. 文档注释</a></h3>
-<p>Rust 拥有一流的文档支持。使用 <code>///</code> 编写文档注释，支持 Markdown。</p>
+<hr>
+<h2 id="-文档测试-documentation-tests"><a class="header" href="#-文档测试-documentation-tests">📚 文档测试 (Documentation Tests)</a></h2>
+<p>Rust 允许在文档注释中写代码，并且 Cargo 会去运行它们！这确保了<strong>文档和代码永远同步</strong>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>/// 将给定的数字加一。
@@ -6619,158 +6719,240 @@ pub fn add_one(x: i32) -&gt; i32 {
 }
 <span class="boring">}</span></code></pre>
 <ul>
-<li><code>cargo doc --open</code>: 生成并打开 HTML 文档。</li>
-<li>代码块内的代码会被当做测试运行 (<code>cargo test</code>)。</li>
+<li><strong><code>///</code></strong>:用于为接下来的项（函数、结构体）生成文档。</li>
+<li><strong><code>//!</code></strong>: 用于为包含它的项（通常是 crate 或 模块）生成文档，通常写在文件开头。</li>
+<li>运行 <code>cargo doc --open</code> 查看生成的网页。</li>
 </ul>
-<h3 id="3-cargo-workspaces-工作空间"><a class="header" href="#3-cargo-workspaces-工作空间">3. Cargo Workspaces (工作空间)</a></h3>
-<p>当项目变得很大时，可以将其拆分为多个 crate。Workspace 允许这些 crate 共享同一个 <code>Cargo.lock</code> 和输出目录 (<code>target/</code>)。</p>
-<p><strong>目录结构示例</strong>:</p>
-<pre><code>my-project/
-├── Cargo.toml (Workspace root)
-├── crates/
-│   ├── api/
-│   │   ├── Cargo.toml
-│   │   └── src/lib.rs
-│   └── core/
-│       ├── Cargo.toml
-│       └── src/lib.rs
-</code></pre>
-<p><strong>根 Cargo.toml</strong>:</p>
+<hr>
+<h2 id="-cargo-workspaces-工作空间"><a class="header" href="#-cargo-workspaces-工作空间">📦 Cargo Workspaces (工作空间)</a></h2>
+<p>当项目变大时，我们通常会把它拆分成多个 crates 放进一个仓库 (Monorepo)。Workspace 允许这些 crates 共享同一个 <code>Cargo.lock</code> 和输出目录 <code>target/</code>。</p>
+<h3 id="目录结构可视化"><a class="header" href="#目录结构可视化">目录结构可视化</a></h3>
+<pre class="mermaid">graph TD
+    Root[my-project/ &lt;br&gt; Cargo.toml (workspace)] --&gt; Target[target/ &lt;br&gt; (共享构建产物)]
+    Root --&gt; Crates[crates/]
+    Crates --&gt; Core[core/ &lt;br&gt; Cargo.toml]
+    Crates --&gt; Api[api/ &lt;br&gt; Cargo.toml]
+    Api -.依赖.-&gt; Core
+
+    style Target fill:#ffccbc
+</pre>
+
+<p><strong>根 <code>Cargo.toml</code></strong>:</p>
 <pre><code class="language-toml">[workspace]
 members = [
     "crates/api",
     "crates/core",
 ]
 </code></pre>
-<h2 id="-代码示例-1"><a class="header" href="#-代码示例-1">💻 代码示例</a></h2>
-<h3 id="示例-1-条件编译-conditional-compilation"><a class="header" href="#示例-1-条件编译-conditional-compilation">示例 1: 条件编译 (Conditional Compilation)</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    if cfg!(target_os = "linux") {
-        println!("Running on Linux!");
-    } else {
-        println!("Not running on Linux.");
-    }
+<hr>
+<h2 id="-语义化版本-semver"><a class="header" href="#-语义化版本-semver">🏷️ 语义化版本 (SemVer)</a></h2>
+<p>Cargo 假定所有的包都遵守 <a href="https://semver.org/">SemVer</a> 规范。
+版本号格式：<code>Major.Minor.Patch</code> (主版本.次版本.补丁)</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">部分</th><th style="text-align: left">含义</th><th style="text-align: left">例子</th><th style="text-align: left">兼容性 (Cargo 默认)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>Major</strong></td><td style="text-align: left">不兼容的 API 修改</td><td style="text-align: left"><code>1.0.0</code> -&gt; <code>2.0.0</code></td><td style="text-align: left">❌ 不自动升级 (<code>^1.0</code> 不含 <code>2.0</code>)</td></tr>
+<tr><td style="text-align: left"><strong>Minor</strong></td><td style="text-align: left">向后兼容的新功能</td><td style="text-align: left"><code>1.1.0</code> -&gt; <code>1.2.0</code></td><td style="text-align: left">✅ 允许升级</td></tr>
+<tr><td style="text-align: left"><strong>Patch</strong></td><td style="text-align: left">向后兼容的 Bug 修复</td><td style="text-align: left"><code>1.1.1</code> -&gt; <code>1.1.2</code></td><td style="text-align: left">✅ 允许升级</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>特殊情况</strong>: <code>0.x.x</code> 版本被视为不稳定，<code>0.1.0</code> 和 <code>0.2.0</code> 被视为不兼容。</p>
+<hr>
+<h2 id="-代码实战feature-flags"><a class="header" href="#-代码实战feature-flags">💻 代码实战：Feature Flags</a></h2>
+<p>你可以通过 Feature 开关来控制代码的编译，减小二进制体积或启用实验性功能。</p>
+<p><strong>Cargo.toml</strong>:</p>
+<pre><code class="language-toml">[features]
+default = ["std"]
+std = []
+advanced = []
+</code></pre>
+<p><strong>src/lib.rs</strong>:</p>
+<pre class="playground"><code class="language-rust">#[cfg(feature = "advanced")]
+fn complex_algorithm() {
+    println!("Doing heavy math...");
 }
 
-#[cfg(test)]
-mod tests {
-    // 只有在 cargo test 时才编译此模块
+fn main() {
+    // 只有在开启 advanced feature 时，才编译这行调用
+    #[cfg(feature = "advanced")]
+    complex_algorithm();
 }</code></pre>
+<p>运行命令：<code>cargo run --features advanced</code></p>
+<hr>
 <h2 id="-练习题-14"><a class="header" href="#-练习题-14">🏋️ 练习题</a></h2>
-<h3 id="练习-1-编写文档测试"><a class="header" href="#练习-1-编写文档测试">练习 1: 编写文档测试</a></h3>
-<p>为一个简单的数学函数编写文档注释，包含 Examples 部分，确保代码示例是可运行的测试。
-<a href="Day16-30/18.CargoAndCrates/exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
-<h3 id="练习-2-条件编译"><a class="header" href="#练习-2-条件编译">练习 2: 条件编译</a></h3>
-<p>编写代码，根据是否开启了某个 Feature (假设名为 “advanced”) 来编译不同的函数实现。
-<em>(注意：单文件练习难以模拟 Cargo.toml feature 配置，这里使用 <code>cfg</code> 属性演示)</em>
-<a href="Day16-30/18.CargoAndCrates/exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
-<h3 id="练习-3-workspace-模拟"><a class="header" href="#练习-3-workspace-模拟">练习 3: Workspace 模拟</a></h3>
-<p>创建一个模拟 Workspace 结构的说明。这不仅是一个代码练习，而是一个架构设计练习。
-<a href="Day16-30/18.CargoAndCrates/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-3"><a class="header" href="#-常见问题-3">🤔 常见问题</a></h2>
-<h3 id="q1-cargolock-应该提交到-git-吗"><a class="header" href="#q1-cargolock-应该提交到-git-吗">Q1: <code>Cargo.lock</code> 应该提交到 Git 吗？</a></h3>
-<p>A:</p>
-<ul>
-<li>如果是 <strong>二进制项目 (bin)</strong>：<strong>应该</strong>提交，确保所有人构建出的可执行文件依赖版本一致。</li>
-<li>如果是 <strong>库项目 (lib)</strong>：通常<strong>不</strong>提交，让库的依赖版本由使用者的 <code>Cargo.lock</code> 决定（但这有争议，现代观点建议尽量提交以保证 CI 稳定性）。</li>
-</ul>
-<h3 id="q2-什么是语义化版本-semver"><a class="header" href="#q2-什么是语义化版本-semver">Q2: 什么是语义化版本 (SemVer)？</a></h3>
-<p>A: 格式为 <code>Major.Minor.Patch</code> (如 <code>1.2.3</code>)。</p>
-<ul>
-<li>Major: 不兼容的 API 修改。</li>
-<li>Minor: 向后兼容的功能新增。</li>
-<li>Patch: 向后兼容的 Bug 修复。
-Cargo 默认锁定 Major 版本不变（如 <code>^1.2.3</code> 允许升级到 <code>1.9.9</code> 但不允许 <code>2.0.0</code>）。</li>
-</ul>
-<h2 id="-扩展阅读-1"><a class="header" href="#-扩展阅读-1">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
-<li><a href="https://rust-lang.github.io/api-guidelines/">Rust API Guidelines</a></li>
-</ul>
+<p>👉 <strong><a href="Day16-30/18.CargoAndCrates/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>编写文档测试</strong>: 为你的函数编写文档注释，并确保 <code>cargo test</code> 通过。</li>
+<li><strong>创建 Workspace</strong>: 模拟一个包含 <code>core</code> 和 <code>cli</code> 两个包的项目结构。</li>
+<li><strong>使用 Feature</strong>: 定义一个特性，控制结构体中的某个字段是否从 API 中暴露。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-11"><a class="header" href="#-最佳实践-11">💡 最佳实践</a></h2>
+<ol>
+<li><strong>二进制提交 .lock</strong>: 如果你开发的是一个可执行程序 (Binary)，务必把 <code>Cargo.lock</code> 提交到 Git，确保 CI/CD 行为一致。</li>
+<li><strong>库不提交 .lock</strong>: 如果你开发的是一个库 (Library)，通常<strong>不要</strong>提交 <code>Cargo.lock</code>，让用户决定最终版本。</li>
+<li><strong>CI 检查</strong>: 在 CI 中运行 <code>cargo fmt</code>, <code>cargo clippy</code>, 和 <code>cargo doc</code>。</li>
+</ol>
+<hr>
+<h2 id="-下一步-25"><a class="header" href="#-下一步-25">⏭️ 下一步</a></h2>
+<p>我们已经搞定了构建和包管理。
+接下来，我们将进入 Rust 内存管理中比较高级的部分：智能指针。
+我们会看看除了引用 (<code>&amp;</code>) 之外，还有哪些方式可以指向内存，以及它们解决了什么特定问题。</p>
+<p>下一节: <a href="Day16-30/19.SmartPointers_Box/README.html">Day 19: 智能指针 - Box</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-19-智能指针---box"><a class="header" href="#day-19-智能指针---box">Day 19: 智能指针 - Box<t></t></a></h1>
 <h2 id="-学习目标-16"><a class="header" href="#-学习目标-16">📝 学习目标</a></h2>
 <ul>
-<li>理解栈 (Stack) 与堆 (Heap) 的区别。</li>
-<li>掌握 <code>Box&lt;T&gt;</code> 的使用场景。</li>
-<li>能够使用 <code>Box&lt;T&gt;</code> 定义递归数据结构（如链表）。</li>
-<li>理解 <code>Deref</code> trait 和解引用强制转换 (Deref Coercion)。</li>
-<li>理解 <code>Drop</code> trait 和资源清理。</li>
+<li>理解 <strong>栈 (Stack)</strong> 与 <strong>堆 (Heap)</strong> 的内存模型</li>
+<li>掌握 <strong><code>Box&lt;T&gt;</code></strong> 的核心作用：所有权转移到堆</li>
+<li>学会使用 <code>Box</code> 解决 <strong>递归类型</strong> (Infinite Size) 问题</li>
+<li>理解 <strong><code>Deref</code></strong> (解引用) 与 <strong><code>Drop</code></strong> (资源清理) Trait</li>
+<li>了解 <strong>解引用强制转换 (Deref Coercion)</strong> 的魔法</li>
 </ul>
-<h2 id="-为什么要学这个-3"><a class="header" href="#-为什么要学这个-3">🎯 为什么要学这个</a></h2>
-<p>在 Rust 中，默认情况下所有值都分配在栈上。栈非常快，但空间有限且要求数据大小固定。智能指针 <code>Box&lt;T&gt;</code> 是最基本的工具，用于将数据移动到堆上。掌握它对于处理大型数据结构、递归类型（如树、图）以及面向对象编程（Trait Objects）至关重要。</p>
-<h2 id="-核心概念-2"><a class="header" href="#-核心概念-2">📖 核心概念</a></h2>
-<h3 id="1-栈-vs-堆"><a class="header" href="#1-栈-vs-堆">1. 栈 vs 堆</a></h3>
+<h2 id="-核心概念指向堆的指针"><a class="header" href="#-核心概念指向堆的指针">🎯 核心概念：指向堆的指针</a></h2>
+<p>在 Rust 中，所有值默认都是在 <strong>栈</strong> 上分配的。
+<code>Box&lt;T&gt;</code> 是最简单的智能指针，它允许你把数据存储在 <strong>堆</strong> 上，并在栈上保留一个指向堆数据的指针。</p>
+<h3 id="内存布局可视化"><a class="header" href="#内存布局可视化">内存布局可视化</a></h3>
+<pre class="mermaid">graph TD
+    subgraph Stack [栈 Stack (固定大小, 快)]
+        Ptr[b: ptr] --&gt;|指向| HeapData
+    end
+    
+    subgraph Heap [堆 Heap (动态大小, 慢)]
+        HeapData[5]
+    end
+    
+    style Stack fill:#ccffcc
+    style Heap fill:#ffcccc
+</pre>
+
 <ul>
-<li><strong>栈</strong>: 后进先出，速度极快。所有存储在栈上的数据必须有已知的大小。</li>
-<li><strong>堆</strong>: 可以在运行时请求任意大小的内存。访问速度稍慢（需要指针跳转），分配和释放需要开销。</li>
+<li><strong>栈上的 <code>b</code></strong>: 只有指针大小 (8 字节)，非常快。</li>
+<li><strong>堆上的数据</strong>: 可以非常大 (比如 1GB 的数组)。</li>
 </ul>
-<p><code>Box&lt;T&gt;</code> 是一个指针，它本身（指针地址）存储在栈上，而它指向的数据存储在堆上。</p>
-<h3 id="2-box-的使用场景"><a class="header" href="#2-box-的使用场景">2. Box<t> 的使用场景</t></a></h3>
-<ol>
-<li><strong>编译时大小未知</strong>: 例如递归类型。</li>
-<li><strong>大数据转移</strong>: 转移所有权时只拷贝指针，不拷贝数据。</li>
-<li><strong>Trait 对象</strong>: 当你只关心类型实现了什么 Trait，而不关心具体类型时。</li>
-</ol>
-<h3 id="3-递归类型-recursive-types"><a class="header" href="#3-递归类型-recursive-types">3. 递归类型 (Recursive Types)</a></h3>
-<p>Rust 需要在编译时知道每个类型的大小。如果一个结构体直接包含自身，大小就是无限的，Rust 无法编译。
-<code>Box&lt;T&gt;</code> 的大小是固定的（指针大小），因此可以用来打破递归循环。</p>
+<hr>
+<h2 id="-为什么需要-box"><a class="header" href="#-为什么需要-box">🛠️ 为什么需要 Box？</a></h2>
+<h3 id="1-递归类型-recursive-types"><a class="header" href="#1-递归类型-recursive-types">1. 递归类型 (Recursive Types)</a></h3>
+<p>Rust 必须在编译时知道类型的确切大小。如果不使用指针，递归类型的大小是无限的。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>// 无法编译：Has infinite size
-// enum List { Cons(i32, List), Nil }
-
-// 可以编译
+</span>// ❌ 无法编译：大小无限！
+// List = i32 + List = i32 + i32 + List = ... ∞
 enum List {
-    Cons(i32, Box&lt;List&gt;),
+    Cons(i32, List),
     Nil,
 }
 <span class="boring">}</span></code></pre>
-<h3 id="4-deref-trait"><a class="header" href="#4-deref-trait">4. Deref Trait</a></h3>
-<p>实现了 <code>Deref</code> trait 的智能指针可以像普通引用一样使用 <code>*</code> 运算符。
-Rust 提供<strong>解引用强制转换 (Deref Coercion)</strong>：如果 <code>T</code> 实现了 <code>Deref&lt;Target=U&gt;</code>，我们可以将 <code>&amp;T</code> 传给需要 <code>&amp;U</code> 的函数。
-例如：<code>String</code> 实现 <code>Deref&lt;Target=str&gt;</code>，所以 <code>&amp;String</code> 可以传给接受 <code>&amp;str</code> 的函数。</p>
-<h3 id="5-drop-trait"><a class="header" href="#5-drop-trait">5. Drop Trait</a></h3>
-<p><code>Drop</code> trait 类似于其他语言的析构函数。当值离开作用域时，Rust 会自动调用 <code>drop</code> 方法。我们可以实现它来释放文件、网络连接等资源。</p>
-<h2 id="-代码示例-2"><a class="header" href="#-代码示例-2">💻 代码示例</a></h2>
-<h3 id="示例-1-基本-box-使用"><a class="header" href="#示例-1-基本-box-使用">示例 1: 基本 Box 使用</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    let b = Box::new(5);
-    println!("b = {}", b);
+<p><strong>解决方案</strong>: 使用 <code>Box</code>。哪怕 <code>Box</code> 指向一头大象，<code>Box</code> 本身的大小永远只是一个指针的大小。</p>
+<pre class="mermaid">graph LR
+    Cons1[Cons 1] --&gt;|Box ptr| Cons2[Cons 2]
+    Cons2 --&gt;|Box ptr| Nil[Nil]
+    
+    style Cons1 fill:#fff9c4
+    style Cons2 fill:#fff9c4
+</pre>
+
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 可以编译：大小固定
+enum List {
+    Cons(i32, Box&lt;List&gt;), // i32 + 指针大小
+    Nil,
+}
+<span class="boring">}</span></code></pre>
+<h3 id="2-大数据转移"><a class="header" href="#2-大数据转移">2. 大数据转移</a></h3>
+<p>当你拥有大量数据（如 <code>[i32; 10000]</code>）并希望转移所有权时，如果不使用 <code>Box</code>，数据会在栈上进行拷贝，效率低下。使用 <code>Box</code> 只会拷贝指针。</p>
+<h3 id="3-trait-对象"><a class="header" href="#3-trait-对象">3. Trait 对象</a></h3>
+<p>当你需要在一个集合中存储不同类型，但它们实现相同 Trait 时 (Day 26 详解)。</p>
+<hr>
+<h2 id="-这就是魔法deref-与-drop"><a class="header" href="#-这就是魔法deref-与-drop">🔮 这就是魔法：Deref 与 Drop</a></h2>
+<p>智能指针之所以叫“智能”，是因为它们实现了两个特殊的 Trait。</p>
+<h3 id="1-deref-解引用"><a class="header" href="#1-deref-解引用">1. Deref (解引用)</a></h3>
+<p>允许我们将智能指针当做普通引用来用 (<code>*</code> 运算符)。</p>
+<pre class="playground"><code class="language-rust">use std::ops::Deref;
+
+struct MyBox&lt;T&gt;(T);
+
+impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+    type Target = T;
+
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.0 // 返回内部数据的引用
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y); // 编译器实际上运行的是 *(y.deref())
 }</code></pre>
-<h3 id="示例-2-递归数据结构"><a class="header" href="#示例-2-递归数据结构">示例 2: 递归数据结构</a></h3>
+<p><strong>解引用强制转换 (Deref Coercion)</strong>:
+这是 Rust 的一个超级便利特性。如果你实现了 <code>Deref&lt;Target=U&gt;</code>，那么 <code>&amp;T</code> 可以自动变成 <code>&amp;U</code>。</p>
+<ul>
+<li><code>&amp;String</code> -&gt; <code>&amp;str</code></li>
+<li><code>&amp;Box&lt;String&gt;</code> -&gt; <code>&amp;String</code> -&gt; <code>&amp;str</code></li>
+</ul>
+<blockquote>
+<p>这就是为什么接受 <code>&amp;str</code> 的函数也能接受 <code>&amp;Box&lt;String&gt;</code>。</p>
+</blockquote>
+<h3 id="2-drop-清理"><a class="header" href="#2-drop-清理">2. Drop (清理)</a></h3>
+<p>当智能指针离开作用域时，<code>drop</code> 方法会被自动调用，用来释放堆内存或资源（如文件句柄、锁）。</p>
+<pre class="playground"><code class="language-rust">struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&amp;mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
+fn main() {
+    let c = CustomSmartPointer { data: String::from("my stuff") };
+    let d = CustomSmartPointer { data: String::from("other stuff") };
+    println!("CustomSmartPointers created.");
+} // 打印顺序：d 先 drop，c 后 drop (栈的后进先出)</code></pre>
+<hr>
+<h2 id="-代码实战构建链表"><a class="header" href="#-代码实战构建链表">💻 代码实战：构建链表</a></h2>
 <pre class="playground"><code class="language-rust">#[derive(Debug)]
 enum List {
     Cons(i32, Box&lt;List&gt;),
     Nil,
 }
 
-use List::{Cons, Nil};
+use crate::List::{Cons, Nil};
 
 fn main() {
-    let list = Cons(1, Box::new(Cons(2, Box::new(Nil))));
-    println!("{:?}", list);
+    // 构造链表: 1 -&gt; 2 -&gt; 3 -&gt; Nil
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+    
+    println!("List: {:?}", list);
 }</code></pre>
+<hr>
 <h2 id="-练习题-15"><a class="header" href="#-练习题-15">🏋️ 练习题</a></h2>
-<h3 id="练习-1-box-基础"><a class="header" href="#练习-1-box-基础">练习 1: Box 基础</a></h3>
-<p>创建一个 <code>Box</code> 来存储一个非常大的数组（例如 1000 个 i32），并验证它确实是在堆上分配的（虽然验证堆分配比较困难，这里主要练习语法）。
-<a href="Day16-30/19.SmartPointers_Box/exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
-<h3 id="练习-2-链表构建"><a class="header" href="#练习-2-链表构建">练习 2: 链表构建</a></h3>
-<p>使用 <code>Box</code> 定义一个 <code>Cons</code> 列表，并编写一个函数来求和。
-<a href="Day16-30/19.SmartPointers_Box/exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
-<h3 id="练习-3-自定义智能指针"><a class="header" href="#练习-3-自定义智能指针">练习 3: 自定义智能指针</a></h3>
-<p>实现一个 <code>MyBox&lt;T&gt;</code> 结构体，并实现 <code>Deref</code> trait，使其可以被解引用。
-<a href="Day16-30/19.SmartPointers_Box/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-4"><a class="header" href="#-常见问题-4">🤔 常见问题</a></h2>
-<h3 id="q1-boxnew-会发生拷贝吗"><a class="header" href="#q1-boxnew-会发生拷贝吗">Q1: <code>Box::new</code> 会发生拷贝吗？</a></h3>
-<p>A: 在优化构建 (<code>--release</code>) 中，编译器通常会优化掉中间的栈拷贝，直接在堆上构建对象。但在 Debug 模式下，可能会先在栈上创建再移动到堆上。</p>
-<h3 id="q2-既然-rust-有-gc-吗"><a class="header" href="#q2-既然-rust-有-gc-吗">Q2: 既然 Rust 有 GC 吗？</a></h3>
-<p>A: Rust 没有垃圾回收器 (GC)。<code>Box</code> 利用所有权系统和 <code>Drop</code> trait 来管理内存。当 <code>Box</code> 离开作用域时，它拥有的堆内存会被立即释放。</p>
-<h2 id="-扩展阅读-2"><a class="header" href="#-扩展阅读-2">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch15-01-box.html">Rust Book: Using Box<t> to Point to Data on the Heap</t></a></li>
-<li><a href="https://doc.rust-lang.org/book/ch15-00-smart-pointers.html">Rust Book: Smart Pointers</a></li>
-</ul>
+<p>👉 <strong><a href="Day16-30/19.SmartPointers_Box/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>基础 Box</strong>: 将一个栈上的大数据移动到堆上。</li>
+<li><strong>递归求和</strong>: 编写一个递归函数，计算 <code>List</code> 中所有整数的和。</li>
+<li><strong>实现智能指针</strong>: 手动实现一个类似 Box 的封装结构，并观察 <code>Drop</code> 的调用时机。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-12"><a class="header" href="#-最佳实践-12">💡 最佳实践</a></h2>
+<ol>
+<li><strong>不要滥用 Box</strong>: Rust 默认的栈分配非常高效。只有在确实需要堆分配（递归、大小未知、大数据）时才使用 Box。</li>
+<li><strong>理解所有权</strong>: <code>Box&lt;T&gt;</code> 拥有它指向的数据。当 Box 被销毁，数据也被销毁。</li>
+</ol>
+<hr>
+<h2 id="-下一步-26"><a class="header" href="#-下一步-26">⏭️ 下一步</a></h2>
+<p><code>Box&lt;T&gt;</code> 解决了“独占所有权”的堆分配问题。但如果我们想要 <strong>多个指针同时指向同一块数据</strong> 该怎么办？（比如图数据结构）。
+Rust 提供了引用计数指针 <code>Rc&lt;T&gt;</code>。</p>
+<p>下一节: <a href="Day16-30/20.SmartPointers_RcRefCell/README.html">Day 20: 智能指针 - Rc 与 RefCell</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-20-智能指针---rc-与-refcell"><a class="header" href="#day-20-智能指针---rc-与-refcell">Day 20: 智能指针 - Rc<t> 与 RefCell<t></t></t></a></h1>
 <h2 id="-学习目标-17"><a class="header" href="#-学习目标-17">📝 学习目标</a></h2>
@@ -6780,10 +6962,10 @@ fn main() {
 <li>掌握编译时借用检查与运行时借用检查的区别。</li>
 <li>能够组合使用 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code> 来实现可变的共享数据。</li>
 </ul>
-<h2 id="-为什么要学这个-4"><a class="header" href="#-为什么要学这个-4">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-1"><a class="header" href="#-为什么要学这个-1">🎯 为什么要学这个</a></h2>
 <p>在 Rust 中，所有权规则非常严格：一个值在同一时间只能有一个所有者，或者多个不可变借用，或者一个可变借用。
 但在实际数据结构（如双向链表、图、GUI 控件树）中，一个节点可能被多个其他节点引用，或者我们需要在不可变引用的上下文中修改数据（例如缓存、模拟对象）。<code>Rc</code> 和 <code>RefCell</code> 提供了绕过严格静态检查的安全机制。</p>
-<h2 id="-核心概念-3"><a class="header" href="#-核心概念-3">📖 核心概念</a></h2>
+<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
 <h3 id="1-rc-引用计数"><a class="header" href="#1-rc-引用计数">1. Rc<t> (引用计数)</t></a></h3>
 <p><code>Rc</code> 代表 <strong>Reference Counting</strong>。它用于在堆上分配数据，供程序的多个部分读取。</p>
 <ul>
@@ -6821,7 +7003,7 @@ let b = Rc::clone(&amp;value);
 *a.borrow_mut() += 10;
 println!("b sees: {}", b.borrow()); // 15
 <span class="boring">}</span></code></pre>
-<h2 id="-代码示例-3"><a class="header" href="#-代码示例-3">💻 代码示例</a></h2>
+<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
 <h3 id="示例-1-rc-共享列表"><a class="header" href="#示例-1-rc-共享列表">示例 1: Rc 共享列表</a></h3>
 <pre class="playground"><code class="language-rust">use std::rc::Rc;
 
@@ -6860,7 +7042,7 @@ fn main() {
 <h3 id="练习-3-共享可变树节点"><a class="header" href="#练习-3-共享可变树节点">练习 3: 共享可变树节点</a></h3>
 <p>定义一个树节点结构体，每个节点包含一个值和子节点列表。使用 <code>Rc&lt;RefCell&lt;Node&gt;&gt;</code> 使得父节点和子节点可以互相引用（或者简单的多所有权修改测试），并修改某个子节点的值，验证父节点也能看到修改。
 <a href="Day16-30/20.SmartPointers_RcRefCell/exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题-5"><a class="header" href="#-常见问题-5">🤔 常见问题</a></h2>
+<h2 id="-常见问题-2"><a class="header" href="#-常见问题-2">🤔 常见问题</a></h2>
 <h3 id="q1-cellt-和-refcellt-有什么区别"><a class="header" href="#q1-cellt-和-refcellt-有什么区别">Q1: <code>Cell&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 有什么区别？</a></h3>
 <p>A:</p>
 <ul>
@@ -6875,7 +7057,7 @@ fn main() {
 <li><strong>复杂性</strong>：类型签名变得很长且难以阅读。
 只在确实需要时使用。</li>
 </ol>
-<h2 id="-扩展阅读-3"><a class="header" href="#-扩展阅读-3">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch15-05-interior-mutability.html">Rust Book: RefCell<t> and the Interior Mutability Pattern</t></a></li>
 <li><a href="https://doc.rust-lang.org/book/ch15-06-reference-cycles.html">Rust Book: Reference Cycles</a></li>
@@ -6984,7 +7166,7 @@ fn main() {
 <li>了解线程的性能开销和使用场景</li>
 </ul>
 <hr>
-<h2 id="-为什么要学这个-5"><a class="header" href="#-为什么要学这个-5">🎯 为什么要学这个</a></h2>
+<h2 id="-为什么要学这个-2"><a class="header" href="#-为什么要学这个-2">🎯 为什么要学这个</a></h2>
 <p>并发编程是现代应用程序的核心：</p>
 <ol>
 <li><strong>充分利用硬件</strong>：现代 CPU 都是多核的，单线程程序无法充分利用硬件性能</li>
@@ -6999,7 +7181,7 @@ fn main() {
 <li><strong>Rust</strong>：零成本抽象 + 编译时安全保证 = 最佳选择！</li>
 </ul>
 <hr>
-<h2 id="-核心概念-4"><a class="header" href="#-核心概念-4">📖 核心概念</a></h2>
+<h2 id="-核心概念-1"><a class="header" href="#-核心概念-1">📖 核心概念</a></h2>
 <h3 id="1-线程-vs-进程"><a class="header" href="#1-线程-vs-进程">1. 线程 vs 进程</a></h3>
 <pre class="mermaid">graph TD
     subgraph 进程A
@@ -7060,7 +7242,7 @@ fn main() {
 </pre>
 
 <hr>
-<h2 id="-代码示例-4"><a class="header" href="#-代码示例-4">💻 代码示例</a></h2>
+<h2 id="-代码示例-1"><a class="header" href="#-代码示例-1">💻 代码示例</a></h2>
 <h3 id="示例-1-基本线程创建"><a class="header" href="#示例-1-基本线程创建">示例 1: 基本线程创建</a></h3>
 <pre class="playground"><code class="language-rust">use std::thread;
 use std::time::Duration;
@@ -7130,20 +7312,20 @@ fn main() {
 <h3 id="q2-join-会阻塞吗"><a class="header" href="#q2-join-会阻塞吗">Q2: join() 会阻塞吗？</a></h3>
 <p><strong>是的！</strong> <code>join()</code> 会阻塞当前线程直到目标线程结束。</p>
 <hr>
-<h2 id="-最佳实践-10"><a class="header" href="#-最佳实践-10">💡 最佳实践</a></h2>
+<h2 id="-最佳实践-13"><a class="header" href="#-最佳实践-13">💡 最佳实践</a></h2>
 <ol>
 <li><strong>始终join()</strong>: 确保子线程完成或使用其他同步机制</li>
 <li><strong>线程命名</strong>: 使用 <code>Builder::new().name()</code> 便于调试</li>
 <li><strong>避免过度线程化</strong>: 线程不是免费的，每个约占 2MB 栈空间</li>
 </ol>
 <hr>
-<h2 id="-扩展阅读-4"><a class="header" href="#-扩展阅读-4">🔗 扩展阅读</a></h2>
+<h2 id="-扩展阅读-1"><a class="header" href="#-扩展阅读-1">🔗 扩展阅读</a></h2>
 <ul>
 <li><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">Rust Book: Fearless Concurrency</a></li>
 <li><a href="https://doc.rust-lang.org/std/thread/">std::thread 文档</a></li>
 </ul>
 <hr>
-<h2 id="-下一步-24"><a class="header" href="#-下一步-24">⏭️ 下一步</a></h2>
+<h2 id="-下一步-27"><a class="header" href="#-下一步-27">⏭️ 下一步</a></h2>
 <p><strong>下一节</strong>: <a href="Day16-30/23.MessagePassing/README.html">Day 23: 消息传递 (Message Passing)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-23-并发编程---消息传递-message-passing"><a class="header" href="#day-23-并发编程---消息传递-message-passing">Day 23: 并发编程 - 消息传递 (Message Passing)</a></h1>

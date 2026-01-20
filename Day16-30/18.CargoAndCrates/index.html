@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-32e194be.js";
+            window.path_to_searchindex_js = "../../searchindex-c0907910.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -180,26 +180,51 @@
                         <h1 id="day-18-cargo-进阶与-cratesio"><a class="header" href="#day-18-cargo-进阶与-cratesio">Day 18: Cargo 进阶与 Crates.io</a></h1>
 <h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>理解 Cargo 的 Release Profiles (<code>dev</code> vs <code>release</code>)。</li>
-<li>掌握如何编写文档注释 (<code>///</code>) 并运行文档测试。</li>
-<li>学会使用 Cargo Workspaces 管理多个包。</li>
-<li>了解如何发布包到 Crates.io 以及版本管理。</li>
+<li>理解 <strong>Release Profiles</strong> (<code>dev</code> vs <code>release</code>) 及其配置</li>
+<li>熟练编写 <strong>文档注释</strong> (<code>///</code>) 并通过 <code>cargo test</code> 运行文档测试</li>
+<li>掌握 <strong>Cargo Workspaces</strong> 管理多包项目 (Monorepo)</li>
+<li>理解 <strong>Cargo.lock</strong> 的作用与 <strong>语义化版本 (SemVer)</strong></li>
+<li>了解发布包到 Crates.io 的流程</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<p>Cargo 是 Rust 生态系统的基石。它不仅仅是一个构建工具，还是依赖管理器、文档生成器和测试运行器。掌握 Cargo 的高级用法对于构建大型项目、优化构建速度和发布高质量的库至关重要。</p>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-发布配置-release-profiles"><a class="header" href="#1-发布配置-release-profiles">1. 发布配置 (Release Profiles)</a></h3>
-<p>Cargo 提供了两种主要的预设配置：</p>
+<h2 id="-核心概念cargo-不仅仅是构建工具"><a class="header" href="#-核心概念cargo-不仅仅是构建工具">🎯 核心概念：Cargo 不仅仅是构建工具</a></h2>
+<p>Cargo 是 Rust 生态系统的统一接口，它身兼数职：构建系统、包管理器、测试运行器、文档生成器和发布工具。</p>
+<h3 id="依赖解析流程"><a class="header" href="#依赖解析流程">依赖解析流程</a></h3>
+<p>当你在 <code>Cargo.toml</code> 中写下 <code>rand = "0.8"</code> 时，Cargo 实际上做了很多工作：</p>
+<pre class="mermaid">graph TD
+    Toml[Cargo.toml&lt;br&gt;约束: rand ^0.8] --&gt; Solver{版本求解器}
+    Registry[Crates.io&lt;br&gt;索引数据库] --&gt; Solver
+    Solver --计算最优解--&gt; Lock[Cargo.lock&lt;br&gt;精确版本: rand 0.8.5]
+    Lock --&gt; Build[构建过程]
+    
+    style Lock fill:#d1c4e9
+    style Toml fill:#b3e5fc
+</pre>
+
 <ul>
-<li><strong>dev</strong>: 运行 <code>cargo build</code> 时使用。默认 <code>opt-level = 0</code> (无优化)，包含调试信息，构建速度快。</li>
-<li><strong>release</strong>: 运行 <code>cargo build --release</code> 时使用。默认 <code>opt-level = 3</code> (最高优化)，去除部分调试信息，运行速度快但构建慢。</li>
+<li><strong>Cargo.toml</strong>: 描述你的 <strong>意图</strong> (我要一个兼容 0.8 的版本)。</li>
+<li><strong>Cargo.lock</strong>: 记录 <strong>事实</strong> (实际构建时用了 0.8.5 版)。<strong>确保可复现构建</strong>。</li>
 </ul>
-<p>可以在 <code>Cargo.toml</code> 中自定义：</p>
+<hr>
+<h2 id="-发布配置-release-profiles"><a class="header" href="#-发布配置-release-profiles">🚀 发布配置 (Release Profiles)</a></h2>
+<p>Cargo 预设了两种主要的 Profile，分别用于开发和发布。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">Profile</th><th style="text-align: left">命令</th><th style="text-align: left"><code>opt-level</code> (0-3)</th><th style="text-align: left">调试信息</th><th style="text-align: left">目标</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>dev</code></strong></td><td style="text-align: left"><code>cargo build</code></td><td style="text-align: left">0 (无优化)</td><td style="text-align: left">包含</td><td style="text-align: left">快速编译，方便 Debug</td></tr>
+<tr><td style="text-align: left"><strong><code>release</code></strong></td><td style="text-align: left"><code>cargo build --release</code></td><td style="text-align: left">3 (最大优化)</td><td style="text-align: left">不包含</td><td style="text-align: left">运行时极快，二进制小</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>自定义配置 (<code>Cargo.toml</code>)</strong>:</p>
 <pre><code class="language-toml">[profile.dev]
-opt-level = 1 # 开发时稍微优化一点
+opt-level = 1 # 开发时也稍微优化一下，虽然编译慢点，但运行快点
 </code></pre>
-<h3 id="2-文档注释"><a class="header" href="#2-文档注释">2. 文档注释</a></h3>
-<p>Rust 拥有一流的文档支持。使用 <code>///</code> 编写文档注释，支持 Markdown。</p>
+<hr>
+<h2 id="-文档测试-documentation-tests"><a class="header" href="#-文档测试-documentation-tests">📚 文档测试 (Documentation Tests)</a></h2>
+<p>Rust 允许在文档注释中写代码，并且 Cargo 会去运行它们！这确保了<strong>文档和代码永远同步</strong>。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>/// 将给定的数字加一。
@@ -217,74 +242,90 @@ pub fn add_one(x: i32) -&gt; i32 {
 }
 <span class="boring">}</span></code></pre>
 <ul>
-<li><code>cargo doc --open</code>: 生成并打开 HTML 文档。</li>
-<li>代码块内的代码会被当做测试运行 (<code>cargo test</code>)。</li>
+<li><strong><code>///</code></strong>:用于为接下来的项（函数、结构体）生成文档。</li>
+<li><strong><code>//!</code></strong>: 用于为包含它的项（通常是 crate 或 模块）生成文档，通常写在文件开头。</li>
+<li>运行 <code>cargo doc --open</code> 查看生成的网页。</li>
 </ul>
-<h3 id="3-cargo-workspaces-工作空间"><a class="header" href="#3-cargo-workspaces-工作空间">3. Cargo Workspaces (工作空间)</a></h3>
-<p>当项目变得很大时，可以将其拆分为多个 crate。Workspace 允许这些 crate 共享同一个 <code>Cargo.lock</code> 和输出目录 (<code>target/</code>)。</p>
-<p><strong>目录结构示例</strong>:</p>
-<pre><code>my-project/
-├── Cargo.toml (Workspace root)
-├── crates/
-│   ├── api/
-│   │   ├── Cargo.toml
-│   │   └── src/lib.rs
-│   └── core/
-│       ├── Cargo.toml
-│       └── src/lib.rs
-</code></pre>
-<p><strong>根 Cargo.toml</strong>:</p>
+<hr>
+<h2 id="-cargo-workspaces-工作空间"><a class="header" href="#-cargo-workspaces-工作空间">📦 Cargo Workspaces (工作空间)</a></h2>
+<p>当项目变大时，我们通常会把它拆分成多个 crates 放进一个仓库 (Monorepo)。Workspace 允许这些 crates 共享同一个 <code>Cargo.lock</code> 和输出目录 <code>target/</code>。</p>
+<h3 id="目录结构可视化"><a class="header" href="#目录结构可视化">目录结构可视化</a></h3>
+<pre class="mermaid">graph TD
+    Root[my-project/ &lt;br&gt; Cargo.toml (workspace)] --&gt; Target[target/ &lt;br&gt; (共享构建产物)]
+    Root --&gt; Crates[crates/]
+    Crates --&gt; Core[core/ &lt;br&gt; Cargo.toml]
+    Crates --&gt; Api[api/ &lt;br&gt; Cargo.toml]
+    Api -.依赖.-&gt; Core
+
+    style Target fill:#ffccbc
+</pre>
+
+<p><strong>根 <code>Cargo.toml</code></strong>:</p>
 <pre><code class="language-toml">[workspace]
 members = [
     "crates/api",
     "crates/core",
 ]
 </code></pre>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-条件编译-conditional-compilation"><a class="header" href="#示例-1-条件编译-conditional-compilation">示例 1: 条件编译 (Conditional Compilation)</a></h3>
-<pre class="playground"><code class="language-rust">fn main() {
-    if cfg!(target_os = "linux") {
-        println!("Running on Linux!");
-    } else {
-        println!("Not running on Linux.");
-    }
+<hr>
+<h2 id="-语义化版本-semver"><a class="header" href="#-语义化版本-semver">🏷️ 语义化版本 (SemVer)</a></h2>
+<p>Cargo 假定所有的包都遵守 <a href="https://semver.org/">SemVer</a> 规范。
+版本号格式：<code>Major.Minor.Patch</code> (主版本.次版本.补丁)</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">部分</th><th style="text-align: left">含义</th><th style="text-align: left">例子</th><th style="text-align: left">兼容性 (Cargo 默认)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>Major</strong></td><td style="text-align: left">不兼容的 API 修改</td><td style="text-align: left"><code>1.0.0</code> -&gt; <code>2.0.0</code></td><td style="text-align: left">❌ 不自动升级 (<code>^1.0</code> 不含 <code>2.0</code>)</td></tr>
+<tr><td style="text-align: left"><strong>Minor</strong></td><td style="text-align: left">向后兼容的新功能</td><td style="text-align: left"><code>1.1.0</code> -&gt; <code>1.2.0</code></td><td style="text-align: left">✅ 允许升级</td></tr>
+<tr><td style="text-align: left"><strong>Patch</strong></td><td style="text-align: left">向后兼容的 Bug 修复</td><td style="text-align: left"><code>1.1.1</code> -&gt; <code>1.1.2</code></td><td style="text-align: left">✅ 允许升级</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>特殊情况</strong>: <code>0.x.x</code> 版本被视为不稳定，<code>0.1.0</code> 和 <code>0.2.0</code> 被视为不兼容。</p>
+<hr>
+<h2 id="-代码实战feature-flags"><a class="header" href="#-代码实战feature-flags">💻 代码实战：Feature Flags</a></h2>
+<p>你可以通过 Feature 开关来控制代码的编译，减小二进制体积或启用实验性功能。</p>
+<p><strong>Cargo.toml</strong>:</p>
+<pre><code class="language-toml">[features]
+default = ["std"]
+std = []
+advanced = []
+</code></pre>
+<p><strong>src/lib.rs</strong>:</p>
+<pre class="playground"><code class="language-rust">#[cfg(feature = "advanced")]
+fn complex_algorithm() {
+    println!("Doing heavy math...");
 }
 
-#[cfg(test)]
-mod tests {
-    // 只有在 cargo test 时才编译此模块
+fn main() {
+    // 只有在开启 advanced feature 时，才编译这行调用
+    #[cfg(feature = "advanced")]
+    complex_algorithm();
 }</code></pre>
+<p>运行命令：<code>cargo run --features advanced</code></p>
+<hr>
 <h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<h3 id="练习-1-编写文档测试"><a class="header" href="#练习-1-编写文档测试">练习 1: 编写文档测试</a></h3>
-<p>为一个简单的数学函数编写文档注释，包含 Examples 部分，确保代码示例是可运行的测试。
-<a href="./exercises/solutions/exercise1_solution.rs">查看参考答案</a></p>
-<h3 id="练习-2-条件编译"><a class="header" href="#练习-2-条件编译">练习 2: 条件编译</a></h3>
-<p>编写代码，根据是否开启了某个 Feature (假设名为 “advanced”) 来编译不同的函数实现。
-<em>(注意：单文件练习难以模拟 Cargo.toml feature 配置，这里使用 <code>cfg</code> 属性演示)</em>
-<a href="./exercises/solutions/exercise2_solution.rs">查看参考答案</a></p>
-<h3 id="练习-3-workspace-模拟"><a class="header" href="#练习-3-workspace-模拟">练习 3: Workspace 模拟</a></h3>
-<p>创建一个模拟 Workspace 结构的说明。这不仅是一个代码练习，而是一个架构设计练习。
-<a href="./exercises/solutions/exercise3_solution.rs">查看参考答案</a></p>
-<h2 id="-常见问题"><a class="header" href="#-常见问题">🤔 常见问题</a></h2>
-<h3 id="q1-cargolock-应该提交到-git-吗"><a class="header" href="#q1-cargolock-应该提交到-git-吗">Q1: <code>Cargo.lock</code> 应该提交到 Git 吗？</a></h3>
-<p>A:</p>
-<ul>
-<li>如果是 <strong>二进制项目 (bin)</strong>：<strong>应该</strong>提交，确保所有人构建出的可执行文件依赖版本一致。</li>
-<li>如果是 <strong>库项目 (lib)</strong>：通常<strong>不</strong>提交，让库的依赖版本由使用者的 <code>Cargo.lock</code> 决定（但这有争议，现代观点建议尽量提交以保证 CI 稳定性）。</li>
-</ul>
-<h3 id="q2-什么是语义化版本-semver"><a class="header" href="#q2-什么是语义化版本-semver">Q2: 什么是语义化版本 (SemVer)？</a></h3>
-<p>A: 格式为 <code>Major.Minor.Patch</code> (如 <code>1.2.3</code>)。</p>
-<ul>
-<li>Major: 不兼容的 API 修改。</li>
-<li>Minor: 向后兼容的功能新增。</li>
-<li>Patch: 向后兼容的 Bug 修复。
-Cargo 默认锁定 Major 版本不变（如 <code>^1.2.3</code> 允许升级到 <code>1.9.9</code> 但不允许 <code>2.0.0</code>）。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/cargo/">The Cargo Book</a></li>
-<li><a href="https://rust-lang.github.io/api-guidelines/">Rust API Guidelines</a></li>
-</ul>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>编写文档测试</strong>: 为你的函数编写文档注释，并确保 <code>cargo test</code> 通过。</li>
+<li><strong>创建 Workspace</strong>: 模拟一个包含 <code>core</code> 和 <code>cli</code> 两个包的项目结构。</li>
+<li><strong>使用 Feature</strong>: 定义一个特性，控制结构体中的某个字段是否从 API 中暴露。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>二进制提交 .lock</strong>: 如果你开发的是一个可执行程序 (Binary)，务必把 <code>Cargo.lock</code> 提交到 Git，确保 CI/CD 行为一致。</li>
+<li><strong>库不提交 .lock</strong>: 如果你开发的是一个库 (Library)，通常<strong>不要</strong>提交 <code>Cargo.lock</code>，让用户决定最终版本。</li>
+<li><strong>CI 检查</strong>: 在 CI 中运行 <code>cargo fmt</code>, <code>cargo clippy</code>, 和 <code>cargo doc</code>。</li>
+</ol>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>我们已经搞定了构建和包管理。
+接下来，我们将进入 Rust 内存管理中比较高级的部分：智能指针。
+我们会看看除了引用 (<code>&amp;</code>) 之外，还有哪些方式可以指向内存，以及它们解决了什么特定问题。</p>
+<p>下一节: <a href="../19.SmartPointers_Box/README.html">Day 19: 智能指针 - Box</a></p>
 
                     </main>
 
