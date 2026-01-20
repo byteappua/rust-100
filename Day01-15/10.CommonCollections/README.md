@@ -1,135 +1,198 @@
 # Day 10: 常用集合 (Common Collections)
 
 ## 📝 学习目标
-- 掌握 **Vector (`Vec<T>`)** 的增删改查操作
-- 理解 **String** 的编码机制与操作限制
-- 熟练使用 **HashMap (`HashMap<K, V>`)** 进行键值存储
-- 理解这些集合在内存中的布局（堆内存）
 
-## 🎯 为什么要学这个
-Rust 的标准库提供了许多强大的数据结构，称为"集合"。与内置的数组和元组不同：
-- 它们的数据存储在 **堆 (Heap)** 上。
-- 它们的大小是 **动态** 的（运行时可变）。
-- 它们是处理不定长数据的基石。
+- 掌握 **Vector (`Vec<T>`)** 的内存布局与动态增长机制
+- 深入理解 **String** (UTF-8) 为什么不支持索引
+- 熟练使用 **HashMap (`HashMap<K, V>`)**
+- 理解集合与 **所有权 (Ownership)** 的交互
+- 学会使用 `with_capacity` 优化性能
 
-## 📖 核心概念
+## 🎯 核心概念：堆上的动态数据
 
-### 1. Vector (向量)
-`Vec<T>` 是一个可增长的数组。它在内存中是连续存储的。
+Rust 标准库提供了一系列强大的数据结构，称为 **集合 (Collections)**。
+与数组 (`[T; N]`) 和元组不同，集合的数据存储在 **堆 (Heap)** 上，这意味着：
 
-- **创建**: `Vec::new()` 或 `vec![1, 2, 3]`。
-- **访问**: 下标索引 `&v[i]` (越界 Panic) 或 `v.get(i)` (返回 `Option`)。
-- **遍历**: `for x in &v`。
+1. **动态大小**：不需要在编译时知道大小，可以随时通过 API 增长或缩小。
+2. **所有权管理**：集合拥有其存储的数据，集合被 Drop 时，数据也会被 Drop。
+
+---
+
+## 1. Vector (向量)
+
+`Vec<T>` 是一个可增长的数组。它是 Rust 中最常用的集合。
+
+### 内存布局
+
+`Vec<T>` 在栈上由三个字段组成，指向堆上的数据缓冲区。
+
+```mermaid
+graph LR
+    subgraph Stack [StackTrace: Vec]
+        ptr[ptr]
+        len[len: 3]
+        cap[capacity: 5]
+    end
+    
+    subgraph Heap [Heap Buffer]
+        d1[1]
+        d2[2]
+        d3[3]
+        unused1[.]
+        unused2[.]
+    end
+
+    ptr --> d1
+    d1 -.- d2 -.- d3 -.- unused1 -.- unused2
+
+    style len fill:#ccffcc
+    style cap fill:#ffcccc
+```
+
+* **len (长度)**: 当前存了多少个元素。
+- **capacity (容量)**: 堆上预分配了多少空间。当 `push` 超过容量时，Vec 会自动重新分配更大的内存（通常翻倍）并搬运数据。
+
+### 常用操作
 
 ```rust
+// 创建：使用 vec! 宏
 let mut v = vec![1, 2, 3];
-v.push(4);      // 添加
-v.pop();        // 删除最后一个并返回 Option<T>
+
+// 添加
+v.push(4); 
+
+// 读取：推荐使用 get，处理越界安全
+match v.get(100) {
+    Some(value) => println!("Value is {}", value),
+    None => println!("Index out of bounds!"),
+}
+// v[100] // ❌ 这会导致 panic
+
+// 遍历
+for i in &v {
+    println!("{}", i);
+}
 ```
 
-### 2. String (字符串)
-Rust 的 `String` 是 UTF-8 编码的字节序列。
+---
 
-- **本质**: `String` 是 `Vec<u8>` 的封装。
-- **不支持索引**: `s[0]` 是非法的，因为一个 UTF-8 字符可能占用 1-4 个字节，简单的字节索引无法准确对应字符。
-- **操作**: `push_str`, `+` (拼接), `format!`。
-- **遍历**:
-    - `s.chars()`: 遍历 Unicode 标量值 (char)。
-    - `s.bytes()`: 遍历原始字节。
+## 2. String (字符串)
+
+**Rust 的 `String` 是 UTF-8 编码的字节序列。** 这与 C++ 或 Java 的字符串有本质区别。
+
+### 为什么不支持索引 `s[0]`？
+
+假设有一个字符串 `s = "你好"`。
+在 UTF-8 编码中，汉字通常占 3 个字节。
+
+```mermaid
+graph LR
+    subgraph Conceptual [字符视角]
+        c1[你]
+        c2[好]
+    end
+    
+    subgraph Bytes [底层字节视角]
+        b1[228]
+        b2[189]
+        b3[160]
+        b4[229]
+        b5[165]
+        b6[189]
+    end
+
+    c1 --- b1 & b2 & b3
+    c2 --- b4 & b5 & b6
+```
+
+- 长度 `s.len()` 是 **6** (字节数)。
+- 如果你试图访问 `s[0]`，你只能拿到 `228` 这个字节，它没有任何意义，也不是"你"的一半。
+- 为了避免歧义和 O(N) 的索引性能陷阱，Rust **禁止** 使用 `[]` 索引字符串。
+
+### 正确的遍历方式
+
+- **遍历字符**: 使用 `.chars()`
+- **遍历字节**: 使用 `.bytes()`
 
 ```rust
-let s = String::from("你好");
-// s.len() 是 6 (每个汉字 3 字节)
-// s.chars().count() 是 2
+for c in "你好".chars() {
+    println!("{}", c); // 打印 "你", "好"
+}
 ```
 
-### 3. HashMap (哈希表)
-`HashMap<K, V>` 存储键值对映射。
+---
 
-- **所有权**:
-    - 对于实现了 `Copy` 的类型 (如 `i32`)，值会被拷贝。
-    - 对于 `String` 等类型，值的所有权会被移动进 HashMap。
-- **更新**: `insert` (覆盖), `entry(...).or_insert(...)` (不存在则插入)。
+## 3. HashMap (哈希表)
+
+`HashMap<K, V>` 使用哈希函数将键映射到值。
+
+```mermaid
+graph LR
+    Key[Key: "Blue"] --> HashFunc[Hash Function]
+    HashFunc --> Index[Index: 2]
+    Index --> Bucket[Value: 10]
+```
+
+### 所有权规则
+
+- 对于实现了 `Copy` 的类型 (`i32`, `bool`)，数据会被复制进 HashMap。
+- 对于拥有所有权的类型 (`String`)，所有权会被 **移动 (Move)** 进 HashMap。
 
 ```rust
 use std::collections::HashMap;
 
+let field_name = String::from("Favorite color");
+let field_value = String::from("Blue");
+
+let mut map = HashMap::new();
+map.insert(field_name, field_value);
+// ⚠️ field_name 和 field_value 在这里失效了！被移到了 map 中。
+```
+
+### 给力的 Entry API
+
+不仅可以插入数据，还可以根据键是否存在来执行逻辑，代码非常优雅。
+
+```rust
 let mut scores = HashMap::new();
 scores.insert(String::from("Blue"), 10);
+
+// "Yellow" 不存在，插入 50
+scores.entry(String::from("Yellow")).or_insert(50);
+// "Blue" 存在，不修改，返回 10
+scores.entry(String::from("Blue")).or_insert(50);
 ```
 
-## 💻 代码示例
+---
 
-### 示例 1: Vector 操作与枚举
-Vector 只能存储同一种类型。如果需要存储不同类型，可以使用枚举。
+## 💡 性能优化：`with_capacity`
+
+由于 Vec 和 HashMap 在增长时需要重新分配内存和拷贝数据（开销昂贵），如果你预先知道大概有多少数据，**请务必使用 `with_capacity`**。
 
 ```rust
-#[derive(Debug)]
-enum SpreadsheetCell {
-    Int(i32),
-    Float(f64),
-    Text(String),
-}
+// 😡 可能会重新分配多次（1->2->4->8...）
+let mut v = Vec::new();
+for i in 0..1024 { v.push(i); }
 
-fn main() {
-    let row = vec![
-        SpreadsheetCell::Int(3),
-        SpreadsheetCell::Text(String::from("blue")),
-        SpreadsheetCell::Float(10.12),
-    ];
-
-    for cell in &row {
-        println!("{:?}", cell);
-    }
-}
+// 😍 只分配一次内存
+let mut v = Vec::with_capacity(1024);
+for i in 0..1024 { v.push(i); }
 ```
 
-### 示例 2: HashMap 统计词频
-```rust
-use std::collections::HashMap;
-
-fn main() {
-    let text = "hello world wonderful world";
-    let mut map = HashMap::new();
-
-    for word in text.split_whitespace() {
-        let count = map.entry(word).or_insert(0);
-        *count += 1;
-    }
-
-    println!("{:?}", map);
-}
-```
+---
 
 ## 🏋️ 练习题
 
-我们准备了练习题来帮助你掌握这三种集合的使用。
-
-- **练习 1**: 使用 Vector 进行统计（平均数、中位数、众数）
-- **练习 2**: Pig Latin (猪拉丁语) 转换工具
-- **练习 3**: 员工部门管理系统 (HashMap 综合应用)
-
 👉 **[点击这里查看练习题](./exercises/README.md)**
 
-## 🤔 常见问题 (FAQ)
+1. **统计工具**: 给定一组整数，计算平均数、中位数和众数。
+2. **Pig Latin**: 实现一个简单的单词转换逻辑，练习字符串处理。
+3. **部门管理**: 使用 HashMap 管理"部门->员工列表"的关系。
 
-### Q1: `&String` 和 `&str` 有什么区别？
-A: `String` 是堆上分配的、可变的字符串对象。`&str` 是字符串切片（通常是对 String 或字面量的引用），是不可变的视图。函数参数通常建议写 `&str` 以兼容两种类型（`&String` 会自动强转为 `&str`）。
-
-### Q2: 为什么 `s1 + &s2` 中 `s1` 必须被移动？
-A: `+` 运算符调用的是 `add` 方法：`fn add(self, s: &str) -> String`。第一个参数是 `self`，意味着它获取了 `s1` 的所有权。为了效率，它直接在 `s1` 的缓冲区上追加 `s2` 的内容，并返回修改后的 `s1`，避免了重新分配新内存。
-
-### Q3: 什么时候用数组 `[T; N]`，什么时候用 `Vec<T>`？
-A: 如果数据数量固定且较小，用数组（栈分配，更快）。如果数量不确定或很大，用 Vector。
-
-## 💡 最佳实践
-- **预分配容量**: 如果知道大概要存多少元素，使用 `Vec::with_capacity(n)` 或 `HashMap::with_capacity(n)` 可以减少内存重新分配的次数，提高性能。
-- **Entry API**: 修改 HashMap 时优先使用 `entry` API，代码更简洁且效率更高（只计算一次哈希值）。
-
-## 🔗 扩展阅读
-- [Rust 程序设计语言 - 常见集合](https://doc.rust-lang.org/book/ch08-00-common-collections.html)
+---
 
 ## ⏭️ 下一步
-现在我们已经掌握了基础语法和常用数据结构。但在编程中，错误是不可避免的。Rust 有一套独特且安全的错误处理机制。
 
-下一节: [Day 11: 错误处理](../11.ErrorHandling/README.md)
+到目前为止，我们写的代码如果出错（比如 Vector 越界）就会 Panic 崩溃。实际上 Rust 有一套非常完善的 **错误处理** 机制，可以让我们稳健地处理异常。
+
+下一节: [Day 11: 错误处理 (Error Handling)](../11.ErrorHandling/README.md)

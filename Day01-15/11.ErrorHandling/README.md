@@ -1,131 +1,192 @@
 # Day 11: 错误处理 (Error Handling)
 
 ## 📝 学习目标
-- 理解 Rust 错误处理哲学：可恢复 vs 不可恢复错误
-- 掌握 `Result<T, E>` 枚举及其常用方法 (`unwrap`, `expect`)
-- 熟练使用 `?` 运算符传播错误
-- 了解如何在 `main` 函数中处理错误
-- 掌握 `panic!` 的使用场景
 
-## 🎯 为什么要学这个
-Rust 以安全著称，而处理错误是安全的重要组成部分。
-- **强制处理**: Rust 不使用异常 (Exception)。它迫使你在编译时就必须决定如何处理可能发生的错误，从而消除了运行时未捕获异常导致的崩溃。
-- **清晰明确**: 函数签名明确指出了可能失败的操作。
+- 理解 Rust **可恢复 (Result)** 与 **不可恢复 (Panic)** 错误的区别
+- 掌握 **`Result<T, E>`** 的核心用法
+- 熟练使用 **`?` 运算符** 传播错误
+- 学会 **`unwrap`** 和 **`expect`** 的适用场景
+- 了解如何在 `main` 函数中优雅地处理错误
 
-## 📖 核心概念
+## 🎯 核心哲学：向左走？向右走？
 
-### 1. 错误的分类
-- **不可恢复错误**: 严重的 bug，如数组越界。Rust 使用 `panic!` 宏来处理，程序会打印错误信息并退出。
-- **可恢复错误**: 预期的失败，如文件未找到。Rust 使用 `Result<T, E>` 类型来处理，允许程序做出响应（如创建新文件）。
+Rust 将错误分为两大类。在写代码时，你首先要面对的决策是：
 
-### 2. Result 枚举
+```mermaid
+graph TD
+    Start[错误发生] --> Q1{问题严重吗?}
+    Q1 --"Yes (Bug/不可恢复)"--> Panic[Panic! (崩溃退出)]
+    Q1 --"No (预期情况/可恢复)"--> Result[Result (返回错误值)]
+    
+    Panic --> Ex1[数组越界]
+    Panic --> Ex2[逻辑不可能到达的分支]
+    
+    Result --> Ex3[文件未找到]
+    Result --> Ex4[网络超时]
+    Result --> Ex5[解析数字失败]
+    
+    style Panic fill:#ffcccc,stroke:#ff0000
+    style Result fill:#ccffcc,stroke:#00ff00
+```
+
+1. **不可恢复错误 (panic!)**: 表示代码中有 Bug。Rust 会打印错误信息，清理栈内存，然后退出。
+2. **可恢复错误 (Result)**: 表示即便代码没写错也可能发生的情况（如文件不存在）。你需要显式处理它。
+
+---
+
+## 💥 不可恢复错误：`panic!`
+
+当程序遇到无法处理的糟糕情况时，就 panic。
+
 ```rust
-enum Result<T, E> {
-    Ok(T),  // 操作成功，包含结果值
-    Err(E), // 操作失败，包含错误信息
+fn main() {
+    // 显式 panic
+    panic!("crash and burn");
+    
+    // 隐式 panic (例如数组越界)
+    let v = vec![1, 2, 3];
+    v[99];
 }
 ```
 
-### 3. 处理 Result
-- **match**: 最基本的处理方式，显式处理每种情况。
-- **unwrap()**: 如果是 `Ok` 返回值，如果是 `Err` 直接 panic。用于原型开发或确定不会失败的场景。
-- **expect(msg)**: 同 `unwrap`，但可以指定 panic 时的错误信息（推荐）。
+---
 
-### 4. 传播错误 (?)
-当函数内部发生错误，且你希望由调用者来处理时，可以使用 `?` 运算符。
+## 🛡️ 可恢复错误：`Result<T, E>`
+
+`Result` 是一个枚举，定义如下：
+
+```rust
+enum Result<T, E> {
+    Ok(T),  // 成功，包含值 T
+    Err(E), // 失败，包含错误 E
+}
+```
+
+### 处理 Result 的四种姿势
+
+| 方法 | 说明 | 适用场景 |
+| :--- | :--- | :--- |
+| **`match`** | 显式处理 `Ok` 和 `Err` 分支 | 需要对错误做精细处理（如文件不存在则创建） |
+| **`unwrap()`** | 成功返值，失败 panic | 原型开发、测试、你 100% 确定不会失败时 |
+| **`expect(msg)`** | 同 `unwrap`，但可自定义 panic 信息 | 同上，但比 unwrap 提供更多调试信息 (推荐) |
+| **`?`** | 成功返值，失败则 **立即返回 Err 给调用者** | 函数内部，想把锅甩给调用者时 (最常用) |
+
+---
+
+## 🚀 传播错误：`?` 运算符
+
+`?` 是 Rust 中极其优雅的语法糖。它能消除大量的 `match` 嵌套。
+
+### `?` 的工作流程
+
+```mermaid
+graph LR
+    Step1[代码: File::open?] --> Check{是 Ok 还是 Err?}
+    Check --Ok(file)--> ReturnVal[表达式求值为 file] --> Continue[继续执行下一行]
+    Check --Err(e)--> ReturnErr[return Err(e)] --> Exit[函数立即结束]
+    
+    style ReturnErr fill:#ffcccc,stroke:#ff0000
+    style Continue fill:#ccffcc,stroke:#00ff00
+```
+
+### 代码对比
+
+**未使用 `?` (啰嗦)**:
 
 ```rust
 use std::fs::File;
-use std::io;
-use std::io::Read;
+use std::io::{self, Read};
 
 fn read_username() -> Result<String, io::Error> {
+    let f = File::open("hello.txt");
+
+    let mut f = match f {
+        Ok(file) => file,
+        Err(e) => return Err(e), // 手动返回错误
+    };
+
     let mut s = String::new();
-    File::open("hello.txt")?.read_to_string(&mut s)?; // 失败则直接返回 Err
+    match f.read_to_string(&mut s) {
+        Ok(_) => Ok(s),
+        Err(e) => Err(e), // 手动返回错误
+    }
+}
+```
+
+**使用 `?` (优雅)**:
+
+```rust
+fn read_username() -> Result<String, io::Error> {
+    let mut s = String::new();
+    // 链式调用：打开文件 -> 读取内容
+    File::open("hello.txt")?.read_to_string(&mut s)?;
     Ok(s)
 }
 ```
 
-## 💻 代码示例
+---
 
-### 示例 1: 基本的 Result 处理
-```rust
-use std::fs::File;
-use std::io::ErrorKind;
+## 💻 实用示例
 
-fn main() {
-    let f = File::open("hello.txt");
+### 示例 1: `main` 函数也返回 Result
 
-    let f = match f {
-        Ok(file) => file,
-        Err(error) => match error.kind() {
-            ErrorKind::NotFound => match File::create("hello.txt") {
-                Ok(fc) => fc,
-                Err(e) => panic!("Tried to create file but there was a problem: {:?}", e),
-            },
-            other_error => {
-                panic!("There was a problem opening the file: {:?}", other_error)
-            }
-        },
-    };
-}
-```
-
-### 示例 2: 使用 unwrap_or_else
-这是处理错误的更 Rust 风格的方式，避免了深层嵌套的 match。
+为了在 `main` 中使用 `?`，我们需要修改它的返回类型。
 
 ```rust
 use std::fs::File;
-use std::io::ErrorKind;
+use std::error::Error;
 
-fn main() {
-    let f = File::open("hello.txt").unwrap_or_else(|error| {
-        if error.kind() == ErrorKind::NotFound {
-            File::create("hello.txt").unwrap_or_else(|error| {
-                panic!("Problem creating the file: {:?}", error);
-            })
-        } else {
-            panic!("Problem opening the file: {:?}", error);
-        }
-    });
-}
-```
-
-## 🏋️ 练习题
-
-我们准备了练习题来帮助你掌握错误处理模式。
-
-- **练习 1**: 安全的数学运算
-- **练习 2**: 文件读取与错误传播
-- **练习 3**: 解析 CSV 数据
-
-👉 **[点击这里查看练习题](./exercises/README.md)**
-
-## 🤔 常见问题 (FAQ)
-
-### Q1: 什么时候用 panic! 什么时候用 Result？
-A:
-- 如果错误是由于调用者使用了错误的代码（Bug）导致的（如索引越界），或者处于无法恢复的损坏状态，使用 `panic!`。
-- 如果错误是预期的（如网络超时、文件不存在），使用 `Result`。
-- 在示例代码、原型代码和测试中，常用 `unwrap` (即 panic)。
-
-### Q2: 可以在 main 函数中使用 ? 吗？
-A: 可以，但 `main` 函数必须返回 `Result`。
-```rust
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let f = File::open("hello.txt")?;
+// Box<dyn Error> 意味着 "任意类型的错误"
+fn main() -> Result<(), Box<dyn Error>> {
+    let f = File::open("hello.txt")?; // 如果失败，程序以非0状态码退出
+    
     Ok(())
 }
 ```
 
-## 💡 最佳实践
-- **不要滥用 unwrap**: 在生产代码中，尽量使用 `match`, `unwrap_or`, `expect` 或 `?`，除非你 100% 确定不会失败。
-- **自定义错误**: 对于库的开发者，定义自己的错误类型（通常是一个 Enum），可以更清晰地表达错误意图。
+### 示例 2: 自定义验证错误
 
-## 🔗 扩展阅读
-- [Rust 程序设计语言 - 错误处理](https://doc.rust-lang.org/book/ch09-00-error-handling.html)
+```rust
+#[derive(Debug)]
+struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 || value > 100 {
+            // 这里用 panic 是合适的，因为违反了 API 契约（Bug）
+            panic!("Guess value must be between 1 and 100, got {}.", value);
+        }
+
+        Guess { value }
+    }
+}
+```
+
+---
+
+## 🏋️ 练习题
+
+👉 **[点击这里查看练习题](./exercises/README.md)**
+
+1. **安全除法**: 编写一个除法函数，当除数为 0 时返回 Err。
+2. **文件读取**: 使用 `?` 重构文件读取代码。
+3. **解析 CSV**: 尝试解析一个可能格式错误的字符串，处理解析错误。
+
+---
+
+## 💡 最佳实践
+
+1. **库代码优先用 Result**: 编写给别人用的库时，尽量不要 panic，把决定权交给用户。
+2. **善用 `expect`**: 除非写 Demo，否则尽量用 `expect` 代替 `unwrap`，这能让你在 Debug 时省下很多头发。
+3. **转换错误**: 有时这层函数返回 `AppError`，下层返回 `io::Error`。可以使用 `map_err` 进行转换。
+
+---
 
 ## ⏭️ 下一步
-有了错误处理的基础，我们可以编写更健壮的程序。接下来我们将学习如何编写更通用、更灵活的代码。
 
-下一节: [Day 12: 泛型](../12.Generics/README.md)
+在前面的课程中，我们为了复用代码，比如求两个 `i32` 的最大值，可能写了 `fn max(a: i32, b: i32)`。如果要处理 `f64` 怎么办？再写一个？
+不，Rust 有 **泛型 (Generics)**。
+
+下一节: [Day 12: 泛型 (Generics)](../12.Generics/README.md)
