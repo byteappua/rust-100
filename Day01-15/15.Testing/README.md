@@ -1,87 +1,88 @@
 # Day 15: 自动化测试 (Automated Testing)
 
 ## 📝 学习目标
-- 掌握 Rust 单元测试的编写 (`#[test]`)
-- 熟练使用断言宏 (`assert!`, `assert_eq!`, `assert_ne!`)
-- 掌握如何测试 `panic!` (`should_panic`)
-- 了解集成测试与文档测试
-- 掌握 `cargo test` 的常用参数
 
-## 🎯 为什么要学这个
-- **正确性**: 确保代码按预期工作。
-- **重构信心**: 当你修改代码时，测试能立刻告诉你是否破坏了现有功能。
-- **文档**: 测试用例本身就是很好的代码使用示例（特别是文档测试）。
-- **Rust 原生支持**: 可以在代码文件中直接写测试，不需要额外的框架。
+- 掌握 Rust **测试金字塔**：单元测试 vs 集成测试
+- 熟练编写 **`#[test]`** 函数
+- 掌握 **断言宏** (`assert!`, `assert_eq!`)
+- 学会测试 **Panic** 和返回 **Result**
+- 掌握 **Cargo Test** 常用命令与并行控制
 
-## 📖 核心概念
+## 🎯 核心概念：信心的来源
 
-### 1. 单元测试 (Unit Tests)
-通常位于源码文件的底部，封装在 `mod tests` 模块中。
-- 测试私有接口。
-- 使用 `#[cfg(test)]` 标注，确保只在测试时编译。
+代码写完了，怎么保证它是对的？靠“肉眼观察”是不够的。
+Rust 提供了 **第一类 (First-class)** 的测试支持，不需要安装任何第三方框架。
+
+### 测试金字塔
+
+```mermaid
+graph TD
+    UI[UI / E2E 测试 (慢, 覆盖面广)]
+    Integration[集成测试 tests/ (中等, 测API交互)]
+    Unit[单元测试 #[test] (快, 测具体逻辑)]
+    
+    UI --> Integration
+    Integration --> Unit
+    
+    style Unit fill:#ccffcc
+    style Integration fill:#ffffcc
+    style UI fill:#ffcccc
+```
+
+1. **单元测试 (Unit Tests)**: 位于源码文件中，测试私有函数，关注微小逻辑。
+2. **集成测试 (Integration Tests)**: 位于 `tests/` 目录，只能访问公有 API，关注组件协作。
+3. **文档测试 (Doc Tests)**: 写在注释里，兼具文档和测试功能。
+
+---
+
+## 🛠️ 单元测试 (Unit Tests)
+
+单元测试通常和代码在一起，放在一个叫 `tests` 的子模块中。
 
 ```rust
+// 业务逻辑
 fn internal_add(a: i32, b: i32) -> i32 { a + b }
 
-#[cfg(test)]
+// 测试模块
+#[cfg(test)] // 只有运行 cargo test 时才编译这部分代码
 mod tests {
-    use super::*;
+    use super::*; // 引入外部模块的所有内容
 
-    #[test]
+    #[test] // 标记这是一个测试函数
     fn test_internal_add() {
         assert_eq!(internal_add(2, 2), 4);
     }
 }
 ```
 
-### 2. 集成测试 (Integration Tests)
-位于项目根目录的 `tests` 目录下。
-- 只能调用公有 API (就像外部用户一样)。
-- 专门用于测试多个模块间的交互。
+### 常用断言宏
 
-### 3. 文档测试 (Doc-tests)
-写在文档注释 `///` 中的代码块。`cargo test` 会自动运行它们。
-这确保了你的文档示例永远是可运行的，不会过期。
+| 宏 | 说明 | 示例 |
+| :--- | :--- | :--- |
+| `assert!(expr)` | 验证表达式为 `true` | `assert!(x > 5)` |
+| `assert_eq!(a, b)` | 验证 `a == b` | `assert_eq!(2+2, 4)` |
+| `assert_ne!(a, b)` | 验证 `a != b` | `assert_ne!(2+2, 5)` |
+| `debug_assert!(...)` | 仅在 Debug 模式下运行 | (用于性能敏感处) |
 
-### 4. 常用断言
-- `assert!(expr)`: 验证表达式为真。
-- `assert_eq!(left, right)`: 验证相等。
-- `assert_ne!(left, right)`: 验证不等。
-- `debug_assert!(...)`: 只在 Debug 模式下运行。
+---
 
-## 💻 代码示例
+## 🏗️ 进阶用法
 
-### 示例 1: 基本测试与 Panic 测试
+### 1. 测试 Panic (`should_panic`)
+
+有时我们需要确保代码 **正确地报错**（比如参数校验）。
 
 ```rust
-pub struct Guess {
-    value: i32,
-}
-
-impl Guess {
-    pub fn new(value: i32) -> Guess {
-        if value < 1 || value > 100 {
-            panic!("Guess value must be between 1 and 100, got {}.", value);
-        }
-
-        Guess { value }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    #[should_panic(expected = "must be between 1 and 100")] // 检查 panic 信息包含特定字符串
-    fn greater_than_100() {
-        Guess::new(200);
-    }
+#[test]
+#[should_panic(expected = "必须大于 0")] // 检查 panic 信息
+fn test_validation() {
+    let g = Guess::new(-1); // 应该 panic
 }
 ```
 
-### 示例 2: 使用 Result 编写测试
-允许在测试中使用 `?` 运算符。
+### 2. 使用 Result
+
+测试函数也可以返回 `Result`，这样就可以在测试里使用 `?` 了。这在测试需要 setup 可能会失败的场景时非常有用。
 
 ```rust
 #[test]
@@ -89,40 +90,84 @@ fn it_works() -> Result<(), String> {
     if 2 + 2 == 4 {
         Ok(())
     } else {
-        Err(String::from("two plus two does not equal four"))
+        Err(String::from("math broke"))
     }
 }
 ```
 
+---
+
+## 🔗 集成测试 (Integration Tests)
+
+在项目根目录下创建 `tests` 目录。这里的每个文件都会被编译成一个独立的 Crate。
+
+```text
+my_project/
+├── src/
+│   └── lib.rs
+└── tests/
+    └── integration_test.rs
+```
+
+```rust
+// tests/integration_test.rs
+use my_project; // 必须像外部用户一样导入
+
+#[test]
+fn it_adds_two() {
+    assert_eq!(my_project::add_two(2), 4);
+}
+```
+
+---
+
+## ⚙️ 运行测试 (Cargo Test)
+
+Rust 的测试运行器默认是 **并行** 的，且会 **捕获 (吞掉) 输出**。
+
+| 命令 | 作用 |
+| :--- | :--- |
+| `cargo test` | 运行所有测试 |
+| `cargo test -- --test-threads=1` | **串行运行** (避免数据库/文件冲突) |
+| `cargo test -- --show-output` | 显示 `println!` 的输出 |
+| `cargo test name` | 只运行名字包含 "name" 的测试 |
+
+```mermaid
+graph LR
+    Start[cargo test] --> Build[编译代码 & 测试]
+    Build --> Run{运行测试}
+    Run --并行--> Thread1[Test 1]
+    Run --并行--> Thread2[Test 2]
+    Thread1 --> Result1[Pass/Fail]
+    Thread2 --> Result2[Pass/Fail]
+    Result1 & Result2 --> Summary[汇总报告]
+```
+
+---
+
 ## 🏋️ 练习题
-
-我们准备了练习题来帮助你掌握测试的编写。
-
-- **练习 1**: 编写基本的单元测试
-- **练习 2**: 测试自定义结构体与 panic
-- **练习 3**: 编写文档测试（模拟）
 
 👉 **[点击这里查看练习题](./exercises/README.md)**
 
-## 🤔 常见问题 (FAQ)
+1. **编写单元测试**: 为简单的数学函数编写测试。
+2. **覆盖边界情况**: 测试 0、负数、溢出等情况。
+3. **集成测试**: 创建 `tests/` 目录并测试公有 API。
 
-### Q1: `cargo test` 默认是并行运行的吗？
-A: 是的。如果你的测试相互依赖（例如都操作同一个文件或数据库），这可能会导致问题。可以使用 `cargo test -- --test-threads=1` 来串行运行测试。
-
-### Q2: 既然可以测试私有函数，那还需要集成测试吗？
-A: 需要。单元测试关注实现的细节（白盒），集成测试关注对外暴露的 API 是否好用、多个组件能否正确协作（黑盒）。两者缺一不可。
+---
 
 ## 💡 最佳实践
-- **TDD (测试驱动开发)**: 先写一个失败的测试，再写代码让它通过。
-- **测试覆盖率**: 尽量覆盖各种边缘情况 (Edge Cases)，不仅仅是正常路径 (Happy Path)。
-- **文档即测试**: 尽量为公有 API 编写包含示例代码的文档注释。
 
-## 🔗 扩展阅读
-- [Rust 程序设计语言 - 测试](https://doc.rust-lang.org/book/ch11-00-testing.html)
+1. **私有函数也能测**: Rust 允许单元测试直接调用私有函数，这是确保核心算法正确的好方法。
+2. **TDD (测试驱动开发)**: 红(写失败测试) -> 绿(写代码通过) -> 重构。
+3. **文档即测试**: 在 `lib.rs` 的文档注释中写 Example 代码，Rust 会自动运行它们。一举两得。
+
+---
 
 ## ⏭️ 下一步
-恭喜你完成了第一阶段（基础知识）的所有内容！你已经掌握了 Rust 的变量、所有权、类型系统、泛型、Trait、生命周期和测试。
 
-接下来，我们将进入第二阶段：**进阶概念**。我们将探索函数式编程特性。
+恭喜你完成了第一阶段（基础知识）的所有内容！
+你已经掌握了 Rust 的核心语法、内存安全模型 (所有权/生命周期) 和工程化工具 (测试/模块)。
 
-下一节: [Day 16: 闭包](../Day16-30/16.Closures/README.md)
+接下来，我们将进入 **Day 16: 闭包与迭代器**，开启函数式编程的大门。
+
+下一节: [Day 16: 闭包 (Closures)](../Day16-30/16.Closures/README.md)
