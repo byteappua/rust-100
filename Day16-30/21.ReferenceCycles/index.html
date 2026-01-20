@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-c0907910.js";
+            window.path_to_searchindex_js = "../../searchindex-3374bbbf.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -177,89 +177,143 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="day-21-引用循环与内存泄漏"><a class="header" href="#day-21-引用循环与内存泄漏">Day 21: 引用循环与内存泄漏</a></h1>
-<p>Rust 的内存安全性保证使其很难发生内存泄漏，但不是不可能。如果使用 <code>Rc&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 创建了引用循环，items 的引用计数永远不会降为 0，内存也就永远不会被释放。</p>
-<h2 id="1-制造引用循环"><a class="header" href="#1-制造引用循环">1. 制造引用循环</a></h2>
-<p>如果两个 <code>Rc</code> 指针相互引用，就会形成循环。</p>
-<pre class="playground"><code class="language-rust">use std::rc::Rc;
-use std::cell::RefCell;
-use crate::List::{Cons, Nil};
+                        <h1 id="day-21-引用循环与内存泄漏-reference-cycles"><a class="header" href="#day-21-引用循环与内存泄漏-reference-cycles">Day 21: 引用循环与内存泄漏 (Reference Cycles)</a></h1>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>理解 <strong>引用循环 (Reference Cycle)</strong> 是如何产生的</li>
+<li>掌握 <strong>内存泄漏 (Memory Leak)</strong> 的原因</li>
+<li>熟练使用 <strong><code>Weak&lt;T&gt;</code></strong> (弱引用) 打破循环</li>
+<li>能够构建父子双向引用的 <strong>树形结构</strong></li>
+</ul>
+<h2 id="-核心概念rc-的阿喀琉斯之踵"><a class="header" href="#-核心概念rc-的阿喀琉斯之踵">🎯 核心概念：Rc 的阿喀琉斯之踵</a></h2>
+<p>Rust 的内存安全机制非常强大，但它并不保证 <strong>绝对没有内存泄漏</strong>。
+当使用 <code>Rc&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 时，如果两个对象互相引用，且都是强引用 (Strong Reference)，就会形成死锁般的引用循环，导致内存永远无法释放。</p>
+<h3 id="引用循环可视化"><a class="header" href="#引用循环可视化">引用循环可视化</a></h3>
+<pre class="mermaid">graph LR
+    A[节点 A &lt;br&gt; count: 2] --&gt;|Rc| B[节点 B &lt;br&gt; count: 2]
+    B --&gt;|Rc| A
+    
+    style A fill:#ffcccc
+    style B fill:#ffcccc
+</pre>
 
-#[derive(Debug)]
-enum List {
-    Cons(i32, RefCell&lt;Rc&lt;List&gt;&gt;),
-    Nil,
+<ol>
+<li>A 指向 B，B 的计数为 1。</li>
+<li>B 指向 A，A 的计数为 1。</li>
+<li>外部变量 <code>a</code> 指向 A，A 计数 2。</li>
+<li>外部变量 <code>b</code> 指向 B，B 计数 2。</li>
+<li><code>main</code> 结束，<code>a</code> 和 <code>b</code> 离开作用域，A 和 B 计数各减 1，变为 1。</li>
+<li><strong>结果</strong>：A 和 B 互相引用，计数永远为 1，永远不会被回收！</li>
+</ol>
+<hr>
+<h2 id="-解决方案weak"><a class="header" href="#-解决方案weak">🛡️ 解决方案：Weak<t></t></a></h2>
+<p>为了打破循环，我们需要一种 “不持有所有权” 的引用，这就是 <strong><code>Weak&lt;T&gt;</code></strong>。</p>
+<h3 id="强引用-vs-弱引用"><a class="header" href="#强引用-vs-弱引用">强引用 vs 弱引用</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left"><code>Rc&lt;T&gt;</code> (强引用)</th><th style="text-align: left"><code>Weak&lt;T&gt;</code> (弱引用)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>增加计数</strong></td><td style="text-align: left"><code>strong_count</code></td><td style="text-align: left"><code>weak_count</code></td></tr>
+<tr><td style="text-align: left"><strong>所有权</strong></td><td style="text-align: left">拥有数据</td><td style="text-align: left"><strong>不</strong>拥有数据</td></tr>
+<tr><td style="text-align: left"><strong>生命周期</strong></td><td style="text-align: left">计数归零才清理</td><td style="text-align: left">不影响清理</td></tr>
+<tr><td style="text-align: left"><strong>访问方式</strong></td><td style="text-align: left">直接访问</td><td style="text-align: left">必须调用 <code>upgrade()</code></td></tr>
+<tr><td style="text-align: left"><strong>比喻</strong></td><td style="text-align: left">牵着气球的线 (线在球在)</td><td style="text-align: left">看着气球的人 (人走球不一定走)</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="访问弱引用"><a class="header" href="#访问弱引用">访问弱引用</a></h3>
+<p>因为 <code>Weak&lt;T&gt;</code> 指向的值可能已经被释放了，所以在使用前必须通过 <code>.upgrade()</code> 升级。它返回 <code>Option&lt;Rc&lt;T&gt;&gt;</code>。</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::rc::{Rc, Weak};
+
+let weak: Weak&lt;i32&gt; = ...;
+
+match weak.upgrade() {
+    Some(rc_val) =&gt; println!("值还在: {}", rc_val),
+    None =&gt; println!("值已经被释放了"),
 }
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-代码实战树形结构"><a class="header" href="#-代码实战树形结构">💻 代码实战：树形结构</a></h2>
+<p>最经典的引用循环场景是 <strong>树 (Tree)</strong>：父节点拥有子节点，子节点也想知道父节点是谁。</p>
+<ul>
+<li>Parent -&gt; Child: <strong>Strong</strong> (父在子在)</li>
+<li>Child -&gt; Parent: <strong>Weak</strong> (子在父不一定在，防止循环)</li>
+</ul>
+<pre class="mermaid">graph TD
+    Parent[Parent] --&gt;|Rc| Child[Child]
+    Child -.-&gt;|Weak| Parent
+    
+    style Parent fill:#ccffcc
+    style Child fill:#e1f5fe
+</pre>
 
-impl List {
-    fn tail(&amp;self) -&gt; Option&lt;&amp;RefCell&lt;Rc&lt;List&gt;&gt;&gt; {
-        match self {
-            Cons(_, item) =&gt; Some(item),
-            Nil =&gt; None,
-        }
-    }
-}
-
-fn main() {
-    let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil))));
-
-    println!("a initial rc count = {}", Rc::strong_count(&amp;a));
-    println!("a next item = {:?}", a.tail());
-
-    let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&amp;a))));
-
-    println!("a rc count after b creation = {}", Rc::strong_count(&amp;a));
-    println!("b initial rc count = {}", Rc::strong_count(&amp;b));
-    println!("b next item = {:?}", b.tail());
-
-    if let Some(link) = a.tail() {
-        *link.borrow_mut() = Rc::clone(&amp;b);
-    }
-
-    println!("b rc count after changing a = {}", Rc::strong_count(&amp;b));
-    println!("a rc count after changing a = {}", Rc::strong_count(&amp;a));
-
-    // 取消下面的注释会造成栈溢出，因为 debug 打印会尝试递归打印循环引用
-    // println!("a next item = {:?}", a.tail());
-}</code></pre>
-<h2 id="2-使用-weak-避免引用循环"><a class="header" href="#2-使用-weak-避免引用循环">2. 使用 Weak<t> 避免引用循环</t></a></h2>
-<p><code>Weak&lt;T&gt;</code> 是弱引用，不增加 <code>strong_count</code>，而是增加 <code>weak_count</code>。当 <code>strong_count</code> 为 0 时，即使 <code>weak_count</code> 不为 0，对象也会被清理。</p>
-<p>你需要使用 <code>upgrade</code> 方法将 <code>Weak&lt;T&gt;</code> 升级为 <code>Option&lt;Rc&lt;T&gt;&gt;</code> 才能访问数据，这确保了数据存在。</p>
-<h3 id="示例树形结构父节点指针"><a class="header" href="#示例树形结构父节点指针">示例：树形结构（父节点指针）</a></h3>
-<p>子节点拥有父节点的引用，如果用 <code>Rc</code> 就会造成循环。应该使用 <code>Weak</code>。</p>
 <pre class="playground"><code class="language-rust">use std::rc::{Rc, Weak};
 use std::cell::RefCell;
 
 #[derive(Debug)]
 struct Node {
     value: i32,
-    parent: RefCell&lt;Weak&lt;Node&gt;&gt;,
+    // 子节点列表：父节点拥有子节点 (Vec&lt;Rc&gt;)
     children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,
+    // 父节点指针：子节点弱引用父节点 (Weak)
+    parent: RefCell&lt;Weak&lt;Node&gt;&gt;, 
 }
 
 fn main() {
+    // 1. 创建叶子 (Leaf)
     let leaf = Rc::new(Node {
         value: 3,
-        parent: RefCell::new(Weak::new()),
+        parent: RefCell::new(Weak::new()), // 初始没有父节点
         children: RefCell::new(vec![]),
     });
 
-    let branch = Rc::new(Node {
-        value: 5,
-        parent: RefCell::new(Weak::new()),
-        children: RefCell::new(vec![Rc::clone(&amp;leaf)]),
-    });
+    println!("leaf strong = {}, weak = {}", Rc::strong_count(&amp;leaf), Rc::weak_count(&amp;leaf));
 
-    *leaf.parent.borrow_mut() = Rc::downgrade(&amp;branch);
+    {
+        // 2. 创建树枝 (Branch)
+        let branch = Rc::new(Node {
+            value: 5,
+            children: RefCell::new(vec![Rc::clone(&amp;leaf)]), // Branch 拥有 Leaf
+            parent: RefCell::new(Weak::new()),
+        });
 
-    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+        // 3. 建立反向连接：Leaf 指向 Branch
+        *leaf.parent.borrow_mut() = Rc::downgrade(&amp;branch); // 这里使用 downgrade 创建 Weak
+
+        println!("branch strong = {}, weak = {}", Rc::strong_count(&amp;branch), Rc::weak_count(&amp;branch));
+        
+        // 尝试访问父节点
+        println!("leaf parent: {:?}", leaf.parent.borrow().upgrade());
+    } // branch 离开作用域，被销毁
+
+    // 4. branch 死后，leaf 还在，但它的 parent 已经空了
+    println!("leaf parent dead: {:?}", leaf.parent.borrow().upgrade());
 }</code></pre>
-<h2 id="3-strong-vs-weak"><a class="header" href="#3-strong-vs-weak">3. Strong vs Weak</a></h2>
-<ul>
-<li><code>Rc::clone</code> 增加 <code>strong_count</code>。<code>Rc&lt;T&gt;</code> 实例在 <code>strong_count</code> 为 0 时被清理。</li>
-<li><code>Rc::downgrade</code> 增加 <code>weak_count</code>。<code>Weak&lt;T&gt;</code> 不影响清理时间。</li>
-<li><code>Weak&lt;T&gt;</code> 用于打破循环引用，防止内存泄漏。</li>
-</ul>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>制造泄漏</strong>: 故意编写一个双向链表 A &lt;-&gt; B (使用 <code>Rc</code>)，并验证内存没有被释放 (strong_count 不归零)。</li>
+<li><strong>修复泄漏</strong>: 使用 <code>Weak</code> 修复上述代码。</li>
+<li><strong>图结构</strong>: 实现一个简单的有向图，节点间可能有环，思考如果只用 <code>Rc</code> 会有什么问题。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>层级关系</strong>: 在父子层级关系中，通常 <strong>父持子(Strong)，子指父(Weak)</strong>。</li>
+<li><strong>检查必要性</strong>: 只有在确实需要双向引用时才引入 <code>Weak</code>，否则单向引用（只有 <code>children</code>）通常更简单安全。</li>
+<li><strong>Upgrade 检查</strong>: 永远不要假设 <code>Weak</code> 指针有效，始终处理 <code>upgrade()</code> 返回 <code>None</code> 的情况。</li>
+</ol>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>智能指针及其潜在的内存问题我们已经讨论完了。
+接下来的话题将进入 Rust 的另一个杀手级特性：<strong>并发编程</strong>。
+我们将学习如何安全地使用线程，拥抱“Fearless Concurrency”。</p>
+<p>下一节: <a href="../22.Threads/README.html">Day 22: 线程 (Threads)</a></p>
 
                     </main>
 
