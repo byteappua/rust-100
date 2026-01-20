@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-1a69fd7d.js";
+            window.path_to_searchindex_js = "../../searchindex-32e194be.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -180,87 +180,81 @@
                         <h1 id="day-15-自动化测试-automated-testing"><a class="header" href="#day-15-自动化测试-automated-testing">Day 15: 自动化测试 (Automated Testing)</a></h1>
 <h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>掌握 Rust 单元测试的编写 (<code>#[test]</code>)</li>
-<li>熟练使用断言宏 (<code>assert!</code>, <code>assert_eq!</code>, <code>assert_ne!</code>)</li>
-<li>掌握如何测试 <code>panic!</code> (<code>should_panic</code>)</li>
-<li>了解集成测试与文档测试</li>
-<li>掌握 <code>cargo test</code> 的常用参数</li>
+<li>掌握 Rust <strong>测试金字塔</strong>：单元测试 vs 集成测试</li>
+<li>熟练编写 <strong><code>#[test]</code></strong> 函数</li>
+<li>掌握 <strong>断言宏</strong> (<code>assert!</code>, <code>assert_eq!</code>)</li>
+<li>学会测试 <strong>Panic</strong> 和返回 <strong>Result</strong></li>
+<li>掌握 <strong>Cargo Test</strong> 常用命令与并行控制</li>
 </ul>
-<h2 id="-为什么要学这个"><a class="header" href="#-为什么要学这个">🎯 为什么要学这个</a></h2>
-<ul>
-<li><strong>正确性</strong>: 确保代码按预期工作。</li>
-<li><strong>重构信心</strong>: 当你修改代码时，测试能立刻告诉你是否破坏了现有功能。</li>
-<li><strong>文档</strong>: 测试用例本身就是很好的代码使用示例（特别是文档测试）。</li>
-<li><strong>Rust 原生支持</strong>: 可以在代码文件中直接写测试，不需要额外的框架。</li>
-</ul>
-<h2 id="-核心概念"><a class="header" href="#-核心概念">📖 核心概念</a></h2>
-<h3 id="1-单元测试-unit-tests"><a class="header" href="#1-单元测试-unit-tests">1. 单元测试 (Unit Tests)</a></h3>
-<p>通常位于源码文件的底部，封装在 <code>mod tests</code> 模块中。</p>
-<ul>
-<li>测试私有接口。</li>
-<li>使用 <code>#[cfg(test)]</code> 标注，确保只在测试时编译。</li>
-</ul>
+<h2 id="-核心概念信心的来源"><a class="header" href="#-核心概念信心的来源">🎯 核心概念：信心的来源</a></h2>
+<p>代码写完了，怎么保证它是对的？靠“肉眼观察”是不够的。
+Rust 提供了 <strong>第一类 (First-class)</strong> 的测试支持，不需要安装任何第三方框架。</p>
+<h3 id="测试金字塔"><a class="header" href="#测试金字塔">测试金字塔</a></h3>
+<pre class="mermaid">graph TD
+    UI[UI / E2E 测试 (慢, 覆盖面广)]
+    Integration[集成测试 tests/ (中等, 测API交互)]
+    Unit[单元测试 #[test] (快, 测具体逻辑)]
+    
+    UI --&gt; Integration
+    Integration --&gt; Unit
+    
+    style Unit fill:#ccffcc
+    style Integration fill:#ffffcc
+    style UI fill:#ffcccc
+</pre>
+
+<ol>
+<li><strong>单元测试 (Unit Tests)</strong>: 位于源码文件中，测试私有函数，关注微小逻辑。</li>
+<li><strong>集成测试 (Integration Tests)</strong>: 位于 <code>tests/</code> 目录，只能访问公有 API，关注组件协作。</li>
+<li><strong>文档测试 (Doc Tests)</strong>: 写在注释里，兼具文档和测试功能。</li>
+</ol>
+<hr>
+<h2 id="-单元测试-unit-tests"><a class="header" href="#-单元测试-unit-tests">🛠️ 单元测试 (Unit Tests)</a></h2>
+<p>单元测试通常和代码在一起，放在一个叫 <code>tests</code> 的子模块中。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>fn internal_add(a: i32, b: i32) -&gt; i32 { a + b }
+</span>// 业务逻辑
+fn internal_add(a: i32, b: i32) -&gt; i32 { a + b }
 
-#[cfg(test)]
+// 测试模块
+#[cfg(test)] // 只有运行 cargo test 时才编译这部分代码
 mod tests {
-    use super::*;
+    use super::*; // 引入外部模块的所有内容
 
-    #[test]
+    #[test] // 标记这是一个测试函数
     fn test_internal_add() {
         assert_eq!(internal_add(2, 2), 4);
     }
 }
 <span class="boring">}</span></code></pre>
-<h3 id="2-集成测试-integration-tests"><a class="header" href="#2-集成测试-integration-tests">2. 集成测试 (Integration Tests)</a></h3>
-<p>位于项目根目录的 <code>tests</code> 目录下。</p>
-<ul>
-<li>只能调用公有 API (就像外部用户一样)。</li>
-<li>专门用于测试多个模块间的交互。</li>
-</ul>
-<h3 id="3-文档测试-doc-tests"><a class="header" href="#3-文档测试-doc-tests">3. 文档测试 (Doc-tests)</a></h3>
-<p>写在文档注释 <code>///</code> 中的代码块。<code>cargo test</code> 会自动运行它们。
-这确保了你的文档示例永远是可运行的，不会过期。</p>
-<h3 id="4-常用断言"><a class="header" href="#4-常用断言">4. 常用断言</a></h3>
-<ul>
-<li><code>assert!(expr)</code>: 验证表达式为真。</li>
-<li><code>assert_eq!(left, right)</code>: 验证相等。</li>
-<li><code>assert_ne!(left, right)</code>: 验证不等。</li>
-<li><code>debug_assert!(...)</code>: 只在 Debug 模式下运行。</li>
-</ul>
-<h2 id="-代码示例"><a class="header" href="#-代码示例">💻 代码示例</a></h2>
-<h3 id="示例-1-基本测试与-panic-测试"><a class="header" href="#示例-1-基本测试与-panic-测试">示例 1: 基本测试与 Panic 测试</a></h3>
+<h3 id="常用断言宏"><a class="header" href="#常用断言宏">常用断言宏</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">宏</th><th style="text-align: left">说明</th><th style="text-align: left">示例</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>assert!(expr)</code></td><td style="text-align: left">验证表达式为 <code>true</code></td><td style="text-align: left"><code>assert!(x &gt; 5)</code></td></tr>
+<tr><td style="text-align: left"><code>assert_eq!(a, b)</code></td><td style="text-align: left">验证 <code>a == b</code></td><td style="text-align: left"><code>assert_eq!(2+2, 4)</code></td></tr>
+<tr><td style="text-align: left"><code>assert_ne!(a, b)</code></td><td style="text-align: left">验证 <code>a != b</code></td><td style="text-align: left"><code>assert_ne!(2+2, 5)</code></td></tr>
+<tr><td style="text-align: left"><code>debug_assert!(...)</code></td><td style="text-align: left">仅在 Debug 模式下运行</td><td style="text-align: left">(用于性能敏感处)</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="-进阶用法"><a class="header" href="#-进阶用法">🏗️ 进阶用法</a></h2>
+<h3 id="1-测试-panic-should_panic"><a class="header" href="#1-测试-panic-should_panic">1. 测试 Panic (<code>should_panic</code>)</a></h3>
+<p>有时我们需要确保代码 <strong>正确地报错</strong>（比如参数校验）。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub struct Guess {
-    value: i32,
-}
-
-impl Guess {
-    pub fn new(value: i32) -&gt; Guess {
-        if value &lt; 1 || value &gt; 100 {
-            panic!("Guess value must be between 1 and 100, got {}.", value);
-        }
-
-        Guess { value }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    #[should_panic(expected = "must be between 1 and 100")] // 检查 panic 信息包含特定字符串
-    fn greater_than_100() {
-        Guess::new(200);
-    }
+</span>#[test]
+#[should_panic(expected = "必须大于 0")] // 检查 panic 信息
+fn test_validation() {
+    let g = Guess::new(-1); // 应该 panic
 }
 <span class="boring">}</span></code></pre>
-<h3 id="示例-2-使用-result-编写测试"><a class="header" href="#示例-2-使用-result-编写测试">示例 2: 使用 Result 编写测试</a></h3>
-<p>允许在测试中使用 <code>?</code> 运算符。</p>
+<h3 id="2-使用-result"><a class="header" href="#2-使用-result">2. 使用 Result</a></h3>
+<p>测试函数也可以返回 <code>Result</code>，这样就可以在测试里使用 <code>?</code> 了。这在测试需要 setup 可能会失败的场景时非常有用。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>#[test]
@@ -268,37 +262,76 @@ fn it_works() -&gt; Result&lt;(), String&gt; {
     if 2 + 2 == 4 {
         Ok(())
     } else {
-        Err(String::from("two plus two does not equal four"))
+        Err(String::from("math broke"))
     }
 }
 <span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-集成测试-integration-tests"><a class="header" href="#-集成测试-integration-tests">🔗 集成测试 (Integration Tests)</a></h2>
+<p>在项目根目录下创建 <code>tests</code> 目录。这里的每个文件都会被编译成一个独立的 Crate。</p>
+<pre><code class="language-text">my_project/
+├── src/
+│   └── lib.rs
+└── tests/
+    └── integration_test.rs
+</code></pre>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// tests/integration_test.rs
+use my_project; // 必须像外部用户一样导入
+
+#[test]
+fn it_adds_two() {
+    assert_eq!(my_project::add_two(2), 4);
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-运行测试-cargo-test"><a class="header" href="#-运行测试-cargo-test">⚙️ 运行测试 (Cargo Test)</a></h2>
+<p>Rust 的测试运行器默认是 <strong>并行</strong> 的，且会 <strong>捕获 (吞掉) 输出</strong>。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">命令</th><th style="text-align: left">作用</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>cargo test</code></td><td style="text-align: left">运行所有测试</td></tr>
+<tr><td style="text-align: left"><code>cargo test -- --test-threads=1</code></td><td style="text-align: left"><strong>串行运行</strong> (避免数据库/文件冲突)</td></tr>
+<tr><td style="text-align: left"><code>cargo test -- --show-output</code></td><td style="text-align: left">显示 <code>println!</code> 的输出</td></tr>
+<tr><td style="text-align: left"><code>cargo test name</code></td><td style="text-align: left">只运行名字包含 “name” 的测试</td></tr>
+</tbody>
+</table>
+</div>
+<pre class="mermaid">graph LR
+    Start[cargo test] --&gt; Build[编译代码 &amp; 测试]
+    Build --&gt; Run{运行测试}
+    Run --并行--&gt; Thread1[Test 1]
+    Run --并行--&gt; Thread2[Test 2]
+    Thread1 --&gt; Result1[Pass/Fail]
+    Thread2 --&gt; Result2[Pass/Fail]
+    Result1 &amp; Result2 --&gt; Summary[汇总报告]
+</pre>
+
+<hr>
 <h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
-<p>我们准备了练习题来帮助你掌握测试的编写。</p>
-<ul>
-<li><strong>练习 1</strong>: 编写基本的单元测试</li>
-<li><strong>练习 2</strong>: 测试自定义结构体与 panic</li>
-<li><strong>练习 3</strong>: 编写文档测试（模拟）</li>
-</ul>
 <p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
-<h2 id="-常见问题-faq"><a class="header" href="#-常见问题-faq">🤔 常见问题 (FAQ)</a></h2>
-<h3 id="q1-cargo-test-默认是并行运行的吗"><a class="header" href="#q1-cargo-test-默认是并行运行的吗">Q1: <code>cargo test</code> 默认是并行运行的吗？</a></h3>
-<p>A: 是的。如果你的测试相互依赖（例如都操作同一个文件或数据库），这可能会导致问题。可以使用 <code>cargo test -- --test-threads=1</code> 来串行运行测试。</p>
-<h3 id="q2-既然可以测试私有函数那还需要集成测试吗"><a class="header" href="#q2-既然可以测试私有函数那还需要集成测试吗">Q2: 既然可以测试私有函数，那还需要集成测试吗？</a></h3>
-<p>A: 需要。单元测试关注实现的细节（白盒），集成测试关注对外暴露的 API 是否好用、多个组件能否正确协作（黑盒）。两者缺一不可。</p>
+<ol>
+<li><strong>编写单元测试</strong>: 为简单的数学函数编写测试。</li>
+<li><strong>覆盖边界情况</strong>: 测试 0、负数、溢出等情况。</li>
+<li><strong>集成测试</strong>: 创建 <code>tests/</code> 目录并测试公有 API。</li>
+</ol>
+<hr>
 <h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
-<ul>
-<li><strong>TDD (测试驱动开发)</strong>: 先写一个失败的测试，再写代码让它通过。</li>
-<li><strong>测试覆盖率</strong>: 尽量覆盖各种边缘情况 (Edge Cases)，不仅仅是正常路径 (Happy Path)。</li>
-<li><strong>文档即测试</strong>: 尽量为公有 API 编写包含示例代码的文档注释。</li>
-</ul>
-<h2 id="-扩展阅读"><a class="header" href="#-扩展阅读">🔗 扩展阅读</a></h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/book/ch11-00-testing.html">Rust 程序设计语言 - 测试</a></li>
-</ul>
+<ol>
+<li><strong>私有函数也能测</strong>: Rust 允许单元测试直接调用私有函数，这是确保核心算法正确的好方法。</li>
+<li><strong>TDD (测试驱动开发)</strong>: 红(写失败测试) -&gt; 绿(写代码通过) -&gt; 重构。</li>
+<li><strong>文档即测试</strong>: 在 <code>lib.rs</code> 的文档注释中写 Example 代码，Rust 会自动运行它们。一举两得。</li>
+</ol>
+<hr>
 <h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
-<p>恭喜你完成了第一阶段（基础知识）的所有内容！你已经掌握了 Rust 的变量、所有权、类型系统、泛型、Trait、生命周期和测试。</p>
-<p>接下来，我们将进入第二阶段：<strong>进阶概念</strong>。我们将探索函数式编程特性。</p>
-<p>下一节: <a href="../Day16-30/16.Closures/README.html">Day 16: 闭包</a></p>
+<p>恭喜你完成了第一阶段（基础知识）的所有内容！
+你已经掌握了 Rust 的核心语法、内存安全模型 (所有权/生命周期) 和工程化工具 (测试/模块)。</p>
+<p>接下来，我们将进入 <strong>Day 16: 闭包与迭代器</strong>，开启函数式编程的大门。</p>
+<p>下一节: <a href="../Day16-30/16.Closures/README.html">Day 16: 闭包 (Closures)</a></p>
 
                     </main>
 
