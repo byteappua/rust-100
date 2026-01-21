@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-3374bbbf.js";
+            window.path_to_searchindex_js = "../../searchindex-9fd189b9.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -178,12 +178,38 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-24-并发编程---共享状态-shared-state"><a class="header" href="#day-24-并发编程---共享状态-shared-state">Day 24: 并发编程 - 共享状态 (Shared State)</a></h1>
-<p>另一种并发模型是共享内存。在 Rust 中，这通常意味着多线程同时访问和修改同一块数据。</p>
-<h2 id="1-mutex-互斥器"><a class="header" href="#1-mutex-互斥器">1. Mutex<t> (互斥器)</t></a></h2>
-<p><code>Mutex</code> (Mutual Exclusion) 允许一次只允许一个线程访问数据。要访问数据，线程必须先获取锁 (<code>lock</code>)。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li><code>Mutex&lt;T&gt;</code> 提供<strong>内部可变性</strong>（类似于 <code>RefCell&lt;T&gt;</code>）。</li>
-<li><code>lock()</code> 返回一个 <code>MutexGuard</code> 智能指针，当它离开作用域时，锁会自动释放。</li>
+<li>理解 <strong>共享状态</strong> 并发模型 (“Shared Memory”)</li>
+<li>掌握 <strong><code>Mutex&lt;T&gt;</code></strong> (互斥锁) 的使用与原理</li>
+<li>掌握 <strong><code>Arc&lt;T&gt;</code></strong> (原子引用计数) 在多线程中的作用</li>
+<li>理解 <strong>死锁 (Deadlock)</strong> 及其成因</li>
+<li>区分 <code>Rc</code>/<code>RefCell</code> 与 <code>Arc</code>/<code>Mutex</code></li>
+</ul>
+<h2 id="-核心概念抢麦克风"><a class="header" href="#-核心概念抢麦克风">🎯 核心概念：抢麦克风</a></h2>
+<p>如果说 Message Passing 是传纸条，那 Shared State 就是一群人抢同一个麦克风。
+<strong>规则</strong>：</p>
+<ol>
+<li>想说话必须先拿到麦克风（获取锁 <code>lock</code>）。</li>
+<li>同一时间只能有一个人拿麦克风（互斥 <code>Mutex</code>）。</li>
+<li>说完了必须把麦克风放下（释放锁 <code>drop</code>）。</li>
+</ol>
+<h3 id="mutex-状态机"><a class="header" href="#mutex-状态机">Mutex 状态机</a></h3>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Unlocked: 初始状态
+    Unlocked --&gt; Locked: 线程 A 调用 lock()
+    Locked --&gt; Locked: 线程 B 调用 lock() &lt;br&gt; (阻塞等待)
+    Locked --&gt; Unlocked: 线程 A 结束作用域 (Drop)
+    Unlocked --&gt; Locked: 线程 B 获得锁
+</pre>
+
+<hr>
+<h2 id="1-mutex-互斥锁"><a class="header" href="#1-mutex-互斥锁">1. Mutex<t>: 互斥锁</t></a></h2>
+<p><code>Mutex</code> (Mutual Exclusion) 提供了一种 <strong>内部可变性</strong> (Interior Mutability)，就像 <code>RefCell</code> 一样，允许你在不可变引用的情况下修改内部数据。</p>
+<ul>
+<li><strong><code>lock()</code></strong>: 阻塞当前线程，直到获取锁。</li>
+<li><strong><code>unwrap()</code></strong>: 如果另一个线程在持有锁时 Panic 了，锁就会变脏 (Poisoned)。<code>unwrap</code> 此时会 Panic。通常我们直接 <code>unwrap</code>，因为一旦数据污染，程序也没法跑了。</li>
+<li><strong><code>MutexGuard</code></strong>: <code>lock()</code> 返回的智能指针。当它离开作用域 (Drop) 时，锁会自动释放。</li>
 </ul>
 <pre class="playground"><code class="language-rust">use std::sync::Mutex;
 
@@ -191,25 +217,58 @@ fn main() {
     let m = Mutex::new(5);
 
     {
+        // 获取锁，block 直到拿到为止
         let mut num = m.lock().unwrap();
         *num = 6;
-    } // 锁在这里自动释放
+    } // 离开作用域，num 被 drop，锁自动释放
 
     println!("m = {:?}", m);
 }</code></pre>
-<h2 id="2-arc-原子引用计数"><a class="header" href="#2-arc-原子引用计数">2. Arc<t> (原子引用计数)</t></a></h2>
-<p>要在多个线程间共享 <code>Mutex&lt;T&gt;</code> 的所有权，我们需要类似 <code>Rc&lt;T&gt;</code> 的东西。但是 <code>Rc&lt;T&gt;</code> 并不是线程安全的。</p>
-<p>Rust 提供了 <code>Arc&lt;T&gt;</code> (Atomic Reference Counting)，它是线程安全的引用计数智能指针。</p>
+<hr>
+<h2 id="2-arc-多线程的所有权"><a class="header" href="#2-arc-多线程的所有权">2. Arc<t>: 多线程的所有权</t></a></h2>
+<p>要在多个线程间共享 <code>Mutex</code>，我们需要多重所有权。</p>
+<ul>
+<li><code>Rc&lt;T&gt;</code>: <strong>非</strong>线程安全。它的计数器更新不是原子的 (Atomic)。</li>
+<li><code>Arc&lt;T&gt;</code>: <strong>A</strong>tomic <strong>R</strong>eference <strong>C</strong>ounting。线程安全，但性能稍低。</li>
+</ul>
+<h3 id="内存布局线程间的共享"><a class="header" href="#内存布局线程间的共享">内存布局：线程间的共享</a></h3>
+<pre class="mermaid">graph TD
+    subgraph Thread1 [线程 1]
+        A1[Arc ptr]
+    end
+    subgraph Thread2 [线程 2]
+        A2[Arc ptr]
+    end
+    
+    subgraph Heap [堆内存]
+        Data[Mutex &lt;br&gt; (包含数据)]
+    end
+    
+    A1 --&gt;|共享| Data
+    A2 --&gt;|共享| Data
+    
+    style Data fill:#e1f5fe
+</pre>
+
+<h3 id="为什么不能用-rc"><a class="header" href="#为什么不能用-rc">为什么不能用 Rc?</a></h3>
+<p>如果在多线程中使用 <code>Rc</code>，两个线程同时增加引用计数 (<code>count += 1</code>)，可能会因为 CPU 缓存竞争导致计数错误，最终导致内存泄漏或 Double Free。<code>Arc</code> 使用 CPU 的原子指令保证了计数的准确性。</p>
+<hr>
+<h2 id="3-标准组合arcmutex"><a class="header" href="#3-标准组合arcmutex">3. 标准组合：Arc&lt;Mutex<t>&gt;</t></a></h2>
+<p>这是 Rust 并发编程中最常见的模式，相当于线程安全版的 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code>。</p>
 <pre class="playground"><code class="language-rust">use std::sync::{Arc, Mutex};
 use std::thread;
 
 fn main() {
+    // 1. 创建共享数据：Arc(Mutex(数据))
     let counter = Arc::new(Mutex::new(0));
     let mut handles = vec![];
 
     for _ in 0..10 {
+        // 2. 克隆 Arc，让新线程拥有所有权
         let counter = Arc::clone(&amp;counter);
+        
         let handle = thread::spawn(move || {
+            // 3.获取锁并修改
             let mut num = counter.lock().unwrap();
             *num += 1;
         });
@@ -220,9 +279,69 @@ fn main() {
         handle.join().unwrap();
     }
 
+    // 主线程读取最终结果
     println!("Result: {}", *counter.lock().unwrap());
 }</code></pre>
-<p>注意：<code>Arc</code> 会带来一些性能损耗，所以如果不需要多线程共享，优先使用 <code>Rc</code>。</p>
+<hr>
+<h2 id="-死锁-deadlock"><a class="header" href="#-死锁-deadlock">☠️ 死锁 (Deadlock)</a></h2>
+<p>Rust 保证内存安全（不会发生数据竞争），但<strong>不保证避免死锁</strong>。
+如果两个线程互相等待对方释放锁，程序就会卡死。</p>
+<pre class="mermaid">graph LR
+    T1[线程 1] --持有--&gt; LockA
+    T1 --等待--&gt; LockB
+    
+    T2[线程 2] --持有--&gt; LockB
+    T2 --等待--&gt; LockA
+    
+    style T1 fill:#ffcccc
+    style T2 fill:#ffcccc
+</pre>
+
+<p><strong>避免策略</strong>:</p>
+<ol>
+<li><strong>顺序加锁</strong>: 总是以相同的顺序获取锁（例如先 A 后 B）。</li>
+<li><strong>缩小锁范围</strong>: 尽量缩短持有锁的时间。</li>
+</ol>
+<hr>
+<h2 id="-智能指针对比表"><a class="header" href="#-智能指针对比表">⚡ 智能指针对比表</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">单线程 (非线程安全)</th><th style="text-align: left">多线程 (线程安全)</th><th style="text-align: left">功能</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>Rc&lt;T&gt;</code></td><td style="text-align: left"><strong><code>Arc&lt;T&gt;</code></strong></td><td style="text-align: left">共享所有权 (只读)</td></tr>
+<tr><td style="text-align: left"><code>RefCell&lt;T&gt;</code></td><td style="text-align: left"><strong><code>Mutex&lt;T&gt;</code></strong></td><td style="text-align: left">内部可变性 (互斥修改)</td></tr>
+<tr><td style="text-align: left"><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></td><td style="text-align: left"><strong><code>Arc&lt;Mutex&lt;T&gt;&gt;</code></strong></td><td style="text-align: left">共享可变状态</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>多线程计数器</strong>: 修复提供的代码，使其能正确地在多线程中计数。</li>
+<li><strong>死锁模拟</strong>: 编写一个必然死锁的程序，并尝试修复它（调整加锁顺序）。</li>
+<li><strong>读写锁</strong>: 了解 <code>RwLock&lt;T&gt;</code>，它允许多个读者或一个写者。尝试用它替换 <code>Mutex</code>。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>锁的粒度</strong>: 锁保护的数据越少越好，持有锁的时间越短越好。</li>
+<li><strong>RwLock</strong>: 如果读操作远多于写操作，使用 <code>RwLock&lt;T&gt;</code> 性能更好。</li>
+<li><strong>Send / Sync</strong>:
+<ul>
+<li><code>Send</code>: 类型的所有权可以在线程间移动。</li>
+<li><code>Sync</code>: 类型的引用 (<code>&amp;T</code>) 可以被多个线程共享。</li>
+<li><code>Mutex&lt;T&gt;</code> 是 <code>Sync</code> 的，只要 <code>T</code> 是 <code>Send</code> 的。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>我们学习了线程、通道和锁。如果我们需要在异步编程（Async/Await）场景下并发呢？
+在进入异步之前，我们先补充一个重要话题：<strong>Trait 对象与面向对象设计模式</strong>。</p>
+<p>下一节: <a href="../25.OOFeatures/README.html">Day 25: 面向对象特性 (OO Features)</a></p>
 
                     </main>
 

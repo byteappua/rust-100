@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-3374bbbf.js";
+            window.path_to_searchindex_js = "../../searchindex-9fd189b9.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -178,58 +178,141 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-23-并发编程---消息传递-message-passing"><a class="header" href="#day-23-并发编程---消息传递-message-passing">Day 23: 并发编程 - 消息传递 (Message Passing)</a></h1>
-<p>Go 语言有一句名言：“不要通过共享内存来通信，而要通过通信来共享内存。” Rust 也支持这种方式，主要通过 <strong>Channel (通道)</strong> 来实现。</p>
-<h2 id="1-mpsc-通道"><a class="header" href="#1-mpsc-通道">1. mpsc 通道</a></h2>
-<p>Rust 标准库提供了 <code>mpsc</code> (Multiple Producer, Single Consumer)，即<strong>多生产者，单消费者</strong>通道。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>掌握 <strong>Message Passing</strong> 并发模型 (“Do not communicate by sharing memory…”)</li>
+<li>理解 <strong>mpsc</strong> (多生产者单消费者) 架构</li>
+<li>掌握 <strong>所有权转移</strong> 在通道中的作用</li>
+<li>区分 <strong>非阻塞 (Asynchronous)</strong> 与 <strong>阻塞 (Synchronous)</strong> 通道</li>
+</ul>
+<h2 id="-核心概念以通信共享内存"><a class="header" href="#-核心概念以通信共享内存">🎯 核心概念：以通信共享内存</a></h2>
+<p>与 “线程 A 和线程 B 同时修改变量 X” 不同，Rust 提倡 “线程 A 把数据 X 发送给线程 B”。
+一旦发送，线程 A 就失去了对 X 的所有权，从而杜绝了数据竞争。</p>
+<blockquote>
+<p>“Do not communicate by sharing memory; instead, share memory by communicating.” - Go Proverb</p>
+</blockquote>
+<h3 id="mpsc-模型流水线"><a class="header" href="#mpsc-模型流水线">MPSC 模型流水线</a></h3>
+<p>Rust 标准库的通道是 <strong>Multiple Producer, Single Consumer</strong> (多生产者，单消费者)。</p>
+<pre class="mermaid">graph LR
+    Producer1[线程 A (Tx)] --&gt;|发送消息| Channel(通道)
+    Producer2[线程 B (Tx1)] --&gt;|发送消息| Channel
+    Channel --&gt;|接收消息| Consumer[主线程 (Rx)]
+    
+    style Channel fill:#e1f5fe
+    style Consumer fill:#fff9c4
+</pre>
+
+<hr>
+<h2 id="-基本使用mpscchannel"><a class="header" href="#-基本使用mpscchannel">🛠️ 基本使用：mpsc::channel</a></h2>
+<p>这是一个 <strong>异步、无限缓冲</strong> 的通道。发送永远不会阻塞（除非内存耗尽），接收会阻塞直到有数据。</p>
+<h3 id="所有权转移图解-the-transfer"><a class="header" href="#所有权转移图解-the-transfer">所有权转移图解 (The Transfer)</a></h3>
+<p>当你调用 <code>send(val)</code> 时，<code>val</code> 的所有权被移交给了通道（最终移交给接收者）。</p>
+<pre class="mermaid">graph LR
+    A[发送端] --move val--&gt; Channel[通道] --move val--&gt; B[接收端]
+    style A fill:#ffcccc
+    style B fill:#ccffcc
+</pre>
+
 <pre class="playground"><code class="language-rust">use std::sync::mpsc;
 use std::thread;
 
 fn main() {
-    // tx: 发送端 (transmitter)
-    // rx: 接收端 (receiver)
     let (tx, rx) = mpsc::channel();
 
     thread::spawn(move || {
         let val = String::from("hi");
-        tx.send(val).unwrap();
-        // send 会转移所有权，val 在这里之后不能再被使用
+        println!("Sending: {}", val);
+        tx.send(val).unwrap(); 
+        // println!("val is {}", val); // ❌ 错误：val 的所有权已经没了！
     });
 
-    // recv() 会阻塞直到收到一个值
-    // try_recv() 不会阻塞
-    let received = rx.recv().unwrap();
+    let received = rx.recv().unwrap(); // 阻塞等待
     println!("Got: {}", received);
 }</code></pre>
-<h2 id="2-发送多个值与遍历接收"><a class="header" href="#2-发送多个值与遍历接收">2. 发送多个值与遍历接收</a></h2>
-<p>接收端 <code>rx</code> 可以被当作迭代器使用。当通道关闭且没有剩余值时，迭代结束。</p>
+<hr>
+<h2 id="-两种通道类型对比"><a class="header" href="#-两种通道类型对比">⚡ 两种通道类型对比</a></h2>
+<p>Rust 提供了两种通道：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">类型</th><th style="text-align: left">构造函数</th><th style="text-align: left">缓冲区大小</th><th style="text-align: left">发送行为 <code>send()</code></th><th style="text-align: left">适用场景</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>异步 (Asynchronous)</strong></td><td style="text-align: left"><code>channel()</code></td><td style="text-align: left">无限</td><td style="text-align: left"><strong>非阻塞</strong> (立即返回)</td><td style="text-align: left">生产者不应等待，或者生产速度慢于消费速度</td></tr>
+<tr><td style="text-align: left"><strong>同步 (Synchronous)</strong></td><td style="text-align: left"><code>sync_channel(N)</code></td><td style="text-align: left">固定大小 N</td><td style="text-align: left"><strong>阻塞</strong> (直到缓冲区有空位)</td><td style="text-align: left">需要背压 (Backpressure)，限制生产速度</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="同步通道示例-backpressure"><a class="header" href="#同步通道示例-backpressure">同步通道示例 (Backpressure)</a></h3>
+<pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    // 缓冲区只有 1。如果里面已经着了 1 个消息，再发就会阻塞。
+    let (tx, rx) = mpsc::sync_channel(1);
+
+    thread::spawn(move || {
+        println!("发送 1...");
+        tx.send(1).unwrap(); // 成功，缓冲 1/1
+        
+        println!("发送 2...");
+        tx.send(2).unwrap(); // 阻塞！直到接收端拿走了 1
+        println!("2 发送成功！");
+    });
+
+    thread::sleep(Duration::from_secs(2));
+    println!("接收: {}", rx.recv().unwrap()); // 拿走 1，发送端解除阻塞
+}</code></pre>
+<hr>
+<h2 id="-发送多个值-迭代器模式"><a class="header" href="#-发送多个值-迭代器模式">🔄 发送多个值 (迭代器模式)</a></h2>
+<p>接收端 <code>Rx</code> 实现了 <code>Iterator</code> trait，可以像遍历数组一样遍历消息，直到通道关闭。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>thread::spawn(move || {
-    let vals = vec![
-        String::from("hi"),
-        String::from("from"),
-        String::from("thread"),
-    ];
+</span>let (tx, rx) = mpsc::channel();
+let tx1 = tx.clone(); // 克隆发送端，支持多生产者
 
-    for val in vals {
-        tx.send(val).unwrap();
-        thread::sleep(Duration::from_secs(1));
+thread::spawn(move || {
+    let vals = vec!["A", "B", "C"];
+    for v in vals {
+        tx1.send(v).unwrap();
+        thread::sleep(Duration::from_millis(1));
     }
-}); // 闭包结束，tx 离开作用域，通道被关闭
+}); // 线程结束，tx1 销毁
 
+thread::spawn(move || {
+    let vals = vec!["D", "E", "F"];
+    for v in vals {
+        tx.send(v).unwrap();
+        thread::sleep(Duration::from_millis(1));
+    }
+}); // 线程结束，tx 销毁
+
+// 只要还有 tx 活着，迭代器就不会结束
+// 当所有 tx 都销毁且 buffer 空了，迭代结束
 for received in rx {
     println!("Got: {}", received);
 }
 <span class="boring">}</span></code></pre>
-<h2 id="3-多生产者"><a class="header" href="#3-多生产者">3. 多生产者</a></h2>
-<p>可以通过 <code>tx.clone()</code> 创建多个发送端，它们都发送到同一个接收端。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let (tx, rx) = mpsc::channel();
-let tx1 = tx.clone();
-thread::spawn(move || { tx1.send(...).unwrap(); });
-thread::spawn(move || { tx.send(...).unwrap(); });
-<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>多线程聊天室</strong>: 创建 3 个线程模拟用户，向主线程发送消息，主线程打印出来。</li>
+<li><strong>工作池 (Worker Pool)</strong>: 创建一个任务通道，分发给 4 个 Worker 线程执行。</li>
+<li><strong>同步限制</strong>: 使用 <code>sync_channel</code> 模拟一个生产速度远快于消费速度的场景，观察发送端的阻塞行为。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>克隆发送端</strong>: <code>tx</code> 可以无限克隆 (<code>mpsc</code>)，但 <code>rx</code> 只能有一个。</li>
+<li><strong>错误处理</strong>: <code>send</code> 会返回 <code>Result</code>。如果接收端 <code>rx</code> 已经被销毁了，<code>send</code> 会报错。利用这一点可以优雅退出生产者线程。</li>
+<li><strong>所有权</strong>: 发送的消息必须实现了 <code>Send</code> trait（几乎所有类型都是）。</li>
+</ol>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>如果多个线程必须 <strong>同时访问</strong> 同一个内存位置（而不是传递它），我们该怎么办？这就需要锁（Locks）。</p>
+<p>下一节: <a href="../24.SharedState/README.html">Day 24: 共享状态并发 (Shared State)</a></p>
 
                     </main>
 

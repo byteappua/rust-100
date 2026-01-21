@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-3374bbbf.js";
+            window.path_to_searchindex_js = "searchindex-9fd189b9.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-794baa04.js"></script>
@@ -7388,66 +7388,175 @@ handle.join().unwrap();
 <p>下一节: <a href="Day16-30/23.MessagePassing/README.html">Day 23: 消息传递 (Message Passing)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-23-并发编程---消息传递-message-passing"><a class="header" href="#day-23-并发编程---消息传递-message-passing">Day 23: 并发编程 - 消息传递 (Message Passing)</a></h1>
-<p>Go 语言有一句名言：“不要通过共享内存来通信，而要通过通信来共享内存。” Rust 也支持这种方式，主要通过 <strong>Channel (通道)</strong> 来实现。</p>
-<h2 id="1-mpsc-通道"><a class="header" href="#1-mpsc-通道">1. mpsc 通道</a></h2>
-<p>Rust 标准库提供了 <code>mpsc</code> (Multiple Producer, Single Consumer)，即<strong>多生产者，单消费者</strong>通道。</p>
+<h2 id="-学习目标-20"><a class="header" href="#-学习目标-20">📝 学习目标</a></h2>
+<ul>
+<li>掌握 <strong>Message Passing</strong> 并发模型 (“Do not communicate by sharing memory…”)</li>
+<li>理解 <strong>mpsc</strong> (多生产者单消费者) 架构</li>
+<li>掌握 <strong>所有权转移</strong> 在通道中的作用</li>
+<li>区分 <strong>非阻塞 (Asynchronous)</strong> 与 <strong>阻塞 (Synchronous)</strong> 通道</li>
+</ul>
+<h2 id="-核心概念以通信共享内存"><a class="header" href="#-核心概念以通信共享内存">🎯 核心概念：以通信共享内存</a></h2>
+<p>与 “线程 A 和线程 B 同时修改变量 X” 不同，Rust 提倡 “线程 A 把数据 X 发送给线程 B”。
+一旦发送，线程 A 就失去了对 X 的所有权，从而杜绝了数据竞争。</p>
+<blockquote>
+<p>“Do not communicate by sharing memory; instead, share memory by communicating.” - Go Proverb</p>
+</blockquote>
+<h3 id="mpsc-模型流水线"><a class="header" href="#mpsc-模型流水线">MPSC 模型流水线</a></h3>
+<p>Rust 标准库的通道是 <strong>Multiple Producer, Single Consumer</strong> (多生产者，单消费者)。</p>
+<pre class="mermaid">graph LR
+    Producer1[线程 A (Tx)] --&gt;|发送消息| Channel(通道)
+    Producer2[线程 B (Tx1)] --&gt;|发送消息| Channel
+    Channel --&gt;|接收消息| Consumer[主线程 (Rx)]
+    
+    style Channel fill:#e1f5fe
+    style Consumer fill:#fff9c4
+</pre>
+
+<hr>
+<h2 id="-基本使用mpscchannel"><a class="header" href="#-基本使用mpscchannel">🛠️ 基本使用：mpsc::channel</a></h2>
+<p>这是一个 <strong>异步、无限缓冲</strong> 的通道。发送永远不会阻塞（除非内存耗尽），接收会阻塞直到有数据。</p>
+<h3 id="所有权转移图解-the-transfer"><a class="header" href="#所有权转移图解-the-transfer">所有权转移图解 (The Transfer)</a></h3>
+<p>当你调用 <code>send(val)</code> 时，<code>val</code> 的所有权被移交给了通道（最终移交给接收者）。</p>
+<pre class="mermaid">graph LR
+    A[发送端] --move val--&gt; Channel[通道] --move val--&gt; B[接收端]
+    style A fill:#ffcccc
+    style B fill:#ccffcc
+</pre>
+
 <pre class="playground"><code class="language-rust">use std::sync::mpsc;
 use std::thread;
 
 fn main() {
-    // tx: 发送端 (transmitter)
-    // rx: 接收端 (receiver)
     let (tx, rx) = mpsc::channel();
 
     thread::spawn(move || {
         let val = String::from("hi");
-        tx.send(val).unwrap();
-        // send 会转移所有权，val 在这里之后不能再被使用
+        println!("Sending: {}", val);
+        tx.send(val).unwrap(); 
+        // println!("val is {}", val); // ❌ 错误：val 的所有权已经没了！
     });
 
-    // recv() 会阻塞直到收到一个值
-    // try_recv() 不会阻塞
-    let received = rx.recv().unwrap();
+    let received = rx.recv().unwrap(); // 阻塞等待
     println!("Got: {}", received);
 }</code></pre>
-<h2 id="2-发送多个值与遍历接收"><a class="header" href="#2-发送多个值与遍历接收">2. 发送多个值与遍历接收</a></h2>
-<p>接收端 <code>rx</code> 可以被当作迭代器使用。当通道关闭且没有剩余值时，迭代结束。</p>
+<hr>
+<h2 id="-两种通道类型对比"><a class="header" href="#-两种通道类型对比">⚡ 两种通道类型对比</a></h2>
+<p>Rust 提供了两种通道：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">类型</th><th style="text-align: left">构造函数</th><th style="text-align: left">缓冲区大小</th><th style="text-align: left">发送行为 <code>send()</code></th><th style="text-align: left">适用场景</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>异步 (Asynchronous)</strong></td><td style="text-align: left"><code>channel()</code></td><td style="text-align: left">无限</td><td style="text-align: left"><strong>非阻塞</strong> (立即返回)</td><td style="text-align: left">生产者不应等待，或者生产速度慢于消费速度</td></tr>
+<tr><td style="text-align: left"><strong>同步 (Synchronous)</strong></td><td style="text-align: left"><code>sync_channel(N)</code></td><td style="text-align: left">固定大小 N</td><td style="text-align: left"><strong>阻塞</strong> (直到缓冲区有空位)</td><td style="text-align: left">需要背压 (Backpressure)，限制生产速度</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="同步通道示例-backpressure"><a class="header" href="#同步通道示例-backpressure">同步通道示例 (Backpressure)</a></h3>
+<pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    // 缓冲区只有 1。如果里面已经着了 1 个消息，再发就会阻塞。
+    let (tx, rx) = mpsc::sync_channel(1);
+
+    thread::spawn(move || {
+        println!("发送 1...");
+        tx.send(1).unwrap(); // 成功，缓冲 1/1
+        
+        println!("发送 2...");
+        tx.send(2).unwrap(); // 阻塞！直到接收端拿走了 1
+        println!("2 发送成功！");
+    });
+
+    thread::sleep(Duration::from_secs(2));
+    println!("接收: {}", rx.recv().unwrap()); // 拿走 1，发送端解除阻塞
+}</code></pre>
+<hr>
+<h2 id="-发送多个值-迭代器模式"><a class="header" href="#-发送多个值-迭代器模式">🔄 发送多个值 (迭代器模式)</a></h2>
+<p>接收端 <code>Rx</code> 实现了 <code>Iterator</code> trait，可以像遍历数组一样遍历消息，直到通道关闭。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>thread::spawn(move || {
-    let vals = vec![
-        String::from("hi"),
-        String::from("from"),
-        String::from("thread"),
-    ];
+</span>let (tx, rx) = mpsc::channel();
+let tx1 = tx.clone(); // 克隆发送端，支持多生产者
 
-    for val in vals {
-        tx.send(val).unwrap();
-        thread::sleep(Duration::from_secs(1));
+thread::spawn(move || {
+    let vals = vec!["A", "B", "C"];
+    for v in vals {
+        tx1.send(v).unwrap();
+        thread::sleep(Duration::from_millis(1));
     }
-}); // 闭包结束，tx 离开作用域，通道被关闭
+}); // 线程结束，tx1 销毁
 
+thread::spawn(move || {
+    let vals = vec!["D", "E", "F"];
+    for v in vals {
+        tx.send(v).unwrap();
+        thread::sleep(Duration::from_millis(1));
+    }
+}); // 线程结束，tx 销毁
+
+// 只要还有 tx 活着，迭代器就不会结束
+// 当所有 tx 都销毁且 buffer 空了，迭代结束
 for received in rx {
     println!("Got: {}", received);
 }
 <span class="boring">}</span></code></pre>
-<h2 id="3-多生产者"><a class="header" href="#3-多生产者">3. 多生产者</a></h2>
-<p>可以通过 <code>tx.clone()</code> 创建多个发送端，它们都发送到同一个接收端。</p>
-<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let (tx, rx) = mpsc::channel();
-let tx1 = tx.clone();
-thread::spawn(move || { tx1.send(...).unwrap(); });
-thread::spawn(move || { tx.send(...).unwrap(); });
-<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-练习题-19"><a class="header" href="#-练习题-19">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="Day16-30/23.MessagePassing/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>多线程聊天室</strong>: 创建 3 个线程模拟用户，向主线程发送消息，主线程打印出来。</li>
+<li><strong>工作池 (Worker Pool)</strong>: 创建一个任务通道，分发给 4 个 Worker 线程执行。</li>
+<li><strong>同步限制</strong>: 使用 <code>sync_channel</code> 模拟一个生产速度远快于消费速度的场景，观察发送端的阻塞行为。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-16"><a class="header" href="#-最佳实践-16">💡 最佳实践</a></h2>
+<ol>
+<li><strong>克隆发送端</strong>: <code>tx</code> 可以无限克隆 (<code>mpsc</code>)，但 <code>rx</code> 只能有一个。</li>
+<li><strong>错误处理</strong>: <code>send</code> 会返回 <code>Result</code>。如果接收端 <code>rx</code> 已经被销毁了，<code>send</code> 会报错。利用这一点可以优雅退出生产者线程。</li>
+<li><strong>所有权</strong>: 发送的消息必须实现了 <code>Send</code> trait（几乎所有类型都是）。</li>
+</ol>
+<hr>
+<h2 id="-下一步-30"><a class="header" href="#-下一步-30">⏭️ 下一步</a></h2>
+<p>如果多个线程必须 <strong>同时访问</strong> 同一个内存位置（而不是传递它），我们该怎么办？这就需要锁（Locks）。</p>
+<p>下一节: <a href="Day16-30/24.SharedState/README.html">Day 24: 共享状态并发 (Shared State)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-24-并发编程---共享状态-shared-state"><a class="header" href="#day-24-并发编程---共享状态-shared-state">Day 24: 并发编程 - 共享状态 (Shared State)</a></h1>
-<p>另一种并发模型是共享内存。在 Rust 中，这通常意味着多线程同时访问和修改同一块数据。</p>
-<h2 id="1-mutex-互斥器"><a class="header" href="#1-mutex-互斥器">1. Mutex<t> (互斥器)</t></a></h2>
-<p><code>Mutex</code> (Mutual Exclusion) 允许一次只允许一个线程访问数据。要访问数据，线程必须先获取锁 (<code>lock</code>)。</p>
+<h2 id="-学习目标-21"><a class="header" href="#-学习目标-21">📝 学习目标</a></h2>
 <ul>
-<li><code>Mutex&lt;T&gt;</code> 提供<strong>内部可变性</strong>（类似于 <code>RefCell&lt;T&gt;</code>）。</li>
-<li><code>lock()</code> 返回一个 <code>MutexGuard</code> 智能指针，当它离开作用域时，锁会自动释放。</li>
+<li>理解 <strong>共享状态</strong> 并发模型 (“Shared Memory”)</li>
+<li>掌握 <strong><code>Mutex&lt;T&gt;</code></strong> (互斥锁) 的使用与原理</li>
+<li>掌握 <strong><code>Arc&lt;T&gt;</code></strong> (原子引用计数) 在多线程中的作用</li>
+<li>理解 <strong>死锁 (Deadlock)</strong> 及其成因</li>
+<li>区分 <code>Rc</code>/<code>RefCell</code> 与 <code>Arc</code>/<code>Mutex</code></li>
+</ul>
+<h2 id="-核心概念抢麦克风"><a class="header" href="#-核心概念抢麦克风">🎯 核心概念：抢麦克风</a></h2>
+<p>如果说 Message Passing 是传纸条，那 Shared State 就是一群人抢同一个麦克风。
+<strong>规则</strong>：</p>
+<ol>
+<li>想说话必须先拿到麦克风（获取锁 <code>lock</code>）。</li>
+<li>同一时间只能有一个人拿麦克风（互斥 <code>Mutex</code>）。</li>
+<li>说完了必须把麦克风放下（释放锁 <code>drop</code>）。</li>
+</ol>
+<h3 id="mutex-状态机"><a class="header" href="#mutex-状态机">Mutex 状态机</a></h3>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Unlocked: 初始状态
+    Unlocked --&gt; Locked: 线程 A 调用 lock()
+    Locked --&gt; Locked: 线程 B 调用 lock() &lt;br&gt; (阻塞等待)
+    Locked --&gt; Unlocked: 线程 A 结束作用域 (Drop)
+    Unlocked --&gt; Locked: 线程 B 获得锁
+</pre>
+
+<hr>
+<h2 id="1-mutex-互斥锁"><a class="header" href="#1-mutex-互斥锁">1. Mutex<t>: 互斥锁</t></a></h2>
+<p><code>Mutex</code> (Mutual Exclusion) 提供了一种 <strong>内部可变性</strong> (Interior Mutability)，就像 <code>RefCell</code> 一样，允许你在不可变引用的情况下修改内部数据。</p>
+<ul>
+<li><strong><code>lock()</code></strong>: 阻塞当前线程，直到获取锁。</li>
+<li><strong><code>unwrap()</code></strong>: 如果另一个线程在持有锁时 Panic 了，锁就会变脏 (Poisoned)。<code>unwrap</code> 此时会 Panic。通常我们直接 <code>unwrap</code>，因为一旦数据污染，程序也没法跑了。</li>
+<li><strong><code>MutexGuard</code></strong>: <code>lock()</code> 返回的智能指针。当它离开作用域 (Drop) 时，锁会自动释放。</li>
 </ul>
 <pre class="playground"><code class="language-rust">use std::sync::Mutex;
 
@@ -7455,25 +7564,58 @@ fn main() {
     let m = Mutex::new(5);
 
     {
+        // 获取锁，block 直到拿到为止
         let mut num = m.lock().unwrap();
         *num = 6;
-    } // 锁在这里自动释放
+    } // 离开作用域，num 被 drop，锁自动释放
 
     println!("m = {:?}", m);
 }</code></pre>
-<h2 id="2-arc-原子引用计数"><a class="header" href="#2-arc-原子引用计数">2. Arc<t> (原子引用计数)</t></a></h2>
-<p>要在多个线程间共享 <code>Mutex&lt;T&gt;</code> 的所有权，我们需要类似 <code>Rc&lt;T&gt;</code> 的东西。但是 <code>Rc&lt;T&gt;</code> 并不是线程安全的。</p>
-<p>Rust 提供了 <code>Arc&lt;T&gt;</code> (Atomic Reference Counting)，它是线程安全的引用计数智能指针。</p>
+<hr>
+<h2 id="2-arc-多线程的所有权"><a class="header" href="#2-arc-多线程的所有权">2. Arc<t>: 多线程的所有权</t></a></h2>
+<p>要在多个线程间共享 <code>Mutex</code>，我们需要多重所有权。</p>
+<ul>
+<li><code>Rc&lt;T&gt;</code>: <strong>非</strong>线程安全。它的计数器更新不是原子的 (Atomic)。</li>
+<li><code>Arc&lt;T&gt;</code>: <strong>A</strong>tomic <strong>R</strong>eference <strong>C</strong>ounting。线程安全，但性能稍低。</li>
+</ul>
+<h3 id="内存布局线程间的共享"><a class="header" href="#内存布局线程间的共享">内存布局：线程间的共享</a></h3>
+<pre class="mermaid">graph TD
+    subgraph Thread1 [线程 1]
+        A1[Arc ptr]
+    end
+    subgraph Thread2 [线程 2]
+        A2[Arc ptr]
+    end
+    
+    subgraph Heap [堆内存]
+        Data[Mutex &lt;br&gt; (包含数据)]
+    end
+    
+    A1 --&gt;|共享| Data
+    A2 --&gt;|共享| Data
+    
+    style Data fill:#e1f5fe
+</pre>
+
+<h3 id="为什么不能用-rc"><a class="header" href="#为什么不能用-rc">为什么不能用 Rc?</a></h3>
+<p>如果在多线程中使用 <code>Rc</code>，两个线程同时增加引用计数 (<code>count += 1</code>)，可能会因为 CPU 缓存竞争导致计数错误，最终导致内存泄漏或 Double Free。<code>Arc</code> 使用 CPU 的原子指令保证了计数的准确性。</p>
+<hr>
+<h2 id="3-标准组合arcmutex"><a class="header" href="#3-标准组合arcmutex">3. 标准组合：Arc&lt;Mutex<t>&gt;</t></a></h2>
+<p>这是 Rust 并发编程中最常见的模式，相当于线程安全版的 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code>。</p>
 <pre class="playground"><code class="language-rust">use std::sync::{Arc, Mutex};
 use std::thread;
 
 fn main() {
+    // 1. 创建共享数据：Arc(Mutex(数据))
     let counter = Arc::new(Mutex::new(0));
     let mut handles = vec![];
 
     for _ in 0..10 {
+        // 2. 克隆 Arc，让新线程拥有所有权
         let counter = Arc::clone(&amp;counter);
+        
         let handle = thread::spawn(move || {
+            // 3.获取锁并修改
             let mut num = counter.lock().unwrap();
             *num += 1;
         });
@@ -7484,9 +7626,69 @@ fn main() {
         handle.join().unwrap();
     }
 
+    // 主线程读取最终结果
     println!("Result: {}", *counter.lock().unwrap());
 }</code></pre>
-<p>注意：<code>Arc</code> 会带来一些性能损耗，所以如果不需要多线程共享，优先使用 <code>Rc</code>。</p>
+<hr>
+<h2 id="-死锁-deadlock"><a class="header" href="#-死锁-deadlock">☠️ 死锁 (Deadlock)</a></h2>
+<p>Rust 保证内存安全（不会发生数据竞争），但<strong>不保证避免死锁</strong>。
+如果两个线程互相等待对方释放锁，程序就会卡死。</p>
+<pre class="mermaid">graph LR
+    T1[线程 1] --持有--&gt; LockA
+    T1 --等待--&gt; LockB
+    
+    T2[线程 2] --持有--&gt; LockB
+    T2 --等待--&gt; LockA
+    
+    style T1 fill:#ffcccc
+    style T2 fill:#ffcccc
+</pre>
+
+<p><strong>避免策略</strong>:</p>
+<ol>
+<li><strong>顺序加锁</strong>: 总是以相同的顺序获取锁（例如先 A 后 B）。</li>
+<li><strong>缩小锁范围</strong>: 尽量缩短持有锁的时间。</li>
+</ol>
+<hr>
+<h2 id="-智能指针对比表"><a class="header" href="#-智能指针对比表">⚡ 智能指针对比表</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">单线程 (非线程安全)</th><th style="text-align: left">多线程 (线程安全)</th><th style="text-align: left">功能</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><code>Rc&lt;T&gt;</code></td><td style="text-align: left"><strong><code>Arc&lt;T&gt;</code></strong></td><td style="text-align: left">共享所有权 (只读)</td></tr>
+<tr><td style="text-align: left"><code>RefCell&lt;T&gt;</code></td><td style="text-align: left"><strong><code>Mutex&lt;T&gt;</code></strong></td><td style="text-align: left">内部可变性 (互斥修改)</td></tr>
+<tr><td style="text-align: left"><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></td><td style="text-align: left"><strong><code>Arc&lt;Mutex&lt;T&gt;&gt;</code></strong></td><td style="text-align: left">共享可变状态</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="-练习题-20"><a class="header" href="#-练习题-20">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="Day16-30/24.SharedState/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>多线程计数器</strong>: 修复提供的代码，使其能正确地在多线程中计数。</li>
+<li><strong>死锁模拟</strong>: 编写一个必然死锁的程序，并尝试修复它（调整加锁顺序）。</li>
+<li><strong>读写锁</strong>: 了解 <code>RwLock&lt;T&gt;</code>，它允许多个读者或一个写者。尝试用它替换 <code>Mutex</code>。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-17"><a class="header" href="#-最佳实践-17">💡 最佳实践</a></h2>
+<ol>
+<li><strong>锁的粒度</strong>: 锁保护的数据越少越好，持有锁的时间越短越好。</li>
+<li><strong>RwLock</strong>: 如果读操作远多于写操作，使用 <code>RwLock&lt;T&gt;</code> 性能更好。</li>
+<li><strong>Send / Sync</strong>:
+<ul>
+<li><code>Send</code>: 类型的所有权可以在线程间移动。</li>
+<li><code>Sync</code>: 类型的引用 (<code>&amp;T</code>) 可以被多个线程共享。</li>
+<li><code>Mutex&lt;T&gt;</code> 是 <code>Sync</code> 的，只要 <code>T</code> 是 <code>Send</code> 的。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="-下一步-31"><a class="header" href="#-下一步-31">⏭️ 下一步</a></h2>
+<p>我们学习了线程、通道和锁。如果我们需要在异步编程（Async/Await）场景下并发呢？
+在进入异步之前，我们先补充一个重要话题：<strong>Trait 对象与面向对象设计模式</strong>。</p>
+<p>下一节: <a href="Day16-30/25.OOFeatures/README.html">Day 25: 面向对象特性 (OO Features)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-25-并发编程---send-与-sync-trait"><a class="header" href="#day-25-并发编程---send-与-sync-trait">Day 25: 并发编程 - Send 与 Sync Trait</a></h1>
 <p><code>Send</code> 和 <code>Sync</code> 是 Rust 并发安全的基石。它们是 <strong>Marker Traits</strong>（标记 Trait），没有任何方法，只是用来标记类型具有某些并发属性。</p>
