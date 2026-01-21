@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-9fd189b9.js";
+            window.path_to_searchindex_js = "searchindex-daa7f0db.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-794baa04.js"></script>
@@ -7691,76 +7691,264 @@ fn main() {
 <p>下一节: <a href="Day16-30/25.OOFeatures/README.html">Day 25: 面向对象特性 (OO Features)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-25-并发编程---send-与-sync-trait"><a class="header" href="#day-25-并发编程---send-与-sync-trait">Day 25: 并发编程 - Send 与 Sync Trait</a></h1>
-<p><code>Send</code> 和 <code>Sync</code> 是 Rust 并发安全的基石。它们是 <strong>Marker Traits</strong>（标记 Trait），没有任何方法，只是用来标记类型具有某些并发属性。</p>
-<h2 id="1-send-trait"><a class="header" href="#1-send-trait">1. Send Trait</a></h2>
-<p><code>Send</code> 标记表明类型的所有权可以在线程间转移。</p>
+<h2 id="-学习目标-22"><a class="header" href="#-学习目标-22">📝 学习目标</a></h2>
 <ul>
-<li>几乎所有的 Rust 类型都是 <code>Send</code> 的。</li>
-<li>主要例外：<code>Rc&lt;T&gt;</code>。因为 <code>Rc</code> 的引用计数不是原子的，在多线程间转移会导致计数错误。</li>
-<li><code>Raw Pointers</code> (裸指针) 也不是 <code>Send</code> 的。</li>
+<li>理解 <strong>Marker Traits</strong> (标记 Trait) 的概念</li>
+<li>掌握 <strong><code>Send</code></strong> (所有权传送) 与 <strong><code>Sync</code></strong> (线程间共享) 的区别</li>
+<li>理解 “T is Sync if and only if &amp;T is Send” 的逻辑关系</li>
+<li>能够识别哪些类型是线程安全的，哪些不是</li>
 </ul>
-<p>如果一个类型完全由 <code>Send</code> 的类型组成，那么它自动就是 <code>Send</code> 的。</p>
-<h2 id="2-sync-trait"><a class="header" href="#2-sync-trait">2. Sync Trait</a></h2>
-<p><code>Sync</code> 标记表明类型可以被多个线程安全地共享引用（即 <code>&amp;T</code> 是 <code>Send</code> 的）。</p>
+<h2 id="-核心概念安全的基石"><a class="header" href="#-核心概念安全的基石">🎯 核心概念：安全的基石</a></h2>
+<p>Rust 的并发安全不仅仅靠可以 “锁” (Mutex) 或者 “通道” (Channel)，更底层的是靠 <strong>类型系统</strong>。
+<code>Send</code> 和 <code>Sync</code> 是 Rust 编译器在多线程环境下保驾护航的两个 “门神”。它们告诉编译器：这个类型能不能安全地送到另一个线程？能不能被多个线程同时看？</p>
+<h3 id="关系逻辑图"><a class="header" href="#关系逻辑图">关系逻辑图</a></h3>
+<pre class="mermaid">graph TD
+    Type[类型 T] --&gt; CheckSend{能在线程间移动吗?}
+    CheckSend --Yes--&gt; Send[impl Send for T]
+    CheckSend --No--&gt; NotSend[非 Send (如 Rc, 裸指针)]
+    
+    Type --&gt; CheckSync{能被多线程同时读取吗?}
+    CheckSync --Yes--&gt; Sync[impl Sync for T]
+    CheckSync --No--&gt; NotSync[非 Sync (如 RefCell, Rc)]
+    
+    Sync -.-&gt;|蕴含| SendRef[impl Send for &amp;T]
+    
+    style Send fill:#ccffcc
+    style Sync fill:#e1f5fe
+    style NotSend fill:#ffcccc
+    style NotSync fill:#ffcccc
+</pre>
+
+<hr>
+<h2 id="1-send-所有权的转移"><a class="header" href="#1-send-所有权的转移">1. Send: 所有权的转移</a></h2>
+<p><strong><code>Send</code> 标记表明类型 T 的所有权可以在线程间转移。</strong></p>
 <ul>
-<li>基本类型是 <code>Sync</code> 的。</li>
-<li><code>Mutex&lt;T&gt;</code> 是 <code>Sync</code> 的。</li>
-<li><code>RefCell&lt;T&gt;</code> 不是 <code>Sync</code> 的，因为它的运行时借用检查不是线程安全的。</li>
-<li><code>Rc&lt;T&gt;</code> 不是 <code>Sync</code> 的。</li>
+<li><strong>绝大多数类型</strong>都是 <code>Send</code> 的（如 <code>i32</code>, <code>String</code>, <code>Box&lt;T&gt;</code>, <code>Mutex&lt;T&gt;</code>）。</li>
+<li><strong>例外</strong>：<code>Rc&lt;T&gt;</code>。因为如果把 <code>Rc</code> 移到另一个线程，两个线程同时修改引用计数会导致数据竞争（非原子操作）。</li>
 </ul>
-<h2 id="3-手动实现"><a class="header" href="#3-手动实现">3. 手动实现</a></h2>
-<p>通常不需要手动实现 <code>Send</code> 和 <code>Sync</code>，编译器会自动推导。手动实现是不安全的（<code>unsafe</code>），通常只在编写底层并发原语时需要。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>// 仅作演示，通常由编译器自动推导
-unsafe impl Send for MyType {}
-unsafe impl Sync for MyType {}
+</span>use std::thread;
+use std::rc::Rc;
+
+let r = Rc::new(5);
+// ❌ 编译错误！Rc&lt;i32&gt; 没有实现 Send，不能 move 进线程
+thread::spawn(move || {
+    println!("{}", r);
+});
 <span class="boring">}</span></code></pre>
-<h2 id="4-编译器检查"><a class="header" href="#4-编译器检查">4. 编译器检查</a></h2>
-<p>Rust 编译器会利用这些 Trait 来检查并发代码的安全性。例如 <code>thread::spawn</code> 的签名要求闭包捕获的变量必须是 <code>Send</code> 的。</p>
+<hr>
+<h2 id="2-sync-线程间共享"><a class="header" href="#2-sync-线程间共享">2. Sync: 线程间共享</a></h2>
+<p><strong><code>Sync</code> 标记表明类型 T 可以被多个线程安全地共享引用 (通过 <code>&amp;T</code>)。</strong></p>
+<h3 id="黄金法则"><a class="header" href="#黄金法则">黄金法则</a></h3>
+<blockquote>
+<p><strong>T is <code>Sync</code> if and only if <code>&amp;T</code> is <code>Send</code>.</strong>
+(如果 T 的引用可以被送往另一个线程，那么 T 就是 Sync 的)</p>
+</blockquote>
+<p>这听起来有点绕，但逻辑很简单：如果我在线程 A 有一个 <code>&amp;T</code>，我把它传给线程 B，那现在 A 和 B 都有 <code>&amp;T</code>，也就是都在访问同一个 T。这就叫 “共享”。</p>
+<ul>
+<li><strong><code>Mutex&lt;T&gt;</code></strong> 是 <code>Sync</code> 的（它可以被多线程共享）。</li>
+<li><strong><code>RefCell&lt;T&gt;</code></strong> 不是 <code>Sync</code> 的（它的运行时借用检查不是线程安全的，多线程同时 <code>borrow_mut</code> 会导致数据竞争）。</li>
+</ul>
+<hr>
+<h2 id="-线程安全矩阵-thread-safety-matrix"><a class="header" href="#-线程安全矩阵-thread-safety-matrix">📊 线程安全矩阵 (Thread Safety Matrix)</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">类型</th><th style="text-align: left">Send?</th><th style="text-align: left">Sync?</th><th style="text-align: left">说明</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>i32</code>, <code>bool</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">简单值拷贝，哪里都能去</td></tr>
+<tr><td style="text-align: left"><strong><code>String</code>, <code>Vec&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">独占所有权，Move 没问题</td></tr>
+<tr><td style="text-align: left"><strong><code>Rc&lt;T&gt;</code></strong></td><td style="text-align: left">❌</td><td style="text-align: left">❌</td><td style="text-align: left">引用计数非原子，彻底不安全</td></tr>
+<tr><td style="text-align: left"><strong><code>Arc&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">原子引用计数，专门为多线程设计</td></tr>
+<tr><td style="text-align: left"><strong><code>RefCell&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">❌</td><td style="text-align: left">可以 Move，但不能在线程间共享引用 (因为内部检查不安全)</td></tr>
+<tr><td style="text-align: left"><strong><code>Mutex&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">内部有锁，可以安全共享</td></tr>
+<tr><td style="text-align: left"><strong><code>*const T</code></strong> (裸指针)</td><td style="text-align: left">❌</td><td style="text-align: left">❌</td><td style="text-align: left">编译器无法追踪裸指针，默认不安全</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="3-手动实现-unsafe"><a class="header" href="#3-手动实现-unsafe">3. 手动实现 (Unsafe)</a></h2>
+<p>通常你不需要手动实现这些 Trait，编译器会自动为由 Send/Sync 类型组成的结构体自动推导。
+但如果你编写底层代码（如使用裸指针实现自己的 Vec），可能需要手动通过 <code>unsafe</code> 告诉编译器：“相信我，这是安全的”。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn spawn&lt;F, T&gt;(f: F) -&gt; JoinHandle&lt;T&gt;
-where
-    F: FnOnce() -&gt; T,
-    F: Send + 'static,
-    T: Send + 'static,
+</span>struct MyBox(*mut u8);
+
+// 只有当我确信你是由于某种原因安全的时候...
+unsafe impl Send for MyBox {}
+unsafe impl Sync for MyBox {}
 <span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-练习题-21"><a class="header" href="#-练习题-21">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="Day16-30/25.SendSync/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>Rc 挑战</strong>: 尝试在 <code>thread::spawn</code> 中使用 <code>Rc</code>, 阅读编译器给出的错误信息。</li>
+<li><strong>验证 RefCell</strong>: 尝试将 <code>&amp;RefCell&lt;i32&gt;</code> 传递给另一个线程，观察报错。</li>
+<li><strong>Wrapper</strong>: 创建一个包含 <code>Rc</code> 的 NewType 结构体，手动为其实现 <code>Send</code> (虽然这很不安全)，骗过编译器并强行运行，观察可能发生的崩溃或数据错误（仅用于教学！）。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-18"><a class="header" href="#-最佳实践-18">💡 最佳实践</a></h2>
+<ol>
+<li><strong>相信编译器</strong>: 如果编译器报 “T cannot be sent between threads safely”，通常是你错误地使用了 <code>Rc</code> 或 <code>RefCell</code>，或者忘记用 <code>Arc</code>/<code>Mutex</code> 包装了。</li>
+<li><strong>Arc&lt;Mutex<t>&gt;</t></strong>: 记住这个公式。<code>Arc</code> 提供 Send/Sync (让多线程持有)，<code>Mutex</code> 提供内部可变性 (让多线程修改)。</li>
+</ol>
+<hr>
+<h2 id="-下一步-32"><a class="header" href="#-下一步-32">⏭️ 下一步</a></h2>
+<p>关于并发的内存安全我们已经讲透了。
+现在，让我们换个脑子，回到 Rust 的语言特性本身。Rust 不是面向对象的语言，但它确实有一些面向对象的特性。</p>
+<p>下一节: <a href="Day16-30/26.OOP_TraitObjects/README.html">Day 26: 面向对象特性 (OO Features)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-26-面向对象特性---trait-对象"><a class="header" href="#day-26-面向对象特性---trait-对象">Day 26: 面向对象特性 - Trait 对象</a></h1>
-<p>Rust 不是传统的面向对象语言（没有继承），但可以使用 <strong>Trait 对象</strong> 来实现多态性。</p>
-<h2 id="1-trait-对象-trait-objects"><a class="header" href="#1-trait-对象-trait-objects">1. Trait 对象 (Trait Objects)</a></h2>
-<p>如果我们需要一个集合，其中包含不同类型但都实现了某个 Trait 的对象，我们可以使用 Trait 对象。</p>
-<p>语法：<code>Box&lt;dyn Trait&gt;</code> 或 <code>&amp;dyn Trait</code>。</p>
-<p><code>dyn</code> 关键字强调这是一个动态调度的类型。</p>
-<h2 id="2-动态调度-dynamic-dispatch"><a class="header" href="#2-动态调度-dynamic-dispatch">2. 动态调度 (Dynamic Dispatch)</a></h2>
-<p>当我们在泛型中使用 Trait Bound 时（如 <code>fn foo&lt;T: Trait&gt;(t: T)</code>），编译器会进行<strong>单态化 (Monomorphization)</strong>，也就是<strong>静态调度</strong>。编译器为每个具体类型生成代码，性能好，但灵活性受限（集合中只能是一种类型）。</p>
-<p>使用 Trait 对象时，Rust 在运行时查找 Trait 方法的实现（通过 vtable），这就是<strong>动态调度</strong>。这会带来微小的运行时开销，但允许更大的灵活性。</p>
-<h2 id="3-对象安全-object-safety"><a class="header" href="#3-对象安全-object-safety">3. 对象安全 (Object Safety)</a></h2>
-<p>只有<strong>对象安全</strong>的 Trait 才能组成 Trait 对象。如果一个 Trait 的所有方法都满足以下条件，则它是对象安全的：</p>
-<ol>
-<li>返回值类型不是 <code>Self</code>。</li>
-<li>方法没有任何泛型类型参数。</li>
-</ol>
+<h2 id="-学习目标-23"><a class="header" href="#-学习目标-23">📝 学习目标</a></h2>
+<ul>
+<li>理解 Rust 中的 <strong>多态 (Polymorphism)</strong> 实现方式</li>
+<li>掌握 <strong>Trait Object</strong> (<code>dyn Trait</code>) 与 <strong>动态调度</strong></li>
+<li>理解 <strong>胖指针 (Fat Pointer)</strong> 与 <strong>vtable</strong> 的底层原理</li>
+<li>掌握 <strong>对象安全 (Object Safety)</strong> 的规则</li>
+</ul>
+<h2 id="-核心概念rust-的继承"><a class="header" href="#-核心概念rust-的继承">🎯 核心概念：Rust 的“继承”</a></h2>
+<p>Rust 不是传统的 OOP 语言（没有 <code>class</code> 和继承），但通过 <strong>Trait Objects</strong>，我们可以实现运行时多态，即：
+<strong>“我不在乎你是谁，我只在乎你能做什么（Trait）。”</strong></p>
+<h3 id="1-静态调度-vs-动态调度"><a class="header" href="#1-静态调度-vs-动态调度">1. 静态调度 vs 动态调度</a></h3>
+<p>Rust 提供了两种多态方式：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">泛型 (Generics)</th><th style="text-align: left">Trait 对象 (Trait Objects)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>语法</strong></td><td style="text-align: left"><code>fn foo&lt;T: Draw&gt;(x: T)</code></td><td style="text-align: left"><code>fn foo(x: &amp;dyn Draw)</code></td></tr>
+<tr><td style="text-align: left"><strong>术语</strong></td><td style="text-align: left"><strong>静态调度</strong> (Static Dispatch)</td><td style="text-align: left"><strong>动态调度</strong> (Dynamic Dispatch)</td></tr>
+<tr><td style="text-align: left"><strong>原理</strong></td><td style="text-align: left"><strong>单态化</strong> (编译时生成多份代码)</td><td style="text-align: left"><strong>Vtable</strong> (运行时查表)</td></tr>
+<tr><td style="text-align: left"><strong>优点</strong></td><td style="text-align: left">性能极致 (内联优化)</td><td style="text-align: left">灵活性强 (异构集合)</td></tr>
+<tr><td style="text-align: left"><strong>缺点</strong></td><td style="text-align: left">二进制体积变大，编译慢</td><td style="text-align: left">运行时微小开销，无法内联</td></tr>
+<tr><td style="text-align: left"><strong>适用</strong></td><td style="text-align: left">绝大多数场景</td><td style="text-align: left">需要存储不同类型的集合时</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="2-深入底层胖指针-fat-pointer"><a class="header" href="#2-深入底层胖指针-fat-pointer">2. 深入底层：胖指针 (Fat Pointer)</a></h2>
+<p>当你使用 <code>&amp;dyn Trait</code> 或 <code>Box&lt;dyn Trait&gt;</code> 时，Rust 实际上在幕后操作一个 <strong>胖指针</strong>。
+普通的指针只有 64 位（存储地址），但胖指针有 128 位：</p>
+<pre class="mermaid">graph LR
+    subgraph Stack [栈 Stack]
+        OBJ[Box dyn Draw]
+        PTR1[Data Ptr]
+        PTR2[Vtable Ptr]
+        OBJ --&gt; PTR1
+        OBJ --&gt; PTR2
+    end
+    
+    subgraph Heap [堆 Heap]
+        DATA[具体数据 (Button)]
+    end
+    
+    subgraph StaticMemory [静态内存]
+        VTABLE[Vtable (Button 实现的 Draw 方法表)]
+        FUNC[draw() 函数代码]
+    end
+    
+    PTR1 --&gt; DATA
+    PTR2 --&gt; VTABLE
+    VTABLE --&gt; FUNC
+    
+    style Stack fill:#ccffcc
+    style Heap fill:#e1f5fe
+    style StaticMemory fill:#fff9c4
+</pre>
+
+<ul>
+<li><strong>Data Ptr</strong>: 指向实际的数据（如 <code>Button</code> 结构体）。</li>
+<li><strong>Vtable Ptr</strong>: 指向虚函数表 (Virtual Method Table)，里面记录了 <code>Button</code> 为 <code>Draw</code> Trait 实现的所有方法的地址。</li>
+</ul>
+<p>这就是为什么这叫 <strong>动态调度</strong>：程序运行时，需要先通过 vtable 找到函数地址，然后再跳转执行。</p>
+<hr>
+<h2 id="-代码实战gui-库"><a class="header" href="#-代码实战gui-库">💻 代码实战：GUI 库</a></h2>
+<p>假设我们要写一个 GUI 库，界面上有一堆组件（按钮、文本框），它们都实现了 <code>Draw</code> trait。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>trait Draw {
     fn draw(&amp;self);
 }
 
+struct Button {
+    width: u32,
+    height: u32,
+    label: String,
+}
+
+impl Draw for Button {
+    fn draw(&amp;self) {
+        println!("Drawing button: {}", self.label);
+    }
+}
+
+struct SelectBox {
+    width: u32,
+    height: u32,
+    options: Vec&lt;String&gt;,
+}
+
+impl Draw for SelectBox {
+    fn draw(&amp;self) {
+        println!("Drawing select box with options: {:?}", self.options);
+    }
+}
+
 struct Screen {
-    // 这里可以存放任何实现了 Draw 的类型
+    // 关键点：这里必须用 Box&lt;dyn Draw&gt;，因为 Button 和 SelectBox 大小不同
     components: Vec&lt;Box&lt;dyn Draw&gt;&gt;,
 }
 
 impl Screen {
     fn run(&amp;self) {
         for component in self.components.iter() {
-            component.draw();
+            component.draw(); // 动态调度：根据具体类型调用对应的 draw
         }
     }
 }
 <span class="boring">}</span></code></pre>
+<hr>
+<h2 id="3-对象安全-object-safety"><a class="header" href="#3-对象安全-object-safety">3. 对象安全 (Object Safety)</a></h2>
+<p>不是所有的 Trait 都能变成 Trait 对象。只有 <strong>对象安全</strong> 的 Trait 才可以。
+如果你尝试把不安全的 Trait 变成 <code>dyn Trait</code>，编译器会报错。</p>
+<p><strong>主要规则（必须同时满足）</strong>：</p>
+<ol>
+<li><strong>方法的返回值类型不能是 <code>Self</code></strong>。
+<ul>
+<li>原因：运行时 <code>Self</code> 已经被擦除了，编译器不知道 <code>Self</code> 到底多大。</li>
+</ul>
+</li>
+<li><strong>方法不能有泛型参数</strong>。
+<ul>
+<li>原因：泛型方法需要单态化，需要编译时生成代码，而 Trait Object 是运行时决定的。</li>
+</ul>
+</li>
+</ol>
+<p><strong>错误示例</strong>: <code>Clone</code> Trait 就<strong>不是</strong>对象安全的，因为它有 <code>fn clone(&amp;self) -&gt; Self</code>。
+所以你不能写 <code>Box&lt;dyn Clone&gt;</code>。</p>
+<hr>
+<h2 id="-练习题-22"><a class="header" href="#-练习题-22">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="Day16-30/26.OOP_TraitObjects/exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>GUI 扩展</strong>: 实现一个新的组件 <code>TextField</code>，并将其加入到 <code>Screen</code> 中运行。</li>
+<li><strong>对象安全</strong>: 尝试定义一个带有泛型方法的 Trait，然后尝试将其用作 Trait Object，观察编译器的报错信息。</li>
+<li><strong>State 模式</strong>: 使用 Trait Object 实现经典的 State 设计模式（如博客文章的草稿 -&gt; 审核 -&gt; 发布状态流转）。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践-19"><a class="header" href="#-最佳实践-19">💡 最佳实践</a></h2>
+<ol>
+<li><strong>优先泛型</strong>: 默认情况下使用泛型 (<code>fn foo&lt;T: Component&gt;</code>)。只有当你确实需要在一个容器里存不同类型的数据时，才使用 Trait Object。</li>
+<li><strong>Box vs &amp;</strong>: <code>Box&lt;dyn Trait&gt;</code> 拥有所有权（堆上），<code>&amp;dyn Trait</code> 只是借用。</li>
+<li><strong>Sized</strong>: Trait Object 是 <code>!Sized</code> (大小不确定) 的，所以必须总是在指针后面使用它 (<code>&amp;</code>, <code>Box</code>, <code>Rc</code> 等)。</li>
+</ol>
+<hr>
+<h2 id="-下一步-33"><a class="header" href="#-下一步-33">⏭️ 下一步</a></h2>
+<p>到目前为止，我们学习的模式匹配都比较基础 (<code>match</code> 枚举)。Rust 的模式匹配功能远不止于此。
+下一节，我们将深入探索模式匹配的高级用法，如解构结构体、忽略值、匹配守卫等。</p>
+<p>下一节: <a href="Day16-30/27.Patterns/README.html">Day 27: 模式匹配 (Patterns and Matching)</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="day-27-模式与匹配-patterns-and-matching"><a class="header" href="#day-27-模式与匹配-patterns-and-matching">Day 27: 模式与匹配 (Patterns and Matching)</a></h1>
 <p>Rust 的模式匹配功能非常强大，不仅限于 <code>match</code> 表达式。</p>

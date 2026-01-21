@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-9fd189b9.js";
+            window.path_to_searchindex_js = "../../searchindex-daa7f0db.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -178,39 +178,154 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-26-面向对象特性---trait-对象"><a class="header" href="#day-26-面向对象特性---trait-对象">Day 26: 面向对象特性 - Trait 对象</a></h1>
-<p>Rust 不是传统的面向对象语言（没有继承），但可以使用 <strong>Trait 对象</strong> 来实现多态性。</p>
-<h2 id="1-trait-对象-trait-objects"><a class="header" href="#1-trait-对象-trait-objects">1. Trait 对象 (Trait Objects)</a></h2>
-<p>如果我们需要一个集合，其中包含不同类型但都实现了某个 Trait 的对象，我们可以使用 Trait 对象。</p>
-<p>语法：<code>Box&lt;dyn Trait&gt;</code> 或 <code>&amp;dyn Trait</code>。</p>
-<p><code>dyn</code> 关键字强调这是一个动态调度的类型。</p>
-<h2 id="2-动态调度-dynamic-dispatch"><a class="header" href="#2-动态调度-dynamic-dispatch">2. 动态调度 (Dynamic Dispatch)</a></h2>
-<p>当我们在泛型中使用 Trait Bound 时（如 <code>fn foo&lt;T: Trait&gt;(t: T)</code>），编译器会进行<strong>单态化 (Monomorphization)</strong>，也就是<strong>静态调度</strong>。编译器为每个具体类型生成代码，性能好，但灵活性受限（集合中只能是一种类型）。</p>
-<p>使用 Trait 对象时，Rust 在运行时查找 Trait 方法的实现（通过 vtable），这就是<strong>动态调度</strong>。这会带来微小的运行时开销，但允许更大的灵活性。</p>
-<h2 id="3-对象安全-object-safety"><a class="header" href="#3-对象安全-object-safety">3. 对象安全 (Object Safety)</a></h2>
-<p>只有<strong>对象安全</strong>的 Trait 才能组成 Trait 对象。如果一个 Trait 的所有方法都满足以下条件，则它是对象安全的：</p>
-<ol>
-<li>返回值类型不是 <code>Self</code>。</li>
-<li>方法没有任何泛型类型参数。</li>
-</ol>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
+<ul>
+<li>理解 Rust 中的 <strong>多态 (Polymorphism)</strong> 实现方式</li>
+<li>掌握 <strong>Trait Object</strong> (<code>dyn Trait</code>) 与 <strong>动态调度</strong></li>
+<li>理解 <strong>胖指针 (Fat Pointer)</strong> 与 <strong>vtable</strong> 的底层原理</li>
+<li>掌握 <strong>对象安全 (Object Safety)</strong> 的规则</li>
+</ul>
+<h2 id="-核心概念rust-的继承"><a class="header" href="#-核心概念rust-的继承">🎯 核心概念：Rust 的“继承”</a></h2>
+<p>Rust 不是传统的 OOP 语言（没有 <code>class</code> 和继承），但通过 <strong>Trait Objects</strong>，我们可以实现运行时多态，即：
+<strong>“我不在乎你是谁，我只在乎你能做什么（Trait）。”</strong></p>
+<h3 id="1-静态调度-vs-动态调度"><a class="header" href="#1-静态调度-vs-动态调度">1. 静态调度 vs 动态调度</a></h3>
+<p>Rust 提供了两种多态方式：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">特性</th><th style="text-align: left">泛型 (Generics)</th><th style="text-align: left">Trait 对象 (Trait Objects)</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong>语法</strong></td><td style="text-align: left"><code>fn foo&lt;T: Draw&gt;(x: T)</code></td><td style="text-align: left"><code>fn foo(x: &amp;dyn Draw)</code></td></tr>
+<tr><td style="text-align: left"><strong>术语</strong></td><td style="text-align: left"><strong>静态调度</strong> (Static Dispatch)</td><td style="text-align: left"><strong>动态调度</strong> (Dynamic Dispatch)</td></tr>
+<tr><td style="text-align: left"><strong>原理</strong></td><td style="text-align: left"><strong>单态化</strong> (编译时生成多份代码)</td><td style="text-align: left"><strong>Vtable</strong> (运行时查表)</td></tr>
+<tr><td style="text-align: left"><strong>优点</strong></td><td style="text-align: left">性能极致 (内联优化)</td><td style="text-align: left">灵活性强 (异构集合)</td></tr>
+<tr><td style="text-align: left"><strong>缺点</strong></td><td style="text-align: left">二进制体积变大，编译慢</td><td style="text-align: left">运行时微小开销，无法内联</td></tr>
+<tr><td style="text-align: left"><strong>适用</strong></td><td style="text-align: left">绝大多数场景</td><td style="text-align: left">需要存储不同类型的集合时</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="2-深入底层胖指针-fat-pointer"><a class="header" href="#2-深入底层胖指针-fat-pointer">2. 深入底层：胖指针 (Fat Pointer)</a></h2>
+<p>当你使用 <code>&amp;dyn Trait</code> 或 <code>Box&lt;dyn Trait&gt;</code> 时，Rust 实际上在幕后操作一个 <strong>胖指针</strong>。
+普通的指针只有 64 位（存储地址），但胖指针有 128 位：</p>
+<pre class="mermaid">graph LR
+    subgraph Stack [栈 Stack]
+        OBJ[Box dyn Draw]
+        PTR1[Data Ptr]
+        PTR2[Vtable Ptr]
+        OBJ --&gt; PTR1
+        OBJ --&gt; PTR2
+    end
+    
+    subgraph Heap [堆 Heap]
+        DATA[具体数据 (Button)]
+    end
+    
+    subgraph StaticMemory [静态内存]
+        VTABLE[Vtable (Button 实现的 Draw 方法表)]
+        FUNC[draw() 函数代码]
+    end
+    
+    PTR1 --&gt; DATA
+    PTR2 --&gt; VTABLE
+    VTABLE --&gt; FUNC
+    
+    style Stack fill:#ccffcc
+    style Heap fill:#e1f5fe
+    style StaticMemory fill:#fff9c4
+</pre>
+
+<ul>
+<li><strong>Data Ptr</strong>: 指向实际的数据（如 <code>Button</code> 结构体）。</li>
+<li><strong>Vtable Ptr</strong>: 指向虚函数表 (Virtual Method Table)，里面记录了 <code>Button</code> 为 <code>Draw</code> Trait 实现的所有方法的地址。</li>
+</ul>
+<p>这就是为什么这叫 <strong>动态调度</strong>：程序运行时，需要先通过 vtable 找到函数地址，然后再跳转执行。</p>
+<hr>
+<h2 id="-代码实战gui-库"><a class="header" href="#-代码实战gui-库">💻 代码实战：GUI 库</a></h2>
+<p>假设我们要写一个 GUI 库，界面上有一堆组件（按钮、文本框），它们都实现了 <code>Draw</code> trait。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>trait Draw {
     fn draw(&amp;self);
 }
 
+struct Button {
+    width: u32,
+    height: u32,
+    label: String,
+}
+
+impl Draw for Button {
+    fn draw(&amp;self) {
+        println!("Drawing button: {}", self.label);
+    }
+}
+
+struct SelectBox {
+    width: u32,
+    height: u32,
+    options: Vec&lt;String&gt;,
+}
+
+impl Draw for SelectBox {
+    fn draw(&amp;self) {
+        println!("Drawing select box with options: {:?}", self.options);
+    }
+}
+
 struct Screen {
-    // 这里可以存放任何实现了 Draw 的类型
+    // 关键点：这里必须用 Box&lt;dyn Draw&gt;，因为 Button 和 SelectBox 大小不同
     components: Vec&lt;Box&lt;dyn Draw&gt;&gt;,
 }
 
 impl Screen {
     fn run(&amp;self) {
         for component in self.components.iter() {
-            component.draw();
+            component.draw(); // 动态调度：根据具体类型调用对应的 draw
         }
     }
 }
 <span class="boring">}</span></code></pre>
+<hr>
+<h2 id="3-对象安全-object-safety"><a class="header" href="#3-对象安全-object-safety">3. 对象安全 (Object Safety)</a></h2>
+<p>不是所有的 Trait 都能变成 Trait 对象。只有 <strong>对象安全</strong> 的 Trait 才可以。
+如果你尝试把不安全的 Trait 变成 <code>dyn Trait</code>，编译器会报错。</p>
+<p><strong>主要规则（必须同时满足）</strong>：</p>
+<ol>
+<li><strong>方法的返回值类型不能是 <code>Self</code></strong>。
+<ul>
+<li>原因：运行时 <code>Self</code> 已经被擦除了，编译器不知道 <code>Self</code> 到底多大。</li>
+</ul>
+</li>
+<li><strong>方法不能有泛型参数</strong>。
+<ul>
+<li>原因：泛型方法需要单态化，需要编译时生成代码，而 Trait Object 是运行时决定的。</li>
+</ul>
+</li>
+</ol>
+<p><strong>错误示例</strong>: <code>Clone</code> Trait 就<strong>不是</strong>对象安全的，因为它有 <code>fn clone(&amp;self) -&gt; Self</code>。
+所以你不能写 <code>Box&lt;dyn Clone&gt;</code>。</p>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>GUI 扩展</strong>: 实现一个新的组件 <code>TextField</code>，并将其加入到 <code>Screen</code> 中运行。</li>
+<li><strong>对象安全</strong>: 尝试定义一个带有泛型方法的 Trait，然后尝试将其用作 Trait Object，观察编译器的报错信息。</li>
+<li><strong>State 模式</strong>: 使用 Trait Object 实现经典的 State 设计模式（如博客文章的草稿 -&gt; 审核 -&gt; 发布状态流转）。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>优先泛型</strong>: 默认情况下使用泛型 (<code>fn foo&lt;T: Component&gt;</code>)。只有当你确实需要在一个容器里存不同类型的数据时，才使用 Trait Object。</li>
+<li><strong>Box vs &amp;</strong>: <code>Box&lt;dyn Trait&gt;</code> 拥有所有权（堆上），<code>&amp;dyn Trait</code> 只是借用。</li>
+<li><strong>Sized</strong>: Trait Object 是 <code>!Sized</code> (大小不确定) 的，所以必须总是在指针后面使用它 (<code>&amp;</code>, <code>Box</code>, <code>Rc</code> 等)。</li>
+</ol>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>到目前为止，我们学习的模式匹配都比较基础 (<code>match</code> 枚举)。Rust 的模式匹配功能远不止于此。
+下一节，我们将深入探索模式匹配的高级用法，如解构结构体、忽略值、匹配守卫等。</p>
+<p>下一节: <a href="../27.Patterns/README.html">Day 27: 模式匹配 (Patterns and Matching)</a></p>
 
                     </main>
 

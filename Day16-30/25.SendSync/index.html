@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-9fd189b9.js";
+            window.path_to_searchindex_js = "../../searchindex-daa7f0db.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-794baa04.js"></script>
@@ -178,41 +178,114 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="day-25-并发编程---send-与-sync-trait"><a class="header" href="#day-25-并发编程---send-与-sync-trait">Day 25: 并发编程 - Send 与 Sync Trait</a></h1>
-<p><code>Send</code> 和 <code>Sync</code> 是 Rust 并发安全的基石。它们是 <strong>Marker Traits</strong>（标记 Trait），没有任何方法，只是用来标记类型具有某些并发属性。</p>
-<h2 id="1-send-trait"><a class="header" href="#1-send-trait">1. Send Trait</a></h2>
-<p><code>Send</code> 标记表明类型的所有权可以在线程间转移。</p>
+<h2 id="-学习目标"><a class="header" href="#-学习目标">📝 学习目标</a></h2>
 <ul>
-<li>几乎所有的 Rust 类型都是 <code>Send</code> 的。</li>
-<li>主要例外：<code>Rc&lt;T&gt;</code>。因为 <code>Rc</code> 的引用计数不是原子的，在多线程间转移会导致计数错误。</li>
-<li><code>Raw Pointers</code> (裸指针) 也不是 <code>Send</code> 的。</li>
+<li>理解 <strong>Marker Traits</strong> (标记 Trait) 的概念</li>
+<li>掌握 <strong><code>Send</code></strong> (所有权传送) 与 <strong><code>Sync</code></strong> (线程间共享) 的区别</li>
+<li>理解 “T is Sync if and only if &amp;T is Send” 的逻辑关系</li>
+<li>能够识别哪些类型是线程安全的，哪些不是</li>
 </ul>
-<p>如果一个类型完全由 <code>Send</code> 的类型组成，那么它自动就是 <code>Send</code> 的。</p>
-<h2 id="2-sync-trait"><a class="header" href="#2-sync-trait">2. Sync Trait</a></h2>
-<p><code>Sync</code> 标记表明类型可以被多个线程安全地共享引用（即 <code>&amp;T</code> 是 <code>Send</code> 的）。</p>
+<h2 id="-核心概念安全的基石"><a class="header" href="#-核心概念安全的基石">🎯 核心概念：安全的基石</a></h2>
+<p>Rust 的并发安全不仅仅靠可以 “锁” (Mutex) 或者 “通道” (Channel)，更底层的是靠 <strong>类型系统</strong>。
+<code>Send</code> 和 <code>Sync</code> 是 Rust 编译器在多线程环境下保驾护航的两个 “门神”。它们告诉编译器：这个类型能不能安全地送到另一个线程？能不能被多个线程同时看？</p>
+<h3 id="关系逻辑图"><a class="header" href="#关系逻辑图">关系逻辑图</a></h3>
+<pre class="mermaid">graph TD
+    Type[类型 T] --&gt; CheckSend{能在线程间移动吗?}
+    CheckSend --Yes--&gt; Send[impl Send for T]
+    CheckSend --No--&gt; NotSend[非 Send (如 Rc, 裸指针)]
+    
+    Type --&gt; CheckSync{能被多线程同时读取吗?}
+    CheckSync --Yes--&gt; Sync[impl Sync for T]
+    CheckSync --No--&gt; NotSync[非 Sync (如 RefCell, Rc)]
+    
+    Sync -.-&gt;|蕴含| SendRef[impl Send for &amp;T]
+    
+    style Send fill:#ccffcc
+    style Sync fill:#e1f5fe
+    style NotSend fill:#ffcccc
+    style NotSync fill:#ffcccc
+</pre>
+
+<hr>
+<h2 id="1-send-所有权的转移"><a class="header" href="#1-send-所有权的转移">1. Send: 所有权的转移</a></h2>
+<p><strong><code>Send</code> 标记表明类型 T 的所有权可以在线程间转移。</strong></p>
 <ul>
-<li>基本类型是 <code>Sync</code> 的。</li>
-<li><code>Mutex&lt;T&gt;</code> 是 <code>Sync</code> 的。</li>
-<li><code>RefCell&lt;T&gt;</code> 不是 <code>Sync</code> 的，因为它的运行时借用检查不是线程安全的。</li>
-<li><code>Rc&lt;T&gt;</code> 不是 <code>Sync</code> 的。</li>
+<li><strong>绝大多数类型</strong>都是 <code>Send</code> 的（如 <code>i32</code>, <code>String</code>, <code>Box&lt;T&gt;</code>, <code>Mutex&lt;T&gt;</code>）。</li>
+<li><strong>例外</strong>：<code>Rc&lt;T&gt;</code>。因为如果把 <code>Rc</code> 移到另一个线程，两个线程同时修改引用计数会导致数据竞争（非原子操作）。</li>
 </ul>
-<h2 id="3-手动实现"><a class="header" href="#3-手动实现">3. 手动实现</a></h2>
-<p>通常不需要手动实现 <code>Send</code> 和 <code>Sync</code>，编译器会自动推导。手动实现是不安全的（<code>unsafe</code>），通常只在编写底层并发原语时需要。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>// 仅作演示，通常由编译器自动推导
-unsafe impl Send for MyType {}
-unsafe impl Sync for MyType {}
+</span>use std::thread;
+use std::rc::Rc;
+
+let r = Rc::new(5);
+// ❌ 编译错误！Rc&lt;i32&gt; 没有实现 Send，不能 move 进线程
+thread::spawn(move || {
+    println!("{}", r);
+});
 <span class="boring">}</span></code></pre>
-<h2 id="4-编译器检查"><a class="header" href="#4-编译器检查">4. 编译器检查</a></h2>
-<p>Rust 编译器会利用这些 Trait 来检查并发代码的安全性。例如 <code>thread::spawn</code> 的签名要求闭包捕获的变量必须是 <code>Send</code> 的。</p>
+<hr>
+<h2 id="2-sync-线程间共享"><a class="header" href="#2-sync-线程间共享">2. Sync: 线程间共享</a></h2>
+<p><strong><code>Sync</code> 标记表明类型 T 可以被多个线程安全地共享引用 (通过 <code>&amp;T</code>)。</strong></p>
+<h3 id="黄金法则"><a class="header" href="#黄金法则">黄金法则</a></h3>
+<blockquote>
+<p><strong>T is <code>Sync</code> if and only if <code>&amp;T</code> is <code>Send</code>.</strong>
+(如果 T 的引用可以被送往另一个线程，那么 T 就是 Sync 的)</p>
+</blockquote>
+<p>这听起来有点绕，但逻辑很简单：如果我在线程 A 有一个 <code>&amp;T</code>，我把它传给线程 B，那现在 A 和 B 都有 <code>&amp;T</code>，也就是都在访问同一个 T。这就叫 “共享”。</p>
+<ul>
+<li><strong><code>Mutex&lt;T&gt;</code></strong> 是 <code>Sync</code> 的（它可以被多线程共享）。</li>
+<li><strong><code>RefCell&lt;T&gt;</code></strong> 不是 <code>Sync</code> 的（它的运行时借用检查不是线程安全的，多线程同时 <code>borrow_mut</code> 会导致数据竞争）。</li>
+</ul>
+<hr>
+<h2 id="-线程安全矩阵-thread-safety-matrix"><a class="header" href="#-线程安全矩阵-thread-safety-matrix">📊 线程安全矩阵 (Thread Safety Matrix)</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th style="text-align: left">类型</th><th style="text-align: left">Send?</th><th style="text-align: left">Sync?</th><th style="text-align: left">说明</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align: left"><strong><code>i32</code>, <code>bool</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">简单值拷贝，哪里都能去</td></tr>
+<tr><td style="text-align: left"><strong><code>String</code>, <code>Vec&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">独占所有权，Move 没问题</td></tr>
+<tr><td style="text-align: left"><strong><code>Rc&lt;T&gt;</code></strong></td><td style="text-align: left">❌</td><td style="text-align: left">❌</td><td style="text-align: left">引用计数非原子，彻底不安全</td></tr>
+<tr><td style="text-align: left"><strong><code>Arc&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">原子引用计数，专门为多线程设计</td></tr>
+<tr><td style="text-align: left"><strong><code>RefCell&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">❌</td><td style="text-align: left">可以 Move，但不能在线程间共享引用 (因为内部检查不安全)</td></tr>
+<tr><td style="text-align: left"><strong><code>Mutex&lt;T&gt;</code></strong></td><td style="text-align: left">✅</td><td style="text-align: left">✅</td><td style="text-align: left">内部有锁，可以安全共享</td></tr>
+<tr><td style="text-align: left"><strong><code>*const T</code></strong> (裸指针)</td><td style="text-align: left">❌</td><td style="text-align: left">❌</td><td style="text-align: left">编译器无法追踪裸指针，默认不安全</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="3-手动实现-unsafe"><a class="header" href="#3-手动实现-unsafe">3. 手动实现 (Unsafe)</a></h2>
+<p>通常你不需要手动实现这些 Trait，编译器会自动为由 Send/Sync 类型组成的结构体自动推导。
+但如果你编写底层代码（如使用裸指针实现自己的 Vec），可能需要手动通过 <code>unsafe</code> 告诉编译器：“相信我，这是安全的”。</p>
 <pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn spawn&lt;F, T&gt;(f: F) -&gt; JoinHandle&lt;T&gt;
-where
-    F: FnOnce() -&gt; T,
-    F: Send + 'static,
-    T: Send + 'static,
+</span>struct MyBox(*mut u8);
+
+// 只有当我确信你是由于某种原因安全的时候...
+unsafe impl Send for MyBox {}
+unsafe impl Sync for MyBox {}
 <span class="boring">}</span></code></pre>
+<hr>
+<h2 id="-练习题"><a class="header" href="#-练习题">🏋️ 练习题</a></h2>
+<p>👉 <strong><a href="./exercises/README.html">点击这里查看练习题</a></strong></p>
+<ol>
+<li><strong>Rc 挑战</strong>: 尝试在 <code>thread::spawn</code> 中使用 <code>Rc</code>, 阅读编译器给出的错误信息。</li>
+<li><strong>验证 RefCell</strong>: 尝试将 <code>&amp;RefCell&lt;i32&gt;</code> 传递给另一个线程，观察报错。</li>
+<li><strong>Wrapper</strong>: 创建一个包含 <code>Rc</code> 的 NewType 结构体，手动为其实现 <code>Send</code> (虽然这很不安全)，骗过编译器并强行运行，观察可能发生的崩溃或数据错误（仅用于教学！）。</li>
+</ol>
+<hr>
+<h2 id="-最佳实践"><a class="header" href="#-最佳实践">💡 最佳实践</a></h2>
+<ol>
+<li><strong>相信编译器</strong>: 如果编译器报 “T cannot be sent between threads safely”，通常是你错误地使用了 <code>Rc</code> 或 <code>RefCell</code>，或者忘记用 <code>Arc</code>/<code>Mutex</code> 包装了。</li>
+<li><strong>Arc&lt;Mutex<t>&gt;</t></strong>: 记住这个公式。<code>Arc</code> 提供 Send/Sync (让多线程持有)，<code>Mutex</code> 提供内部可变性 (让多线程修改)。</li>
+</ol>
+<hr>
+<h2 id="-下一步"><a class="header" href="#-下一步">⏭️ 下一步</a></h2>
+<p>关于并发的内存安全我们已经讲透了。
+现在，让我们换个脑子，回到 Rust 的语言特性本身。Rust 不是面向对象的语言，但它确实有一些面向对象的特性。</p>
+<p>下一节: <a href="../26.OOP_TraitObjects/README.html">Day 26: 面向对象特性 (OO Features)</a></p>
 
                     </main>
 
